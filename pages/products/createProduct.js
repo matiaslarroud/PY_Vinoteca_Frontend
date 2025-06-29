@@ -20,7 +20,7 @@ const formProducto = () => {
 
          console.log(product)
 
-         fetch('http://localhost:5000/api/v1/products',
+         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products`,
             {
                 method: 'POST',
                 headers: {'Content-Type':'application/json'},
