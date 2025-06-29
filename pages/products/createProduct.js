@@ -18,8 +18,6 @@ const formProducto = () => {
     const clickChange = (e) => {
          e.preventDefault();
 
-         console.log(product)
-
          fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products`,
             {
                 method: 'POST',
@@ -30,12 +28,13 @@ const formProducto = () => {
                 })
             }
          ).then((a) => {
-                        console.log(a)
                         return a.json()
                     })
                     .then((data) => {
-                            console.log(data)
-                            setProduct(initialState)
+                            if(data.ok){
+                                console.log('Producto creado exitosamente.');
+                                setProduct(initialState);;
+                            }
                         })
                 .catch((err) => {console.log('Error al enviar datos. \n Error: ',err)})
     }
