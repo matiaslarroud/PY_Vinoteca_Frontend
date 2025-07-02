@@ -1,39 +1,81 @@
+import { FaWineGlassAlt, FaUserFriends, FaTruck, FaClipboardList, FaChartBar } from "react-icons/fa";
 import Link from "next/link";
 
 export default function Home() {
   return (
-    <>
-      <h1 className="titulo-pagina">Entusiasmo por el Vino</h1>
-      <div>
-          <button>
-              <Link  className="btn-productos" href="/products/indexProduct">Productos</Link>
-          </button>
-      </div>
-      
-        <style>
-            {`
-                .titulo-pagina {
-                      font-size: 3rem;
-                      color: white;
-                      text-align: center;
-                      margin-top: 40px;
-                      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-                    }
+  <>
+  <h1 className="titulo-pagina">Entusiasmo por el Vino</h1>
 
-                button {
-                  margin-top: 25px;
-                  padding: 12px;
-                  background-color: #8B0000;
-                  color: white;
-                  font-size: 1.1rem;
-                  border: none;
-                  border-radius: 8px;
-                  cursor: pointer;
-                  transition: background-color 0.3s ease;
-                }
-            `}
-        </style>
-    </>
+  <div className="menu-grid">
+      <div className="boton-acceso">
+        <Link href="/products/indexProduct">
+          <FaWineGlassAlt className="icono" />
+          <span>Productos</span>
+        </Link>
+      </div>
+      <div className="boton-acceso">
+        <Link href="/clients" className="boton-acceso">
+          <FaUserFriends className="icono" />
+          <span>Clientes</span>
+        </Link>
+      </div>
+      <div className="boton-acceso">
+        <Link href="/providers" className="boton-acceso">
+          <FaTruck className="icono" />
+          <span>Proveedores</span>
+        </Link>
+      </div>
+      <div className="boton-acceso">
+        <Link href="/orders" className="boton-acceso">
+          <FaClipboardList className="icono" />
+          <span>Pedidos</span>
+        </Link>
+      </div>
+      <div className="boton-acceso">
+        <Link href="/reports" className="boton-acceso">
+          <FaChartBar className="icono" />
+          <span>Reportes</span>
+        </Link>
+      </div>
+  </div>
+
+  <style jsx>{`
+    .titulo-pagina {
+      font-size: 3rem;
+      color: white;
+      text-align: center;
+      margin-top: 60px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);
+    }
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 30px;
+      padding: 40px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .boton-acceso {
+      display: flex;
+      background-color:rgba(42, 39, 39,.7);
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 2rem;
+      padding: 30px
+    }
+    .boton-acceso:hover {
+      background-color: #a30000;
+      transform: translateY(-5px);
+    }
+    .icono {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+  `}
+  </style>
+</>
   );
 }
