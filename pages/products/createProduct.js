@@ -17,7 +17,6 @@ const formProducto = () => {
     }
 
     const clickChange = (e) => {
-         e.preventDefault();
 
          fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products`,
             {

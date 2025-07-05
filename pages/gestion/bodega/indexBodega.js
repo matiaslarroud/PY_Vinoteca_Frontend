@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react"
 import { FaPlus, FaHome } from "react-icons/fa";
-import FormularioProductoCreate from './createProduct';
-import FormularioProductoUpdate from './updateProduct';
 
 const { default: Link } = require("next/link")
 
-const indexProduct = () => {
+const indexBodega = () => {
     const [vinos,setVinos] = useState([]);    
     const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
     const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
@@ -273,4 +271,4 @@ const indexProduct = () => {
     )
 }
 
-export default indexProduct;
+export default indexBodega;

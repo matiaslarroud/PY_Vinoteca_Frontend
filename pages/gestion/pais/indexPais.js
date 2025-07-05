@@ -1,31 +1,33 @@
 import { useEffect, useState } from "react"
 import { FaPlus, FaHome } from "react-icons/fa";
-import FormularioProductoCreate from './createProduct';
-import FormularioProductoUpdate from './updateProduct';
-
+import FormCreatePais from './createPais.js'
+import FormUpdatePais from './updatePais.js'
 const { default: Link } = require("next/link")
 
-const indexProduct = () => {
-    const [vinos,setVinos] = useState([]);    
+const indexPais = () => {
+    const [paises,setPaises] = useState([]);    
     const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
     const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
-    
-    useEffect(() => {  
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products`)
+    const fetchData = () => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/pais`)
                 .then((a) => {
                             return a.json()
                 })
                     .then (({data}) => {
-                        setVinos(data);
+                        setPaises(data);
                     })
+        }
+    
+    useEffect(() => {  
+        fetchData();
     }, [])
 
-    const deleteProduct = async(productID) => {
-        if(!productID) {
+    const deletePais = async(paisID) => {
+        if(!paisID) {
             console.log("Error con el ID del producto al querer eliminarlo.")
             return
         }
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/${productID}`,
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/pais/${paisID}`,
             {
                 method:'DELETE',
                 headers: {
@@ -34,22 +36,24 @@ const indexProduct = () => {
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
+                fetchData();
                 console.log(res.message);
             })
             .catch((err)=>{
-                console.log("ERROR AL ENVIAR PRODUCTO PARA SU ELIMINACIÓN. \n ERROR: ",err);
+                console.log("Error al enviar DELETE para pais. \n ERROR: ",err);
             })
     }
 
     return(
         <>
-            {mostrarModalCreate && (
+            {mostrarModalCreate &&(
+                
                 <div className="modal">
                     <div className="modal-content">
                         <button className="close" onClick={() => setMostrarModalCreate(false)}>
                             &times;
                         </button>
-                        <FormularioProductoCreate />
+                        <FormCreatePais />
                     </div>
                 </div>
             )}
@@ -60,11 +64,11 @@ const indexProduct = () => {
                         <button className="close" onClick={() => setMostrarModalUpdate(null)}>
                             &times;
                         </button>
-                        <FormularioProductoUpdate idProducto={mostrarModalUpdate} />
+                        <FormUpdatePais idPais={mostrarModalUpdate} />
                     </div>
                 </div>
             )}
-            <h1 className="titulo-pagina">Productos</h1>
+            <h1 className="titulo-pagina">Pais</h1>
             
             <div className="botonera">
                 <div className="btn-accion">
@@ -78,34 +82,32 @@ const indexProduct = () => {
                 <div className="btn-accion">
                     <button onClick={() => setMostrarModalCreate(true)}>
                         <FaPlus  className="icono" />
-                        Agregar Producto
+                        Agregar Pais
                     </button>
                 </div>                
             </div>
             <div className="contenedor-tabla">
-                <input type="text" id="buscador" placeholder="Buscar vinos..." />
+                <input type="text" id="buscador" placeholder="Buscar pais..." />
 
                 <div className="tabla-scroll">
                     <table id="tablaVinos">
                         <thead>
                         <tr className="fila">
                             <th className="columna">Nombre</th>
-                            <th className="columna">Precio</th>
                             <th className="columna">Acciones</th>
                         </tr>
                         </thead>
                         <tbody>
                             {
-                                vinos.map(({_id,name , price}) => (
-                                    <tr key={_id}>
+                                paises.map(({_id,name}) => (
+                                    <tr key={_id} className="fila">
                                         <td className="columna">{name}</td>
-                                        <td className="columna">{price}</td>
                                         <td className="columna">
                                             <div className="acciones">
                                                 <button onClick={() => setMostrarModalUpdate(_id)} className="btn-productos">
                                                     Modificar
                                                 </button>
-                                                <button onClick={() => deleteProduct(_id)} className="btn-productos">
+                                                <button onClick={() => deletePais(_id)} className="btn-productos">
                                                     Eliminar
                                                 </button>
                                             </div>
@@ -181,8 +183,9 @@ const indexProduct = () => {
                         background-color: #8B0000;
                         color: white;
                         font-size: 1.1rem;
-                        width: 100%;
-                        height: 100%;
+                        margin: 1rem;
+                        width: 10rem;
+                        height: 3rem;
                         border: none;
                         border-radius: 8px;
                         cursor: pointer;
@@ -222,6 +225,7 @@ const indexProduct = () => {
                         border-bottom: 1px solid #555;
                         text-align: left;
                         color: black;
+                        font-size: 1,5rem;
                     }
 
                     th {
@@ -231,6 +235,9 @@ const indexProduct = () => {
                         top: 0;
                     }
 
+                    .fila{
+                        height:50px;
+                    }
                     .modal {
                         position: fixed;
                         top: 0;
@@ -248,10 +255,8 @@ const indexProduct = () => {
                         background-color: #121212;
                         padding: 40px;
                         border-radius: 12px;
-                        width: 90%;
-                        height:80%;
-                        max-width: 500px;
-                        max-height: 800px;
+                        width: auto;
+                        height:auto;
                         box-shadow: 0 5px 15px rgba(0,0,0,0.3);
                         position: relative;
                         margin: 20px;
@@ -266,6 +271,8 @@ const indexProduct = () => {
                         border: none;
                         cursor: pointer;
                         color: black;
+                        width: 1rem;
+                        height: 2rem;
                     }
                 `}
             </style>
@@ -273,4 +280,4 @@ const indexProduct = () => {
     )
 }
 
-export default indexProduct;
+export default indexPais;

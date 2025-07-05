@@ -1,46 +1,39 @@
-import { FaWineGlassAlt, FaCog , FaUserFriends, FaTruck, FaClipboardList, FaChartBar } from "react-icons/fa";
 import Link from "next/link";
 
-export default function Home() {
+export default function indexGestion() {
   return (
   <>
-  <h1 className="titulo-pagina">Entusiasmo por el Vino</h1>
+  <h1 className="titulo-pagina">Gestion</h1>
 
   <div className="menu-grid">
       <div className="boton-acceso">
-        <Link href="/products/indexProduct">
-          <FaWineGlassAlt className="icono" />
-          <span>Productos</span>
+        <Link href="bodega/indexBodega">
+          <span>Bodega</span>
         </Link>
       </div>
       <div className="boton-acceso">
-        <Link href="/clients" className="boton-acceso">
-          <FaUserFriends className="icono" />
-          <span>Clientes</span>
+        <Link href="pais/indexPais" className="boton-acceso">
+          <span>Pais</span>
         </Link>
       </div>
       <div className="boton-acceso">
-        <Link href="/providers" className="boton-acceso">
-          <FaTruck className="icono" />
-          <span>Proveedores</span>
+        <Link href="provincia/indexProvincia" className="boton-acceso">
+          <span>Provincia</span>
         </Link>
       </div>
       <div className="boton-acceso">
-        <Link href="/orders" className="boton-acceso">
-          <FaClipboardList className="icono" />
-          <span>Pedidos</span>
+        <Link href="localidad/indexLocalidad" className="boton-acceso">
+          <span>Localidad</span>
         </Link>
       </div>
       <div className="boton-acceso">
-        <Link href="/gestion/createBodega" className="boton-acceso">
-          <FaChartBar className="icono" />
-          <span>Reportes</span>
+        <Link href="barrio/indexBarrio" className="boton-acceso">
+          <span>Barrio</span>
         </Link>
       </div>
       <div className="boton-acceso">
-        <Link href="/gestion/indexGestion" className="boton-acceso">
-          <FaCog className="icono" />
-          <span>Gestion</span>
+        <Link href="calle/indexCalle" className="boton-acceso">
+          <span>Calle</span>
         </Link>
       </div>
   </div>

@@ -1,31 +1,46 @@
 import { useEffect, useState } from "react"
 import { FaPlus, FaHome } from "react-icons/fa";
-import FormularioProductoCreate from './createProduct';
-import FormularioProductoUpdate from './updateProduct';
+import FormularioLocalidadUpdate from '../localidad/updateLocalidad'
+import FormularioLocalidadCreate from '../localidad/createLocalidad'
 
 const { default: Link } = require("next/link")
 
-const indexProduct = () => {
-    const [vinos,setVinos] = useState([]);    
+const indexLocalidad = () => {
+    const [localidades,setLocalidades] = useState([]);
+    const [provincias,setProvincias] = useState([]);
     const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
     const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
-    
-    useEffect(() => {  
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products`)
+    const fetchData = ()=>{
+            fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/localidad`)
                 .then((a) => {
                             return a.json()
                 })
                     .then (({data}) => {
-                        setVinos(data);
+                        setLocalidades(data);
                     })
+                }
+    
+    const fetchDataProvincias = ()=>{
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/provincia`)
+                .then((a) => {
+                            return a.json()
+                })
+                    .then (({data}) => {
+                        setProvincias(data);
+                    })
+                }
+
+    useEffect(() => {  
+        fetchData(),
+        fetchDataProvincias();
     }, [])
 
-    const deleteProduct = async(productID) => {
-        if(!productID) {
-            console.log("Error con el ID del producto al querer eliminarlo.")
+    const deleteLocalidad = async(localidadID) => {
+        if(!localidadID) {
+            console.log("Error con el ID de la localidad al querer eliminarla.")
             return
         }
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/${productID}`,
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/localidad/${localidadID}`,
             {
                 method:'DELETE',
                 headers: {
@@ -34,10 +49,11 @@ const indexProduct = () => {
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
+                fetchData()
                 console.log(res.message);
             })
             .catch((err)=>{
-                console.log("ERROR AL ENVIAR PRODUCTO PARA SU ELIMINACIÓN. \n ERROR: ",err);
+                console.log("Error al enviar localidad para su eliminacion. \n ERROR: ",err);
             })
     }
 
@@ -49,7 +65,7 @@ const indexProduct = () => {
                         <button className="close" onClick={() => setMostrarModalCreate(false)}>
                             &times;
                         </button>
-                        <FormularioProductoCreate />
+                        <FormularioLocalidadCreate />
                     </div>
                 </div>
             )}
@@ -60,11 +76,11 @@ const indexProduct = () => {
                         <button className="close" onClick={() => setMostrarModalUpdate(null)}>
                             &times;
                         </button>
-                        <FormularioProductoUpdate idProducto={mostrarModalUpdate} />
+                        <FormularioLocalidadUpdate localidadID={mostrarModalUpdate} />
                     </div>
                 </div>
             )}
-            <h1 className="titulo-pagina">Productos</h1>
+            <h1 className="titulo-pagina">Localidad</h1>
             
             <div className="botonera">
                 <div className="btn-accion">
@@ -78,40 +94,43 @@ const indexProduct = () => {
                 <div className="btn-accion">
                     <button onClick={() => setMostrarModalCreate(true)}>
                         <FaPlus  className="icono" />
-                        Agregar Producto
+                        Agregar Localidad
                     </button>
                 </div>                
             </div>
             <div className="contenedor-tabla">
-                <input type="text" id="buscador" placeholder="Buscar vinos..." />
+                <input type="text" id="buscador" placeholder="Buscar localidades..." />
 
                 <div className="tabla-scroll">
                     <table id="tablaVinos">
                         <thead>
                         <tr className="fila">
                             <th className="columna">Nombre</th>
-                            <th className="columna">Precio</th>
+                            <th className="columna">Provincia</th>
                             <th className="columna">Acciones</th>
                         </tr>
                         </thead>
                         <tbody>
                             {
-                                vinos.map(({_id,name , price}) => (
+                                localidades.map(({_id, name , provincia}) => {
+                                    const provinciaEncontrada = provincias.find((p)=>{return p._id === provincia});
+
+                                    return (
                                     <tr key={_id}>
                                         <td className="columna">{name}</td>
-                                        <td className="columna">{price}</td>
+                                        <td className="columna">{ provinciaEncontrada?.name }</td>
                                         <td className="columna">
                                             <div className="acciones">
                                                 <button onClick={() => setMostrarModalUpdate(_id)} className="btn-productos">
                                                     Modificar
                                                 </button>
-                                                <button onClick={() => deleteProduct(_id)} className="btn-productos">
+                                                <button type="submit" onClick={() => deleteLocalidad(_id)} className="btn-productos">
                                                     Eliminar
                                                 </button>
                                             </div>
                                         </td>
-                                    </tr>
-                                ))
+                                    </tr>)
+                                })
                             }                        
                         </tbody>
                     </table>
@@ -266,6 +285,8 @@ const indexProduct = () => {
                         border: none;
                         cursor: pointer;
                         color: black;
+                        width: 1rem;
+                        height: 2rem;
                     }
                 `}
             </style>
@@ -273,4 +294,4 @@ const indexProduct = () => {
     )
 }
 
-export default indexProduct;
+export default indexLocalidad;

@@ -1,86 +1,80 @@
-const { useState, useEffect } = require("react")
-import { useRouter } from 'next/router';
+const { useState } = require("react")
 
 const { default: Link } = require("next/link")
-const initialState = {name:'' , price:0}
 
-const updateProduct = ({idProducto}) => {
-    const router = useRouter();
-    const [product , setProduct] = useState(initialState);
-    useEffect( () => {
-        if(!idProducto){return} 
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/${idProducto}`)
-                .then((a) => {
-                    return a.json();
-                 })
-                    .then((data) => {
-                            if(data.ok && data.prod.name && data.prod.price){
-                                const nombreP = data.prod.name;
-                                const precioP = data.prod.price;
-                                console.log('Producto encontrado exitosamente.');
-                                setProduct({name: nombreP , price: precioP} )
-                            }
-                        })
-                    .catch((err) => {console.log('Error al enviar datos. \n Error: ',err)})
-    } , [idProducto]);
-
+const initialState = {name:'', pais:'', provincia:'', localidad:'', barrio:'', calle:''}
+const createBodega = () => {
+    const [bodega , setBodega] = useState(initialState);
+    
     const inputChange = (e) => {
         const value = e.target.value;
         const name = e.target.name;
         
-        setProduct({
-            ...product , 
+        setBodega({
+            ...bodega , 
                 [name]:value
         })   
     }
 
-    const clickChange = async (e) => {
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/${id}` ,
+    const clickChange = (e) => {
+         e.preventDefault();
+
+         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/bodega`,
             {
-                method: 'PUT',
+                method: 'POST',
                 headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({
-                    name: product.name,
-                    price: product.price
+                    name: bodega.name,
+                    pais: bodega.pais,
+                    provincia: bodega.provincia,
+                    localidad: bodega.localidad,
+                    barrio: bodega.barrio,
+                    calle: bodega.calle,
                 })
             }
-        )
-            .then((a) => {return a.json()})
-                .then((s) => { console.log(s.message) })
-         
+         ).then((a) => {
+                        return a.json()
+                    })
+                    .then((data) => {
+                            if(data.ok){
+                                console.log('Bodega creada exitosamente.');
+                                setBodega(initialState);;
+                            }
+                        })
+                .catch((err) => {console.log('Error al enviar datos. \n Error: ',err)})
     }
 
     return(
         <>
             <div className="form-container">
-                <h1 className="titulo-pagina">Modificar Producto</h1>
-                <form id="formProducto">
+                <h1 className="titulo-pagina">Cargar Bodega</h1>
+                <form id="formC">
                     <div className="form-group">
                         <label for="nombre">Nombre:</label>
-                        <input type="text" onChange={inputChange} value={product.name} name="name" placeholder="Ingresa el nombre del producto" required></input>
+                        <input type="text" onChange={inputChange} value={bodega.name} name="name" placeholder="Ingresa el nombre de la bodega" required></input>
                     </div>
-                    
                     <div className="form-group">
-                        <label for="marca">Marca:</label>
-                        <input type="text" id="marca" name="marca" required></input>
+                        <label for="nombre">Pais:</label>
+                        <input type="text" onChange={inputChange} value={bodega.pais} name="pais" placeholder="Ingresa el pais de la bodega" required></input>
                     </div>
-                    
                     <div className="form-group">
-                        <label for="stock">Stock:</label>
-                        <input type="number" id="stock" name="stock" min="0" required></input>
+                        <label for="nombre">Provincia:</label>
+                        <input type="text" onChange={inputChange} value={bodega.provincia} name="provincia" placeholder="Ingresa el nombre de la provincia" required></input>
                     </div>
-                    
                     <div className="form-group">
-                        <label for="ubicacion">Ubicación:</label>
-                        <input type="text" id="ubicacion" name="ubicacion" required></input>
+                        <label for="nombre">Localidad:</label>
+                        <input type="text" onChange={inputChange} value={bodega.localidad} name="localidad" placeholder="Ingresa el nombre de la localidad" required></input>
                     </div>
-                    
                     <div className="form-group">
-                        <label for="precio">Precio:</label>
-                        <input type="number" onChange={inputChange} value={product.price} name="price" placeholder="Ingresa el precio del producto" min="0" step="0.01" required></input>
+                        <label for="nombre">Barrio:</label>
+                        <input type="text" onChange={inputChange} value={bodega.barrio} name="barrio" placeholder="Ingresa el nombre del barrio" required></input>
+                    </div>
+                    <div className="form-group">
+                        <label for="nombre">Calle:</label>
+                        <input type="text" onChange={inputChange} value={bodega.calle} name="calle" placeholder="Ingresa el nombre de la calle" required></input>
                     </div>
                     
-                    <button type="submit" className="submit-btn" onClick={clickChange}>Cargar Producto</button>
+                    <button type="submit" className="submit-btn" onClick={clickChange}>Cargar Bodega</button>
                 </form>
             </div>
             <style jsx>
@@ -154,4 +148,4 @@ const updateProduct = ({idProducto}) => {
     )
 }
 
-export default updateProduct;
+export default createBodega;

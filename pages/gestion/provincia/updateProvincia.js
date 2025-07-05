@@ -1,86 +1,97 @@
 const { useState, useEffect } = require("react")
 import { useRouter } from 'next/router';
+import indexProvincia from './indexProvincia';
 
 const { default: Link } = require("next/link")
-const initialState = {name:'' , price:0}
+const initialState = {name:'', pais:''}                  
 
-const updateProduct = ({idProducto}) => {
-    const router = useRouter();
-    const [product , setProduct] = useState(initialState);
-    useEffect( () => {
-        if(!idProducto){return} 
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/${idProducto}`)
+const updateProvincia = ({provinciaID}) => {
+    const [provincia , setProvincia] = useState(initialState);
+    const [paises,setPaises] = useState([]);
+    const fetchDataProvincia = async(provinciaID) => {
+            await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/provincia/${provinciaID}`)
                 .then((a) => {
                     return a.json();
                  })
-                    .then((data) => {
-                            if(data.ok && data.prod.name && data.prod.price){
-                                const nombreP = data.prod.name;
-                                const precioP = data.prod.price;
-                                console.log('Producto encontrado exitosamente.');
-                                setProduct({name: nombreP , price: precioP} )
+                    .then((s) => 
+                        {
+                            if(s.ok && s.data.name){
+                                const nombreP = s.data.name;
+                                const paisP = s.data.pais;
+                                console.log('Provincia encontrada exitosamente.');
+                                setProvincia({name: nombreP, pais:paisP} )
                             }
                         })
-                    .catch((err) => {console.log('Error al enviar datos. \n Error: ',err)})
-    } , [idProducto]);
+                    .catch((err) => {console.log('No se encontro provincia con este id. \n Error: ',err)})
+    }
+    const fetchDataPais = async()=>{
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/pais`)
+            .then((a)=>{return a.json()})
+                .then((s)=>{
+                    setPaises(s.data)
+                })
+    }  
+    useEffect(() => {
+        if(!provinciaID){return}
+        fetchDataProvincia(provinciaID);
+        fetchDataPais();
+    } , [provinciaID]);
 
     const inputChange = (e) => {
         const value = e.target.value;
         const name = e.target.name;
         
-        setProduct({
-            ...product , 
+        setProvincia({
+            ...provincia , 
                 [name]:value
         })   
     }
 
     const clickChange = async (e) => {
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/${id}` ,
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/provincia/${provinciaID}` ,
             {
                 method: 'PUT',
                 headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({
-                    name: product.name,
-                    price: product.price
+                    name: provincia.name,
+                    pais: provincia.pais
                 })
             }
         )
             .then((a) => {return a.json()})
                 .then((s) => { console.log(s.message) })
-         
+
     }
 
     return(
         <>
             <div className="form-container">
-                <h1 className="titulo-pagina">Modificar Producto</h1>
+                <h1 className="titulo-pagina">Modificar Provincia</h1>
                 <form id="formProducto">
                     <div className="form-group">
-                        <label for="nombre">Nombre:</label>
-                        <input type="text" onChange={inputChange} value={product.name} name="name" placeholder="Ingresa el nombre del producto" required></input>
+                        <label htmlFor="nombre">Nombre:</label>
+                        <input type="text" onChange={inputChange} value={provincia.name} name="name" placeholder="Ingresa el nombre de la provincia" required></input>
                     </div>
                     
                     <div className="form-group">
-                        <label for="marca">Marca:</label>
-                        <input type="text" id="marca" name="marca" required></input>
+                        <label htmlFor="nombre">Pais:</label>
+                        <select name="pais" onChange={inputChange} value={provincia.pais}>
+                            <option value=''>Seleccione un pais...</option>
+                            {
+                                paises.map(({_id,name}) => 
+                                    (
+                                        <option key={_id} value={_id}>
+                                            {name}
+                                        </option>                                        
+                                    )
+                                )
+                            }
+                        </select>
                     </div>
-                    
-                    <div className="form-group">
-                        <label for="stock">Stock:</label>
-                        <input type="number" id="stock" name="stock" min="0" required></input>
+
+                    <div className="form-carga-button">
+                        <button type="submit" className="submit-btn" onClick={clickChange}>Guardar</button>
                     </div>
-                    
-                    <div className="form-group">
-                        <label for="ubicacion">Ubicación:</label>
-                        <input type="text" id="ubicacion" name="ubicacion" required></input>
-                    </div>
-                    
-                    <div className="form-group">
-                        <label for="precio">Precio:</label>
-                        <input type="number" onChange={inputChange} value={product.price} name="price" placeholder="Ingresa el precio del producto" min="0" step="0.01" required></input>
-                    </div>
-                    
-                    <button type="submit" className="submit-btn" onClick={clickChange}>Cargar Producto</button>
                 </form>
             </div>
             <style jsx>
@@ -95,6 +106,11 @@ const updateProduct = ({idProducto}) => {
                         max-width: 500px;
                         border-radius: 12px;
                         box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+                        }
+
+                        .form-carga-button{
+                            text-align: center;
+                            margin-top: auto;
                         }
 
                         .form-group {
@@ -154,4 +170,4 @@ const updateProduct = ({idProducto}) => {
     )
 }
 
-export default updateProduct;
+export default updateProvincia;

@@ -1,31 +1,46 @@
 import { useEffect, useState } from "react"
 import { FaPlus, FaHome } from "react-icons/fa";
-import FormularioProductoCreate from './createProduct';
-import FormularioProductoUpdate from './updateProduct';
+import FormularioCalleUpdate from '../calle/updateCalle'
+import FormularioCalleCreate from '../calle/createCalle'
 
 const { default: Link } = require("next/link")
 
-const indexProduct = () => {
-    const [vinos,setVinos] = useState([]);    
+const indexCalle = () => {
+    const [barrios,setBarrios] = useState([]);
+    const [calles,setCalles] = useState([]);
     const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
     const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
-    
-    useEffect(() => {  
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products`)
+    const fetchData = ()=>{
+            fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/calle`)
                 .then((a) => {
                             return a.json()
                 })
                     .then (({data}) => {
-                        setVinos(data);
+                        setCalles(data);
                     })
+                }
+    
+    const fetchDataBarrios = ()=>{
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/barrio`)
+                .then((a) => {
+                            return a.json()
+                })
+                    .then (({data}) => {
+                        setBarrios(data);
+                    })
+                }
+
+    useEffect(() => {  
+        fetchData(),
+        fetchDataBarrios();
     }, [])
 
-    const deleteProduct = async(productID) => {
-        if(!productID) {
-            console.log("Error con el ID del producto al querer eliminarlo.")
+    const deleteCalle = async(calleID) => {
+        if(!calleID) {
+            console.log("Error con el ID de la calle al querer eliminarla.")
             return
         }
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/${productID}`,
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/calle/${calleID}`,
             {
                 method:'DELETE',
                 headers: {
@@ -34,10 +49,11 @@ const indexProduct = () => {
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
+                fetchData()
                 console.log(res.message);
             })
             .catch((err)=>{
-                console.log("ERROR AL ENVIAR PRODUCTO PARA SU ELIMINACIÓN. \n ERROR: ",err);
+                console.log("Error al enviar calle para su eliminacion. \n ERROR: ",err);
             })
     }
 
@@ -49,7 +65,7 @@ const indexProduct = () => {
                         <button className="close" onClick={() => setMostrarModalCreate(false)}>
                             &times;
                         </button>
-                        <FormularioProductoCreate />
+                        <FormularioCalleCreate />
                     </div>
                 </div>
             )}
@@ -60,11 +76,11 @@ const indexProduct = () => {
                         <button className="close" onClick={() => setMostrarModalUpdate(null)}>
                             &times;
                         </button>
-                        <FormularioProductoUpdate idProducto={mostrarModalUpdate} />
+                        <FormularioCalleUpdate calleID={mostrarModalUpdate} />
                     </div>
                 </div>
             )}
-            <h1 className="titulo-pagina">Productos</h1>
+            <h1 className="titulo-pagina">Calle</h1>
             
             <div className="botonera">
                 <div className="btn-accion">
@@ -78,40 +94,43 @@ const indexProduct = () => {
                 <div className="btn-accion">
                     <button onClick={() => setMostrarModalCreate(true)}>
                         <FaPlus  className="icono" />
-                        Agregar Producto
+                        Agregar Calle
                     </button>
                 </div>                
             </div>
             <div className="contenedor-tabla">
-                <input type="text" id="buscador" placeholder="Buscar vinos..." />
+                <input type="text" id="buscador" placeholder="Buscar calles..." />
 
                 <div className="tabla-scroll">
                     <table id="tablaVinos">
                         <thead>
                         <tr className="fila">
                             <th className="columna">Nombre</th>
-                            <th className="columna">Precio</th>
+                            <th className="columna">Barrio</th>
                             <th className="columna">Acciones</th>
                         </tr>
                         </thead>
                         <tbody>
                             {
-                                vinos.map(({_id,name , price}) => (
+                                calles.map(({_id, name , barrio}) => {
+                                    const barrioEncontrado = barrios.find((p)=>{return p._id === barrio});
+
+                                    return (
                                     <tr key={_id}>
                                         <td className="columna">{name}</td>
-                                        <td className="columna">{price}</td>
+                                        <td className="columna">{ barrioEncontrado?.name }</td>
                                         <td className="columna">
                                             <div className="acciones">
                                                 <button onClick={() => setMostrarModalUpdate(_id)} className="btn-productos">
                                                     Modificar
                                                 </button>
-                                                <button onClick={() => deleteProduct(_id)} className="btn-productos">
+                                                <button type="submit" onClick={() => deleteCalle(_id)} className="btn-productos">
                                                     Eliminar
                                                 </button>
                                             </div>
                                         </td>
-                                    </tr>
-                                ))
+                                    </tr>)
+                                })
                             }                        
                         </tbody>
                     </table>
@@ -266,6 +285,8 @@ const indexProduct = () => {
                         border: none;
                         cursor: pointer;
                         color: black;
+                        width: 1rem;
+                        height: 2rem;
                     }
                 `}
             </style>
@@ -273,4 +294,4 @@ const indexProduct = () => {
     )
 }
 
-export default indexProduct;
+export default indexCalle;

@@ -1,86 +1,56 @@
-const { useState, useEffect } = require("react")
-import { useRouter } from 'next/router';
+const { useState } = require("react")
 
 const { default: Link } = require("next/link")
-const initialState = {name:'' , price:0}
 
-const updateProduct = ({idProducto}) => {
-    const router = useRouter();
-    const [product , setProduct] = useState(initialState);
-    useEffect( () => {
-        if(!idProducto){return} 
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/${idProducto}`)
-                .then((a) => {
-                    return a.json();
-                 })
-                    .then((data) => {
-                            if(data.ok && data.prod.name && data.prod.price){
-                                const nombreP = data.prod.name;
-                                const precioP = data.prod.price;
-                                console.log('Producto encontrado exitosamente.');
-                                setProduct({name: nombreP , price: precioP} )
-                            }
-                        })
-                    .catch((err) => {console.log('Error al enviar datos. \n Error: ',err)})
-    } , [idProducto]);
-
+const initialState = {name:''}
+const formPais = () => {
+    const [pais , setPais] = useState(initialState);
+    
     const inputChange = (e) => {
         const value = e.target.value;
         const name = e.target.name;
         
-        setProduct({
-            ...product , 
+        setPais({
+            ...pais , 
                 [name]:value
         })   
     }
 
-    const clickChange = async (e) => {
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/${id}` ,
+    const clickChange = (e) => {
+
+         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/pais`,
             {
-                method: 'PUT',
+                method: 'POST',
                 headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({
-                    name: product.name,
-                    price: product.price
+                    name: pais.name,
                 })
             }
-        )
-            .then((a) => {return a.json()})
-                .then((s) => { console.log(s.message) })
-         
+         ).then((a) => {
+                        return a.json()
+                    })
+                    .then((s) => {
+                            if(s.ok){
+                                console.log(s.message);
+                                setPais(initialState);;
+                            }
+                        })
+                .catch((err) => {console.log('Error al enviar datos. \n Error: ',err)})
     }
 
     return(
         <>
             <div className="form-container">
-                <h1 className="titulo-pagina">Modificar Producto</h1>
+                <h1 className="titulo-pagina">Cargar Pais</h1>
                 <form id="formProducto">
                     <div className="form-group">
-                        <label for="nombre">Nombre:</label>
-                        <input type="text" onChange={inputChange} value={product.name} name="name" placeholder="Ingresa el nombre del producto" required></input>
+                        <label htmlFor="nombre">Nombre:</label>
+                        <input type="text" onChange={inputChange} value={pais.name} name="name" placeholder="Ingresa el nombre del pais" required></input>
                     </div>
                     
-                    <div className="form-group">
-                        <label for="marca">Marca:</label>
-                        <input type="text" id="marca" name="marca" required></input>
+                    <div className="form-carga-button">
+                        <button type="submit" className="submit-btn" onClick={clickChange}>Cargar Pais</button>
                     </div>
-                    
-                    <div className="form-group">
-                        <label for="stock">Stock:</label>
-                        <input type="number" id="stock" name="stock" min="0" required></input>
-                    </div>
-                    
-                    <div className="form-group">
-                        <label for="ubicacion">Ubicación:</label>
-                        <input type="text" id="ubicacion" name="ubicacion" required></input>
-                    </div>
-                    
-                    <div className="form-group">
-                        <label for="precio">Precio:</label>
-                        <input type="number" onChange={inputChange} value={product.price} name="price" placeholder="Ingresa el precio del producto" min="0" step="0.01" required></input>
-                    </div>
-                    
-                    <button type="submit" className="submit-btn" onClick={clickChange}>Cargar Producto</button>
                 </form>
             </div>
             <style jsx>
@@ -97,9 +67,16 @@ const updateProduct = ({idProducto}) => {
                         box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
                         }
 
+                        .form-carga-button{
+                            text-align: center;
+                            margin-top: auto;
+                        }
+
                         .form-group {
                         display: flex;
                         flex-direction: column;
+                        heigth:2rem;
+                        width: 90%;
                         }
 
                         .form-group label {
@@ -154,4 +131,4 @@ const updateProduct = ({idProducto}) => {
     )
 }
 
-export default updateProduct;
+export default formPais;
