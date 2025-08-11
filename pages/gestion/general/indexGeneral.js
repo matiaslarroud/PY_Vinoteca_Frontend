@@ -1,11 +1,16 @@
 import Link from "next/link";
-import { FaHome } from "react-icons/fa";
+import { FaHome , FaArrowLeft } from "react-icons/fa";
+import { useRouter } from 'next/router';
 
-export default function indexGestion() {
+export default function indexUbicaciones() {
+  const router = useRouter();
   return (
   <>
-  <h1 className="titulo-pagina">Gestion</h1>
+  <h1 className="titulo-pagina">Gestion Ventas</h1>
    <div className="botonera">
+    <button className="btn-icon" onClick={() => router.back()} title="Volver atrás">
+        <FaArrowLeft />
+    </button>
     <button className="btn-icon" title="Volver al menú">
         <Link href="/" >
             <FaHome />
@@ -14,18 +19,23 @@ export default function indexGestion() {
   </div>
   <div className="menu-grid">
       <div className="boton-acceso">
-        <Link href="./ubicaciones/indexUbicaciones">
-          <span>Gestion ubicaciones</span>
+        <Link href="medioPago/indexMedioPago" className="boton-acceso">
+          <span>Medios de Pago</span>
         </Link>
       </div>
       <div className="boton-acceso">
-        <Link href="./vinos/indexVinos">
-          <span>Gestion vinos</span>
+        <Link href="iva/indexCondicionIva" className="boton-acceso">
+          <span>Condiciones de IVA</span>
         </Link>
       </div>
       <div className="boton-acceso">
-        <Link href="./general/indexGeneral">
-          <span>Gestion general</span>
+        <Link href="tipoComprobante/indexTipo" className="boton-acceso">
+          <span>Tipos de Comprobante</span>
+        </Link>
+      </div>
+      <div className="boton-acceso">
+        <Link href="empleado/indexEmpleado" className="boton-acceso">
+          <span>Empleados</span>
         </Link>
       </div>
   </div>
@@ -70,6 +80,7 @@ export default function indexGestion() {
         cursor: pointer;
         transition: background-color 0.3s ease;
     }
+
     .titulo-pagina {
       font-size: 3rem;
       color: white;

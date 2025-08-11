@@ -1,37 +1,72 @@
 import Link from "next/link";
-import { FaHome } from "react-icons/fa";
+import { FaHome , FaArrowLeft } from "react-icons/fa";
+import { useRouter } from 'next/router';
 
 export default function indexGestion() {
+  const router = useRouter();
   return (
   <>
   <h1 className="titulo-pagina">Gestion</h1>
-   <div className="botonera">
-    <button className="btn-icon" title="Volver al menú">
+  <div className="botonera">
+      <button className="btn-icon" onClick={() => router.back()} title="Volver atrás">
+        <FaArrowLeft />
+      </button>
+      <button className="btn-icon"title="Volver al menú">
         <Link href="/" >
             <FaHome />
         </Link>
-    </button>             
-  </div>
+      </button>             
+    </div>
   <div className="menu-grid">
       <div className="boton-acceso">
-        <Link href="./ubicaciones/indexUbicaciones">
-          <span>Gestion ubicaciones</span>
+        <Link href="bodega/indexBodega">
+          <span>Bodega</span>
         </Link>
       </div>
       <div className="boton-acceso">
-        <Link href="./vinos/indexVinos">
-          <span>Gestion vinos</span>
+        <Link href="bodega_paraje/indexParaje">
+          <span>Paraje Bodega</span>
         </Link>
       </div>
       <div className="boton-acceso">
-        <Link href="./general/indexGeneral">
-          <span>Gestion general</span>
+        <Link href="vino_crianza/indexCrianza">
+          <span>Crianza</span>
+        </Link>
+      </div>
+      <div className="boton-acceso">
+        <Link href="vino_tipo/indexVinoTipo">
+          <span>Tipo Vino</span>
+        </Link>
+      </div>
+      <div className="boton-acceso">
+        <Link href="vino_uva/indexUva">
+          <span>Uva</span>
+        </Link>
+      </div>
+      <div className="boton-acceso">
+        <Link href="vino_varietal/indexVarietal">
+          <span>Varietal</span>
+        </Link>
+      </div>
+      <div className="boton-acceso">
+        <Link href="vino_volumen/indexVolumen">
+          <span>Volumen</span>
         </Link>
       </div>
   </div>
 
   <style jsx>{`
     .botonera {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-top: 40px;
+        align-items: center;
+        justify-content: center;
+        padding: 30px;
+    }
+    
+   .botonera {
       display: flex;
       justify-content: center;
       gap: 1rem;
@@ -53,12 +88,12 @@ export default function indexGestion() {
       justify-content: center;
       transition: background-color 0.3s, transform 0.2s;
     }
-    
+        
     .btn-icon:hover {
       background-color: #a30000;
       transform: translateY(-3px);
     }
-    
+
     button {
         background-color: #8B0000;
         color: white;
@@ -70,6 +105,7 @@ export default function indexGestion() {
         cursor: pointer;
         transition: background-color 0.3s ease;
     }
+
     .titulo-pagina {
       font-size: 3rem;
       color: white;

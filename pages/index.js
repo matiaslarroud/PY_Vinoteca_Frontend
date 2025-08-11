@@ -8,27 +8,21 @@ export default function Home() {
 
   <div className="menu-grid">
       <div className="boton-acceso">
-        <Link href="/products/indexProduct">
+        <Link href="/products/indexProducts">
           <FaWineGlassAlt className="icono" />
           <span>Productos</span>
         </Link>
       </div>
       <div className="boton-acceso">
-        <Link href="/clients" className="boton-acceso">
+        <Link href="/clientes/indexClientes" className="boton-acceso">
           <FaUserFriends className="icono" />
           <span>Clientes</span>
         </Link>
       </div>
       <div className="boton-acceso">
-        <Link href="/providers" className="boton-acceso">
+        <Link href="/proveedores/indexProveedor" className="boton-acceso">
           <FaTruck className="icono" />
           <span>Proveedores</span>
-        </Link>
-      </div>
-      <div className="boton-acceso">
-        <Link href="/orders" className="boton-acceso">
-          <FaClipboardList className="icono" />
-          <span>Pedidos</span>
         </Link>
       </div>
       <div className="boton-acceso">

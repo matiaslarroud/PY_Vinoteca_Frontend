@@ -4,28 +4,29 @@ import { FaHome } from "react-icons/fa";
 export default function indexGestion() {
   return (
   <>
-  <h1 className="titulo-pagina">Gestion</h1>
-   <div className="botonera">
-    <button className="btn-icon" title="Volver al menú">
-        <Link href="/" >
-            <FaHome />
-        </Link>
-    </button>             
+  <h1 className="titulo-pagina">Productos</h1>
+  <div className="botonera">
+    <button className="btn-icon"title="Volver al menú">
+      <Link href="/" >
+          <FaHome />
+      </Link>
+    </button>              
   </div>
+
   <div className="menu-grid">
       <div className="boton-acceso">
-        <Link href="./ubicaciones/indexUbicaciones">
-          <span>Gestion ubicaciones</span>
+        <Link href="./vinos/indexVino">
+          <span>Vinos</span>
         </Link>
       </div>
       <div className="boton-acceso">
-        <Link href="./vinos/indexVinos">
-          <span>Gestion vinos</span>
+        <Link href="./picadas/indexPicada">
+          <span>Picadas</span>
         </Link>
       </div>
       <div className="boton-acceso">
-        <Link href="./general/indexGeneral">
-          <span>Gestion general</span>
+        <Link href="./insumos/indexInsumo">
+          <span>Insumos</span>
         </Link>
       </div>
   </div>
@@ -53,23 +54,12 @@ export default function indexGestion() {
       justify-content: center;
       transition: background-color 0.3s, transform 0.2s;
     }
-    
+                    
     .btn-icon:hover {
       background-color: #a30000;
       transform: translateY(-3px);
     }
-    
-    button {
-        background-color: #8B0000;
-        color: white;
-        font-size: 1.1rem;
-        width: 100%;
-        height: 100%;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
+
     .titulo-pagina {
       font-size: 3rem;
       color: white;
@@ -85,6 +75,18 @@ export default function indexGestion() {
       padding: 40px;
       max-width: 1000px;
       margin: 0 auto;
+    }
+    
+    button {
+        background-color: #8B0000;
+        color: white;
+        font-size: 1.1rem;
+        width: 100%;
+        height: 100%;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
     }
 
     .boton-acceso {
