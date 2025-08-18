@@ -1,31 +1,11 @@
-const { useState, useEffect } = require("react")
+const { useState } = require("react")
+
 const { default: Link } = require("next/link")
 
-
-const initialState = {name:'', familia:''}   
-
-const updateBodega = ({bodegaID}) => {
-    const [bodega, setBodega] = useState(initialState);
+const initialState = {name:'', familia:''}
+const newRemitoCliente = () => {
+    const [bodega , setBodega] = useState(initialState);
     
-    const fetchData = (bodegaID) => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/bodega/${bodegaID}`)
-        .then((a)=>{
-            return a.json();
-        })
-            .then((s)=>{
-                if(s.ok && s.data.name){
-                    const nombreB = s.data.name;
-                    const familiaB = s.data.familia;
-                    setBodega({name: nombreB, familia:familiaB} )
-                }
-            })
-        .catch((err)=>{console.log("No se encontro bodega con este id.\nError: ",err)})
-    }
-    useEffect(()=>{
-        if(!bodegaID){return}
-        fetchData(bodegaID)
-    }, [bodegaID])
-
     const inputChange = (e) => {
         const value = e.target.value;
         const name = e.target.name;
@@ -37,9 +17,9 @@ const updateBodega = ({bodegaID}) => {
     }
 
     const clickChange = (e) => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/bodega/${bodegaID}`,
+         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/bodega`,
             {
-                method: 'PUT',
+                method: 'POST',
                 headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({
                     name: bodega.name,
@@ -51,6 +31,7 @@ const updateBodega = ({bodegaID}) => {
                     })
                     .then((data) => {
                             if(data.ok){
+                                console.log('Bodega creada exitosamente.');
                                 setBodega(initialState);;
                             }
                         })
@@ -60,7 +41,7 @@ const updateBodega = ({bodegaID}) => {
     return(
         <>
             <div className="form-container">
-                <h1 className="titulo-pagina">Modificar Bodega</h1>
+                <h1 className="titulo-pagina">Cargar Bodega</h1>
                 <form id="formC">
                     <div className="form-group">
                         <label htmlFor="nombre">Nombre:</label>
@@ -70,6 +51,7 @@ const updateBodega = ({bodegaID}) => {
                         <label htmlFor="nombre">Familia:</label>
                         <input type="text" onChange={inputChange} value={bodega.familia} name="familia" placeholder="Ingresa el nombre de la familia" required></input>
                     </div>
+                    
                     
                     <button type="submit" className="submit-btn" onClick={clickChange}>Cargar Bodega</button>
                 </form>
@@ -145,4 +127,4 @@ const updateBodega = ({bodegaID}) => {
     )
 }
 
-export default updateBodega;
+export default newRemitoCliente;

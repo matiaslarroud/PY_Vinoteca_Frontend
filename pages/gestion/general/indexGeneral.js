@@ -38,6 +38,11 @@ export default function indexUbicaciones() {
           <span>Empleados</span>
         </Link>
       </div>
+      <div className="boton-acceso">
+        <Link href="transporte/indexTransporte" className="boton-acceso">
+          <span>Transportes</span>
+        </Link>
+      </div>
   </div>
 
   <style jsx>{`

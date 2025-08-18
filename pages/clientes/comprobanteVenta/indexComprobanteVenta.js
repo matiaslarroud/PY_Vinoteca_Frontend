@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react"
 import { FaPlus, FaHome, FaArrowLeft, FaTrash , FaFileInvoice  } from "react-icons/fa";
 import { useRouter } from 'next/router';
-import FormularioComprobanteVentaCreate from './createComprobanteVenta'
+import FormularioComprobanteVentaCreate from './new_ComprobanteVenta'
+
 
 const { default: Link } = require("next/link")
 

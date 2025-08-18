@@ -1,7 +1,6 @@
 const { useState , useEffect } = require("react")
-import Select from 'react-select';          
-import { FaTrash} from "react-icons/fa";
-import FormularioClienteCreate from '../../clientes/createCliente'
+import Select from 'react-select';        
+import FormularioClienteCreate from '../createCliente'
 const { default: Link } = require("next/link")
 
 const initialStateComprobanteVenta = {

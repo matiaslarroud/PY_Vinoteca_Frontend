@@ -3,6 +3,7 @@ import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit , FaFileInvoiceDollar } fr
 import { useRouter } from 'next/router';
 import FormularioNotaPedidoUpdate from './updateNotaPedido'
 import FormularioNotaPedidoCreate from './createNotaPedido'
+import FormularioComprobanteVentaByNotaPedido from '../comprobanteVenta/create_ComprobanteVenta'
 
 const { default: Link } = require("next/link")
 
@@ -13,6 +14,7 @@ const indexPresupuesto = () => {
     const [clientes,setClientes] = useState([]);  
     const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
     const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
+    const [mostrarModalComprobanteVenta, setMostrarModalComprobanteVenta] = useState(null);
     
     const [filtroNombre, setFiltroNombre] = useState('');
     const [filtroPresupuesto , setFiltroPresupuesto] = useState('');  
@@ -156,6 +158,23 @@ const indexPresupuesto = () => {
                     </div>
                 </div>
             )}
+
+            {mostrarModalComprobanteVenta && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="close" onClick={() => setMostrarModalComprobanteVenta(null)}>
+                            &times;
+                        </button>
+                        <FormularioComprobanteVentaByNotaPedido 
+                            pedidoID={mostrarModalComprobanteVenta} 
+                            exito={()=>{
+                                setMostrarModalComprobanteVenta(null);
+                                fetchData();
+                            }}    
+                        />
+                    </div>
+                </div>
+            )}
             <h1 className="titulo-pagina">Nota de Pedido</h1>
             
             <div className="botonera">
@@ -229,7 +248,13 @@ const indexPresupuesto = () => {
                                                     <FaTrash />
                                                 </button>
                                                 <button   className="btn-icon" title="Generar comprobante de venta">
-                                                    <FaFileInvoiceDollar />
+                                                    <FaFileInvoiceDollar onClick={() => {
+                                                        if (facturado) {
+                                                        alert("Este pedido ya fue facturado y no se puede modificar.");
+                                                        return;
+                                                        }
+                                                        setMostrarModalComprobanteVenta(_id);
+                                                    }} />
                                                 </button>
                                             </div>
                                         </td>
