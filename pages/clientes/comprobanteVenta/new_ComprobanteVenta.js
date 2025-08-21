@@ -156,7 +156,6 @@ const createComprobanteVenta = ({exito}) => {
             .then((s)=>{
                 if(s.ok){
                     const pedidosNoFacturados = s.data.filter(pedido => pedido.facturado === false);
-                    console.log("Pedidos no facturados:", pedidosNoFacturados);
                     setNotaPedidos(pedidosNoFacturados);
                 }
             })

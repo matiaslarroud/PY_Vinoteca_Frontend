@@ -2,127 +2,167 @@ const { useState, useEffect } = require("react")
 import Select from 'react-select';
 import { FaTrash} from "react-icons/fa";
 
-const initialState = {name:'',stock:0 , precioVenta:0 , deposito:'' , tipoVino:''}
-const initialStateDetalle = {picada:'',insumo:'', cantidad:0}
+const initialState = {name:'',telefono:'', email:'', cuit:'', pais:'', provincia:'', localidad:'', barrio:'', calle:'', condicionIva:''}
+const initialStateDetalle = {transporteID:'', pais:'', provincia:'', localidad:''}
 
-const updatePicada = ({exito , picadaID}) => {
-    const [insumos , setinsumos] = useState([]);
-    const [depositos, setDepositos] = useState([]);
-    const [tiposVino, setTiposVino] = useState([]);
-    const [picada , setPicada] = useState(initialState)
+const updateTransporte = ({exito , transporteID}) => {
+    const [transporte, setTransporte] = useState(initialState);
+    const [paises, setPaises] = useState([]);
+    const [provincias, setProvincias] = useState([]);
+    const [localidades, setLocalidades] = useState([]);
+    const [barrios, setBarrios] = useState([]); 
+    const [calles, setCalles] = useState([]);
+    const [condicionesIva, setCondicionesIva] = useState([]);
     const [detalles, setDetalles] = useState([initialStateDetalle]);
 
-    const detallesValidos = detalles.filter(d => d.insumo && d.cantidad > 0);
+    const detallesValidos = detalles.filter(d => d.pais !== '' && d.provincia !== '' && d.localidad !== '');
     const puedeGuardar = detallesValidos.length > 0;
     
-    const fetchData_Picada = async (param)=> {
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productPicada/${param}`)
-            .then ((a)=>{return a.json()})
-                .then ((s)=>{
-                    setPicada(s.data)
-                })
-            .catch((err)=>{console.log(err)});
-    }
+    const fetchData_Paises = async () => {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/pais`);
+        const { data } = await res.json();
+        if (data) {
+            setPaises(data);
+        } else {
+            console.error("Error al cargar los países");
+        }
+    };
     
-    const fetchData_PicadaDetalles = async (param)=> {
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productPicadaDetalle/picada/${param}`)
-            .then ((a)=>{return a.json()})
-                .then ((s)=>{
-                    setDetalles(s.data)
-                })
-            .catch((err)=>{console.log(err)});
-    }
-    const fetch_Depositos = async () => {
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/deposito`)
-            .then ((a)=>{return a.json()})
-                .then ((s)=>{
-                    setDepositos(s.data)
-                })
-            .catch((err)=>{console.log(err)});
-    }
+    const fetchData_Transporte = async (param) => {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/transporte/${param}`);
+        const { data } = await res.json();
+        if (data) {
+            setTransporte(data);
+        } else {
+            console.error("Error al cargar los datos del transporte");
+        }
+    };
+    
+    const fetchData_Transporte_Detalle = async (param) => {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/transporteDetalle/transporte/${param}`);
+        const { data } = await res.json();
+        if (data) {
+            setDetalles(data);
+        } else {
+            console.error("Error al cargar los destinos del transporte");
+        }
+    };
 
-    const fetch_tiposVino = async () => {
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/tipoVino`)
-            .then ((a)=>{return a.json()})
-                .then ((s)=>{
-                    setTiposVino(s.data)
-                })
-            .catch((err)=>{console.log(err)});
+    const fetchData_Provincias = async () => {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/provincia`);
+        const { data } = await res.json();
+        if (data) {
+            setProvincias(data);
+        } else {
+            console.error("Error al cargar las provincias");   
     }
+    };
+    
+    const fetchData_Localidades = async () => {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/localidad`);
+        const { data } = await res.json();  
+        if (data) {
+            setLocalidades(data);
+        } else {
+            console.error("Error al cargar las localidades");
+        }
+    };
 
-    const fetch_Insumos = async () => {
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productInsumo`)
-            .then ((a)=>{return a.json()})
-                .then ((s)=>{
-                    setinsumos(s.data)
-                })
-            .catch((err)=>{console.log(err)});
-    }
+    const fetchData_Barrios = async () => {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/barrio`);
+        const { data } = await res.json();  
+        if (data) {
+            setBarrios(data);
+        } else {
+            console.error("Error al cargar los barrios");
+        }
+    };
+
+    const fetchData_Calles = async () => {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/calle`);
+        const { data } = await res.json();
+        if (data) {
+            setCalles(data);
+        } else {
+            console.error("Error al cargar las calles");    
+        }
+    };
+
+    const fetchData_CondicionesIva = async () => {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/condicionIva`);
+        const { data } = await res.json();
+        if (data) {
+            setCondicionesIva(data);
+        }
+        else {
+            console.error("Error al cargar las condiciones de IVA");
+        }  
+    };
+
     
     useEffect(()=>{
-        if(!picadaID){return}
-        fetch_Depositos();
-        fetch_tiposVino();
-        fetch_Insumos();
-        fetchData_Picada(picadaID);
-        fetchData_PicadaDetalles(picadaID);
-    } , [picadaID])
+        fetchData_Transporte(transporteID);
+        fetchData_Transporte_Detalle(transporteID);
+        fetchData_Paises();
+        fetchData_Provincias();
+        fetchData_Localidades();
+        fetchData_Barrios();
+        fetchData_Calles();
+        fetchData_CondicionesIva();
+    } , [transporteID])
     
     const inputChange = (e) => {
         const value = e.target.value;
         const name = e.target.name;
         
-        setPicada({
-            ...picada , 
+        setTransporte({
+            ...transporte , 
                 [name]:value
         })   
     }
+
+    const handleDetalleChange = (index, field, value) => {
+        const nuevosDetalles = [...detalles];
+        nuevosDetalles[index][field] = value;
+        
+        setDetalles(nuevosDetalles);
+    };
 
     const selectChange = (selectedOption, actionMeta) => {
         const name = actionMeta.name;
         const value = selectedOption ? selectedOption.value : "";
 
-        setPicada({
-            ...picada,
+        setTransporte({
+            ...transporte,
             [name]: value,
         });
     };
 
-    const calcularTotalPicada = (detalles) => {
-        let total = 0;
-        detalles.forEach((item) => {
-            const insumoInfo = insumos.find(insumo => insumo._id === item.insumo);
-            const precio = insumoInfo ? insumoInfo.precioCosto : 0;
-            const ganancia = insumoInfo ? insumoInfo.ganancia : 0;
-            total += (precio+((precio*ganancia)/100)) * item.cantidad;
-        });
-
-        setPicada(prev => ({
-            ...prev,
-            precioVenta: total
-        }));
-    };
-
     const clickChange = async(e) => {
          e.preventDefault();
-         const resPicada = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productPicada/${picadaID}`,
+         const resTransporte = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/transporte/${transporteID}`,
             {
                 method: 'PUT',
                 headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({
-                    name: picada.name,
-                    stock: picada.stock,
-                    deposito: picada.deposito,
-                    tipoVino: picada.tipoVino,
-                    precioVenta: picada.precioVenta,
+                    name: transporte.name,
+                    telefono: transporte.telefono,
+                    email: transporte.email,
+                    cuit: transporte.cuit,
+                    pais: transporte.pais,
+                    provincia: transporte.provincia,
+                    localidad: transporte.localidad,
+                    barrio: transporte.barrio,
+                    calle: transporte.calle,
+                    condicionIva: transporte.condicionIva
                 })
             }
         )
 
-        const picadaCreada = await resPicada.json();
-        const identificador = picadaCreada.data._id;
+        const transporteCreado = await resTransporte.json();
+        const id = transporteCreado.data._id;
 
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productPicadaDetalle/${identificador}`,
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/transporteDetalle/${id}`,
             {
                 method:'DELETE',
                 headers: {
@@ -134,208 +174,395 @@ const updatePicada = ({exito , picadaID}) => {
                 console.log(res.message);
             })
             .catch((err)=>{
-                console.log("Error al envia Picada para su eliminación. \n Error: ",err);
+                console.log("Error al enviar destinos de transporte para su eliminación. \n Error: ",err);
             })
+
+
 
 
         // GUARDAMOS DETALLES
         for (const detalle of detalles) {
-            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productPicadaDetalle`, {
+            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/transporteDetalle`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    cantidad: detalle.cantidad,
-                    insumo: detalle.insumo,
-                    picada: identificador
-
-            })
-                });
+                    transporteID: id,
+                    pais: detalle.pais, 
+                    provincia: detalle.provincia,
+                    localidad: detalle.localidad    
+                })
+            });
             
             if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
         }
         setDetalles([initialStateDetalle]);
-        setPicada(initialState);
+        setTransporte(initialState);
         exito();
     }
 
-    const handleDetalleChange = (index, field, value) => {
-        const nuevosDetalles = [...detalles];
-        nuevosDetalles[index][field] = field === "cantidad" ? parseFloat(value) : value;
-        
-        const prod = insumos.find(p => p._id === nuevosDetalles[index].insumo);
-        
-        setDetalles(nuevosDetalles);
-        calcularTotalPicada(nuevosDetalles);
-    };
-
     const agregarDetalle = () => {
-        setDetalles([...detalles, { ...{picada:'',insumo:'', cantidad:0} }]);
+        setDetalles([...detalles, { ...{pais:'', provincia:'', localidad:''} }]);
     };
 
-    const [mostrarModalCreate1, setMostrarModalCreate1] = useState(false);
-    const [mostrarModalCreate2, setMostrarModalCreate2] = useState(false);
-    const [mostrarModalCreate3, setMostrarModalCreate3] = useState(false);
-
-    const opciones_insumos = insumos.map(v => ({ value: v._id,label: v.name , stock: v.stock }));
-    const opciones_tiposVino = tiposVino.map(v => ({ value: v._id,label: v.name }));
-    const opciones_depositos = depositos.map(v => ({ value: v._id,label: v.name }));
+    const opciones_paises = paises.map(p => ({ value: p._id, label: p.name }));
+    const opciones_provincias = provincias.filter(a =>(a.pais === transporte.pais)).map(p => ({ value: p._id, label: p.name }));
+    const opciones_localidades = localidades.filter(a => (a.provincia === transporte.provincia)).map(p => ({ value: p._id, label: p.name }));
+    const opciones_barrios = barrios.filter(a => (a.localidad === transporte.localidad)).map(p => ({ value: p._id, label: p.name }));
+    const opciones_calles = calles.filter(a => (a.barrio === transporte.barrio)).map(p => ({ value: p._id, label: p.name }));
+    const opciones_condicionesIva = condicionesIva.map(p => ({ value: p._id, label: p.name }));
 
     return(
         <>
-            {mostrarModalCreate1 && (
-                <div className="modal">
-                <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate1(false)}>&times;</button>
-                    <FormularioTipoVinoCreate
-                    exito={() => {
-                        setMostrarModalCreate1(false);
-                        fetch_tiposVino();
-                    }}
-                    />
-                </div>
-                </div>
-            )}
-
-            {mostrarModalCreate2 && (
-                <div className="modal">
-                <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate2(false)}>&times;</button>
-                    <FormularioDepositoCreate
-                    exito={() => {
-                        setMostrarModalCreate2(false);
-                        fetch_Depositos();
-                    }}
-                    />
-                </div>
-                </div>
-            )}
-
-            {mostrarModalCreate3 && (
-                <div className="modal">
-                <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate3(false)}>&times;</button>
-                    <FormularioInsumoCreate
-                    exito={() => {
-                        setMostrarModalCreate3(false);
-                        fetch_Insumos();
-                    }}
-                    />
-                </div>
-                </div>
-            )}
+            
 
             <div className="form-container">
                 <div className="form-row">
-                    <div className="form-col">
-                        <h1 className="titulo-pagina">Modificar Picada</h1>
-                    </div>
+                    <h1 className="titulo-pagina">Cargar Transporte</h1>
                 </div>
 
                 <form id="updatePicada" className="formulario-picada">
                     <div className="form-row">
                         <div className="form-col">
-                        <label htmlFor="nombre">
-                            Nombre:
-                        </label>
-                        <input
-                            type="text"
-                            onChange={inputChange}
-                            value={picada.name}
-                            name="name"
-                            placeholder="Nombre del producto"
-                            required
-                        />
-                        </div>
-
-                        <div className="form-col">
-                            <label htmlFor="stock">
-                                Stock:
+                            <label htmlFor="nombre">
+                                Nombre:
                             </label>
                             <input
-                                type="number"
+                                type="text"
                                 onChange={inputChange}
-                                value={picada.stock}
-                                name="stock"
-                                placeholder="Cantidad en stock"
+                                value={transporte.name}
+                                name="name"
+                                placeholder="Nombre del transporte"
                                 required
                             />
                         </div>
-
                         <div className="form-col">
-                        <label>
-                            Tipo de Vino:
-                            <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate1(true)}>+</button>
-                        </label>
-                        <Select
-                            className="form-select-react"
-                            classNamePrefix="rs"
-                            options={opciones_tiposVino}
-                            value={opciones_tiposVino.find(op => op.value === picada.tipoVino) || null}
-                            onChange={selectChange}
-                            name='tipoVino'
-                            placeholder="Tipo de vino..."
-                            isClearable
-                            styles={{
-                                container: (base) => ({
-                                ...base,
-                                width: 220, // ⬅️ ancho fijo total
-                                }),
-                                control: (base) => ({
-                                ...base,
-                                minWidth: 220,
-                                maxWidth: 220,
-                                backgroundColor: '#2c2c2c',
-                                color: 'white',
-                                border: '1px solid #444',
-                                borderRadius: 8,
-                                }),
-                                singleValue: (base) => ({
-                                ...base,
-                                color: 'white',
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                }),
-                                menu: (base) => ({
-                                ...base,
-                                backgroundColor: '#2c2c2c',
-                                color: 'white',
-                                }),
-                                option: (base, { isFocused }) => ({
-                                ...base,
-                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                color: 'white',
-                                }),
-                                input: (base) => ({
-                                ...base,
-                                color: 'white',
-                                }),
-                            }}
-                        />
+                            <label htmlFor="nombre">
+                                Cuit:
+                            </label>
+                            <input
+                                type="text"
+                                maxlength="11" 
+                                pattern="[0-9]{11}" 
+                                onChange={inputChange}
+                                value={transporte.cuit}
+                                name="cuit"
+                                placeholder="Cuit del transporte"
+                                required
+                            />
                         </div>
-
-                        <div className="form-col">
-                            <label>
-                                Depósito:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate2(true)}>+</button>
+                         <div className="form-col">
+                            <label >
+                                Condicion de IVA:
                             </label>
                             <Select
                                 className="form-select-react"
                                 classNamePrefix="rs"
-                                options={opciones_depositos}
-                                value={opciones_depositos.find(op => op.value === picada.deposito) || null}
+                                options={opciones_condicionesIva}
+                                value={opciones_condicionesIva.find(op => op.value === transporte.condicionIva) || null}
                                 onChange={selectChange}
-                                name='deposito'
-                                placeholder="Depósito..."
+                                name='condicionIva'
+                                placeholder="Condicion de iva..."
+                                isClearable
+                                required={true}
+                                styles={{
+                                    container: (base) => ({
+                                    ...base,
+                                    width: '100%', // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 100,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }}
+                            />
+                        </div> 
+                        <div className="form-col">
+                            <label htmlFor="nombre">
+                                Telefono:
+                            </label>
+                            <input
+                                type="text"
+                                pattern="[0-9]{10}" 
+                                maxlength="10"
+                                onChange={inputChange}
+                                value={transporte.telefono}
+                                name="telefono"
+                                placeholder="Telefono del transporte"
+                                required
+                            />
+                        </div>
+                        <div className="form-col">
+                            <label htmlFor="nombre">
+                                E-mail:
+                            </label>
+                            <input
+                                type="text"
+                                onChange={inputChange}
+                                value={transporte.email}
+                                name="email"
+                                placeholder="E-mail del transporte"
+                                required
+                            />
+                        </div>
+                    </div>
+                    
+                    <div className="form-row">  
+                        <div className="form-col">
+                            <label >
+                                Pais
+                            </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_paises}
+                                value={opciones_paises.find(op => op.value === transporte.pais) || null}
+                                onChange={selectChange}
+                                name='pais'
+                                placeholder="Pais..."
+                                isClearable
+                                required={true}
+                                styles={{
+                                    container: (base) => ({
+                                    ...base,
+                                    width: '100%', // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 100,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }}
+                            />
+                        </div> 
+                        <div className="form-col">
+                            <label >
+                                Provincia
+                            </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_provincias}
+                                value={opciones_provincias.find(op => op.value === transporte.provincia) || null}
+                                onChange={selectChange}
+                                name='provincia'
+                                placeholder="Provincia..."
+                                required={true}
                                 isClearable
                                 styles={{
                                     container: (base) => ({
                                     ...base,
-                                    width: 220, // ⬅️ ancho fijo total
+                                    width: '100%', // ⬅️ ancho fijo total
                                     }),
                                     control: (base) => ({
                                     ...base,
-                                    minWidth: 220,
+                                    minWidth: 100,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }}
+                            />
+                        </div>
+                        <div className="form-col">
+                            <label >
+                                Localidad
+                            </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_localidades}
+                                value={opciones_localidades.find(op => op.value === transporte.localidad) || null}
+                                onChange={selectChange}
+                                name='localidad'
+                                placeholder="Localidad..."
+                                required={true}
+                                isClearable
+                                styles={{
+                                    container: (base) => ({
+                                    ...base,
+                                    width: '100%', // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 100,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }}
+                            />
+                        </div>
+                        <div className="form-col">
+                            <label >
+                                Barrio
+                            </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_barrios}
+                                value={opciones_barrios.find(op => op.value === transporte.barrio) || null}
+                                onChange={selectChange}
+                                name='barrio'
+                                placeholder="Barrio..."
+                                required={true}
+                                isClearable
+                                styles={{
+                                    container: (base) => ({
+                                    ...base,
+                                    width: '100%', // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 100,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }}
+                            />
+                        </div>
+                        <div className="form-col">
+                            <label >
+                                Calle
+                            </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_calles}
+                                value={opciones_calles.find(op => op.value === transporte.calle) || null}
+                                onChange={selectChange}
+                                name='calle'
+                                placeholder="Calle..."
+                                required={true}
+                                isClearable
+                                styles={{
+                                    container: (base) => ({
+                                    ...base,
+                                    width: '100%', // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 100,
                                     maxWidth: 220,
                                     backgroundColor: '#2c2c2c',
                                     color: 'white',
@@ -371,35 +598,51 @@ const updatePicada = ({exito , picadaID}) => {
                     <div className="form-row">
                         <div className="form-col-productos">
                             <label>
-                                    Insumos:
-                                    <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
+                                    Destinos:
                                     <button type="button" className="btn-add-insumo" onClick={agregarDetalle}>
-                                        + Agregar Insumo
+                                        + Agregar destino
                                     </button>
                             </label>
                          <div className="form-group-insumos">
                                 
-                                {detalles.map((d, i) => (
-                                <div key={i} className="insumo-item">
-                                    <div className='form-col-item1'>
+                                {detalles.map((d, i) => {
+
+                                    const opciones_paisesDetalle = paises.map(p => ({ value: p._id, label: p.name }));
+                                    const opciones_provinciasDetalle = provincias
+                                        .filter(a =>(a.pais === d.pais))
+                                        .map(p => ({ value: p._id, label: p.name }));
+                                        
+                                    const opciones_localidadesDetalle = localidades
+                                        .filter(a => (a.provincia === d.provincia))
+                                        .map(p => ({ value: p._id, label: p.name }));
+
+                                return (
+                                    <div key={i} className="insumo-item">
+                                        
+                                    <div className="form-col-item1">
+                                        <label >
+                                            Pais
+                                        </label>
                                         <Select
                                             className="form-select-react"
                                             classNamePrefix="rs"
-                                            options={opciones_insumos}
-                                            value={opciones_insumos.find(op => op.value === d.insumo) || null}
+                                            options={opciones_paisesDetalle}
+                                            value={opciones_paisesDetalle.find(op => op.value === d.pais) || null}
                                             onChange={(selectedOption) =>
-                                                handleDetalleChange(i, "insumo", selectedOption ? selectedOption.value : "")
+                                                handleDetalleChange(i, "pais", selectedOption ? selectedOption.value : "")
                                             }
-                                            placeholder="Insumo..."
+                                            name='pais'
+                                            placeholder="Pais..."
                                             isClearable
+                                            required={true}
                                             styles={{
                                                 container: (base) => ({
                                                 ...base,
-                                                width: 220, // ⬅️ ancho fijo total
+                                                width: '100%', // ⬅️ ancho fijo total
                                                 }),
                                                 control: (base) => ({
                                                 ...base,
-                                                minWidth: 220,
+                                                minWidth: 100,
                                                 maxWidth: 220,
                                                 backgroundColor: '#2c2c2c',
                                                 color: 'white',
@@ -428,18 +671,114 @@ const updatePicada = ({exito , picadaID}) => {
                                                 color: 'white',
                                                 }),
                                             }}
-                                            />
+                                        />
+                                    </div> 
+                                    <div className="form-col-item1">
+                                        <label >
+                                            Provincia
+                                        </label>
+                                        <Select
+                                            className="form-select-react"
+                                            classNamePrefix="rs"
+                                            options={opciones_provinciasDetalle}
+                                            value={opciones_provinciasDetalle.find(a => a.value === d.provincia) || null}
+                                            onChange={(selectedOption) =>
+                                                handleDetalleChange(i, "provincia", selectedOption ? selectedOption.value : "")
+                                            }
+                                            name='provincia'
+                                            placeholder="Provincia..."
+                                            required={true}
+                                            isClearable
+                                            styles={{
+                                                container: (base) => ({
+                                                ...base,
+                                                width: '100%', // ⬅️ ancho fijo total
+                                                }),
+                                                control: (base) => ({
+                                                ...base,
+                                                minWidth: 100,
+                                                maxWidth: 220,
+                                                backgroundColor: '#2c2c2c',
+                                                color: 'white',
+                                                border: '1px solid #444',
+                                                borderRadius: 8,
+                                                }),
+                                                singleValue: (base) => ({
+                                                ...base,
+                                                color: 'white',
+                                                whiteSpace: 'nowrap',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                                }),
+                                                menu: (base) => ({
+                                                ...base,
+                                                backgroundColor: '#2c2c2c',
+                                                color: 'white',
+                                                }),
+                                                option: (base, { isFocused }) => ({
+                                                ...base,
+                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                                color: 'white',
+                                                }),
+                                                input: (base) => ({
+                                                ...base,
+                                                color: 'white',
+                                                }),
+                                            }}
+                                        />
                                     </div>
-                                    
-                                    <div className='form-col-item1'>
-                                        <input
-                                            type="number"
-                                            placeholder="Cantidad"
-                                            min={1}
-                                            max={opciones_insumos.find((p) => p.value === d.insumo)?.stock || 0}
-                                            value={d.cantidad}
-                                            onChange={(e) => handleDetalleChange(i, "cantidad", e.target.value)}
-                                            required
+                                    <div className="form-col-item1">
+                                        <label >
+                                            Localidad
+                                        </label>
+                                        <Select
+                                            className="form-select-react"
+                                            classNamePrefix="rs"
+                                            options={opciones_localidadesDetalle}
+                                            value={opciones_localidadesDetalle.find(op => op.value === d.localidad) || null}
+                                            onChange={(selectedOption) =>
+                                                handleDetalleChange(i, "localidad", selectedOption ? selectedOption.value : "")
+                                            }
+                                            name='localidad'
+                                            placeholder="Localidad..."
+                                            required={true}
+                                            isClearable
+                                            styles={{
+                                                container: (base) => ({
+                                                ...base,
+                                                width: '100%', // ⬅️ ancho fijo total
+                                                }),
+                                                control: (base) => ({
+                                                ...base,
+                                                minWidth: 100,
+                                                maxWidth: 220,
+                                                backgroundColor: '#2c2c2c',
+                                                color: 'white',
+                                                border: '1px solid #444',
+                                                borderRadius: 8,
+                                                }),
+                                                singleValue: (base) => ({
+                                                ...base,
+                                                color: 'white',
+                                                whiteSpace: 'nowrap',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                                }),
+                                                menu: (base) => ({
+                                                ...base,
+                                                backgroundColor: '#2c2c2c',
+                                                color: 'white',
+                                                }),
+                                                option: (base, { isFocused }) => ({
+                                                ...base,
+                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                                color: 'white',
+                                                }),
+                                                input: (base) => ({
+                                                ...base,
+                                                color: 'white',
+                                                }),
+                                            }}
                                         />
                                     </div>
 
@@ -448,44 +787,34 @@ const updatePicada = ({exito , picadaID}) => {
                                             type="button"
                                             className="btn-icon"
                                             onClick={() => {
-                                                const productos = detalles.filter((_, index) => index !== i);
-                                                setDetalles(productos);
-                                                calcularTotalPicada(productos);
+                                                const destinos = detalles.filter((_, index) => index !== i);
+                                                setDetalles(destinos);
                                             }}
                                             >
                                             <FaTrash />
                                         </button>
                                     </div>
                                 </div>
-                                ))}
+                                )
+                                })}
                             </div>
                         </div>
                         <div className="form-col-precioVenta">
                             <div className="box-cargar" >
-                                <label htmlFor="precioVenta">Precio venta:
-                                    <input
-                                        type="number"
-                                        className='precio-venta'
-                                        onChange={inputChange}
-                                        value={picada.precioVenta}
-                                        name="precioVenta"
-                                        disabled
-                                    />
-                                </label>
                                 <div className="form-submit">
                                     <button
                                     type="submit"
                                     className="submit-btn"
                                     onClick={(e) => {
                                         if (!puedeGuardar) {
-                                        alert("No se puede guardar una picada sin al menos un insumo con cantidad.");
+                                        alert("No se puede guardar un transporte sin al menos un destino.");
                                         e.preventDefault();
                                         return;
                                         }
                                         clickChange(e);
                                     }}
                                     >
-                                    Guardar
+                                    Cargar Transporte
                                     </button>
                                 </div>
                             </div>
@@ -522,6 +851,7 @@ const updatePicada = ({exito , picadaID}) => {
 
                     .titulo-pagina {
                         text-align: center;
+                        width: 100%;
                         font-size: 2rem;
                         margin-bottom: 1.5rem;
                         font-weight: bold;
@@ -542,9 +872,11 @@ const updatePicada = ({exito , picadaID}) => {
 
                     .form-col {
                         flex: 1;
-                        min-width: 250px;
+                        min-width: 100px;
+                        max-width: 200px; 
                         display: flex;
                         flex-direction: column;
+                        gap: 8px;
                     }
 
                     .form-col-productos {
@@ -639,7 +971,7 @@ const updatePicada = ({exito , picadaID}) => {
                     }
 
                     .btn-add-insumo {
-                        background-color: #8b0000;
+                        background-color: #a30000;
                         color: white;
                         border: none;
                         padding: 0.5rem 1rem;
@@ -650,7 +982,7 @@ const updatePicada = ({exito , picadaID}) => {
                     }
 
                     .btn-add-insumo:hover {
-                        background-color: #a30000;
+                        background-color: #8b0000;
                         transform: translateY(-3px);
                     }
 
@@ -660,7 +992,7 @@ const updatePicada = ({exito , picadaID}) => {
                     }
 
                     .submit-btn {
-                        background-color: #8b0000;
+                        background-color: #a30000;
                         color: white;
                         border: none;
                         padding: 0.8rem 1.5rem;
@@ -671,7 +1003,7 @@ const updatePicada = ({exito , picadaID}) => {
                     }
 
                     .submit-btn:hover {
-                        background-color: #a30000;
+                        background-color: #8b0000;
                         transform: translateY(-3px);
                     }
                         
@@ -737,4 +1069,4 @@ const updatePicada = ({exito , picadaID}) => {
     )
 }
 
-export default updatePicada;
+export default updateTransporte;

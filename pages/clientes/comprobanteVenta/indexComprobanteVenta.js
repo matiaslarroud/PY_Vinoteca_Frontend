@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { FaPlus, FaHome, FaArrowLeft, FaTrash , FaFileInvoice  } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import FormularioComprobanteVentaCreate from './new_ComprobanteVenta'
+import FormularioCreateRemitoCliente from '../remito/create_RemitoCliente'
 
 
 const { default: Link } = require("next/link")
@@ -12,7 +13,7 @@ const indexComprobantesVenta = () => {
     const [comprobantesVenta,setComprobantesVenta] = useState([]);
     const [clientes,setClientes] = useState([]);  
     const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
-    const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
+    const [mostrarModalRemito, setMostrarModalRemito] = useState(null);
     
     const [filtroNombre, setFiltroNombre] = useState('');
     const [filtroNotaPedido , setFiltroNotaPedido] = useState('');  
@@ -139,16 +140,16 @@ const indexComprobantesVenta = () => {
                 </div>
             )}
 
-            {mostrarModalUpdate && (
+            {mostrarModalRemito && (
                 <div className="modal">
                     <div className="modal-content">
-                        <button className="close" onClick={() => setMostrarModalUpdate(null)}>
+                        <button className="close" onClick={() => setMostrarModalRemito(null)}>
                             &times;
                         </button>
-                        <FormularioComprobanteVentaUpdate 
-                            notacomprobanteVentaID={mostrarModalUpdate} 
+                        <FormularioCreateRemitoCliente 
+                            comprobanteVentaID={mostrarModalRemito} 
                             exito={()=>{
-                                setMostrarModalUpdate(null);
+                                setMostrarModalRemito(null);
                                 fetchData();
                             }}    
                         />
@@ -199,7 +200,7 @@ const indexComprobantesVenta = () => {
                         </thead>
                         <tbody>
                             {
-                                comprobantesVentaFiltrados.map(({_id, facturado ,cliente , fecha, total , notaPedido}) => {
+                                comprobantesVentaFiltrados.map(({_id, facturado ,cliente , fecha, total , notaPedido, remitoCreado}) => {
                                     const pedidoEncontrado = pedidos.find((p)=>{return p._id === notaPedido})
                                     const clienteEncontrado = clientes.find((p)=>{return p._id === pedidoEncontrado?.cliente})
 
@@ -211,12 +212,13 @@ const indexComprobantesVenta = () => {
                                         <td className="columna">
                                             <div className="acciones">
                                                 <button className="btn-icon" 
-                                                    title={facturado ? "Ya facturado, no se puede generar remito" : "Generar Remito"}
+                                                    title={remitoCreado ? "El remito ya fue creado" : "Generar Remito"}
                                                     onClick={() => {
-                                                        if (facturado) {
-                                                            alert("Este comprobante ya fue facturado y no se puede generar remito.");
+                                                        if (remitoCreado) {
+                                                            alert("El remito ya fue creado anteriormente.");
                                                             return;
                                                         }
+                                                        setMostrarModalRemito(_id);
                                                     }}
                                                 >
                                                     <FaFileInvoice  />

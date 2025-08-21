@@ -15,7 +15,7 @@ const formTransporte = ({exito}) => {
     const [condicionesIva, setCondicionesIva] = useState([]);
     const [detalles, setDetalles] = useState([initialStateDetalle]);
 
-    const detallesValidos = detalles.filter(d => d.insumo && d.cantidad > 0);
+    const detallesValidos = detalles.filter(d => d.pais !== '' && d.provincia !== '' && d.localidad !== '');
     const puedeGuardar = detallesValidos.length > 0;
     
     const fetchData_Paises = async () => {
@@ -157,7 +157,7 @@ const formTransporte = ({exito}) => {
             if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
         }
         setDetalles([initialStateDetalle]);
-        setPicada(initialState);
+        setTransporte(initialState);
         exito();
     }
 
@@ -566,8 +566,19 @@ const formTransporte = ({exito}) => {
                             </label>
                          <div className="form-group-insumos">
                                 
-                                {detalles.map((d, i) => (
-                                <div key={i} className="insumo-item">
+                                {detalles.map((d, i) => {
+
+                                    const opciones_paisesDetalle = paises.map(p => ({ value: p._id, label: p.name }));
+                                    const opciones_provinciasDetalle = provincias
+                                        .filter(a =>(a.pais === d.pais))
+                                        .map(p => ({ value: p._id, label: p.name }));
+                                        
+                                    const opciones_localidadesDetalle = localidades
+                                        .filter(a => (a.provincia === d.provincia))
+                                        .map(p => ({ value: p._id, label: p.name }));
+
+                                return (
+                                    <div key={i} className="insumo-item">
                                         
                                     <div className="form-col-item1">
                                         <label >
@@ -576,8 +587,8 @@ const formTransporte = ({exito}) => {
                                         <Select
                                             className="form-select-react"
                                             classNamePrefix="rs"
-                                            options={opciones_paises}
-                                            value={opciones_paises.find(op => op.value === d.pais) || null}
+                                            options={opciones_paisesDetalle}
+                                            value={opciones_paisesDetalle.find(op => op.value === d.pais) || null}
                                             onChange={(selectedOption) =>
                                                 handleDetalleChange(i, "pais", selectedOption ? selectedOption.value : "")
                                             }
@@ -630,8 +641,8 @@ const formTransporte = ({exito}) => {
                                         <Select
                                             className="form-select-react"
                                             classNamePrefix="rs"
-                                            options={opciones_provincias}
-                                            value={opciones_provincias.find(op => op.value === d.provincia) || null}
+                                            options={opciones_provinciasDetalle}
+                                            value={opciones_provinciasDetalle.find(a => a.value === d.provincia) || null}
                                             onChange={(selectedOption) =>
                                                 handleDetalleChange(i, "provincia", selectedOption ? selectedOption.value : "")
                                             }
@@ -684,8 +695,8 @@ const formTransporte = ({exito}) => {
                                         <Select
                                             className="form-select-react"
                                             classNamePrefix="rs"
-                                            options={opciones_localidades}
-                                            value={opciones_localidades.find(op => op.value === d.localidad) || null}
+                                            options={opciones_localidadesDetalle}
+                                            value={opciones_localidadesDetalle.find(op => op.value === d.localidad) || null}
                                             onChange={(selectedOption) =>
                                                 handleDetalleChange(i, "localidad", selectedOption ? selectedOption.value : "")
                                             }
@@ -745,7 +756,8 @@ const formTransporte = ({exito}) => {
                                         </button>
                                     </div>
                                 </div>
-                                ))}
+                                )
+                                })}
                             </div>
                         </div>
                         <div className="form-col-precioVenta">

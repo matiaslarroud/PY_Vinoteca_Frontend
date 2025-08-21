@@ -8,14 +8,13 @@ const { default: Link } = require("next/link")
 
 const indexRemitoCliente = () => {
     const router = useRouter();
-    const [pedidos,setPedidos] = useState([]);   
+    const [remitos,setRemitos] = useState([]);   
     const [comprobantesVenta,setComprobantesVenta] = useState([]);
-    const [clientes,setClientes] = useState([]);  
+    
     const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
     const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
     
-    const [filtroNombre, setFiltroNombre] = useState('');
-    const [filtroNotaPedido , setFiltroNotaPedido] = useState('');  
+    const [filtroComprobanteVenta , setFiltroComprobanteVenta] = useState('');  
     const [orden, setOrden] = useState({ campo: '', asc: true });
 
     const toggleOrden = (campo) => {
@@ -23,17 +22,43 @@ const indexRemitoCliente = () => {
         campo,
         asc: prev.campo === campo ? !prev.asc : true
         }));
-    };                
+    };          
+    
+  const handleCheck = async (_id) => {
+    const remito = remitos.find((r) => r._id === _id);
 
-  const comprobantesVentaFiltrados = comprobantesVenta
+    if (!remito) return;
+
+    if (remito.entregado) {
+      alert("⚠️ Este pedido ya fue entregado y no puede modificarse.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/remito/${_id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ entregado: true }),
+      });
+
+      if (!res.ok) throw new Error("Error al actualizar el remito");
+
+      setRemitos((prev) =>
+        prev.map((r) =>
+          r._id === _id ? { ...r, entregado: true } : r
+        )
+      );
+    } catch (error) {
+      console.error(error);
+      alert("❌ Hubo un problema al marcar como entregado");
+    }
+  };
+
+  const remitosFiltrados = remitos
     .filter(p => {
-      const clienteNombre = clientes.find(d => d._id === p.cliente)?.name || '';
-      const coincideNombre = clienteNombre.toLowerCase().includes(filtroNombre.toLowerCase())
-      
-      const comprobanteVentaID = pedidos.find(d => d._id === p.notaPedido)?._id || '';
-      const coincidePresupuesto = comprobanteVentaID.toLowerCase().includes(filtroNotaPedido.toLowerCase())
-      
-      return coincideNombre && coincidePresupuesto;
+      const coincideComprobanteVenta = p.comprobanteVentaID.toLowerCase().includes(filtroComprobanteVenta.toLowerCase());
+
+      return coincideComprobanteVenta;
     })
     .sort((a, b) => {
       const campo = orden.campo;
@@ -41,14 +66,9 @@ const indexRemitoCliente = () => {
 
         let aVal, bVal;
 
-        if (campo === 'cliente') {
-        aVal = clientes.find(d => d._id === a.cliente)?.name || '';
-        bVal = clientes.find(d => d._id === b.cliente)?.name || '';
-        }
-
-        if (campo === 'notaPedido') {
-        aVal = pedidos.find(d => d._id === a.notaPedido)?._id || '';
-        bVal = pedidos.find(d => d._id === b.notaPedido)?._id || '';
+        if (campo === 'comprobanteVenta') {
+        aVal = comprobantesVenta.find(d => d._id === a.comprobanteVentaID)?._id || '';
+        bVal = comprobantesVenta.find(d => d._id === b.comprobanteVentaID)?._id || '';
         }
 
         else {
@@ -64,6 +84,16 @@ const indexRemitoCliente = () => {
     });
 
     const fetchData = () => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/remito`)
+                .then((a) => {
+                        return a.json()
+                })
+                    .then ((s) => {
+                        setRemitos(s.data);
+                    })
+        }
+
+    const fetchData_ComprobantesVenta = () => {
         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/comprobanteVenta`)
                 .then((a) => {
                         return a.json()
@@ -72,39 +102,19 @@ const indexRemitoCliente = () => {
                         setComprobantesVenta(s.data);
                     })
         }
-
-    const fetchData_pedidos = () => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido`)
-                .then((a) => {
-                        return a.json()
-                })
-                    .then ((s) => {
-                        setPedidos(s.data);
-                    })
-        }
-    const fetchData_Clientes = () => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente`)
-                .then((a) => {
-                        return a.json()
-                })
-                    .then ((s) => {
-                        setClientes(s.data);
-                    })
-        }
     
 
     useEffect(() => { 
         fetchData();
-        fetchData_pedidos();
-        fetchData_Clientes();
+        fetchData_ComprobantesVenta();
     }, [] )
 
-    const deleteComprobanteVenta = async(comprobanteVentaID) => {
-        if(!comprobanteVentaID) {
-            console.log("Error con el ID del comprobante de venta al querer eliminarlo.")
+    const deleteRemito = async(remitoID) => {
+        if(!remitoID) {
+            console.log("Error con el ID del remito al querer eliminarlo.")
             return
         }
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/comprobanteVenta/${comprobanteVentaID}`,
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/remito/${remitoID}`,
             {
                 method:'DELETE',
                 headers: {
@@ -117,7 +127,7 @@ const indexRemitoCliente = () => {
                 console.log(res.message);
             })
             .catch((err)=>{
-                console.log("Error al enviar comprobante de venta para su eliminación. \n Error: ",err);
+                console.log("Error al enviar remito para su eliminación. \n Error: ",err);
             })
     }
 
@@ -146,7 +156,7 @@ const indexRemitoCliente = () => {
                             &times;
                         </button>
                         <FormularioComprobanteVentaUpdate 
-                            notacomprobanteVentaID={mostrarModalUpdate} 
+                            omprobanteVentaID={mostrarModalUpdate} 
                             exito={()=>{
                                 setMostrarModalUpdate(null);
                                 fetchData();
@@ -155,7 +165,7 @@ const indexRemitoCliente = () => {
                     </div>
                 </div>
             )}
-            <h1 className="titulo-pagina">Comprobante de Venta</h1>
+            <h1 className="titulo-pagina">Remitos</h1>
             
             <div className="botonera">
                 <button className="btn-icon" onClick={() => router.back()} title="Volver atrás">
@@ -166,7 +176,7 @@ const indexRemitoCliente = () => {
                         <FaHome />
                     </Link>
                 </button>
-                <button className="btn-icon" onClick={() => setMostrarModalCreate(true)} title="Agregar Comprobante Venta">
+                <button className="btn-icon" onClick={() => setMostrarModalCreate(true)} title="Agregar Remito">
                      <FaPlus />
                 </button>               
             </div>
@@ -174,15 +184,9 @@ const indexRemitoCliente = () => {
                 <div className="filtros">
                     <input
                         type="text"
-                        placeholder="Filtrar por cliente..."
-                        value={filtroNombre}
-                        onChange={(e) => setFiltroNombre(e.target.value)}
-                    />
-                    <input
-                        type="text"
-                        placeholder="Filtrar por nota de pedido..."
-                        value={filtroNotaPedido}
-                        onChange={(e) => setFiltroNotaPedido(e.target.value)}
+                        placeholder="Filtrar por comprobante de venta..."
+                        value={filtroComprobanteVenta}
+                        onChange={(e) => setFiltroComprobanteVenta(e.target.value)}
                     />
                 </div>
 
@@ -190,38 +194,35 @@ const indexRemitoCliente = () => {
                     <table id="tablaVinos">
                         <thead>
                         <tr className="fila">
-                            <th onClick={() => toggleOrden('cliente')}>Cliente ⬍</th>
-                            <th onClick={() => toggleOrden('notaPedido')}>Nota de Pedido ⬍</th>
+                            <th onClick={() => toggleOrden('comprobanteVenta')}>Comprobante de Venta ⬍</th>
                             <th onClick={() => toggleOrden('fecha')}>Fecha ⬍</th>
-                            <th onClick={() => toggleOrden('total')}>Total ⬍</th>
+                            <th onClick={() => toggleOrden('totalPrecio')}>Total ⬍</th>
+                            <th onClick={() => toggleOrden('entregado')}>Entregado ⬍</th>
+                            <th onClick={() => toggleOrden('totalBultos')}>Bultos ⬍</th>
                             <th>Acciones</th>
                         </tr>
                         </thead>
                         <tbody>
                             {
-                                comprobantesVentaFiltrados.map(({_id, facturado ,cliente , fecha, total , notaPedido}) => {
-                                    const pedidoEncontrado = pedidos.find((p)=>{return p._id === notaPedido})
-                                    const clienteEncontrado = clientes.find((p)=>{return p._id === pedidoEncontrado?.cliente})
+                                remitosFiltrados.map(({_id, comprobanteVentaID , fecha, totalPrecio , totalBultos , entregado}) => {
 
                                     return <tr key={_id}>
-                                        <td className="columna">{clienteEncontrado?.name}</td>
-                                        <td className="columna">{notaPedido}</td>
+                                        <td className="columna">{comprobanteVentaID}</td>
                                         <td className="columna">{fecha.split("T")[0]}</td>
-                                        <td className="columna">${total}</td>
+                                        <td className="columna">${totalPrecio}</td>
+                                        <td className="columna">
+                                            <input
+                                                type="checkbox"
+                                                className="toggle"
+                                                title="Entregado..."
+                                                checked={entregado}
+                                                onChange={() => handleCheck(_id)}
+                                            />
+                                        </td>
+                                        <td className="columna">{totalBultos}</td>
                                         <td className="columna">
                                             <div className="acciones">
-                                                <button className="btn-icon" 
-                                                    title={facturado ? "Ya facturado, no se puede generar remito" : "Generar Remito"}
-                                                    onClick={() => {
-                                                        if (facturado) {
-                                                            alert("Este comprobante ya fue facturado y no se puede generar remito.");
-                                                            return;
-                                                        }
-                                                    }}
-                                                >
-                                                    <FaFileInvoice  />
-                                                </button>
-                                                <button onClick={() => deleteComprobanteVenta(_id)}  className="btn-icon" title="Eliminar">
+                                                <button onClick={() => deleteRemito(_id)}  className="btn-icon" title="Eliminar">
                                                     <FaTrash />
                                                 </button>
                                             </div>
@@ -364,6 +365,42 @@ const indexRemitoCliente = () => {
                         border: none;
                         cursor: pointer;
                     }
+
+                    input[type="checkbox"].toggle {
+                        appearance: none;
+                        -webkit-appearance: none;
+                        width: 50px;
+                        height: 26px;
+                        background: #444;
+                        border-radius: 50px;
+                        position: relative;
+                        cursor: pointer;
+                        transition: background 0.3s ease;
+                        outline: none;
+                        border: 2px solid #666;
+                    }
+
+                    input[type="checkbox"].toggle::before {
+                        content: "";
+                        position: absolute;
+                        width: 20px;
+                        height: 20px;
+                        top: 2px;
+                        left: 2px;
+                        background: #707070ff;
+                        border-radius: 50%;
+                        transition: transform 0.3s ease;
+                    }
+
+                    input[type="checkbox"].toggle:checked {
+                        background: #8b0000; /* verde moderno */
+                        border-color: #000000ff;
+                    }
+
+                    input[type="checkbox"].toggle:checked::before {
+                        
+                    }
+
                 `}
             </style>
         </>

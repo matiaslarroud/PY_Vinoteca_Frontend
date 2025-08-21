@@ -10,22 +10,54 @@ const indexTransporte = () => {
   const router = useRouter();
 
   const [transportes, setTransportes] = useState([]);
+  const [detalles, setDetalles] = useState([]);
+  const [provincias, setProvincias] = useState([]);
+  const [localidades, setLocalidades] = useState([]);
+
+  const [banderaUpdate, setBanderaUpdate] = useState(false);
 
   const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
   const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
 
   const [filtroNombre, setFiltroNombre] = useState('');
+  const [filtroDestinoLocalidad, setFiltroDestinoLocalidad] = useState('');
+  const [filtroDestinoProvincia, setFiltroDestinoProvincia] = useState('');
   const [orden, setOrden] = useState({ campo: '', asc: true });
 
   const fetchData = async () => {
     const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/transporte`);
     const { data } = await res.json();
     setTransportes(data);
+    setBanderaUpdate(false)
+  };
+  const fetchData_Transporte_Detalle = async () => {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/transporteDetalle`);
+      const { data } = await res.json();
+      if (data) {
+          setDetalles(data);
+      } else {
+          console.error("Error al cargar los destinos del transporte");
+      }
+  };
+
+  const fetchData_Provincias = async () => {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/provincia`);
+    const { data } = await res.json();
+    setProvincias(data);
+  };
+
+  const fetchData_Localidades = async () => {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/localidad`);
+    const { data } = await res.json();
+    setLocalidades(data);
   };
 
   useEffect(() => {
     fetchData();
-  }, []);
+    fetchData_Provincias(); 
+    fetchData_Localidades();
+    fetchData_Transporte_Detalle();
+  }, [banderaUpdate]);
 
   const deleteTransporte = async (transporteID) => {
     if (!transporteID) return;
@@ -45,21 +77,39 @@ const indexTransporte = () => {
     }));
   };
 
-  const transportesFiltradas = transportes
-    .filter(p => {
-      
-      return (
-        p.name.toLowerCase().includes(filtroNombre.toLowerCase()) 
-      );
-    })
-    .sort((a, b) => {
+  const transportesFiltrados = transportes
+  .filter(t => {
+    const detallesTransporte = detalles.filter(d => d.transporteID === t._id);
+
+    const criterioProv = filtroDestinoProvincia.toLowerCase();
+    const criterioLoc = filtroDestinoLocalidad.toLowerCase();
+
+    const coincideDestino = detallesTransporte.some(d => {
+      const nombreProv = provincias.find(p => p._id === d.provincia)?.name.toLowerCase() || "";
+      const nombreLoc = localidades.find(l => l._id === d.localidad)?.name.toLowerCase() || "";
+
+      const matchProv = criterioProv === "" || nombreProv.includes(criterioProv);
+      const matchLoc = criterioLoc === "" || nombreLoc.includes(criterioLoc);
+
+
+      return matchProv && matchLoc;
+    });
+
+    // ✅ Filtro final: nombre del transporte y destinos
+    return (
+      t.name.toLowerCase().includes(filtroNombre.toLowerCase()) &&
+      coincideDestino
+    );
+  })
+  .sort((a, b) => {
     const campo = orden.campo;
     if (!campo) return 0;
 
-    let aVal, bVal;
+    let aVal = a[campo];
+    let bVal = b[campo];
 
-    if (typeof aVal === 'string') aVal = aVal.toLowerCase();
-    if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+    if (typeof aVal === "string") aVal = aVal.toLowerCase();
+    if (typeof bVal === "string") bVal = bVal.toLowerCase();
 
     if (aVal < bVal) return orden.asc ? -1 : 1;
     if (aVal > bVal) return orden.asc ? 1 : -1;
@@ -93,6 +143,7 @@ const indexTransporte = () => {
                 exito={() => {
                   setMostrarModalUpdate(null);
                   fetchData();
+                  setBanderaUpdate(true);
                 }}
               />
             </div>
@@ -119,11 +170,24 @@ const indexTransporte = () => {
           <div className="filtros">
             <input
               type="text"
-              placeholder="Filtrar por nombre..."
+              placeholder="Filtrar por nombre transporte..."
               value={filtroNombre}
               onChange={(e) => setFiltroNombre(e.target.value)}
             />
+            <input
+              type="text"
+              placeholder="Filtrar por localidad destino..."
+              value={filtroDestinoLocalidad}
+              onChange={(e) => setFiltroDestinoLocalidad(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Filtrar por provincia destino..."
+              value={filtroDestinoProvincia}
+              onChange={(e) => setFiltroDestinoProvincia(e.target.value)}
+            />
           </div>
+
 
           <div className="tabla-scroll">
             <table>
@@ -134,7 +198,7 @@ const indexTransporte = () => {
                 </tr>
               </thead>
               <tbody>
-                {transportesFiltradas.map(({ _id, name}) => {
+                {transportesFiltrados.map(({ _id, name}) => {
                   return (
                     <tr key={_id}>
                       <td>{name}</td>

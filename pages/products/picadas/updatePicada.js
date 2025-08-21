@@ -137,7 +137,7 @@ const updatePicada = ({exito , picadaID}) => {
                 console.log(res.message);
             })
             .catch((err)=>{
-                console.log("Error al envia Picada para su eliminación. \n Error: ",err);
+                console.log("Error al envia detalles de picada para su eliminación. \n Error: ",err);
             })
 
 
