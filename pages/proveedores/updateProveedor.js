@@ -3,8 +3,8 @@ const { default: Link } = require("next/link")
 
 
 const initialState = {
-    name:'', lastname:'', fechaNacimiento:'', telefono:'', email:'', cuit:'',
-    pais:'', provincia:'', localidad:'', barrio:'', calle:'', condicionIva:'', cuentaCorriente:false
+    name:'', telefono:'', email:'', cuit:'',
+    pais:'', provincia:'', localidad:'', barrio:'', calle:'', condicionIva:'' , altura:''
 }
 
 const updateProveedor = ({proveedorID, exito}) => {
@@ -16,34 +16,35 @@ const updateProveedor = ({proveedorID, exito}) => {
     const [calles , setCalles] = useState([]);
     const [condicionesIva , setCondicionesIva] = useState([]);
     
-    const fetchData = (proveedor) => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/proveedor/${proveedorID}`)
+    const fetchData = async (proveedorID) => {
+     await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/proveedor/${proveedorID}`)
         .then((a)=>{
             return a.json();
         })
             .then((s)=>{
                 if(s.ok){
+                    
                     const nombreC = s.data.name;
-                    const apellidoC = s.data.lastname;
-                    const nacimientoC = s.data.fechaNacimiento.split("T")[0];
                     const telefonoC = s.data.telefono;
                     const emailC = s.data.email;
                     const cuitC = s.data.cuit;
-                    const paisC = s.data.pais;
-                    const provinciaC = s.data.provincia;
-                    const localidadC = s.data.localidad;
-                    const barrioC = s.data.barrio;
-                    const calleC = s.data.calle;
-                    const ivaC = s.data.condicionIva;
-
+                    const paisC = Number(s.data.pais);
+                    const provinciaC = Number(s.data.provincia);
+                    const localidadC = Number(s.data.localidad);
+                    const barrioC = Number(s.data.barrio);
+                    const calleC = Number(s.data.calle);
+                    const alturaC = Number(s.data.altura);
+                    const ivaC = Number(s.data.condicionIva);
                     setProveedor({
-                        name: nombreC , lastname: apellidoC , fechaNacimiento: nacimientoC , telefono: telefonoC , 
+                        name: nombreC , telefono: telefonoC , 
                         email: emailC , cuit: cuitC , pais: paisC , provincia: provinciaC , localidad: localidadC , 
-                        barrio: barrioC , calle: calleC , condicionIva: ivaC ,
+                        barrio: barrioC , calle: calleC , altura: alturaC , condicionIva: ivaC ,
                     })
                 }
+                else{
+                    console.log(s.message);
+                }
             })
-        .catch((err)=>{console.log("No se encontro Proveedor con este id.\nError: ",err)})
     }
 
 const fetchPaises = () => {
@@ -117,10 +118,10 @@ const fetchPaises = () => {
                 method: 'PUT',
                 headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({
-                    name: proveedor.name, lastname: proveedor.lastname, fechaNacimiento: proveedor.fechaNacimiento,
+                    name: proveedor.name,
                     telefono: proveedor.telefono, email: proveedor.email, cuit: proveedor.cuit,
-                    pais: proveedor.pais, provincia: proveedor.provincia, localidad: proveedor.localidad,
-                    barrio: proveedor.barrio, calle: proveedor.calle, condicionIva: proveedor.condicionIva,
+                    pais: Number(proveedor.pais), provincia: Number(proveedor.provincia), localidad: Number(proveedor.localidad),
+                    barrio: Number(proveedor.barrio), calle: Number(proveedor.calle), altura: Number(proveedor.altura), condicionIva: Number(proveedor.condicionIva),
                 })
             }
          ).then((a) => {
@@ -142,16 +143,8 @@ const fetchPaises = () => {
                 <form id="formC" onSubmit={clickChange}>
                     <fieldset className="grid-container">
                     <div className="form-group">
-                        <label htmlFor="nombre">Nombre:</label>
+                        <label htmlFor="nombre">Razon Social:</label>
                         <input type="text" onChange={inputChange} value={proveedor.name} name="name" placeholder="Ingresa el nombre del Proveedor" required></input>
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="nombre">Apellido:</label>
-                        <input type="text" onChange={inputChange} value={proveedor.lastname} name="lastname" placeholder="Ingresa el apellido del Proveedor" required></input>
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="nombre">Fecha de Nacimiento:</label>
-                        <input type="date" onChange={inputChange} value={proveedor.fechaNacimiento} name="fechaNacimiento" placeholder="Ingresa la fecha de nacimiento del Proveedor" required></input>
                     </div>
                     <div className="form-group">
                         <label htmlFor="nombre">Telefono:</label>
@@ -246,6 +239,10 @@ const fetchPaises = () => {
                                 })
                             }
                         </select>
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="nombre">Altura:</label>
+                        <input type="number" onChange={inputChange} value={proveedor.altura} name="altura" placeholder="Ingresa la altura del domicilio del Proveedor" required></input>
                     </div>
 
                     <div className="form-group">

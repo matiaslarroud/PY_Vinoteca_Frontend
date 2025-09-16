@@ -10,7 +10,7 @@ import FormularioCalleCreate from '../../ubicaciones/calle/createCalle'
 
 const initialState = {
     name:'', lastname:'', fechaNacimiento:'', telefono:'', email:'', cuit:'',
-    pais:'', provincia:'', localidad:'', barrio:'', calle:''
+    pais:'', provincia:'', localidad:'', barrio:'', calle:'', altura:0, deptoNumero:0, deptoLetra:'',
 }
 
 const updateEmpleado = ({empleadoID, exito}) => {
@@ -34,24 +34,23 @@ const updateEmpleado = ({empleadoID, exito}) => {
         })
             .then((s)=>{
                 if(s.ok){
-                    const nombreC = s.data.name;
-                    const apellidoC = s.data.lastname;
-                    const nacimientoC = s.data.fechaNacimiento.split("T")[0];
-                    const telefonoC = s.data.telefono;
-                    const emailC = s.data.email;
-                    const cuitC = s.data.cuit;
-                    const paisC = s.data.pais;
-                    const provinciaC = s.data.provincia;
-                    const localidadC = s.data.localidad;
-                    const barrioC = s.data.barrio;
-                    const calleC = s.data.calle;
-                    const ivaC = s.data.condicionIva;
-                    const cuentaCorrienteC = s.data.cuentaCorriente;
-
+                    const nombre = s.data.name ? s.data.name : '';
+                    const apellido = s.data.lastname ? s.data.lastname : '';
+                    const nacimiento = s.data.fechaNacimiento ? s.data.fechaNacimiento.split("T")[0] : '';  
+                    const telefono = s.data.telefono ? s.data.telefono : '';
+                    const email = s.data.email ? s.data.email : '';
+                    const cuit = s.data.cuit ? s.data.cuit : '';
+                    const pais = s.data.pais ? Number(s.data.pais) : '';
+                    const provincia = s.data.provincia ? Number(s.data.provincia) : '';
+                    const localidad = s.data.localidad ? Number(s.data.localidad) : '';
+                    const barrio = s.data.barrio ? Number(s.data.barrio) : '';
+                    const calle = s.data.calle ? Number(s.data.calle) : '';
+                    const altura = s.data.altura ? Number(s.data.altura) : 0;
+                    const deptoNumero = s.data.deptoNumero ? s.data.deptoNumero : 0;
+                    const deptoLetra = s.data.deptoLetra ? s.data.deptoLetra : '';
                     setEmpleado({
-                        name: nombreC , lastname: apellidoC , fechaNacimiento: nacimientoC , telefono: telefonoC , 
-                        email: emailC , cuit: cuitC , pais: paisC , provincia: provinciaC , localidad: localidadC , 
-                        barrio: barrioC , calle: calleC , condicionIva: ivaC , cuentaCorriente:cuentaCorrienteC
+                        name:nombre, lastname:apellido, fechaNacimiento:nacimiento, telefono:telefono, email:email, cuit:cuit,
+                        pais:pais, provincia:provincia, localidad:localidad, barrio:barrio, calle:calle, altura:altura, deptoNumero:deptoNumero, deptoLetra:deptoLetra
                     })
                 }
             })
@@ -123,8 +122,9 @@ const fetchPaises = () => {
                 body: JSON.stringify({
                     name: empleado.name, lastname: empleado.lastname, fechaNacimiento: empleado.fechaNacimiento,
                     telefono: empleado.telefono, email: empleado.email, cuit: empleado.cuit,
-                    pais: empleado.pais, provincia: empleado.provincia, localidad: empleado.localidad,
-                    barrio: empleado.barrio, calle: empleado.calle
+                    pais: Number(empleado.pais), provincia: Number(empleado.provincia), localidad: Number(empleado.localidad),
+                    barrio: Number(empleado.barrio), calle: Number(empleado.calle) , altura: Number(empleado.altura), 
+                    deptoNumero: empleado.deptoNumero, deptoLetra: empleado.deptoLetra
                 })
             }
          ).then((a) => {
@@ -272,7 +272,7 @@ const fetchPaises = () => {
                         <select name="provincia" onChange={inputChange} value={empleado.provincia}>
                             <option value=''>Seleccione una provincia...</option>
                             {
-                                provincias.filter((p)=>{return p.pais === empleado.pais}).map(({_id, name})=>{
+                                provincias.filter((p)=>{return p.pais === Number(empleado.pais)}).map(({_id, name})=>{
                                     return (
                                         <option key={_id} value={_id}>
                                             {name}
@@ -291,7 +291,7 @@ const fetchPaises = () => {
                         <select name="localidad" onChange={inputChange} value={empleado.localidad}>
                             <option value=''>Seleccione una localidad...</option>
                             {
-                                localidades.filter((p)=>{return p.provincia === empleado.provincia}).map(({_id, name})=>{
+                                localidades.filter((p)=>{return p.provincia === Number(empleado.provincia)}).map(({_id, name})=>{
                                     return (
                                         <option key={_id} value={_id}>
                                             {name}
@@ -310,7 +310,7 @@ const fetchPaises = () => {
                         <select name="barrio" onChange={inputChange} value={empleado.barrio}>
                             <option value=''>Seleccione un barrio...</option>
                             {
-                                barrios.filter((p)=>{return p.localidad === empleado.localidad}).map(({_id, name})=>{
+                                barrios.filter((p)=>{return p.localidad === Number(empleado.localidad)}).map(({_id, name})=>{
                                     return (
                                         <option key={_id} value={_id}>
                                             {name}
@@ -329,7 +329,7 @@ const fetchPaises = () => {
                         <select name="calle"  onChange={inputChange} value={empleado.calle}>
                             <option value=''>Seleccione una calle...</option>
                             {
-                                calles.filter((p)=>{return p.barrio === empleado.barrio}).map(({_id, name})=>{
+                                calles.filter((p)=>{return p.barrio === Number(empleado.barrio)}).map(({_id, name})=>{
                                     return (
                                         <option key={_id} value={_id}>
                                             {name}
@@ -338,7 +338,20 @@ const fetchPaises = () => {
                                 })
                             }
                         </select>
-                    </div>         
+                    </div>  
+                    
+                    <div className="form-group">
+                        <label>Altura:</label>
+                        <input type="number" onChange={inputChange} value={empleado.altura} name="altura" placeholder="Altura" required />
+                    </div>
+                    <div className="form-group">
+                        <label>Depto. N°:</label>
+                        <input type="number" onChange={inputChange} value={empleado.deptoNumero} name="deptoNumero" placeholder="Depto. N°" />
+                    </div>
+                    <div className="form-group">
+                        <label>Depto. Letra:</label>
+                        <input type="text" onChange={inputChange} value={empleado.deptoLetra} name="deptoLetra" placeholder="Depto. Letra" />
+                    </div>       
                     </fieldset>
                     <div className='button-area'>
                         <button type="submit" className="submit-btn" onClick={clickChange}>Guardar</button>

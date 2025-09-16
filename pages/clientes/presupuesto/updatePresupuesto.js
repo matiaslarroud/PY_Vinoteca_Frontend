@@ -2,22 +2,21 @@ const { useState, useEffect } = require("react")
 import Select from 'react-select';      
 import { FaTrash} from "react-icons/fa";
 import FormularioEmpleadoCreate from '../../gestion/general/empleado/createEmpleado'
-import FormularioClienteCreate from '../../clientes/createCliente'
-import FormularioMedioPagoCreate from '../../gestion/general/medioPago/createMedioPago'    
+import FormularioClienteCreate from '../../clientes/createCliente' 
 
 const { default: Link } = require("next/link")
 
-const initialStatePresupuesto = {total:'', cliente:'', empleado:'',medioPago:'' }
-const initialDetalle = { producto: "", cantidad: 0, precio: 0, subtotal: 0, presupuesto:'' };
+const initialStatePresupuesto = {total:'', cliente:'', empleado:'' }
+const initialDetalle = { tipoProducto: '', producto: "", cantidad: 0, precio: 0, subtotal: 0, presupuesto:'' };
 
 const updatePresupuesto = ({exito,presupuestoID}) => {
     const [presupuesto , setPresupuesto] = useState(initialStatePresupuesto);
     
     const [clientes,setClientes] = useState([])
     const [empleados,setEmpleados] = useState([])
-    const [mediosPago,setMediosPago] = useState([])
     const [detalles,setDetalles] = useState([initialDetalle])
     const [productos,setProductos] = useState([]);
+    const [tipoProductos,setTipoProductos] = useState([]);
     
     const detallesValidos = detalles.filter(d => d.producto && d.cantidad > 0);
     const puedeGuardar = detallesValidos.length > 0;
@@ -36,17 +35,17 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
     }
     
     const fetchData_PresupuestoDetalle = async (presupuestoID) => {
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuestoDetalle/presupuesto/${presupuestoID}`)
-            .then((a)=>{
-                return a.json();
-            })
-                .then((s)=>{
-                    if(s.ok){
-                        setDetalles(s.data)
-                    }
-                })
-            .catch((err)=>{console.log("Error al cargar vinos.\nError: ",err)})
-    }
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuestoDetalle/presupuesto/${presupuestoID}`);
+            const s = await res.json();
+            if (s.ok) {
+                setDetalles(s.data); // guardamos directo
+            }
+        } catch (err) {
+            console.log("Error al cargar detalles.\nError: ", err);
+        }
+    };
+
     
     const fetchData_Productos = async() => {
     await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products`)
@@ -59,6 +58,19 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                 }
             })
         .catch((err)=>{console.log("Error al cargar vinos.\nError: ",err)})
+    }
+    
+    const fetchData_TipoProductos = () => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/tipos`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if(s.ok){
+                    setTipoProductos(s.data);
+                }
+            })
+        .catch((err)=>{console.log("Error al cargar tipos de productos.\nError: ",err)})
     }
     
     const fetchData_Clientes = async () => {
@@ -77,22 +89,35 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                 })
     }
 
-    const fetchData_MediosPago = async () => {
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/mediopago`)
-            .then((a)=>{return a.json()})
-                .then((s)=>{
-                    setMediosPago(s.data)
-                })
-    }
-    useEffect(()=>{
-        if(!presupuestoID){return}
-        fetchData_Presupuesto(presupuestoID)
-        fetchData_PresupuestoDetalle(presupuestoID)
+    useEffect(() => {
+        if (!presupuestoID) return;
+
         fetchData_Clientes();
         fetchData_Empleados();
-        fetchData_MediosPago();
+        fetchData_TipoProductos();
         fetchData_Productos();
-    }, [presupuestoID])
+        fetchData_Presupuesto(presupuestoID);
+        fetchData_PresupuestoDetalle(presupuestoID);
+    }, [presupuestoID]);
+
+    useEffect(() => {
+        if (!productos.length || !detalles.length) return;
+
+        const detallesConTipo = detalles.map((d) => {
+            const prod = productos.find((p) => p._id === d.producto);
+
+            return {
+                ...d,
+                tipoProducto: d.tipoProducto || (prod ? prod.tipoProducto : ""),
+            };
+        });
+        
+        const isDifferent = JSON.stringify(detalles) !== JSON.stringify(detallesConTipo);
+        if (isDifferent) {
+            setDetalles(detallesConTipo);
+        }
+    }, [productos, detalles]);
+
 
     const clickChange = async(e) => {
          e.preventDefault();
@@ -103,7 +128,6 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                 body: JSON.stringify({
                     cliente: presupuesto.cliente,
                     empleado: presupuesto.empleado,
-                    medioPago: presupuesto.medioPago,
                     total: presupuesto.total,
                 })
             }
@@ -200,7 +224,7 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
     };
 
     const agregarDetalle = () => {
-        setDetalles([...detalles, { ...{producto: "", cantidad: 0, precio: 0, subtotal: 0 } }]);
+        setDetalles([...detalles, { ...{tipoProducto:"", producto: "", cantidad: 0, precio: 0, subtotal: 0 } }]);
     };
     
     const calcularTotal = (detalles) => {
@@ -209,31 +233,29 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                 : 0;
         setPresupuesto((prev) => ({ ...prev, total:totalPresupuesto }));
     };
-    const [mostrarModalCreate1, setMostrarModalCreate1] = useState(false);
+    
     const [mostrarModalCreate2, setMostrarModalCreate2] = useState(false);
     const [mostrarModalCreate3, setMostrarModalCreate3] = useState(false);
 
-    const opciones_productos = productos.map(v => ({ value: v._id,label: v.name , stock: v.stock }))
+     const opciones_tipoProductos = tipoProductos.map(v => ({
+        value: v,
+        label: v === "ProductoVino" ? "Vino" :
+                v === "ProductoPicada" ? "Picada" :
+                v === "ProductoInsumo" ? "Insumo" : v
+    }));
+    const opciones_productos = productos
+        .map(v => ({
+            value: v._id,
+            label: v.name,
+            stock: v.stock,
+            tipoProducto: v.tipoProducto
+        }));
     const opciones_empleados = empleados.map(v => ({ value: v._id,label: v.name }));
     const opciones_clientes = clientes.map(v => ({ value: v._id,label: v.name }));
-    const opciones_mediosPago = mediosPago.map(v => ({ value: v._id,label: v.name }));
 
 
     return(
         <>
-            {mostrarModalCreate1 && (
-                <div className="modal">
-                <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate1(false)}>&times;</button>
-                    <FormularioMedioPagoCreate
-                    exito={() => {
-                        setMostrarModalCreate1(false);
-                        fetchData_MediosPago();
-                    }}
-                    />
-                </div>
-            </div>
-            )}
             {mostrarModalCreate2 && (
                 <div className="modal">
                 <div className="modal-content">
@@ -378,58 +400,6 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                             />
                         </div>
 
-                        <div className="form-col">
-                            <label>
-                                Medio de Pago:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate1(true)}>+</button>
-                            </label>
-                            <Select
-                                className="form-select-react"
-                                classNamePrefix="rs"
-                                options={opciones_mediosPago}
-                                value={opciones_mediosPago.find(op => op.value === presupuesto.medioPago) || null}
-                                onChange={selectChange}
-                                name='medioPago'
-                                placeholder="Medio de Pago..."
-                                isClearable
-                                styles={{
-                                    container: (base) => ({
-                                    ...base,
-                                    width: 220, // ⬅️ ancho fijo total
-                                    }),
-                                    control: (base) => ({
-                                    ...base,
-                                    minWidth: 220,
-                                    maxWidth: 220,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    border: '1px solid #444',
-                                    borderRadius: 8,
-                                    }),
-                                    singleValue: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                    }),
-                                    menu: (base) => ({
-                                    ...base,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    option: (base, { isFocused }) => ({
-                                    ...base,
-                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    input: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    }),
-                                }}
-                            />
-                        </div>
                     </div>
                     <div className="form-row">
                         <div className="form-col-productos">
@@ -448,7 +418,56 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                                         <Select
                                             className="form-select-react"
                                             classNamePrefix="rs"
-                                            options={opciones_productos}
+                                            options={opciones_tipoProductos}
+                                            value={opciones_tipoProductos.find(op => op.value === d.tipoProducto) || null}
+                                            onChange={(selectedOption) =>
+                                                handleDetalleChange(i, "tipoProducto", selectedOption ? selectedOption.value : "")
+                                            }
+                                            placeholder="Tipo de Producto..."
+                                            isClearable
+                                            styles={{
+                                                container: (base) => ({
+                                                ...base,
+                                                width: 120, // ⬅️ ancho fijo total
+                                                }),
+                                                control: (base) => ({
+                                                ...base,
+                                                minWidth: 150,
+                                                maxWidth: 150,
+                                                backgroundColor: '#2c2c2c',
+                                                color: 'white',
+                                                border: '1px solid #444',
+                                                borderRadius: 8,
+                                                }),
+                                                singleValue: (base) => ({
+                                                ...base,
+                                                color: 'white',
+                                                whiteSpace: 'nowrap',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                                }),
+                                                menu: (base) => ({
+                                                ...base,
+                                                backgroundColor: '#2c2c2c',
+                                                color: 'white',
+                                                }),
+                                                option: (base, { isFocused }) => ({
+                                                ...base,
+                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                                color: 'white',
+                                                }),
+                                                input: (base) => ({
+                                                ...base,
+                                                color: 'white',
+                                                }),
+                                            }}
+                                        />
+                                    </div>
+                                    <div className='form-col-item1'>
+                                        <Select
+                                            className="form-select-react"
+                                            classNamePrefix="rs"
+                                            options={opciones_productos.filter(op => op.tipoProducto === d.tipoProducto)}
                                             value={opciones_productos.find(op => op.value === d.producto) || null}
                                             onChange={(selectedOption) =>
                                                 handleDetalleChange(i, "producto", selectedOption ? selectedOption.value : "")
@@ -458,12 +477,12 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                                             styles={{
                                                 container: (base) => ({
                                                 ...base,
-                                                width: 220, // ⬅️ ancho fijo total
+                                                width: 150, // ⬅️ ancho fijo total
                                                 }),
                                                 control: (base) => ({
                                                 ...base,
-                                                minWidth: 220,
-                                                maxWidth: 220,
+                                                minWidth: 150,
+                                                maxWidth: 150,
                                                 backgroundColor: '#2c2c2c',
                                                 color: 'white',
                                                 border: '1px solid #444',

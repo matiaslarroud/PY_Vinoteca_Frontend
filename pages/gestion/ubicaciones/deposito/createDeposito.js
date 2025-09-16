@@ -77,12 +77,12 @@ const formDeposito = ({exito}) => {
                 headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({
                     name: deposito.name,
-                    pais: deposito.paisID,
-                    provincia: deposito.provinciaID,
-                    localidad: deposito.localidadID,
-                    barrio: deposito.barrioID,
-                    calle: deposito.calleID,
-                    altura: deposito.altura,
+                    pais: Number(deposito.paisID),
+                    provincia: Number(deposito.provinciaID),
+                    localidad: Number(deposito.localidadID),
+                    barrio: Number(deposito.barrioID),
+                    calle: Number(deposito.calleID),
+                    altura: Number(deposito.altura),
                     deptoNumero: deposito.deptoNum,
                     deptoLetra: deposito.deptoLetra,
                 })
@@ -131,7 +131,7 @@ const formDeposito = ({exito}) => {
                         <select name="provinciaID" onChange={inputChange} value={deposito.provinciaID}>
                             <option value=''>Seleccione una provincia...</option>
                             {
-                                provincias.filter((p)=>{return p.pais === deposito.paisID}).map(({_id,name}) => 
+                                provincias.filter((p)=>{return p.pais === Number(deposito.paisID)}).map(({_id,name}) => 
                                     (
                                         <option key={_id} value={_id}>
                                             {name}
@@ -147,7 +147,7 @@ const formDeposito = ({exito}) => {
                         <select name="localidadID" onChange={inputChange} value={deposito.localidadID}>
                             <option value=''>Seleccione una localidad...</option>
                             {
-                                localidades.filter((p)=>{return p.provincia === deposito.provinciaID}).map(({_id,name}) => 
+                                localidades.filter((p)=>{return p.provincia === Number(deposito.provinciaID)}).map(({_id,name}) => 
                                     (
                                         <option key={_id} value={_id}>
                                             {name}
@@ -163,7 +163,7 @@ const formDeposito = ({exito}) => {
                         <select name="barrioID" onChange={inputChange} value={deposito.barrioID}>
                             <option value=''>Seleccione un barrio...</option>
                             {
-                                barrios.filter((p)=>{return p.localidad === deposito.localidadID}).map(({_id,name}) => 
+                                barrios.filter((p)=>{return p.localidad === Number(deposito.localidadID)}).map(({_id,name}) => 
                                     (
                                         <option key={_id} value={_id}>
                                             {name}
@@ -179,7 +179,7 @@ const formDeposito = ({exito}) => {
                         <select name="calleID" onChange={inputChange} value={deposito.calleID}>
                             <option value=''>Seleccione una calle...</option>
                             {
-                                calles.filter((p)=>{return p.barrio === deposito.barrioID}).map(({_id,name}) => 
+                                calles.filter((p)=>{return p.barrio === Number(deposito.barrioID)}).map(({_id,name}) => 
                                     (
                                         <option key={_id} value={_id}>
                                             {name}
@@ -191,7 +191,7 @@ const formDeposito = ({exito}) => {
                     </div>
                     <div className="form-group">
                         <label htmlFor="nombre">Altura:</label>
-                        <input type="text" onChange={inputChange} value={deposito.altura} name="altura" placeholder="Ingresa la altura del departamento" required></input>
+                        <input type="text" onChange={inputChange} value={Number(deposito.altura)} name="altura" placeholder="Ingresa la altura del departamento" required></input>
                     </div>
                     <div className="form-group">
                         <label htmlFor="nombre">Departamento N°:</label>

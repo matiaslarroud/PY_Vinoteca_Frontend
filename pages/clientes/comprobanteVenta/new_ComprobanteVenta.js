@@ -7,7 +7,7 @@ const initialStateComprobanteVenta = {
     tipoComprobante:'', fecha:'' , descuentoBandera:false , descuento:0 ,total:0, notaPedido:'', cliente:''
 }
 const initialDetalle = { 
-    producto: "", cantidad: 0, precio: 0, subtotal: 0, notaPedido:'' 
+    tipoProducto:"",producto: "", cantidad: 0, precio: 0, subtotal: 0, notaPedido:'' 
 };
 
 
@@ -19,6 +19,7 @@ const createComprobanteVenta = ({exito}) => {
     const [puedeGuardar, setPuedeGuardar] = useState(false);
     const [productos, setProductos] = useState([]);
     const [tiposComprobante, setTiposComprobante] = useState([]);
+    const [tipoProductos,setTipoProductos] = useState([]);
     
     const inputChange = (e) => {
         const value = e.target.value;
@@ -147,6 +148,19 @@ const createComprobanteVenta = ({exito}) => {
             })
         .catch((err)=>{console.log("Error al cargar productos.\nError: ",err)})
     }
+    
+    const fetchData_TipoProductos = () => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/tipos`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if(s.ok){
+                    setTipoProductos(s.data);
+                }
+            })
+        .catch((err)=>{console.log("Error al cargar tipos de productos.\nError: ",err)})
+    }
 
     const fetchData_NotaPedido = () => {
     fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido`)
@@ -216,7 +230,19 @@ const createComprobanteVenta = ({exito}) => {
     const [mostrarModalCreate1, setMostrarModalCreate1] = useState(false);
     const [mostrarModalCreate3, setMostrarModalCreate3] = useState(false);
 
-    const opciones_productos = productos.map(v => ({ value: v._id,label: v.name , stock: v.stock }))
+     const opciones_tipoProductos = tipoProductos.map(v => ({
+        value: v,
+        label: v === "ProductoVino" ? "Vino" :
+                v === "ProductoPicada" ? "Picada" :
+                v === "ProductoInsumo" ? "Insumo" : v
+    }));
+    const opciones_productos = productos
+        .map(v => ({
+            value: v._id,
+            label: v.name,
+            stock: v.stock,
+            tipoProducto: v.tipoProducto
+        }));
     const opciones_clientes = clientes.map(v => ({ value: v._id,label: v.name }));
     const opciones_notasPedido = notaPedidos.filter((s)=>{return s.cliente === comprobanteVenta.cliente })
         .map(v => {
@@ -242,11 +268,30 @@ const createComprobanteVenta = ({exito}) => {
 
     useEffect(()=>{
         setDetalles([]);
-        fetchData_Clientes();
-        fetchData_NotaPedido();
         fetchData_Productos();
+        fetchData_TipoProductos();
+        fetchData_NotaPedido();
+        fetchData_Clientes();
         fetchData_TipoComprobante();
     }, [])
+    
+    useEffect(() => {
+        if (!productos.length || !detalles.length) return;
+
+        const detallesConTipo = detalles.map((d) => {
+            const prod = productos.find((p) => p._id === d.producto);
+
+            return {
+                ...d,
+                tipoProducto: d.tipoProducto || (prod ? prod.tipoProducto : ""),
+            };
+        });
+        
+        const isDifferent = JSON.stringify(detalles) !== JSON.stringify(detallesConTipo);
+        if (isDifferent) {
+            setDetalles(detallesConTipo);
+        }
+    }, [productos, detalles]);
         
     return(
         <>
@@ -459,23 +504,73 @@ const createComprobanteVenta = ({exito}) => {
                                         <Select
                                             className="form-select-react"
                                             classNamePrefix="rs"
-                                            options={opciones_productos}
+                                            options={opciones_tipoProductos}
+                                            value={opciones_tipoProductos.find(op => op.value === d.tipoProducto) || null}
+                                            onChange={(selectedOption) =>
+                                                handleDetalleChange(i, "tipoProducto", selectedOption ? selectedOption.value : "")
+                                            }
+                                            placeholder="Tipo de Producto..."
+                                            isClearable
+                                            isDisabled={true}
+                                            styles={{
+                                                container: (base) => ({
+                                                ...base,
+                                                width: 120, // ⬅️ ancho fijo total
+                                                }),
+                                                control: (base) => ({
+                                                ...base,
+                                                minWidth: 150,
+                                                maxWidth: 150,
+                                                backgroundColor: '#2c2c2c',
+                                                color: 'white',
+                                                border: '1px solid #444',
+                                                borderRadius: 8,
+                                                }),
+                                                singleValue: (base) => ({
+                                                ...base,
+                                                color: 'white',
+                                                whiteSpace: 'nowrap',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                                }),
+                                                menu: (base) => ({
+                                                ...base,
+                                                backgroundColor: '#2c2c2c',
+                                                color: 'white',
+                                                }),
+                                                option: (base, { isFocused }) => ({
+                                                ...base,
+                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                                color: 'white',
+                                                }),
+                                                input: (base) => ({
+                                                ...base,
+                                                color: 'white',
+                                                }),
+                                            }}
+                                        />
+                                    </div>
+                                    <div className='form-col-item1'>
+                                        <Select
+                                            className="form-select-react"
+                                            classNamePrefix="rs"
+                                            options={opciones_productos.filter(op => op.tipoProducto === d.tipoProducto)}
                                             value={opciones_productos.find(op => op.value === d.producto) || null}
                                             onChange={(selectedOption) =>
                                                 handleDetalleChange(i, "producto", selectedOption ? selectedOption.value : "")
                                             }
                                             placeholder="Producto..."
-                                            isDisabled={true}
                                             isClearable
+                                            isDisabled={true}
                                             styles={{
                                                 container: (base) => ({
                                                 ...base,
-                                                width: 220, // ⬅️ ancho fijo total
+                                                width: 150, // ⬅️ ancho fijo total
                                                 }),
                                                 control: (base) => ({
                                                 ...base,
-                                                minWidth: 220,
-                                                maxWidth: 220,
+                                                minWidth: 150,
+                                                maxWidth: 150,
                                                 backgroundColor: '#2c2c2c',
                                                 color: 'white',
                                                 border: '1px solid #444',
@@ -702,6 +797,7 @@ const createComprobanteVenta = ({exito}) => {
                             flex: 2;
                             min-width: 0; /* Importante para que no desborde */
                             display: flex;
+                            font-size: 12px;
                             flex-direction: column;
                         }
 

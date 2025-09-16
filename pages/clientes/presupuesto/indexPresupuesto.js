@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit } from "react-icons/fa";
+import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit , FaPrint } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import FormularioPresupuestoUpdate from './updatePresupuesto'
 import FormularioPresupuestoCreate from './createPresupuesto'
@@ -98,6 +98,38 @@ const indexPresupuesto = () => {
             })
     }
 
+    const imprimirPresupuesto = async (presupuestoID) => {
+        if (!presupuestoID) {
+            console.error("Error con el ID del presupuesto al querer imprimirlo.");
+            return;
+        }
+
+        try {
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto/imprimir/${presupuestoID}`
+            );
+
+            if (!res.ok) throw new Error("No se pudo generar el PDF");
+
+            // 📌 Convertir respuesta en blob (PDF)
+            const blob = await res.blob();
+
+            // Crear una URL temporal para el PDF
+            const url = URL.createObjectURL(blob);
+
+            // Abrir en una nueva pestaña
+            window.open(url, "_blank");
+
+            // 🔹 Si querés que directamente abra el diálogo de impresión:
+            // const win = window.open(url, "_blank");
+            // win.print();
+
+        } catch (err) {
+            console.error("Error al imprimir presupuesto:", err);
+        }
+    };
+
+
     return(
         <>
             {mostrarModalCreate && (
@@ -186,6 +218,9 @@ const indexPresupuesto = () => {
                                             <div className="acciones">
                                                 <button onClick={() => setMostrarModalUpdate(_id)} className="btn-icon" title="Modificar">
                                                     <FaEdit />
+                                                </button>
+                                                <button onClick={() => imprimirPresupuesto(_id)}  className="btn-icon" title="Imprimir">
+                                                    <FaPrint />
                                                 </button>
                                                 <button onClick={() => deletePresupuesto(_id)}  className="btn-icon" title="Eliminar">
                                                     <FaTrash />

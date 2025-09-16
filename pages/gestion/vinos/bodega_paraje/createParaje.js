@@ -2,7 +2,7 @@ const { useState, useEffect } = require("react")
 
 const { default: Link } = require("next/link")
 
-const initialState = {name:'', bodega:'', pais:'', provincia:'',localidad:'',barrio:'',calle:''}
+const initialState = {name:'', bodega:0, pais:0, provincia:0,localidad:0,barrio:0,calle:0, altura:0}
 const formParaje = ({exito}) => {
     const [paraje , setParaje] = useState(initialState);
     const [bodegas,setBodegas] = useState([]);
@@ -67,7 +67,7 @@ const formParaje = ({exito}) => {
     const inputChange = (e) => {
         const value = e.target.value;
         const name = e.target.name;
-        
+
         setParaje({
             ...paraje , 
                 [name]:value
@@ -82,12 +82,13 @@ const formParaje = ({exito}) => {
                 headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({
                     name: paraje.name,
-                    bodega: paraje.bodega,
-                    pais: paraje.pais,
-                    provincia:paraje.provincia,
-                    localidad:paraje.localidad,
-                    barrio:paraje.barrio,
-                    calle:paraje.calle
+                    bodega: Number(paraje.bodega),
+                    pais: Number(paraje.pais),
+                    provincia: Number(paraje.provincia),
+                    localidad: Number(paraje.localidad),
+                    barrio: Number(paraje.barrio),
+                    calle: Number(paraje.calle),
+                    altura: Number(paraje.altura)
                 })
             }
          ).then((a) => {
@@ -150,7 +151,7 @@ const formParaje = ({exito}) => {
                         <select name="provincia" onChange={inputChange} value={paraje.provincia}>
                             <option value=''>Seleccione una provincia...</option>
                             {
-                                provincias.filter((p)=>{return p.pais === paraje.pais}).map(({_id,name}) => 
+                                provincias.filter((p)=>{return p.pais === Number(paraje.pais)}).map(({_id,name}) => 
                                     (
                                         <option key={_id} value={_id}>
                                             {name}
@@ -166,7 +167,7 @@ const formParaje = ({exito}) => {
                         <select name="localidad" onChange={inputChange} value={paraje.localidad}>
                             <option value=''>Seleccione una localidad...</option>
                             {
-                                localidades.filter((p)=>{return p.provincia === paraje.provincia}).map(({_id,name}) => 
+                                localidades.filter((p)=>{return p.provincia === Number(paraje.provincia)}).map(({_id,name}) => 
                                     (
                                         <option key={_id} value={_id}>
                                             {name}
@@ -182,7 +183,7 @@ const formParaje = ({exito}) => {
                         <select name="barrio" onChange={inputChange} value={paraje.barrio}>
                             <option value=''>Seleccione un barrio...</option>
                             {
-                                barrios.filter((p)=>{return p.localidad === paraje.localidad}).map(({_id,name}) => 
+                                barrios.filter((p)=>{return p.localidad === Number(paraje.localidad)}).map(({_id,name}) => 
                                     (
                                         <option key={_id} value={_id}>
                                             {name}
@@ -198,7 +199,7 @@ const formParaje = ({exito}) => {
                         <select name="calle" onChange={inputChange} value={paraje.calle}>
                             <option value=''>Seleccione una calle...</option>
                             {
-                                calles.filter((p)=>{return p.barrio === paraje.barrio}).map(({_id,name}) => 
+                                calles.filter((p)=>{return p.barrio === Number(paraje.barrio)}).map(({_id,name}) => 
                                     (
                                         <option key={_id} value={_id}>
                                             {name}
@@ -207,6 +208,10 @@ const formParaje = ({exito}) => {
                                 )
                             }
                         </select>
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="nombre">Altura:</label>
+                        <input type="Number" onChange={inputChange} value={paraje.altura} name="altura" placeholder="Ingresa la altura del domicilio del paraje" required></input>
                     </div>
                     </fieldset>
                     <div className="form-footer">

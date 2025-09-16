@@ -4,7 +4,8 @@ const { default: Link } = require("next/link")
 
 const initialState = {
     name:'', lastname:'', fechaNacimiento:'', telefono:'', email:'', cuit:'',
-    pais:'', provincia:'', localidad:'', barrio:'', calle:'', condicionIva:'', cuentaCorriente:false
+    pais:'', provincia:'', localidad:'', barrio:'', calle:'', condicionIva:'', cuentaCorriente:false,
+    altura:0, deptoNumero:0, deptoLetra:''
 }
 const createCliente = ({exito}) => {
     const [cliente , setCliente] = useState(initialState);
@@ -86,8 +87,9 @@ const createCliente = ({exito}) => {
                 body: JSON.stringify({
                     name: cliente.name, lastname: cliente.lastname, fechaNacimiento: cliente.fechaNacimiento,
                     telefono: cliente.telefono, email: cliente.email, cuit: cliente.cuit,
-                    pais: cliente.pais, provincia: cliente.provincia, localidad: cliente.localidad,
-                    barrio: cliente.barrio, calle: cliente.calle, condicionIva: cliente.condicionIva, cuentaCorriente: cliente.cuentaCorriente
+                    pais: Number(cliente.pais), provincia: Number(cliente.provincia), localidad: Number(cliente.localidad),
+                    barrio: Number(cliente.barrio), calle: Number(cliente.calle), condicionIva: Number(cliente.condicionIva), cuentaCorriente: cliente.cuentaCorriente,
+                    altura: Number(cliente.altura), deptoNumero: cliente.deptoNumero, deptoLetra: cliente.deptoLetra
                 })
             }
          ).then((a) => {
@@ -148,7 +150,7 @@ const createCliente = ({exito}) => {
                         <label>Provincia:</label>
                         <select name="provincia" onChange={inputChange} value={cliente.provincia}>
                         <option value="">Seleccione una provincia...</option>
-                        {provincias.filter(p => p.pais === cliente.pais).map(({ _id, name }) => (
+                        {provincias.filter(p => p.pais === Number(cliente.pais)).map(({ _id, name }) => (
                             <option key={_id} value={_id}>{name}</option>
                         ))}
                         </select>
@@ -158,7 +160,7 @@ const createCliente = ({exito}) => {
                         <label>Localidad:</label>
                         <select name="localidad" onChange={inputChange} value={cliente.localidad}>
                         <option value="">Seleccione una localidad...</option>
-                        {localidades.filter(p => p.provincia === cliente.provincia).map(({ _id, name }) => (
+                        {localidades.filter(p => p.provincia === Number(cliente.provincia)).map(({ _id, name }) => (
                             <option key={_id} value={_id}>{name}</option>
                         ))}
                         </select>
@@ -168,7 +170,7 @@ const createCliente = ({exito}) => {
                         <label>Barrio:</label>
                         <select name="barrio" onChange={inputChange} value={cliente.barrio}>
                         <option value="">Seleccione un barrio...</option>
-                        {barrios.filter(p => p.localidad === cliente.localidad).map(({ _id, name }) => (
+                        {barrios.filter(p => p.localidad === Number(cliente.localidad)).map(({ _id, name }) => (
                             <option key={_id} value={_id}>{name}</option>
                         ))}
                         </select>
@@ -178,12 +180,11 @@ const createCliente = ({exito}) => {
                         <label>Calle:</label>
                         <select name="calle" onChange={inputChange} value={cliente.calle}>
                         <option value="">Seleccione una calle...</option>
-                        {calles.filter(p => p.barrio === cliente.barrio).map(({ _id, name }) => (
+                        {calles.filter(p => p.barrio === Number(cliente.barrio)).map(({ _id, name }) => (
                             <option key={_id} value={_id}>{name}</option>
                         ))}
                         </select>
                     </div>
-
                     <div className="form-group">
                         <label>Condición IVA:</label>
                         <select name="condicionIva" onChange={inputChange} value={cliente.condicionIva}>
@@ -192,6 +193,18 @@ const createCliente = ({exito}) => {
                             <option key={_id} value={_id}>{name}</option>
                         ))}
                         </select>
+                    </div>
+                    <div className="form-group">
+                        <label>Altura:</label>
+                        <input type="number" onChange={inputChange} value={cliente.altura} name="altura" placeholder="Altura" required />
+                    </div>
+                    <div className="form-group">
+                        <label>Depto. N°:</label>
+                        <input type="number" onChange={inputChange} value={cliente.deptoNumero} name="deptoNumero" placeholder="Depto. N°" />
+                    </div>
+                    <div className="form-group">
+                        <label>Depto. Letra:</label>
+                        <input type="text" onChange={inputChange} value={cliente.deptoLetra} name="deptoLetra" placeholder="Depto. Letra" />
                     </div>
 
                     <div className="form-group checkbox-group">

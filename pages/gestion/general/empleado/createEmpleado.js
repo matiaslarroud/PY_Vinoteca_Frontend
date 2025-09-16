@@ -10,7 +10,7 @@ const { default: Link } = require("next/link")
 
 const initialState = {
     name:'', lastname:'', fechaNacimiento:'', telefono:'', email:'', cuit:'',
-    pais:'', provincia:'', localidad:'', barrio:'', calle:''
+    pais:'', provincia:'', localidad:'', barrio:'', calle:'', altura:0, deptoNum:0, deptoLetra:'',
 }
 const createEmpleado = ({exito}) => {
     const [empleado , setEmpleado] = useState(initialState);
@@ -89,8 +89,9 @@ const createEmpleado = ({exito}) => {
                 body: JSON.stringify({
                     name: empleado.name, lastname: empleado.lastname, fechaNacimiento: empleado.fechaNacimiento,
                     telefono: empleado.telefono, email: empleado.email, cuit: empleado.cuit,
-                    pais: empleado.pais, provincia: empleado.provincia, localidad: empleado.localidad,
-                    barrio: empleado.barrio, calle: empleado.calle
+                    pais: Number(empleado.pais), provincia: Number(empleado.provincia), localidad: Number(empleado.localidad),
+                    barrio: Number(empleado.barrio), calle: Number(empleado.calle) , altura: Number(empleado.altura), 
+                    deptoNum: empleado.deptoNum, deptoLetra: empleado.deptoLetra,
                 })
             }
          ).then((a) => {
@@ -239,7 +240,7 @@ const createEmpleado = ({exito}) => {
                         <select name="provincia" onChange={inputChange} value={empleado.provincia}>
                             <option value=''>Seleccione una provincia...</option>
                             {
-                                provincias.filter((p)=>{return p.pais === empleado.pais}).map(({_id, name})=>{
+                                provincias.filter((p)=>{return p.pais === Number(empleado.pais)}).map(({_id, name})=>{
                                     return (
                                         <option key={_id} value={_id}>
                                             {name}
@@ -258,7 +259,7 @@ const createEmpleado = ({exito}) => {
                         <select name="localidad" onChange={inputChange} value={empleado.localidad}>
                             <option value=''>Seleccione una localidad...</option>
                             {
-                                localidades.filter((p)=>{return p.provincia === empleado.provincia}).map(({_id, name})=>{
+                                localidades.filter((p)=>{return p.provincia === Number(empleado.provincia)}).map(({_id, name})=>{
                                     return (
                                         <option key={_id} value={_id}>
                                             {name}
@@ -277,7 +278,7 @@ const createEmpleado = ({exito}) => {
                         <select name="barrio" onChange={inputChange} value={empleado.barrio}>
                             <option value=''>Seleccione un barrio...</option>
                             {
-                                barrios.filter((p)=>{return p.localidad === empleado.localidad}).map(({_id, name})=>{
+                                barrios.filter((p)=>{return p.localidad === Number(empleado.localidad)}).map(({_id, name})=>{
                                     return (
                                         <option key={_id} value={_id}>
                                             {name}
@@ -296,7 +297,7 @@ const createEmpleado = ({exito}) => {
                         <select name="calle"  onChange={inputChange} value={empleado.calle}>
                             <option value=''>Seleccione una calle...</option>
                             {
-                                calles.filter((p)=>{return p.barrio === empleado.barrio}).map(({_id, name})=>{
+                                calles.filter((p)=>{return p.barrio === Number(empleado.barrio)}).map(({_id, name})=>{
                                     return (
                                         <option key={_id} value={_id}>
                                             {name}
@@ -305,7 +306,19 @@ const createEmpleado = ({exito}) => {
                                 })
                             }
                         </select>
-                    </div>         
+                    </div>    
+                    <div className="form-group">
+                        <label>Altura:</label>
+                        <input type="number" onChange={inputChange} value={empleado.altura} name="altura" placeholder="Altura" required />
+                    </div>
+                    <div className="form-group">
+                        <label>Depto. N°:</label>
+                        <input type="number" onChange={inputChange} value={empleado.deptoNum} name="deptoNum" placeholder="Depto. N°" />
+                    </div>
+                    <div className="form-group">
+                        <label>Depto. Letra:</label>
+                        <input type="text" onChange={inputChange} value={empleado.deptoLetra} name="deptoLetra" placeholder="Depto. Letra" />
+                    </div>          
                     </fieldset>
                     <div className='button-area'>
                         <button type="submit" className="submit-btn" onClick={clickChange}>Cargar Empleado</button>

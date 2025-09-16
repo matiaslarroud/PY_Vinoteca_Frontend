@@ -1,11 +1,10 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';
 import { FaTrash} from "react-icons/fa";
-import FormularioTipoVinoCreate from '../../gestion/vinos/vino_tipo/createVinoTipo'
 import FormularioDepositoCreate from '../../gestion/ubicaciones/deposito/createDeposito'
 import FormularioInsumoCreate from '../../products/insumos/createInsumo'
 
-const initialState = {name:'',stock:0 , precioVenta:0 , deposito:'' , tipoVino:''}
+const initialState = {name:'',stock:0 , precioVenta:0 , deposito:''}
 const initialStateDetalle = {picada:'',insumo:'', cantidad:0}
 
 const formProducto = ({exito}) => {
@@ -27,15 +26,6 @@ const formProducto = ({exito}) => {
             .catch((err)=>{console.log(err)});
     }
 
-    const fetch_tiposVino = async () => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/tipoVino`)
-            .then ((a)=>{return a.json()})
-                .then ((s)=>{
-                    setTiposVino(s.data)
-                })
-            .catch((err)=>{console.log(err)});
-    }
-
     const fetch_Insumos = async () => {
         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productInsumo`)
             .then ((a)=>{return a.json()})
@@ -48,7 +38,6 @@ const formProducto = ({exito}) => {
     useEffect(()=>{
         setDetalles([])
         fetch_Depositos();
-        fetch_tiposVino();
         fetch_Insumos();
     } , [])
     
@@ -97,7 +86,6 @@ const formProducto = ({exito}) => {
                     name: picada.name,
                     stock: picada.stock,
                     deposito: picada.deposito,
-                    tipoVino: picada.tipoVino,
                     precioVenta: picada.precioVenta,
                 })
             }
@@ -139,30 +127,14 @@ const formProducto = ({exito}) => {
         setDetalles([...detalles, { ...{picada:'',insumo:'', cantidad:0} }]);
     };
 
-    const [mostrarModalCreate1, setMostrarModalCreate1] = useState(false);
     const [mostrarModalCreate2, setMostrarModalCreate2] = useState(false);
     const [mostrarModalCreate3, setMostrarModalCreate3] = useState(false);
 
     const opciones_insumos = insumos.map(v => ({ value: v._id,label: v.name , stock: v.stock }));
-    const opciones_tiposVino = tiposVino.map(v => ({ value: v._id,label: v.name }));
     const opciones_depositos = depositos.map(v => ({ value: v._id,label: v.name }));
 
     return(
         <>
-            {mostrarModalCreate1 && (
-                <div className="modal">
-                <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate1(false)}>&times;</button>
-                    <FormularioTipoVinoCreate
-                    exito={() => {
-                        setMostrarModalCreate1(false);
-                        fetch_tiposVino();
-                    }}
-                    />
-                </div>
-                </div>
-            )}
-
             {mostrarModalCreate2 && (
                 <div className="modal">
                 <div className="modal-content">
@@ -226,59 +198,6 @@ const formProducto = ({exito}) => {
                                 placeholder="Cantidad en stock"
                                 required
                             />
-                        </div>
-
-                        <div className="form-col">
-                        <label>
-                            Tipo de Vino:
-                            <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate1(true)}>+</button>
-                        </label>
-                        <Select
-                            className="form-select-react"
-                            classNamePrefix="rs"
-                            options={opciones_tiposVino}
-                            value={opciones_tiposVino.find(op => op.value === picada.tipoVino) || null}
-                            onChange={selectChange}
-                            name='tipoVino'
-                            placeholder="Tipo de vino..."
-                            isClearable
-                            styles={{
-                                container: (base) => ({
-                                ...base,
-                                width: 220, // ⬅️ ancho fijo total
-                                }),
-                                control: (base) => ({
-                                ...base,
-                                minWidth: 220,
-                                maxWidth: 220,
-                                backgroundColor: '#2c2c2c',
-                                color: 'white',
-                                border: '1px solid #444',
-                                borderRadius: 8,
-                                }),
-                                singleValue: (base) => ({
-                                ...base,
-                                color: 'white',
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                }),
-                                menu: (base) => ({
-                                ...base,
-                                backgroundColor: '#2c2c2c',
-                                color: 'white',
-                                }),
-                                option: (base, { isFocused }) => ({
-                                ...base,
-                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                color: 'white',
-                                }),
-                                input: (base) => ({
-                                ...base,
-                                color: 'white',
-                                }),
-                            }}
-                        />
                         </div>
 
                         <div className="form-col">

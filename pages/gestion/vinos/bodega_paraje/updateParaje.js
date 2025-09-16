@@ -1,7 +1,7 @@
 const { useState, useEffect } = require("react")
 
 const { default: Link } = require("next/link")
-const initialState = {name:'', bodega:'', pais:'', provincia:'',localidad:'',barrio:'',calle:''}
+const initialState = {name:'', bodega:0, pais:0, provincia:0,localidad:0,barrio:0,calle:0, altura:0}
 
 const updateParaje = ({parajeID,exito}) => {
     const [paraje , setParaje] = useState(initialState);
@@ -21,12 +21,13 @@ const updateParaje = ({parajeID,exito}) => {
                         {
                             if(s.ok && s.data.name){
                                 const nombreP = s.data.name;
-                                const bodegaP = s.data.bodega;
-                                const paisP = s.data.pais;
-                                const provinciaP = s.data.provincia;
-                                const localidadP = s.data.localidad;
-                                const barrioP = s.data.barrio;
-                                const calleP = s.data.calle;
+                                const bodegaP = Number(s.data.bodega);
+                                const paisP = Number(s.data.pais);
+                                const provinciaP = Number(s.data.provincia);
+                                const localidadP = Number(s.data.localidad);
+                                const barrioP = Number(s.data.barrio);
+                                const calleP = Number(s.data.calle);
+                                const alturaP = Number(s.data.altura);
                                 setParaje({
                                     name: nombreP, 
                                     bodega:bodegaP , 
@@ -34,12 +35,14 @@ const updateParaje = ({parajeID,exito}) => {
                                     provincia:provinciaP,
                                     localidad:localidadP,
                                     barrio:barrioP,
-                                    calle:calleP
+                                    calle:calleP,
+                                    altura: alturaP
                                 } )
                             }
                         })
                     .catch((err) => {console.log('No se encontro paraje con este id. \n Error: ',err)})
     }
+
     const fetchDataBodegas = async()=>{
         await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/bodega`)
             .then((a)=>{return a.json()})
@@ -112,12 +115,13 @@ const updateParaje = ({parajeID,exito}) => {
                 headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({
                     name: paraje.name,
-                    bodega: paraje.bodega,
-                    pais: paraje.pais,
-                    provincia:paraje.provincia,
-                    localidad:paraje.localidad,
-                    barrio:paraje.barrio,
-                    calle:paraje.calle
+                    bodega: Number(paraje.bodega),
+                    pais: Number(paraje.pais),
+                    provincia: Number(paraje.provincia),
+                    localidad: Number(paraje.localidad),
+                    barrio: Number(paraje.barrio),
+                    calle: Number(paraje.calle),
+                    altura: Number(paraje.altura)
                 })
             }
         )
@@ -177,7 +181,7 @@ const updateParaje = ({parajeID,exito}) => {
                         <select name="provincia" onChange={inputChange} value={paraje.provincia}>
                             <option value=''>Seleccione una provincia...</option>
                             {
-                                provincias.filter((p)=>{return p.pais === paraje.pais}).map(({_id,name}) => 
+                                provincias.filter((p)=>{return p.pais === Number(paraje.pais)}).map(({_id,name}) => 
                                     (
                                         <option key={_id} value={_id}>
                                             {name}
@@ -193,7 +197,7 @@ const updateParaje = ({parajeID,exito}) => {
                         <select name="localidad" onChange={inputChange} value={paraje.localidad}>
                             <option value=''>Seleccione una localidad...</option>
                             {
-                                localidades.filter((p)=>{return p.provincia === paraje.provincia}).map(({_id,name}) => 
+                                localidades.filter((p)=>{return p.provincia === Number(paraje.provincia)}).map(({_id,name}) => 
                                     (
                                         <option key={_id} value={_id}>
                                             {name}
@@ -209,7 +213,7 @@ const updateParaje = ({parajeID,exito}) => {
                         <select name="barrio" onChange={inputChange} value={paraje.barrio}>
                             <option value=''>Seleccione un barrio...</option>
                             {
-                                barrios.filter((p)=>{return p.localidad === paraje.localidad}).map(({_id,name}) => 
+                                barrios.filter((p)=>{return p.localidad === Number(paraje.localidad)}).map(({_id,name}) => 
                                     (
                                         <option key={_id} value={_id}>
                                             {name}
@@ -225,7 +229,7 @@ const updateParaje = ({parajeID,exito}) => {
                         <select name="calle" onChange={inputChange} value={paraje.calle}>
                             <option value=''>Seleccione una calle...</option>
                             {
-                                calles.filter((p)=>{return p.barrio === paraje.barrio}).map(({_id,name}) => 
+                                calles.filter((p)=>{return p.barrio === Number(paraje.barrio)}).map(({_id,name}) => 
                                     (
                                         <option key={_id} value={_id}>
                                             {name}
@@ -234,6 +238,10 @@ const updateParaje = ({parajeID,exito}) => {
                                 )
                             }
                         </select>
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="nombre">Altura:</label>
+                        <input type="Number" onChange={inputChange} value={paraje.altura} name="altura" placeholder="Ingresa la altura del domicilio del paraje" required></input>
                     </div>
                     </fieldset>
                     <div className="form-footer">

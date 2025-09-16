@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit , FaFileInvoiceDollar } from "react-icons/fa";
+import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit , FaPrint , FaFileInvoiceDollar } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import FormularioNotaPedidoUpdate from './updateNotaPedido'
 import FormularioNotaPedidoCreate from './createNotaPedido'
@@ -7,7 +7,7 @@ import FormularioComprobanteVentaByNotaPedido from '../comprobanteVenta/create_C
 
 const { default: Link } = require("next/link")
 
-const indexPresupuesto = () => {
+const indexPedido = () => {
     const router = useRouter();
     const [presupuestos,setPresupuestos] = useState([]);   
     const [pedidos,setPedidos] = useState([]);
@@ -33,7 +33,8 @@ const indexPresupuesto = () => {
       const coincideNombre = clienteNombre.toLowerCase().includes(filtroNombre.toLowerCase())
       
       const presupuestoID = presupuestos.find(d => d._id === p.presupuesto)?._id || '';
-      const coincidePresupuesto = presupuestoID.toLowerCase().includes(filtroPresupuesto.toLowerCase())
+      const coincidePresupuesto = presupuestoID.toString().includes(filtroPresupuesto);
+
       
       return coincideNombre && coincidePresupuesto;
     })
@@ -101,6 +102,34 @@ const indexPresupuesto = () => {
         fetchData_Presupuestos();
         fetchData_Clientes();
     }, [] )
+
+    const imprimirPedido = async (pedidoID) => {
+        if (!pedidoID) {
+            console.error("Error con el ID del pedido al querer imprimirlo.");
+            return;
+        }
+
+        try {
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido/imprimir/${pedidoID}`
+            );
+
+            if (!res.ok) throw new Error("No se pudo generar el PDF");
+
+            // 📌 Convertir respuesta en blob (PDF)
+            const blob = await res.blob();
+
+            // Crear una URL temporal para el PDF
+            const url = URL.createObjectURL(blob);
+
+            // Abrir en una nueva pestaña
+            window.open(url, "_blank");
+
+        } catch (err) {
+            console.error("Error al imprimir pedido:", err);
+        }
+    };
+
 
     const deletePedido = async(pedidoID) => {
         if(!pedidoID) {
@@ -243,6 +272,9 @@ const indexPresupuesto = () => {
                                                     }} 
                                                 >
                                                     <FaEdit />
+                                                </button>
+                                                <button onClick={() => imprimirPedido(_id)}  className="btn-icon" title="Imprimir">
+                                                    <FaPrint />
                                                 </button>
                                                 <button onClick={() => deletePedido(_id)}  className="btn-icon" title="Eliminar">
                                                     <FaTrash />
@@ -402,4 +434,4 @@ const indexPresupuesto = () => {
     )
 }
 
-export default indexPresupuesto;
+export default indexPedido;

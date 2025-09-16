@@ -3,8 +3,8 @@ const { useState, useEffect } = require("react")
 const { default: Link } = require("next/link")
 
 const initialState = {
-    name:'', lastname:'', fechaNacimiento:'', telefono:'', email:'', cuit:'',
-    pais:'', provincia:'', localidad:'', barrio:'', calle:'', condicionIva:''
+    name:'', telefono:'', email:'', cuit:'',
+    pais:'', provincia:'', localidad:'', barrio:'', calle:'' , altura:'', condicionIva:''
 }
 const createProveedor = ({exito}) => {
     const [proveedor , setProveedor] = useState(initialState);
@@ -84,10 +84,10 @@ const createProveedor = ({exito}) => {
                 method: 'POST',
                 headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({
-                    name: proveedor.name, lastname: proveedor.lastname, fechaNacimiento: proveedor.fechaNacimiento,
+                    name: proveedor.name, 
                     telefono: proveedor.telefono, email: proveedor.email, cuit: proveedor.cuit,
-                    pais: proveedor.pais, provincia: proveedor.provincia, localidad: proveedor.localidad,
-                    barrio: proveedor.barrio, calle: proveedor.calle, condicionIva: proveedor.condicionIva,
+                    pais: Number(proveedor.pais), provincia: Number(proveedor.provincia), localidad: Number(proveedor.localidad),
+                    barrio: Number(proveedor.barrio), calle: Number(proveedor.calle), altura: Number(proveedor.altura), condicionIva: Number(proveedor.condicionIva),
                 })
             }
          ).then((a) => {
@@ -110,16 +110,8 @@ const createProveedor = ({exito}) => {
                 <form id="formC" onSubmit={clickChange}>
                     <fieldset className="grid-container">
                     <div className="form-group">
-                        <label htmlFor="nombre">Nombre:</label>
+                        <label htmlFor="nombre">Razon Social:</label>
                         <input type="text" onChange={inputChange} value={proveedor.name} name="name" placeholder="Ingresa el nombre del Proveedor" required></input>
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="nombre">Apellido:</label>
-                        <input type="text" onChange={inputChange} value={proveedor.lastname} name="lastname" placeholder="Ingresa el apellido del Proveedor" required></input>
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="nombre">Fecha de Nacimiento:</label>
-                        <input type="date" onChange={inputChange} value={proveedor.fechaNacimiento} name="fechaNacimiento" placeholder="Ingresa la fecha de nacimiento del Proveedor" required></input>
                     </div>
                     <div className="form-group">
                         <label htmlFor="nombre">Telefono:</label>
@@ -157,7 +149,7 @@ const createProveedor = ({exito}) => {
                         <select name="provincia" onChange={inputChange} value={proveedor.provincia}>
                             <option value=''>Seleccione una provincia...</option>
                             {
-                                provincias.filter((p)=>{return p.pais === proveedor.pais}).map(({_id, name})=>{
+                                provincias.filter((p)=>{return p.pais === Number(proveedor.pais)}).map(({_id, name})=>{
                                     return (
                                         <option key={_id} value={_id}>
                                             {name}
@@ -173,7 +165,7 @@ const createProveedor = ({exito}) => {
                         <select name="localidad" onChange={inputChange} value={proveedor.localidad}>
                             <option value=''>Seleccione una localidad...</option>
                             {
-                                localidades.filter((p)=>{return p.provincia === proveedor.provincia}).map(({_id, name})=>{
+                                localidades.filter((p)=>{return p.provincia === Number(proveedor.provincia)}).map(({_id, name})=>{
                                     return (
                                         <option key={_id} value={_id}>
                                             {name}
@@ -189,7 +181,7 @@ const createProveedor = ({exito}) => {
                         <select name="barrio" onChange={inputChange} value={proveedor.barrio}>
                             <option value=''>Seleccione un barrio...</option>
                             {
-                                barrios.filter((p)=>{return p.localidad === proveedor.localidad}).map(({_id, name})=>{
+                                barrios.filter((p)=>{return p.localidad === Number(proveedor.localidad)}).map(({_id, name})=>{
                                     return (
                                         <option key={_id} value={_id}>
                                             {name}
@@ -205,7 +197,7 @@ const createProveedor = ({exito}) => {
                         <select name="calle"  onChange={inputChange} value={proveedor.calle}>
                             <option value=''>Seleccione una calle...</option>
                             {
-                                calles.filter((p)=>{return p.barrio === proveedor.barrio}).map(({_id, name})=>{
+                                calles.filter((p)=>{return p.barrio === Number(proveedor.barrio)}).map(({_id, name})=>{
                                     return (
                                         <option key={_id} value={_id}>
                                             {name}
@@ -214,6 +206,11 @@ const createProveedor = ({exito}) => {
                                 })
                             }
                         </select>
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="nombre">Altura:</label>
+                        <input type="number" onChange={inputChange} value={proveedor.altura} name="altura" placeholder="Ingresa la altura del domicilio del Proveedor" required></input>
                     </div>
 
                     <div className="form-group">

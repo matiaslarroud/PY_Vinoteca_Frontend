@@ -20,12 +20,12 @@ const updateDeposito = ({depositoID , exito}) => {
                         {
                             if(s.ok && s.data.name){
                                 const nombreP = s.data.name;
-                                const paisP = s.data.pais;
-                                const provinciaP = s.data.provincia;                                
-                                const localidadP = s.data.localidad;
-                                const barrioP = s.data.barrio;
-                                const calleP = s.data.calle;
-                                const alturaP = s.data.altura;
+                                const paisP = Number(s.data.pais);
+                                const provinciaP = Number(s.data.provincia);                                
+                                const localidadP = Number(s.data.localidad);
+                                const barrioP = Number(s.data.barrio);
+                                const calleP = Number(s.data.calle);
+                                const alturaP = Number(s.data.altura);
                                 const deptoNumP = s.data.deptoNumero;
                                 const deptoLetraP = s.data.deptoLetra;
 
@@ -114,12 +114,12 @@ const updateDeposito = ({depositoID , exito}) => {
                 headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({
                     name: deposito.name,
-                    pais: deposito.paisID,
-                    provincia: deposito.provinciaID,
-                    localidad: deposito.localidadID,
-                    barrio: deposito.barrioID,
-                    calle: deposito.calleID,
-                    altura: deposito.altura,
+                    pais: Number(deposito.paisID),
+                    provincia: Number(deposito.provinciaID),
+                    localidad: Number(deposito.localidadID),
+                    barrio: Number(deposito.barrioID),
+                    calle: Number(deposito.calleID),
+                    altura: Number(deposito.altura),
                     deptoNumero: deposito.deptoNum,
                     deptoLetra: deposito.deptoLetra,
                 })
