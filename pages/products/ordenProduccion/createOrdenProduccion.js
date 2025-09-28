@@ -5,52 +5,17 @@ import FormularioTipoVinoCreate from '../../gestion/vinos/vino_tipo/createVinoTi
 import FormularioDepositoCreate from '../../gestion/ubicaciones/deposito/createDeposito'
 import FormularioInsumoCreate from '../insumos/createInsumo'
 
-const initialState = {fechaElaboracion:'' , fechaEntrega:'' , empleado:'' , picada:''}
-const initialStateDetalle = {ordenProduccion:'',insumo:'', cantidad:0}
+const initialState = {fechaElaboracion:'' , fechaEntrega:'' , empleado:''}
+const initialStateDetalle = {ordenProduccion:'',picada:'', cantidad:0}
 
 const formOrden = ({exito}) => {
-    const [insumos , setInsumos] = useState([]);
     const [ordenProduccion , setOrdenProducion] = useState(initialState);
     const [empleados, setEmpleados] = useState([]);
     const [picadas , setPicadas] = useState([]);
     const [detalles, setDetalles] = useState([initialStateDetalle]);
 
-    const detallesValidos = detalles.filter(d => d.insumo && d.cantidad > 0);
+    const detallesValidos = detalles.filter(d => d.picada && d.cantidad > 0);
     const puedeGuardar = detallesValidos.length > 0;
-
-    const fetch_Insumos = async () => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productInsumo`)
-            .then ((a)=>{return a.json()})
-                .then ((s)=>{
-                    setInsumos(s.data)
-                })
-            .catch((err)=>{console.log(err)});
-    }
-
-    const fetch_DetallesPicada = async (picadaID) => {
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productPicadaDetalle/picada/${picadaID}`);
-            const data = await res.json();
-
-            if (data && data.data) {
-                const nuevosDetalles = data.data.map(d => {
-                    const insumoEncontrado = insumos.find(i => i._id === d.insumo);
-
-                    return {
-                        ordenProduccion: "", 
-                        insumo: insumoEncontrado ? insumoEncontrado._id : d.insumo, 
-                        cantidad: d.cantidad
-                    };
-                });
-
-                setDetalles(nuevosDetalles);
-            }
-        } catch (err) {
-            console.error("Error al traer los detalles de la picada:", err);
-        }
-    };
-
-
 
     const fetch_Picadas = async () => {
         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productPicada`)
@@ -73,7 +38,6 @@ const formOrden = ({exito}) => {
     useEffect(()=>{
         setDetalles([]);
         fetch_Picadas();
-        fetch_Insumos();
         fetch_Empleados();
     } , [])
     
@@ -117,9 +81,6 @@ const formOrden = ({exito}) => {
         }
     };
 
-
-
-
     const clickChange = async(e) => {
          e.preventDefault();
          const resOrdenProduccion = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/ordenProduccion`,
@@ -130,7 +91,6 @@ const formOrden = ({exito}) => {
                     fechaElaboracion: ordenProduccion.fechaElaboracion ,
                     fechaEntrega: ordenProduccion.fechaEntrega,
                     empleado: ordenProduccion.empleado,
-                    picada: ordenProduccion.picada,
                 })
             }
         )
@@ -145,7 +105,7 @@ const formOrden = ({exito}) => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     cantidad: detalle.cantidad,
-                    insumo: detalle.insumo,
+                    picada: detalle.picada,
                     ordenProduccion: ordenID
             })
                 });
@@ -165,16 +125,14 @@ const formOrden = ({exito}) => {
     };
 
     const agregarDetalle = () => {
-        setDetalles([...detalles, { ...{ordenProduccion:'',insumo:'', cantidad:0} }]);
+        setDetalles([...detalles, { ...{ordenProduccion:'',picada:'', cantidad:0} }]);
     };
 
     const [mostrarModalCreate1, setMostrarModalCreate1] = useState(false);
     const [mostrarModalCreate2, setMostrarModalCreate2] = useState(false);
-    const [mostrarModalCreate3, setMostrarModalCreate3] = useState(false);
 
-    const opciones_insumos = insumos.map(v => ({ value: v._id,label: v.name , stock: v.stock }));
     const opciones_empleados = empleados.map(v => ({ value: v._id,label: v.name }));
-    const opciones_picadas = picadas.map(v => ({ value: v._id,label: v.name }));
+    const opciones_picadas = picadas.map(v => ({ value: v._id,label: v.name , stock:v.stock }));
 
     return(
         <>
@@ -206,20 +164,6 @@ const formOrden = ({exito}) => {
                 </div>
             )}
 
-            {mostrarModalCreate3 && (
-                <div className="modal">
-                <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate3(false)}>&times;</button>
-                    <FormularioInsumoCreate
-                    exito={() => {
-                        setMostrarModalCreate3(false);
-                        fetch_Insumos();
-                    }}
-                    />
-                </div>
-                </div>
-            )}
-
             <div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
@@ -229,58 +173,6 @@ const formOrden = ({exito}) => {
 
                 <form id="updatePicada" className="formulario-picada">
                     <div className="form-row">
-                        <div className="form-col">
-                            <label>
-                                Picada:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate1(true)}>+</button>
-                            </label>
-                            <Select
-                                className="form-select-react"
-                                classNamePrefix="rs"
-                                options={opciones_picadas}
-                                value={opciones_picadas.find(op => op.value === ordenProduccion.picada) || null}
-                                onChange={selectChange}
-                                name='picada'
-                                placeholder="Picada..."
-                                isClearable
-                                styles={{
-                                    container: (base) => ({
-                                    ...base,
-                                    width: 220, // ⬅️ ancho fijo total
-                                    }),
-                                    control: (base) => ({
-                                    ...base,
-                                    minWidth: 220,
-                                    maxWidth: 220,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    border: '1px solid #444',
-                                    borderRadius: 8,
-                                    }),
-                                    singleValue: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                    }),
-                                    menu: (base) => ({
-                                    ...base,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    option: (base, { isFocused }) => ({
-                                    ...base,
-                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    input: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    }),
-                                }}
-                            />
-                        </div>
                         <div className="form-col">
                             <label>
                                 Fecha de Elaboración:
@@ -350,10 +242,9 @@ const formOrden = ({exito}) => {
                     <div className="form-row">
                         <div className="form-col-productos">
                             <label>
-                                    Insumos:
-                                    <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
+                                    Picadas:
                                     <button type="button" className="btn-add-insumo" onClick={agregarDetalle}>
-                                        + Agregar Insumo
+                                        + Agregar Picada
                                     </button>
                             </label>
                          <div className="form-group-insumos">
@@ -361,53 +252,57 @@ const formOrden = ({exito}) => {
                                 {detalles.map((d, i) => (
                                 <div key={i} className="insumo-item">
                                     <div className='form-col-item1'>
-                                        <Select
-                                            className="form-select-react"
-                                            classNamePrefix="rs"
-                                            options={opciones_insumos}
-                                            value={opciones_insumos.find(op => op.value === d.insumo) || null}
-                                            onChange={(selectedOption) =>
-                                                handleDetalleChange(i, "insumo", selectedOption ? selectedOption.value : "")
-                                            }
-                                            placeholder="Insumo..."
-                                            isClearable
-                                            styles={{
-                                                container: (base) => ({
-                                                ...base,
-                                                width: 220, // ⬅️ ancho fijo total
-                                                }),
-                                                control: (base) => ({
-                                                ...base,
-                                                minWidth: 220,
-                                                maxWidth: 220,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                border: '1px solid #444',
-                                                borderRadius: 8,
-                                                }),
-                                                singleValue: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                                }),
-                                                menu: (base) => ({
-                                                ...base,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                }),
-                                                option: (base, { isFocused }) => ({
-                                                ...base,
-                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                                color: 'white',
-                                                }),
-                                                input: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                }),
-                                            }}
+                                        {/* Picada */}
+                                        <div className="form-col">
+                                            <Select
+                                                className="form-select-react"
+                                                classNamePrefix="rs"
+                                                options={opciones_picadas}
+                                                value={opciones_picadas.find(op => op.value === d.picada) || null}
+                                                onChange={(selectedOption) =>
+                                                    handleDetalleChange(i, "picada", selectedOption ? selectedOption.value : "")
+                                                }
+                                                name='picada'
+                                                placeholder="Picada..."
+                                                isClearable
+                                                styles={{
+                                                    container: (base) => ({
+                                                    ...base,
+                                                    width: 220, // ⬅️ ancho fijo total
+                                                    }),
+                                                    control: (base) => ({
+                                                    ...base,
+                                                    minWidth: 220,
+                                                    maxWidth: 220,
+                                                    backgroundColor: '#2c2c2c',
+                                                    color: 'white',
+                                                    border: '1px solid #444',
+                                                    borderRadius: 8,
+                                                    }),
+                                                    singleValue: (base) => ({
+                                                    ...base,
+                                                    color: 'white',
+                                                    whiteSpace: 'nowrap',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                                    }),
+                                                    menu: (base) => ({
+                                                    ...base,
+                                                    backgroundColor: '#2c2c2c',
+                                                    color: 'white',
+                                                    }),
+                                                    option: (base, { isFocused }) => ({
+                                                    ...base,
+                                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                                    color: 'white',
+                                                    }),
+                                                    input: (base) => ({
+                                                    ...base,
+                                                    color: 'white',
+                                                    }),
+                                                }}
                                             />
+                                        </div>
                                     </div>
                                     
                                     <div className='form-col-item1'>
@@ -415,7 +310,7 @@ const formOrden = ({exito}) => {
                                             type="number"
                                             placeholder="Cantidad"
                                             min={1}
-                                            max={opciones_insumos.find((p) => p.value === d.insumo)?.stock || 0}
+                                            max={opciones_picadas.find((p) => p.value === Number(d.picada))?.stock || 0}
                                             value={d.cantidad}
                                             onChange={(e) => handleDetalleChange(i, "cantidad", e.target.value)}
                                             required
@@ -447,7 +342,7 @@ const formOrden = ({exito}) => {
                                     className="submit-btn"
                                     onClick={(e) => {
                                         if (!puedeGuardar) {
-                                        alert("No se puede guardar una orden de produccion sin al menos un insumo con cantidad.");
+                                        alert("No se puede guardar una orden de produccion sin al menos una picada con cantidad.");
                                         e.preventDefault();
                                         return;
                                         }

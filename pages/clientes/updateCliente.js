@@ -24,7 +24,6 @@ const updateCliente = ({clienteID, exito}) => {
         })
             .then((s)=>{
                 if(s.ok){
-                    console.log(s.data)
                     const nombreC = s.data.name;
                     const apellidoC = s.data.lastname;
                     const nacimientoC = s.data.fechaNacimiento.split("T")[0];

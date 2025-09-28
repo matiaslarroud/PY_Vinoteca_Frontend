@@ -5,16 +5,6 @@ const { default: Link } = require("next/link")
 const initialState = {name:'', tipoUva:''}
 const formVarietal = ({exito}) => {
     const [varietal , setVarietal] = useState(initialState);
-    const [tiposUva, setTiposUva] = useState([])
-    
-    const fetchTiposUva = () => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/uva`)
-            .then((a)=>{return a.json()})
-                .then((s)=>{
-                    setTiposUva(s.data);
-                })
-                .catch((err)=>{console.log(err)})
-    }
 
     const inputChange = (e) => {
         const value = e.target.value;
@@ -26,10 +16,6 @@ const formVarietal = ({exito}) => {
         })   
     }
 
-    useEffect(()=>{
-        fetchTiposUva()
-    } , [])
-
     const clickChange = (e) => {
         e.preventDefault()
          fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/varietal`,
@@ -37,8 +23,7 @@ const formVarietal = ({exito}) => {
                 method: 'POST',
                 headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({
-                    name: varietal.name,
-                    tipoUva: varietal.tipoUva
+                    name: varietal.name
                 })
             }
          ).then((a) => {
@@ -62,22 +47,6 @@ const formVarietal = ({exito}) => {
                     <div className="form-group input-centered">
                         <label htmlFor="nombre">Nombre:</label>
                         <input type="text" onChange={inputChange} value={varietal.name} name="name" placeholder="Ingresa el nombre del varietal" required></input>
-                    </div>
-                    
-                    <div className="form-group input-centered">
-                        <label htmlFor="nombre">Tipo de Uva:</label>
-                        <select name="tipoUva" onChange={inputChange} value={varietal.tipoUva}>
-                            <option value=''>Seleccione un tipo de uva...</option>
-                            {
-                                tiposUva.map(({_id,name}) => 
-                                    (
-                                        <option key={_id} value={_id}>
-                                            {name}
-                                        </option>                                        
-                                    )
-                                )
-                            }
-                        </select>
                     </div>
                     </fieldset>
                     <div className="button-area">

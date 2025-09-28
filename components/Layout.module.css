@@ -1,0 +1,9 @@
+.container {
+  display: flex;
+}
+
+.content {
+  margin-left: 220px; /* ancho del sidebar */
+  padding: 2rem;
+  flex: 1;
+}

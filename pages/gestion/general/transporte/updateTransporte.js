@@ -3,7 +3,6 @@ import Select from 'react-select';
 import { FaTrash} from "react-icons/fa";
 
 const initialState = {name:'',telefono:'', email:'', cuit:'', pais:'', provincia:'', localidad:'', barrio:'', calle:'', condicionIva:''}
-const initialStateDetalle = {transporteID:'', pais:'', provincia:'', localidad:''}
 
 const updateTransporte = ({exito , transporteID}) => {
     const [transporte, setTransporte] = useState(initialState);
@@ -13,10 +12,6 @@ const updateTransporte = ({exito , transporteID}) => {
     const [barrios, setBarrios] = useState([]); 
     const [calles, setCalles] = useState([]);
     const [condicionesIva, setCondicionesIva] = useState([]);
-    const [detalles, setDetalles] = useState([initialStateDetalle]);
-
-    const detallesValidos = detalles.filter(d => d.pais !== '' && d.provincia !== '' && d.localidad !== '');
-    const puedeGuardar = detallesValidos.length > 0;
     
     const fetchData_Paises = async () => {
         const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/pais`);
@@ -35,16 +30,6 @@ const updateTransporte = ({exito , transporteID}) => {
             setTransporte(data);
         } else {
             console.error("Error al cargar los datos del transporte");
-        }
-    };
-    
-    const fetchData_Transporte_Detalle = async (param) => {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/transporteDetalle/transporte/${param}`);
-        const { data } = await res.json();
-        if (data) {
-            setDetalles(data);
-        } else {
-            console.error("Error al cargar los destinos del transporte");
         }
     };
 
@@ -102,7 +87,6 @@ const updateTransporte = ({exito , transporteID}) => {
     
     useEffect(()=>{
         fetchData_Transporte(transporteID);
-        fetchData_Transporte_Detalle(transporteID);
         fetchData_Paises();
         fetchData_Provincias();
         fetchData_Localidades();
@@ -121,13 +105,6 @@ const updateTransporte = ({exito , transporteID}) => {
         })   
     }
 
-    const handleDetalleChange = (index, field, value) => {
-        const nuevosDetalles = [...detalles];
-        nuevosDetalles[index][field] = value;
-        
-        setDetalles(nuevosDetalles);
-    };
-
     const selectChange = (selectedOption, actionMeta) => {
         const name = actionMeta.name;
         const value = selectedOption ? selectedOption.value : "";
@@ -140,7 +117,7 @@ const updateTransporte = ({exito , transporteID}) => {
 
     const clickChange = async(e) => {
          e.preventDefault();
-         const resTransporte = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/transporte/${transporteID}`,
+         await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/transporte/${transporteID}`,
             {
                 method: 'PUT',
                 headers: {'Content-Type':'application/json'},
@@ -158,51 +135,10 @@ const updateTransporte = ({exito , transporteID}) => {
                 })
             }
         )
-
-        const transporteCreado = await resTransporte.json();
-        const id = transporteCreado.data._id;
-
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/transporteDetalle/${id}`,
-            {
-                method:'DELETE',
-                headers: {
-                    'Content-Type':'application/json',
-                }
-            }
-        ).then((a)=>{return a.json()})
-            .then((res)=>{
-                console.log(res.message);
-            })
-            .catch((err)=>{
-                console.log("Error al enviar destinos de transporte para su eliminación. \n Error: ",err);
-            })
-
-
-
-
-        // GUARDAMOS DETALLES
-        for (const detalle of detalles) {
-            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/transporteDetalle`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    transporteID: id,
-                    pais: detalle.pais, 
-                    provincia: detalle.provincia,
-                    localidad: detalle.localidad    
-                })
-            });
-            
-            if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
-        }
-        setDetalles([initialStateDetalle]);
+        
         setTransporte(initialState);
         exito();
     }
-
-    const agregarDetalle = () => {
-        setDetalles([...detalles, { ...{pais:'', provincia:'', localidad:''} }]);
-    };
 
     const opciones_paises = paises.map(p => ({ value: p._id, label: p.name }));
     const opciones_provincias = provincias.filter(a =>(a.pais === transporte.pais)).map(p => ({ value: p._id, label: p.name }));
@@ -596,209 +532,6 @@ const updateTransporte = ({exito , transporteID}) => {
                     </div>
 
                     <div className="form-row">
-                        <div className="form-col-productos">
-                            <label>
-                                    Destinos:
-                                    <button type="button" className="btn-add-insumo" onClick={agregarDetalle}>
-                                        + Agregar destino
-                                    </button>
-                            </label>
-                         <div className="form-group-insumos">
-                                
-                                {detalles.map((d, i) => {
-
-                                    const opciones_paisesDetalle = paises.map(p => ({ value: p._id, label: p.name }));
-                                    const opciones_provinciasDetalle = provincias
-                                        .filter(a =>(a.pais === d.pais))
-                                        .map(p => ({ value: p._id, label: p.name }));
-                                        
-                                    const opciones_localidadesDetalle = localidades
-                                        .filter(a => (a.provincia === d.provincia))
-                                        .map(p => ({ value: p._id, label: p.name }));
-
-                                return (
-                                    <div key={i} className="insumo-item">
-                                        
-                                    <div className="form-col-item1">
-                                        <label >
-                                            Pais
-                                        </label>
-                                        <Select
-                                            className="form-select-react"
-                                            classNamePrefix="rs"
-                                            options={opciones_paisesDetalle}
-                                            value={opciones_paisesDetalle.find(op => op.value === d.pais) || null}
-                                            onChange={(selectedOption) =>
-                                                handleDetalleChange(i, "pais", selectedOption ? selectedOption.value : "")
-                                            }
-                                            name='pais'
-                                            placeholder="Pais..."
-                                            isClearable
-                                            required={true}
-                                            styles={{
-                                                container: (base) => ({
-                                                ...base,
-                                                width: '100%', // ⬅️ ancho fijo total
-                                                }),
-                                                control: (base) => ({
-                                                ...base,
-                                                minWidth: 100,
-                                                maxWidth: 220,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                border: '1px solid #444',
-                                                borderRadius: 8,
-                                                }),
-                                                singleValue: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                                }),
-                                                menu: (base) => ({
-                                                ...base,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                }),
-                                                option: (base, { isFocused }) => ({
-                                                ...base,
-                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                                color: 'white',
-                                                }),
-                                                input: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                }),
-                                            }}
-                                        />
-                                    </div> 
-                                    <div className="form-col-item1">
-                                        <label >
-                                            Provincia
-                                        </label>
-                                        <Select
-                                            className="form-select-react"
-                                            classNamePrefix="rs"
-                                            options={opciones_provinciasDetalle}
-                                            value={opciones_provinciasDetalle.find(a => a.value === d.provincia) || null}
-                                            onChange={(selectedOption) =>
-                                                handleDetalleChange(i, "provincia", selectedOption ? selectedOption.value : "")
-                                            }
-                                            name='provincia'
-                                            placeholder="Provincia..."
-                                            required={true}
-                                            isClearable
-                                            styles={{
-                                                container: (base) => ({
-                                                ...base,
-                                                width: '100%', // ⬅️ ancho fijo total
-                                                }),
-                                                control: (base) => ({
-                                                ...base,
-                                                minWidth: 100,
-                                                maxWidth: 220,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                border: '1px solid #444',
-                                                borderRadius: 8,
-                                                }),
-                                                singleValue: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                                }),
-                                                menu: (base) => ({
-                                                ...base,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                }),
-                                                option: (base, { isFocused }) => ({
-                                                ...base,
-                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                                color: 'white',
-                                                }),
-                                                input: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                }),
-                                            }}
-                                        />
-                                    </div>
-                                    <div className="form-col-item1">
-                                        <label >
-                                            Localidad
-                                        </label>
-                                        <Select
-                                            className="form-select-react"
-                                            classNamePrefix="rs"
-                                            options={opciones_localidadesDetalle}
-                                            value={opciones_localidadesDetalle.find(op => op.value === d.localidad) || null}
-                                            onChange={(selectedOption) =>
-                                                handleDetalleChange(i, "localidad", selectedOption ? selectedOption.value : "")
-                                            }
-                                            name='localidad'
-                                            placeholder="Localidad..."
-                                            required={true}
-                                            isClearable
-                                            styles={{
-                                                container: (base) => ({
-                                                ...base,
-                                                width: '100%', // ⬅️ ancho fijo total
-                                                }),
-                                                control: (base) => ({
-                                                ...base,
-                                                minWidth: 100,
-                                                maxWidth: 220,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                border: '1px solid #444',
-                                                borderRadius: 8,
-                                                }),
-                                                singleValue: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                                }),
-                                                menu: (base) => ({
-                                                ...base,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                }),
-                                                option: (base, { isFocused }) => ({
-                                                ...base,
-                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                                color: 'white',
-                                                }),
-                                                input: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                }),
-                                            }}
-                                        />
-                                    </div>
-
-                                    <div className='form-col-item2'>
-                                        <button
-                                            type="button"
-                                            className="btn-icon"
-                                            onClick={() => {
-                                                const destinos = detalles.filter((_, index) => index !== i);
-                                                setDetalles(destinos);
-                                            }}
-                                            >
-                                            <FaTrash />
-                                        </button>
-                                    </div>
-                                </div>
-                                )
-                                })}
-                            </div>
-                        </div>
                         <div className="form-col-precioVenta">
                             <div className="box-cargar" >
                                 <div className="form-submit">
@@ -806,11 +539,6 @@ const updateTransporte = ({exito , transporteID}) => {
                                     type="submit"
                                     className="submit-btn"
                                     onClick={(e) => {
-                                        if (!puedeGuardar) {
-                                        alert("No se puede guardar un transporte sin al menos un destino.");
-                                        e.preventDefault();
-                                        return;
-                                        }
                                         clickChange(e);
                                     }}
                                     >
@@ -820,10 +548,6 @@ const updateTransporte = ({exito , transporteID}) => {
                             </div>
                         </div>
                     </div>
-
-                    
-
-                    
                 </form>
 
             </div>

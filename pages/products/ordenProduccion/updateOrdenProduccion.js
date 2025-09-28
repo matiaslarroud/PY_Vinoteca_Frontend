@@ -5,68 +5,17 @@ import FormularioTipoVinoCreate from '../../gestion/vinos/vino_tipo/createVinoTi
 import FormularioDepositoCreate from '../../gestion/ubicaciones/deposito/createDeposito'
 import FormularioInsumoCreate from '../insumos/createInsumo'
 
-const initialState = {fechaElaboracion:'' , fechaEntrega:'' , empleado:'' , picada:''}
-const initialStateDetalle = {ordenProduccion:'',insumo:'', cantidad:0}
+const initialState = {fechaElaboracion:'' , fechaEntrega:'' , empleado:''}
+const initialStateDetalle = {ordenProduccion:'',picada:'', cantidad:0}
 
 const updateOrden = ({exito , ordenID}) => {
-    const [insumos , setInsumos] = useState([]);
     const [ordenProduccion , setOrdenProducion] = useState(initialState);
     const [empleados, setEmpleados] = useState([]);
-    const [picadas , setPicadas] = useState([]);
+    const [picadas, setPicadas] = useState([]);
     const [detalles, setDetalles] = useState([initialStateDetalle]);
 
-    const detallesValidos = detalles.filter(d => d.insumo && d.cantidad > 0);
+    const detallesValidos = detalles.filter(d => d.picada && d.cantidad > 0);
     const puedeGuardar = detallesValidos.length > 0;
-
-    const fetch_Insumos = async () => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productInsumo`)
-            .then ((a)=>{return a.json()})
-                .then ((s)=>{
-                    setInsumos(s.data)
-                })
-            .catch((err)=>{console.log(err)});
-    }
-
-    const fetch_DetallesPicada = async (picadaID) => {
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productPicadaDetalle/picada/${picadaID}`);
-            const data = await res.json();
-
-            if (data && data.data) {
-                const nuevosDetalles = data.data.map(d => {
-                    const insumoEncontrado = insumos.find(i => i._id === d.insumo);
-
-                    return {
-                        ordenProduccion: "", 
-                        insumo: insumoEncontrado ? insumoEncontrado._id : d.insumo, 
-                        cantidad: d.cantidad
-                    };
-                });
-
-                setDetalles(nuevosDetalles);
-            }
-        } catch (err) {
-            console.error("Error al traer los detalles de la picada:", err);
-        }
-    };
-
-    const fetch_Orden = async(id) => {
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/ordenProduccion/${id}`)
-            .then ((a)=>{return a.json()})
-                .then ((s)=>{
-                    setOrdenProducion(s.data)
-                })
-            .catch((err)=>{console.log(err)});
-    }
-
-    const fetch_OrdenDetalles = async(id) => {
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/ordenProduccionDetalle/ordenProduccion/${id}`)
-            .then ((a)=>{return a.json()})
-                .then ((s)=>{
-                    setDetalles(s.data)
-                })
-            .catch((err)=>{console.log(err)});
-    }
 
     const fetch_Picadas = async () => {
         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productPicada`)
@@ -85,13 +34,37 @@ const updateOrden = ({exito , ordenID}) => {
                 })
             .catch((err)=>{console.log(err)});
     }
+
+    const fetch_OrdenProduccion = async (ordenID) => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/ordenProduccion/${ordenID}`)
+            .then ((a)=>{return a.json()})
+                .then ((s)=>{
+                    const empleado = s.data.empleado;
+                    const fechaElaboracion = s.data.fechaElaboracion.split("T")[0];
+                    const fechaEntrega = s.data.fechaEntrega.split("T")[0];
+                    setOrdenProducion({
+                        empleado:empleado,
+                        fechaElaboracion:fechaElaboracion,
+                        fechaEntrega:fechaEntrega
+                    })
+                })
+            .catch((err)=>{console.log(err)});
+    }
+
+    const fetch_OrdenProduccionDetalle = async (ordenID) => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/ordenProduccionDetalle/ordenProduccion/${ordenID}`)
+            .then ((a)=>{return a.json()})
+                .then ((s)=>{
+                    setDetalles(s.data)
+                })
+            .catch((err)=>{console.log(err)});
+    }
     
     useEffect(()=>{
         setDetalles([]);
-        fetch_Orden(ordenID);
-        fetch_OrdenDetalles(ordenID);
+        fetch_OrdenProduccion(ordenID);
+        fetch_OrdenProduccionDetalle(ordenID);
         fetch_Picadas();
-        fetch_Insumos();
         fetch_Empleados();
     } , [ordenID])
     
@@ -135,9 +108,6 @@ const updateOrden = ({exito , ordenID}) => {
         }
     };
 
-
-
-
     const clickChange = async(e) => {
          e.preventDefault();
          const resOrdenProduccion = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/ordenProduccion/${ordenID}`,
@@ -148,14 +118,12 @@ const updateOrden = ({exito , ordenID}) => {
                     fechaElaboracion: ordenProduccion.fechaElaboracion ,
                     fechaEntrega: ordenProduccion.fechaEntrega,
                     empleado: ordenProduccion.empleado,
-                    picada: ordenProduccion.picada,
                 })
             }
         )
 
         const ordenCreada = await resOrdenProduccion.json();
         const identificador = ordenCreada.data._id;
-
 
         await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/ordenProduccionDetalle/${identificador}`,
             {
@@ -169,7 +137,7 @@ const updateOrden = ({exito , ordenID}) => {
                 console.log(res.message);
             })
             .catch((err)=>{
-                console.log("Error al enviar detalle de orden de produccion para su eliminación. \n Error: ",err);
+                console.log("Error al enviar detalle para su eliminación. \n Error: ",err);
             })
 
         // GUARDAMOS DETALLES
@@ -179,8 +147,8 @@ const updateOrden = ({exito , ordenID}) => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     cantidad: detalle.cantidad,
-                    insumo: detalle.insumo,
-                    ordenProduccion: ordenID
+                    picada: detalle.picada,
+                    ordenProduccion: identificador
             })
                 });
             
@@ -198,22 +166,15 @@ const updateOrden = ({exito , ordenID}) => {
         setDetalles(nuevosDetalles);
     };
 
-    const formatDateInput = (dateStr) => {
-        if (!dateStr) return '';
-        return new Date(dateStr).toISOString().split('T')[0]; 
-    };
-
     const agregarDetalle = () => {
-        setDetalles([...detalles, { ...{ordenProduccion:'',insumo:'', cantidad:0} }]);
+        setDetalles([...detalles, { ...{ordenProduccion:'',picada:'', cantidad:0} }]);
     };
 
     const [mostrarModalCreate1, setMostrarModalCreate1] = useState(false);
     const [mostrarModalCreate2, setMostrarModalCreate2] = useState(false);
-    const [mostrarModalCreate3, setMostrarModalCreate3] = useState(false);
 
-    const opciones_insumos = insumos.map(v => ({ value: v._id,label: v.name , stock: v.stock }));
     const opciones_empleados = empleados.map(v => ({ value: v._id,label: v.name }));
-    const opciones_picadas = picadas.map(v => ({ value: v._id,label: v.name }));
+    const opciones_picadas = picadas.map(v => ({ value: v._id,label: v.name , stock:v.stock }));
 
     return(
         <>
@@ -245,24 +206,10 @@ const updateOrden = ({exito , ordenID}) => {
                 </div>
             )}
 
-            {mostrarModalCreate3 && (
-                <div className="modal">
-                <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate3(false)}>&times;</button>
-                    <FormularioInsumoCreate
-                    exito={() => {
-                        setMostrarModalCreate3(false);
-                        fetch_Insumos();
-                    }}
-                    />
-                </div>
-                </div>
-            )}
-
             <div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
-                        <h1 className="titulo-pagina">Modificar Orden de Produccion</h1>
+                        <h1 className="titulo-pagina">Cargar Orden de Produccion</h1>
                     </div>
                 </div>
 
@@ -270,67 +217,15 @@ const updateOrden = ({exito , ordenID}) => {
                     <div className="form-row">
                         <div className="form-col">
                             <label>
-                                Picada:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate1(true)}>+</button>
-                            </label>
-                            <Select
-                                className="form-select-react"
-                                classNamePrefix="rs"
-                                options={opciones_picadas}
-                                value={opciones_picadas.find(op => op.value === ordenProduccion.picada) || null}
-                                onChange={selectChange}
-                                name='picada'
-                                placeholder="Picada..."
-                                isClearable
-                                styles={{
-                                    container: (base) => ({
-                                    ...base,
-                                    width: 220, // ⬅️ ancho fijo total
-                                    }),
-                                    control: (base) => ({
-                                    ...base,
-                                    minWidth: 220,
-                                    maxWidth: 220,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    border: '1px solid #444',
-                                    borderRadius: 8,
-                                    }),
-                                    singleValue: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                    }),
-                                    menu: (base) => ({
-                                    ...base,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    option: (base, { isFocused }) => ({
-                                    ...base,
-                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    input: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    }),
-                                }}
-                            />
-                        </div>
-                        <div className="form-col">
-                            <label>
                                 Fecha de Elaboración:
                             </label>
-                            <input type="date" onChange={inputChange} value={formatDateInput(ordenProduccion.fechaElaboracion) ?? ""} name="fechaElaboracion" required />
+                            <input type="date" onChange={inputChange} value={ordenProduccion.fechaElaboracion} name="fechaElaboracion" required />
                         </div>
                         <div className="form-col">
                             <label>
                                 Fecha de Entrega:
                             </label>
-                            <input type="date" onChange={inputChange} value={formatDateInput(ordenProduccion.fechaEntrega) ?? ""} name="fechaEntrega" required />
+                            <input type="date" onChange={inputChange} value={ordenProduccion.fechaEntrega} name="fechaEntrega" required />
                         </div>
                         <div className="form-col">
                             <label>
@@ -389,10 +284,9 @@ const updateOrden = ({exito , ordenID}) => {
                     <div className="form-row">
                         <div className="form-col-productos">
                             <label>
-                                    Insumos:
-                                    <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
+                                    Picadas:
                                     <button type="button" className="btn-add-insumo" onClick={agregarDetalle}>
-                                        + Agregar Insumo
+                                        + Agregar Picada
                                     </button>
                             </label>
                          <div className="form-group-insumos">
@@ -400,53 +294,57 @@ const updateOrden = ({exito , ordenID}) => {
                                 {detalles.map((d, i) => (
                                 <div key={i} className="insumo-item">
                                     <div className='form-col-item1'>
-                                        <Select
-                                            className="form-select-react"
-                                            classNamePrefix="rs"
-                                            options={opciones_insumos}
-                                            value={opciones_insumos.find(op => op.value === d.insumo) || null}
-                                            onChange={(selectedOption) =>
-                                                handleDetalleChange(i, "insumo", selectedOption ? selectedOption.value : "")
-                                            }
-                                            placeholder="Insumo..."
-                                            isClearable
-                                            styles={{
-                                                container: (base) => ({
-                                                ...base,
-                                                width: 220, // ⬅️ ancho fijo total
-                                                }),
-                                                control: (base) => ({
-                                                ...base,
-                                                minWidth: 220,
-                                                maxWidth: 220,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                border: '1px solid #444',
-                                                borderRadius: 8,
-                                                }),
-                                                singleValue: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                                }),
-                                                menu: (base) => ({
-                                                ...base,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                }),
-                                                option: (base, { isFocused }) => ({
-                                                ...base,
-                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                                color: 'white',
-                                                }),
-                                                input: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                }),
-                                            }}
+                                        {/* Picada */}
+                                        <div className="form-col">
+                                            <Select
+                                                className="form-select-react"
+                                                classNamePrefix="rs"
+                                                options={opciones_picadas}
+                                                value={opciones_picadas.find(op => op.value === d.picada) || null}
+                                                onChange={(selectedOption) =>
+                                                    handleDetalleChange(i, "picada", selectedOption ? selectedOption.value : "")
+                                                }
+                                                name='picada'
+                                                placeholder="Picada..."
+                                                isClearable
+                                                styles={{
+                                                    container: (base) => ({
+                                                    ...base,
+                                                    width: 220, // ⬅️ ancho fijo total
+                                                    }),
+                                                    control: (base) => ({
+                                                    ...base,
+                                                    minWidth: 220,
+                                                    maxWidth: 220,
+                                                    backgroundColor: '#2c2c2c',
+                                                    color: 'white',
+                                                    border: '1px solid #444',
+                                                    borderRadius: 8,
+                                                    }),
+                                                    singleValue: (base) => ({
+                                                    ...base,
+                                                    color: 'white',
+                                                    whiteSpace: 'nowrap',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                                    }),
+                                                    menu: (base) => ({
+                                                    ...base,
+                                                    backgroundColor: '#2c2c2c',
+                                                    color: 'white',
+                                                    }),
+                                                    option: (base, { isFocused }) => ({
+                                                    ...base,
+                                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                                    color: 'white',
+                                                    }),
+                                                    input: (base) => ({
+                                                    ...base,
+                                                    color: 'white',
+                                                    }),
+                                                }}
                                             />
+                                        </div>
                                     </div>
                                     
                                     <div className='form-col-item1'>
@@ -454,7 +352,7 @@ const updateOrden = ({exito , ordenID}) => {
                                             type="number"
                                             placeholder="Cantidad"
                                             min={1}
-                                            max={opciones_insumos.find((p) => p.value === d.insumo)?.stock || 0}
+                                            max={opciones_picadas.find((p) => p.value === Number(d.picada))?.stock || 0}
                                             value={d.cantidad}
                                             onChange={(e) => handleDetalleChange(i, "cantidad", e.target.value)}
                                             required
@@ -486,14 +384,14 @@ const updateOrden = ({exito , ordenID}) => {
                                     className="submit-btn"
                                     onClick={(e) => {
                                         if (!puedeGuardar) {
-                                        alert("No se puede guardar una orden de produccion sin al menos un insumo con cantidad.");
+                                        alert("No se puede guardar una orden de produccion sin al menos una picada con cantidad.");
                                         e.preventDefault();
                                         return;
                                         }
                                         clickChange(e);
                                     }}
                                     >
-                                    Guardar
+                                    Cargar Orden
                                     </button>
                                 </div>
                             </div>

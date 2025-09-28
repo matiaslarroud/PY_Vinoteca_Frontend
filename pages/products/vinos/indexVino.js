@@ -107,9 +107,9 @@ const vinosFiltrados = vinos
     }
     
     useEffect(() => {  
-        fetchData(),
-        fetchDataTiposVino(),
-        fetchDataBodegas()
+        fetchData();
+        fetchDataTiposVino();
+        fetchDataBodegas();
     }, [])
 
     const deleteProduct = async(productID) => {
@@ -342,26 +342,27 @@ const vinosFiltrados = vinos
         
         .modal {
             position: fixed;
-            inset: 0;
+            inset: 0; /* top: 0; bottom: 0; left: 0; right: 0 */
             background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000; /* Asegura que esté por encima de todo */
+            z-index: 100;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 1rem;
+            justify-content: center; /* centra horizontal */
+            align-items: center;     /* centra vertical */
+            padding: 1rem;           /* espacio lateral en pantallas pequeñas */
             overflow-y: auto;
         }
-            
+
         .modal-content {
             background-color: #121212;
             padding: 2rem;
             border-radius: 10px;
             width: 100%;
-            max-width: 900px;
+            max-width: 1200px;
             max-height: 90vh;
             overflow-y: auto;
             position: relative;
-         }
+        }
+
         .close {
             position: absolute;
             top: 1rem;

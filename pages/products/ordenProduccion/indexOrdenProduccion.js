@@ -53,37 +53,6 @@ const indexOrdenProduccion = () => {
     }));
   };
 
-  const ordenesFiltradas = ordenes
-    .filter(p => {
-      const picadaNombre = picadas.find(d => d._id === p.picada)?.name || '';
-      return (
-        picadaNombre.toLowerCase().includes(filtroPicada.toLowerCase()) 
-      );
-    })
-    .sort((a, b) => {
-    const campo = orden.campo;
-    if (!campo) return 0;
-
-    let aVal, bVal;
-
-    if (campo === 'picada') {
-      aVal = picadas.find(d => d._id === a.picada)?.name || '';
-      bVal = picadas.find(d => d._id === b.picada)?.name || '';
-    } else {
-      aVal = a[campo];
-      bVal = b[campo];
-    }
-
-    // Si es string, pasamos a minúscula para ordenar insensible a mayúsculas
-    if (typeof aVal === 'string') aVal = aVal.toLowerCase();
-    if (typeof bVal === 'string') bVal = bVal.toLowerCase();
-
-    if (aVal < bVal) return orden.asc ? -1 : 1;
-    if (aVal > bVal) return orden.asc ? 1 : -1;
-    return 0;
-  });
-
-
   return (
       <>
         <div className="box">
@@ -133,30 +102,19 @@ const indexOrdenProduccion = () => {
         </div>
 
         <div className="contenedor-tabla">
-          <div className="filtros">
-            <input
-              type="text"
-              placeholder="Filtrar por picada..."
-              value={filtroPicada}
-              onChange={(e) => setFiltroPicada(e.target.value)}
-            />
-          </div>
 
           <div className="tabla-scroll">
             <table>
               <thead>
                 <tr>
-                  <th onClick={() => toggleOrden('picada')}>Picada ⬍</th>
                   <th onClick={() => toggleOrden('fechaElaboracion')}>Fecha de elaboracion ⬍</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {ordenesFiltradas.map(({ _id, picada, fechaElaboracion }) => {
-                  const picadaEncontrada = picadas.find((p) => p._id === picada);
+                {ordenes.map(({ _id, fechaElaboracion }) => {
                   return (
                     <tr key={_id}>
-                      <td>{picadaEncontrada?.name}</td>
                       <td>{fechaElaboracion.split("T")[0]}</td>
                       <td>
                         <div className="acciones">

@@ -1,12 +1,18 @@
 const { useState, useEffect } = require("react")
+import { FaTrash } from "react-icons/fa";
+import Select from 'react-select';    
 
 const { default: Link } = require("next/link")
 
 const initialState = {name:'',stock:0 , bodega:'' , paraje:'' , crianza : '' , precioCosto:0 , ganancia:0 , tipo:'', uva:'' , varietal:'' , volumen:'' , deposito:''}
+const initialDetalle = { 
+         vino: "", uva: ""
+    };
 const formProducto = ({exito}) => {
     const [product , setProduct] = useState(initialState);
     const [bodegas, setBodegas] = useState([]);
     const [parajes, setParajes] = useState([]);
+    const [detalles,setDetalles] = useState([initialDetalle])
     const [crianzas, setCrianzas] = useState([]);
     const [tiposVino, setTiposVino] = useState([]);
     const [tiposUva, setTiposUva] = useState([]);
@@ -79,16 +85,17 @@ const formProducto = ({exito}) => {
             .catch((err)=>{console.log(err)})
     }
     
-    useEffect(()=>{
-        fetchBodegas(),
-        fetchParajes(),
-        fetchCrianzas(),
-        fetchTiposVino(),
-        fetchTiposUva(),
-        fetchVarietales(),
-        fetchVolumenes(),
-        fetchDepositos()
-    } , [])
+    useEffect(() => {
+        fetchBodegas();
+        fetchParajes();
+        fetchCrianzas();
+        fetchTiposVino();
+        fetchTiposUva();
+        fetchVarietales();
+        fetchVolumenes();
+        fetchDepositos();
+    }, []);
+
     
     const inputChange = (e) => {
         const value = e.target.value;
@@ -99,296 +106,949 @@ const formProducto = ({exito}) => {
                 [name]:value
         })   
     }
+  
+    const handleDetalleChange = (index, field, value) => {
+        const nuevosDetalles = [...detalles];
+        nuevosDetalles[index][field] = value;
+        setDetalles(nuevosDetalles);
+    };
 
-    const clickChange = (e) => {
+
+    const selectChange = (selectedOption, actionMeta) => {
+        const name = actionMeta.name;
+        const value = selectedOption ? selectedOption.value : "";
+
+        setProduct({
+            ...product,
+            [name]: value,
+        });
+    };
+    
+
+    const agregarDetalle = () => {
+        setDetalles([...detalles, { ...{vino:"" , uva: ""} }]);
+    };
+
+    const clickChange = async(e) => {
         e.preventDefault();
-         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productVino`,
-            {
-                method: 'POST',
-                headers: {'Content-Type':'application/json'},
+        const bodyData = {
+            name: product.name,
+            precioCosto: product.precioCosto,
+            stock: product.stock,
+            bodega:product.bodega,
+            paraje:product.paraje,
+            crianza:product.crianza,
+            ganancia: product.ganancia,
+            tipo:product.tipo,
+            varietal:product.varietal,
+            volumen: product.volumen,
+            deposito: product.deposito
+        };
+
+        const resVino = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productVino`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bodyData)
+        })
+
+        const vinoCreado = await resVino.json();
+        const vinoID = vinoCreado.data?._id;
+
+        // GUARDAMOS DETALLES
+        for (const detalle of detalles) {
+            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productVinoDetalle`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    name: product.name,
-                    precioCosto: product.precioCosto,
-                    stock: product.stock,
-                    bodega:product.bodega,
-                    paraje:product.paraje,
-                    crianza:product.crianza,
-                    ganancia: product.ganancia,
-                    tipo:product.tipo,
-                    uva:product.uva,
-                    varietal:product.varietal,
-                    volumen: product.volumen,
-                    deposito: product.deposito
-                })
-            }
-         ).then((a) => {
-                        return a.json()
-                    })
-                    .then((data) => {
-                            if(data.ok){
-                                console.log(data.message);
-                                setProduct(initialState);
-                                exito();
-                            }
-                        })
-                .catch((err) => {console.log('Error al enviar datos. \n Error: ',err)})
+                    uva: detalle.uva,
+                    vino: vinoID
+            })
+            
+            
+            });
+            if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
+            
+        }
+        
+        setDetalles([initialDetalle]);
+        setProduct(initialState);
+        exito();
     }
+
+    
+    const opciones_tipoVino = tiposVino.map(v => ({ value: v._id,label: v.name }));
+    const opciones_varietales = varietales.map(v => ({ value: v._id,label: v.name }));
+    const opciones_volumen = volumenes.map(v => ({ value: v._id,label: v.name }));
+    const opciones_uvas = tiposUva.map(v => ({ value: v._id,label: v.name }));
+    const opciones_deposito = depositos.map(v => ({ value: v._id,label: v.name }));
+    const opciones_crianza = crianzas.map(v => ({ value: v._id,label: v.name }));
+    const opciones_bodega = bodegas.map(v => ({ value: v._id,label: v.name }));
+    const opciones_paraje = parajes.filter(p => (p.bodega === product.bodega)).map(v => ({ value: v._id,label: v.name }));
 
     return(
         <>
             <div className="form-container">
-                <h1 className="titulo-pagina">Cargar Vino</h1>
-                <form id="formC" onSubmit={clickChange}>
-                    <fieldset className="grid-container">
-                    <div className="form-group">
-                        <label htmlFor="nombre">Nombre:</label>
-                        <input type="text" onChange={inputChange} value={product.name} name="name" placeholder="Ingresa el nombre del producto" required></input>
+                <div className="form-row">
+                    <div className="form-col">
+                        <h1 className="titulo-pagina">Cargar Vino</h1>
                     </div>
-                    
-                    <div className="form-group">
-                        <label htmlFor="stock">Stock:</label>
-                        <input type="number" onChange={inputChange} value={product.stock} name="stock" placeholder="Ingresa el stock del producto" required></input>
-                    </div>
-                    
-                    <div className="form-group">
-                        <label htmlFor="bodega">Bodega:</label>
-                        <select name="bodega" onChange={inputChange} value={product.bodega}>
-                            <option value=''>Seleccione una bodega...</option>
-                            {
-                                bodegas.map(({_id,name}) => 
-                                    (
-                                        <option key={_id} value={_id}>
-                                            {name}
-                                        </option>                                        
-                                    )
-                                )
-                            }
-                        </select>
-                    </div>
-                    
-                    <div className="form-group">
-                        <label htmlFor="paraje">Paraje:</label>
-                        <select name="paraje" onChange={inputChange} value={product.paraje}>
-                            <option value=''>Seleccione un paraje...</option>
-                            {
-                                parajes.filter((p)=> {return p.bodega === product.bodega}).map(({_id,name}) =>
-                                {
-                                    return(
-                                        <option key={_id} value={_id}>
-                                            {name}
-                                        </option> 
-                                    )
-                                })
-                            }
-                        </select>
-                    </div>
-                    
-                    <div className="form-group">
-                        <label htmlFor="crianza">Crianza:</label>
-                        <select name="crianza" onChange={inputChange} value={product.crianza}>
-                            <option value=''>Seleccione una crianza...</option>
-                            {
-                                crianzas.map(({_id,name}) => 
-                                    (
-                                        <option key={_id} value={_id}>
-                                            {name}
-                                        </option>                                        
-                                    )
-                                )
-                            }
-                        </select>
-                    </div>
-                    
-                    <div className="form-group">
-                        <label htmlFor="tipoV">Tipo de Vino:</label>
-                        <select name="tipo" onChange={inputChange} value={product.tipo}>
-                            <option value=''>Seleccione un tipo de vino...</option>
-                            {
-                                tiposVino.map(({_id,name}) => 
-                                    (
-                                        <option key={_id} value={_id}>
-                                            {name}
-                                        </option>                                        
-                                    )
-                                )
-                            }
-                        </select>
-                    </div>
-                    
-                    <div className="form-group">
-                        <label htmlFor="uva">Tipo de Uva:</label>
-                        <select name="uva" onChange={inputChange} value={product.uva}>
-                            <option value=''>Seleccione una uva...</option>
-                            {
-                                tiposUva.filter((p)=>{return p.tipo === product.tipo}).map(({_id,name}) => 
-                                    (
-                                        <option key={_id} value={_id}>
-                                            {name}
-                                        </option>                                        
-                                    )
-                                )
-                            }
-                        </select>
-                    </div>
-                    
-                    <div className="form-group">
-                        <label htmlFor="varietal">Varietal:</label>
-                        <select name="varietal" onChange={inputChange} value={product.varietal}>
-                            <option value=''>Seleccione un varietal...</option>
-                            {
-                                varietales.filter((p)=>{return p.uva === product.uva}).map(({_id,name}) => 
-                                    (
-                                        <option key={_id} value={_id}>
-                                            {name}
-                                        </option>                                        
-                                    )
-                                )
-                            }
-                        </select>
-                    </div>
-                    
-                    <div className="form-group">
-                        <label htmlFor="volumen">Volumen:</label>
-                        <select name="volumen" onChange={inputChange} value={product.volumen}>
-                            <option value=''>Seleccione un volumen...</option>
-                            {
-                                volumenes.map(({_id,name}) => 
-                                    (
-                                        <option key={_id} value={_id}>
-                                            {name}
-                                        </option>                                        
-                                    )
-                                )
-                            }
-                        </select>
-                    </div>
-                    
-                    <div className="form-group">
-                        <label htmlFor="deposito">Deposito:</label>
-                        <select name="deposito" onChange={inputChange} value={product.deposito}>
-                            <option value=''>Seleccione un deposito...</option>
-                            {
-                                depositos.map(({_id,name}) => 
-                                    (
-                                        <option key={_id} value={_id}>
-                                            {name}
-                                        </option>                                        
-                                    )
-                                )
-                            }
-                        </select>
-                    </div>
-                    
-                    <div className="form-group">
-                        <label htmlFor="precioC">Precio Costo:</label>
-                        <input type="number" onChange={inputChange} value={product.precioCosto} name="precioCosto" placeholder="Ingresa el precio costo del producto" required></input>
-                    </div>
-                    
-                    <div className="form-group">
-                        <label htmlFor="ganancia">% Ganancia:</label>
-                        <input type="number" onChange={inputChange} value={product.ganancia} name="ganancia" placeholder="Ingresa la ganancia del producto" required></input>
-                    </div>
-                    </fieldset>
+                </div>
 
-                    <div className="form-footer">
-                        <button type="submit" className="submit-btn" onClick={clickChange}>Cargar Producto</button>
+                <form id="formProducto" className="formulario-presupuesto">
+                    <div className="form-row">
+                        <div className="form-col1">
+                            <label>
+                                Nombre:
+                            </label>
+                            <input type='text' onChange={inputChange}  name='name' value={product.name} placeholder='Escriba aqui el nombre...' required/>
+                        </div>
+                        <div className="form-col1">
+                            <label>
+                                Tipo de Vino:
+                            </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_tipoVino}
+                                value={opciones_tipoVino.find(op => op.value === product.tipo) || null}
+                                onChange={selectChange}
+                                name='tipo'
+                                placeholder="Tipo de vino..."
+                                isClearable
+                                styles={{
+                                    container: (base) => ({
+                                    ...base,
+                                    width: 220, // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 220,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }}
+                            />
+                        </div>
+
+                        <div className="form-col1">
+                            <label>
+                                Varietal:
+                            </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_varietales}
+                                value={opciones_varietales.find(op => op.value === product.varietal) || null}
+                                onChange={selectChange}
+                                name='varietal'
+                                placeholder="Varietal..."
+                                isClearable
+                                styles={{
+                                    container: (base) => ({
+                                    ...base,
+                                    width: 220, // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 220,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }}
+                            />
+                        </div>
+
+                        <div className="form-col1">
+                            <label>
+                                Crianza:
+                            </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_crianza}
+                                value={opciones_crianza.find(op => op.value === product.crianza) || null}
+                                onChange={selectChange}
+                                name='crianza'
+                                placeholder="Crianza..."
+                                isClearable
+                                styles={{
+                                    container: (base) => ({
+                                    ...base,
+                                    width: 220, // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 220,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }}
+                            />
+                        </div>
+
+                        <div className="form-col1">
+                            <label>
+                                Volumen:
+                            </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_volumen}
+                                value={opciones_volumen.find(op => op.value === product.volumen) || null}
+                                onChange={selectChange}
+                                name='volumen'
+                                placeholder="Volumen..."
+                                isClearable
+                                styles={{
+                                    container: (base) => ({
+                                    ...base,
+                                    width: 220, // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 220,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }}
+                            />
+                        </div>
+
+                        <div className="form-col1">
+                            <label>
+                                Bodega:
+                            </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_bodega}
+                                value={opciones_bodega.find(op => op.value === product.bodega) || null}
+                                onChange={selectChange}
+                                name='bodega'
+                                placeholder="Bodega..."
+                                isClearable
+                                styles={{
+                                    container: (base) => ({
+                                    ...base,
+                                    width: 220, // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 220,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }}
+                            />
+                        </div>
+
+                        <div className="form-col1">
+                            <label>
+                                Paraje:
+                            </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_paraje}
+                                value={opciones_paraje.find(op => op.value === product.paraje) || null}
+                                onChange={selectChange}
+                                name='paraje'
+                                placeholder="Paraje..."
+                                isClearable
+                                styles={{
+                                    container: (base) => ({
+                                    ...base,
+                                    width: 220, // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 220,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }}
+                            />
+                        </div>
+
+                        <div className="form-col1">
+                            <label>
+                                Deposito:
+                            </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_deposito}
+                                value={opciones_deposito.find(op => op.value === product.deposito) || null}
+                                onChange={selectChange}
+                                name='deposito'
+                                placeholder="Deposito..."
+                                isClearable
+                                styles={{
+                                    container: (base) => ({
+                                    ...base,
+                                    width: 220, // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 220,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }}
+                            />
+                        </div>
+                        <div className="form-col1">
+                            <label>
+                                Precio costo:
+                            </label>
+                            <input type='number' onChange={inputChange}  name='precioCosto' value={product.precioCosto} placeholder='Escriba aqui el precio costo...' required/>
+                        </div>
+                        <div className="form-col1">
+                            <label>
+                                Ganancia:
+                            </label>
+                            <input type='number' onChange={inputChange}  name='ganancia' value={product.ganancia} placeholder='Escriba aqui la ganancia...' required/>
+                        </div>
+                        <div className="form-col1">
+                            <label>
+                                Stock:
+                            </label>
+                            <input type='number' onChange={inputChange}  name='stock' value={product.stock} placeholder='Escriba aqui el stock...' required/>
+                        </div>
+                    </div>
+                    <div className="form-row">
+                        <div className="form-col-productos">
+                            <label>
+                                    Uvas:<button type="button" className="btn-add-producto" onClick={agregarDetalle}>
+                                        + Agregar Uva
+                                    </button>
+                            </label>
+                            <div className="form-group-presupuesto">
+                                
+                                {detalles.map((d, i) => (
+                                <div key={i} className="presupuesto-item">
+                                    <div className='form-col-item1'>
+                                        <Select
+                                            className="form-select-react"
+                                            classNamePrefix="rs"
+                                            options={opciones_uvas}
+                                            value={opciones_uvas.find(op => op.value === d.uva) || null}
+                                            onChange={(selectedOption) =>
+                                                handleDetalleChange(i, "uva", selectedOption ? selectedOption.value : "")
+                                            }
+                                            placeholder="Uva..."
+                                            isClearable
+                                            styles={{
+                                                container: (base) => ({
+                                                ...base,
+                                                width: 250, // ⬅️ ancho fijo total
+                                                }),
+                                                control: (base) => ({
+                                                ...base,
+                                                minWidth: 250,
+                                                maxWidth: 300,
+                                                backgroundColor: '#2c2c2c',
+                                                color: 'white',
+                                                border: '1px solid #444',
+                                                borderRadius: 8,
+                                                }),
+                                                singleValue: (base) => ({
+                                                ...base,
+                                                color: 'white',
+                                                whiteSpace: 'nowrap',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                                }),
+                                                menu: (base) => ({
+                                                ...base,
+                                                backgroundColor: '#2c2c2c',
+                                                color: 'white',
+                                                }),
+                                                option: (base, { isFocused }) => ({
+                                                ...base,
+                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                                color: 'white',
+                                                }),
+                                                input: (base) => ({
+                                                ...base,
+                                                color: 'white',
+                                                }),
+                                            }}
+                                        />
+                                    </div>
+
+                                    <div className='form-col-item2'>
+                                        <button
+                                            type="button"
+                                            className="btn-icon"
+                                            onClick={() => {
+                                                const productos = detalles.filter((_, index) => index !== i);
+                                                setDetalles(productos);
+                                            }}
+                                            >                                    
+                                            <FaTrash />
+                                        </button>
+                                    </div>
+                                </div>
+                                ))}
+                            </div>
+                        </div> 
+
+                        <div className="form-submit">
+                            <button
+                                type="submit"
+                                className="submit-btn"
+                                onClick={(e) => {
+                                    clickChange(e);
+                                }}
+                                >
+                                Cargar Vino
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>
             <style jsx>
                 {`
-                    .form-container {
-                    display: flex;
-                    flex-direction: column;
-                    width: 100%;
-                    max-width: 900px;
-                    max-height: 90vh;
-                    padding: 1rem;
-                    overflow-y: auto;
-                    border-radius: 12px;
-                    background: #1a1a1a;
-                    box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
-                    }
+                        .modal {
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                            background-color: rgba(0,0,0,0.5); /* oscurece fondo */
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            z-index: 1000;
+                        }
+                        
 
-                    .titulo-pagina {
-                    font-size: 2rem;
-                    color: white;
-                    text-align: center;
-                    margin-bottom: 1rem;
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                    text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
-                    }
 
-                    .grid-container {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 1rem;
-                    }
+                        .close {
+                            position: absolute;
+                            top: 1rem;
+                            right: 1.5rem;
+                            font-size: 1.5rem;
+                            background: transparent;
+                            border: none;
+                            cursor: pointer;
+                        }
+                        .btn-icon {
+                            background-color: #8b0000;
+                            color: white;
+                            padding: 0.8rem;
+                            font-size: 1.2rem;
+                            border-radius: 50%;
+                            border: none;
+                            cursor: pointer;
+                            width: 2.5rem;
+                            height: 2.5rem;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            transition: background-color 0.3s, transform 0.2s;
+                        }
+                        
+                        .btn-icon:hover {
+                        background-color: #a30000;
+                        transform: translateY(-3px);
+                        }
 
-                    .form-group {
-                    display: flex;
-                    flex-direction: column;
-                    }
+                        .modal-content {
+                            background-color: #121212;
+                            padding: 40px;
+                            border-radius: 12px;
+                            width: 90%;
+                            height:80%;
+                            max-width: 500px;
+                            max-height: 800px;
+                            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                            position: relative;
+                            margin: 20px;
+                        }
 
-                    .form-group label {
-                    font-weight: 600;
-                    color: white;
-                    margin-bottom: 0.4rem;
-                    }
+                        .form-container {
+                            background-color: #1f1f1f;
+                            color: #fff;
+                            padding: 2rem;
+                            border-radius: 16px;
+                            width: 100%;
+                            height: 100%;
+                            margin: 0 auto;
+                            box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
+                        }
 
-                    .form-group input,
-                    .form-group select {
-                    padding: 0.6rem;
-                    border-radius: 6px;
-                    border: 1px solid #ccc;
-                    font-size: 1rem;
-                    color: white;
-                    background-color: #272626ff;
-                    transition: border-color 0.2s ease-in-out;
-                    }
+                        .titulo-pagina {
+                            text-align: center;
+                            font-size: 2rem;
+                            margin-bottom: 1.5rem;
+                            font-weight: bold;
+                            color: #f5f5f5;
+                        }
 
-                    .form-group input:focus,
-                    .form-group select:focus {
-                    border-color: rgb(115, 8, 8);
-                    outline: none;
-                    }
+                        .formulario-presupuesto {
+                            display: flex;
+                            flex-direction: column;
+                            gap: 2rem;
+                        }
 
-                    .checkbox-group {
-                    display: flex;
-                    align-items: center;
-                    margin-top: 1.5rem;
-                    }
+                        .form-row {
+                            display: flex;
+                            flex-wrap: wrap;
+                            gap: 1.5rem;
+                        }
 
-                    .checkbox-group label {
-                    color: #eee;
-                    font-weight: 500;
-                    }
+                        
 
-                    .form-footer {
-                    margin-top: 2rem;
-                    text-align: center;
-                    }
+                        .form-col-productos {
+                            flex: 8;
+                            min-width: 0; /* Importante para que no desborde */
+                            display: flex;
+                            flex-direction: column;
+                        }
+                            
+                        .form-col-item1 {
+                            flex: 3;
+                            min-width: 0; /* Importante para que no desborde */
+                            display: flex;
+                            flex-direction: column;
+                        }
+                            
+                        .form-col-item2 {
+                            flex: 2;
+                            min-width: 0; /* Importante para que no desborde */
+                            display: flex;
+                            flex-direction: column;
+                        }
 
-                    button.submit-btn {
-                    padding: 0.75rem 2rem;
-                    background-color: #8B0000;
-                    color: white;
-                    border: none;
-                    border-radius: 8px;
-                    font-size: 1.1rem;
-                    font-weight: bold;
-                    cursor: pointer;
-                    transition: background-color 0.3s ease;
-                    }
+                        .form-col-precioVenta {
+                            flex: 2;
+                            min-width: 0;
+                            display: flex;
+                            flex-direction: column;
+                        }
 
-                    button.submit-btn:hover {
-                    background-color: #a30000;
-                    }
 
-                    @media (max-width: 768px) {
-                    .grid-container {
-                        grid-template-columns: 1fr;
-                    }
+                        label {
+                            font-weight: 500;
+                            margin-bottom: 0.5rem;
+                            display: flex;
+                            align-items: center;
+                            gap: 0.5rem;
+                        }
+
+                        .precio-venta {
+                            max-width: 100px;
+                        }
+
+                        input:focus {
+                            border-color: #571212ff;
+                        }
+
+                        .precio-venta {
+                            flex-direction: column;
+                            align-items: flex-end;
+                            justify-content: flex-start;
+                            flex: 1;
+                        }
+
+                            .btn-plus {
+                            background-color: transparent;
+                            color: #651616ff;
+                            border: none;
+                            font-size: 1.2rem;
+                            cursor: pointer;
+                        }
+
+                        .btn-plus:hover {
+                            color: #571212ff;
+                            transform: translateY(-3px);
+                        }
+
+                        .form-group-presupuesto {
+                            display: flex;
+                            flex-direction: column;
+                            gap: 1rem;
+                            height: 160px;
+                            overflow-y: auto;
+                            padding-right: 8px;
+                        }
+
+                        .presupuesto-item {
+                            display: flex;
+                            align-items: center;
+                            gap: 1rem;
+                            flex-wrap: wrap;
+                        }
+
+                        .presupuesto-item input[type="number"] {
+                            width: 80px;
+                        }
+
+                        .form-secondary {
+                            display: grid;
+                            grid-template-columns: repeat(2, 1fr); /* 2 columnas */
+                            gap: 16px;
+                            margin-top: 12px;
+                            }
+
+                            .form-col,
+                            .form-group {
+                            display: flex;
+                            flex-direction: column;
+                            width: 100%;
+                            }
+                            
+                            .form-col1,
+                            .form-group {
+                            display: flex;
+                            flex-direction: column;
+                            width: 250;
+                            }
+
+                            .form-col label,
+                            .form-group label {
+                            margin-bottom: 4px;
+                            font-size: 14px;
+                            color: #ddd;
+                            }
+
+                            .form-group input {
+                            background-color: #2c2c2c;
+                            border: 1px solid #444;
+                            border-radius: 8px;
+                            padding: 8px;
+                            color: white;
+                            width: 100%;
+                            }
+
+                            .form-group input:focus {
+                            outline: none;
+                            border-color: #666;
+                            }
+
+
+                        .btn-remove {
+                            background-color: #651616ff;
+                            color: white;
+                            border: none;
+                            padding: 0.4rem 0.8rem;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            transition: background-color 0.2s ease-in-out;
+                        }
+
+                        .btn-add-producto {
+                            background-color: #651616ff;
+                            color: white;
+                            border: none;
+                            padding: 0.5rem 1rem;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            align-self: flex-start;
+                            transition: background-color 0.2s ease-in-out;
+                        }
+
+                        .btn-add-producto:hover {
+                            background-color: #571212ff;
+                            transform: translateY(-3px);
+                        }
+
+                        .form-submit {
+                            justify-content: center;
+                            margin-top: 1rem;
+                        }
+
+                        .submit-btn {
+                            background-color: #651616ff;
+                            color: white;
+                            border: none;
+                            padding: 0.8rem 1.5rem;
+                            font-size: 1rem;
+                            border-radius: 10px;
+                            cursor: pointer;
+                            transition: background-color 0.2s ease-in-out;
+                        }
+
+                        .submit-btn:hover {
+                            background-color: #571212ff;
+                            transform: translateY(-3px);
+                        }
+
+                        button.submit-btn {
+                            padding: 0.75rem 1rem;
+                            background-color: #8B0000;
+                            color: #fff;
+                            border: none;
+                            border-radius: 8px;
+                            font-size: 1rem;
+                            font-weight: 600;
+                            cursor: pointer;
+                            transition: background-color 0.3s ease;
+                        }
+
+                        button.submit-btn:hover {
+                            background-color: rgb(115, 8, 8);
+                            transform: translateY(-3px);
+                        }
+                        
+                        .titulo-pagina {
+                            font-size: 2rem;
+                            color: white;
+                            text-align: center;
+                            margin-top: 2px;
+                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+                        }
+
+                        
+                        input[type="text"],
+                        input[type="number"] {
+                            background-color: #2c2c2c;
+                            color: white;
+                            border: 1px solid #444;
+                            border-radius: 8px;
+                            padding: 0.6rem;
+                            font-size: 1rem;
+                            outline: none;
+                            transition: border-color 0.2s ease-in-out;
+                        }
+                        
+                        .form-secondary {
+                            display: flex;
+                            flex-direction: column;
+                            gap: 0.75rem;
+                            padding: 1rem;
+                            background-color: #1e1e1e;
+                            border-radius: 12px;
+                            box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+                            font-family: 'Segoe UI', sans-serif;
+                            color: #f0f0f0;
+                            max-width: 200px;
+                        }
+
+                        .label-box {
+                            display: flex;
+                            align-items: center;
+                            gap: 0.5rem;
+                            font-size: 1rem;
+                            cursor: pointer;
+                        }
+
+                        .checkbox-envio {
+                            width: 18px;
+                            height: 18px;
+                            accent-color: #8B0000; /* color vino para el checkbox */
+                        }
+
+                        .input-secondary {
+                            padding: 0.65rem 1rem;
+                            font-size: 1rem;
+                            border-radius: 8px;
+                            border: 1px solid #ccc;
+                            background-color: #f9f9f9;
+                            color: #333;
+                            transition: border-color 0.3s, box-shadow 0.3s;
+                        }
+
+                        .input-secondary:focus {
+                            border-color: #8B0000;
+                            box-shadow: 0 0 5px rgba(139, 0, 0, 0.6);
+                            outline: none;
+                        }
+
+                        .form-col label {
+                            display: flex;
+                            align-items: center;
+                            color: white;
+                            font-weight: bold;
+                            margin-bottom: 0.5rem;
+                        }
+
+                        .form-col input[type="date"] {
+                            width: 220px;
+                            background-color: #2c2c2c;
+                            color: white;
+                            border: 1px solid #444;
+                            border-radius: 8px;
+                            padding: 0.4rem 0.6rem;
+                            font-size: 1rem;
+                            outline: none;
+                        }
+
+                        .form-col input[type="date"]::-webkit-calendar-picker-indicator {
+                            filter: invert(1); /* icono blanco en navegadores webkit */
+                        }
+
 
                 `}
             </style>

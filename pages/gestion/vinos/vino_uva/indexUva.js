@@ -9,14 +9,12 @@ const { default: Link } = require("next/link")
 const indexUva = () => {
     const router = useRouter();
     const [uvas,setUvas] = useState([]);
-    const [tiposVino,setTiposVino] = useState([]);
 
     const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
     const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
     
     
     const [filtroNombreUva, setFiltroNombreUva] = useState('');
-    const [filtroNombreTipoVino, setFiltroNombreTipoVino] = useState('');
     const [orden, setOrden] = useState({ campo: '', asc: true });
 
     const toggleOrden = (campo) => {
@@ -30,10 +28,8 @@ const indexUva = () => {
     .filter(c => {
         const uvaNombre = c.name.toLowerCase().includes(filtroNombreUva.toLowerCase());
         
-        const tipos = tiposVino.find(loc => loc._id === c.tipo)?.name || '';
-        const coincideTipo = tipos.toLowerCase().includes(filtroNombreTipoVino.toLowerCase());
         
-        return uvaNombre && coincideTipo;
+        return uvaNombre;
     })
     .sort((a, b) => {
         const campo = orden.campo;
@@ -41,12 +37,6 @@ const indexUva = () => {
 
         let aVal = a[campo];
         let bVal = b[campo];
-
-        // Si el campo es localidad, obtenemos el nombre para ordenar
-        if (campo === 'tipoVino') {
-        aVal = tiposVino.find(loc => loc._id === a.tipo)?.name || '';
-        bVal = tiposVino.find(loc => loc._id === b.tipo)?.name || '';
-        }
 
         if (typeof aVal === 'string') aVal = aVal.toLowerCase();
         if (typeof bVal === 'string') bVal = bVal.toLowerCase();
@@ -66,20 +56,9 @@ const indexUva = () => {
                     })
                 }
     
-    const fetchDataTiposVino = ()=>{
-            fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/tipoVino`)
-                .then((a) => {
-                            return a.json()
-                })
-                    .then (({data}) => {
-                        setTiposVino(data);
-                    })
-                }
-    
 
     useEffect(() => {  
-        fetchData()
-        fetchDataTiposVino()
+        fetchData();
     }, [])
 
     const deleteUva = async(uvaID) => {
@@ -161,12 +140,6 @@ const indexUva = () => {
                         value={filtroNombreUva}
                         onChange={(e) => setFiltroNombreUva(e.target.value)}
                     />
-                    <input
-                        type="text"
-                        placeholder="Filtrar por tipo de vino..."
-                        value={filtroNombreTipoVino}
-                        onChange={(e) => setFiltroNombreTipoVino(e.target.value)}
-                    />
                 </div>
 
                 <div className="tabla-scroll">
@@ -174,20 +147,15 @@ const indexUva = () => {
                         <thead>
                         <tr className="fila">
                             <th onClick={() => toggleOrden('name')}>Nombre ⬍</th>
-                            <th onClick={() => toggleOrden('tipoVino')}>Tipo de Vino ⬍</th>
                             <th>Acciones</th>
                         </tr>
                         </thead>
                         <tbody>
                             {
-                                uvasFiltradas.map(({_id, name, tipo }) => {
-                                    const tipoVinoEncontrado = tiposVino.find((p)=>{return p._id === tipo})
+                                uvasFiltradas.map(({_id, name }) => {
                                     return (
                                     <tr key={_id}>
                                         <td className="columna">{name}</td>
-                                        <td className="columna">
-                                            {tipoVinoEncontrado?.name}
-                                        </td>
                                         <td className="columna">
                                             <div className="acciones">
                                                 <button onClick={() => setMostrarModalUpdate(_id)} className="btn-icon">

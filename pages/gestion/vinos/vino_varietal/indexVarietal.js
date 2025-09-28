@@ -9,14 +9,12 @@ const { default: Link } = require("next/link")
 const indexVarietal = () => {
     const router = useRouter();
     const [varietalesVino,setVarietalesVino] = useState([]);
-    const [tiposUva,setUva] = useState([]);
 
     const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
     const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
     
     
     const [filtroNombreVarietal, setFiltroNombreVarietal] = useState('');
-    const [filtroNombreUva, setFiltroNombreUva] = useState('');
     const [orden, setOrden] = useState({ campo: '', asc: true });
 
     const toggleOrden = (campo) => {
@@ -30,10 +28,7 @@ const indexVarietal = () => {
     .filter(c => {
         const varietalNombre = c.name.toLowerCase().includes(filtroNombreVarietal.toLowerCase());
         
-        const uvas = tiposUva.find(loc => loc._id === c.uva)?.name || '';
-        const coincideUva = uvas.toLowerCase().includes(filtroNombreUva.toLowerCase());
-        
-        return varietalNombre && coincideUva;
+        return varietalNombre;
     })
     .sort((a, b) => {
         const campo = orden.campo;
@@ -41,12 +36,6 @@ const indexVarietal = () => {
 
         let aVal = a[campo];
         let bVal = b[campo];
-
-        // Si el campo es localidad, obtenemos el nombre para ordenar
-        if (campo === 'tipoUva') {
-        aVal = tiposUva.find(loc => loc._id === a.uva)?.name || '';
-        bVal = tiposUva.find(loc => loc._id === b.uva)?.name || '';
-        }
 
         if (typeof aVal === 'string') aVal = aVal.toLowerCase();
         if (typeof bVal === 'string') bVal = bVal.toLowerCase();
@@ -64,22 +53,10 @@ const indexVarietal = () => {
                     .then (({data}) => {
                         setVarietalesVino(data);
                     })
-                }
-    
-    const fetchDataTiposUva = ()=>{
-            fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/uva`)
-                .then((a) => {
-                            return a.json()
-                })
-                    .then (({data}) => {
-                        setUva(data);
-                    })
-                }
-    
+                }    
 
     useEffect(() => {  
-        fetchData()
-        fetchDataTiposUva()
+        fetchData();
     }, [])
 
     const deleteVarietal = async(varietalID) => {
@@ -161,12 +138,6 @@ const indexVarietal = () => {
                         value={filtroNombreVarietal}
                         onChange={(e) => setFiltroNombreVarietal(e.target.value)}
                     />
-                    <input
-                        type="text"
-                        placeholder="Filtrar por tipo de uva..."
-                        value={filtroNombreUva}
-                        onChange={(e) => setFiltroNombreUva(e.target.value)}
-                    />
                 </div>
 
                 <div className="tabla-scroll">
@@ -174,20 +145,15 @@ const indexVarietal = () => {
                        <thead>
                             <tr className="fila">
                                 <th onClick={() => toggleOrden('name')}>Nombre ⬍</th>
-                                <th onClick={() => toggleOrden('tipoUva')}>Tipo de Uva ⬍</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             {
                                 varietalesFiltrados.map(({_id, name, uva }) => {
-                                    const tipoUvaEncontrado = tiposUva.find((p)=>{return p._id === uva})
                                     return (
                                     <tr key={_id}>
                                         <td className="columna">{name}</td>
-                                        <td className="columna">
-                                            {tipoUvaEncontrado?.name}
-                                        </td>
                                         <td className="columna">
                                             <div className="acciones">
                                                 <button onClick={() => setMostrarModalUpdate(_id)} className="btn-icon">

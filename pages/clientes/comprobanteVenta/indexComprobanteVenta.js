@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaHome, FaArrowLeft, FaTrash , FaFileInvoice  } from "react-icons/fa";
+import { FaPlus, FaHome, FaArrowLeft, FaTrash , FaPrint , FaFileInvoice  } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import FormularioComprobanteVentaCreate from './new_ComprobanteVenta'
 import FormularioCreateRemitoCliente from '../remito/create_RemitoCliente'
@@ -31,10 +31,11 @@ const indexComprobantesVenta = () => {
       const clienteNombre = clientes.find(d => d._id === p.cliente)?.name || '';
       const coincideNombre = clienteNombre.toLowerCase().includes(filtroNombre.toLowerCase())
       
-      const comprobanteVentaID = pedidos.find(d => d._id === p.notaPedido)?._id || '';
-      const coincidePresupuesto = comprobanteVentaID.toLowerCase().includes(filtroNotaPedido.toLowerCase())
+      const pedidoID = pedidos.find(d => d._id === p.notaPedido)?._id || '';
+      const coincidePedido = pedidoID.toString().includes(filtroNotaPedido);
+
       
-      return coincideNombre && coincidePresupuesto;
+      return coincideNombre && coincidePedido;
     })
     .sort((a, b) => {
       const campo = orden.campo;
@@ -99,6 +100,33 @@ const indexComprobantesVenta = () => {
         fetchData_pedidos();
         fetchData_Clientes();
     }, [] )
+
+    const imprimirComprobanteVenta = async (id) => {
+        if (!id) {
+            console.error("Error con el ID del comprobante de venta al querer imprimirlo.");
+            return;
+        }
+
+        try {
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/comprobanteVenta/imprimir/${id}`
+            );
+
+            if (!res.ok) throw new Error("No se pudo generar el PDF");
+
+            // 📌 Convertir respuesta en blob (PDF)
+            const blob = await res.blob();
+
+            // Crear una URL temporal para el PDF
+            const url = URL.createObjectURL(blob);
+
+            // Abrir en una nueva pestaña
+            window.open(url, "_blank");
+
+        } catch (err) {
+            console.error("Error al imprimir comprobante de venta:", err);
+        }
+    };
 
     const deleteComprobanteVenta = async(comprobanteVentaID) => {
         if(!comprobanteVentaID) {
@@ -223,6 +251,9 @@ const indexComprobantesVenta = () => {
                                                 >
                                                     <FaFileInvoice  />
                                                 </button>
+                                                    <button onClick={() => imprimirComprobanteVenta(_id)}  className="btn-icon" title="Imprimir">
+                                                        <FaPrint />
+                                                    </button>
                                                 <button onClick={() => deleteComprobanteVenta(_id)}  className="btn-icon" title="Eliminar">
                                                     <FaTrash />
                                                 </button>

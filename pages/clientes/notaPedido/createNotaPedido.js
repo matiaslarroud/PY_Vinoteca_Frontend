@@ -16,8 +16,33 @@ const initialDetalle = {
          tipoProducto: "", producto: "", cantidad: 0, precio: 0, subtotal: 0, notaPedido:'' 
     };
 
-const createNotaPedido = ({exito}) => {
-    const [notaPedido , setNotaPedido] = useState(initialStateNotaPedido);
+const createNotaPedido = ({exito , param , tipo}) => {
+    const [notaPedido, setNotaPedido] = useState(() => {
+        if (tipo === "cliente") {
+            return {
+                ...initialStateNotaPedido,
+                cliente: param
+            }
+        }
+        if (tipo === "presupuesto") {
+            fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto/${param}`)
+                .then((a)=>{
+                    return a.json();
+                })
+                    .then((s)=>{
+                        if(s.ok){
+                            setNotaPedido({
+                                ...initialStateNotaPedido,
+                                presupuesto: param,
+                                empleado: s.data.empleado,
+                                cliente: s.data.cliente,
+                            });
+                            agregarDetallePresupuesto(param);
+                        }
+                    })            
+        }
+        return initialStateNotaPedido
+    });
     
     const [clientes,setClientes] = useState([])
     const [presupuestos,setPresupuestos] = useState([])
@@ -130,6 +155,7 @@ const createNotaPedido = ({exito}) => {
         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente`)
             .then((a)=>{return a.json()})
                 .then((s)=>{
+
                     setClientes(s.data)
                 })
     }
@@ -149,6 +175,7 @@ const createNotaPedido = ({exito}) => {
                     setMediosPago(s.data)
                 })
     }
+
     useEffect(()=>{
         setDetalles([]);
         fetchData_Clientes();

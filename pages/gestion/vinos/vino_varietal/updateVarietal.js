@@ -5,7 +5,6 @@ const initialState = {name:'',tipoUva:''}
 
 const updateVarietal = ({varietalID, exito}) => {
     const [varietal , setVarietal] = useState(initialState);
-    const [tiposUva, setTiposUva] = useState([])
     
     const fetchDataVarietal = async(varietalID) => {
             await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/varietal/${varietalID}`)
@@ -22,19 +21,9 @@ const updateVarietal = ({varietalID, exito}) => {
                         })
                     .catch((err) => {console.log('No se encontro varietal con este id. \n Error: ',err)})
     }
-
-    const fetchDataTiposUva = ()=>{
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/uva`)
-            .then((a)=>{return a.json()})
-                .then((s)=>{
-                    setTiposUva(s.data)
-                })
-            .catch((err)=>{console.log(err)})
-    }
     useEffect(() => {
         if(!varietalID){return}
         fetchDataVarietal(varietalID);
-        fetchDataTiposUva()
     } , [varietalID]);
 
     const inputChange = (e) => {
@@ -54,8 +43,7 @@ const updateVarietal = ({varietalID, exito}) => {
                 method: 'PUT',
                 headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({
-                    name: varietal.name,
-                    tipoUva: varietal.tipoUva
+                    name: varietal.name
                 })
             }
         )
@@ -76,22 +64,6 @@ const updateVarietal = ({varietalID, exito}) => {
                     <div className="form-group input-centered">
                         <label htmlFor="nombre">Nombre:</label>
                         <input type="text" onChange={inputChange} value={varietal.name} name="name" placeholder="Ingresa el nombre del varietal" required></input>
-                    </div>
-                    
-                    <div className="form-group input-centered">
-                        <label htmlFor="nombre">Tipo de Uva:</label>
-                        <select name="tipoUva" onChange={inputChange} value={varietal.tipoUva}>
-                            <option value=''>Seleccione un tipo de uva...</option>
-                            {
-                                tiposUva.map(({_id,name}) => 
-                                    (
-                                        <option key={_id} value={_id}>
-                                            {name}
-                                        </option>                                        
-                                    )
-                                )
-                            }
-                        </select>
                     </div>
                     </fieldset>
                     <div className="button-area">

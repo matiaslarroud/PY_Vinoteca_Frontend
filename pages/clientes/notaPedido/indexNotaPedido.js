@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit , FaPrint , FaFileInvoiceDollar } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import FormularioNotaPedidoUpdate from './updateNotaPedido'
-import FormularioNotaPedidoCreate from './createNotaPedido'
+import FormularioNotaPedidoCreate from './newNotaPedido'
 import FormularioComprobanteVentaByNotaPedido from '../comprobanteVenta/create_ComprobanteVenta'
 
 const { default: Link } = require("next/link")
@@ -276,9 +276,6 @@ const indexPedido = () => {
                                                 <button onClick={() => imprimirPedido(_id)}  className="btn-icon" title="Imprimir">
                                                     <FaPrint />
                                                 </button>
-                                                <button onClick={() => deletePedido(_id)}  className="btn-icon" title="Eliminar">
-                                                    <FaTrash />
-                                                </button>
                                                 <button   className="btn-icon" title="Generar comprobante de venta">
                                                     <FaFileInvoiceDollar onClick={() => {
                                                         if (facturado) {
@@ -287,6 +284,9 @@ const indexPedido = () => {
                                                         }
                                                         setMostrarModalComprobanteVenta(_id);
                                                     }} />
+                                                </button>
+                                                <button onClick={() => deletePedido(_id)}  className="btn-icon" title="Eliminar">
+                                                    <FaTrash />
                                                 </button>
                                             </div>
                                         </td>

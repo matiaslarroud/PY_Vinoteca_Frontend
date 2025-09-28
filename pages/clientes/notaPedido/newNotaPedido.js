@@ -1,22 +1,22 @@
 const { useState, useEffect } = require("react")
-import Select from 'react-select';      
+import Select from 'react-select';          
 import { FaTrash} from "react-icons/fa";
 import FormularioEmpleadoCreate from '../../gestion/general/empleado/createEmpleado'
-import FormularioClienteCreate from '../../clientes/createCliente'
-import FormularioMedioPagoCreate from '../../gestion/general/medioPago/createMedioPago'    
+import FormularioClienteCreate from '../createCliente'
+import FormularioMedioPagoCreate from '../../gestion/general/medioPago/createMedioPago'
 
 const { default: Link } = require("next/link")
 
 const initialStateNotaPedido = {
-        total:0, fecha:'', fechaEntrega:'', cliente:'', empleado:'',
-        envio:false, presupuesto:'', medioPago:'',
+        total:'', fecha:'', fechaEntrega:'', cliente:'', empleado:'',
+        envio:false , presupuesto:'', medioPago:'',
         provincia:0 , localidad:0 , barrio:0, calle:0,altura:0,deptoNumero:0,deptoLetra:0
     }
 const initialDetalle = { 
-        tipoProducto: '', producto: "", cantidad: 0, precio: 0, subtotal: 0, notaPedido:'' ,
+         tipoProducto: "", producto: "", cantidad: 0, precio: 0, subtotal: 0, notaPedido:'' 
     };
 
-const updateNotaPedido = ({exito,notaPedidoID}) => {
+const newNotaPedido = ({exito}) => {
     const [notaPedido , setNotaPedido] = useState(initialStateNotaPedido);
     
     const [clientes,setClientes] = useState([])
@@ -27,26 +27,25 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
     const [productos,setProductos] = useState([]);
     const [tipoProductos,setTipoProductos] = useState([]);
     const [habilitado, setHabilitado] = useState(false);
-    const [datosCargados, setDatosCargados] = useState(false);
     const [provincias,setProvincias] = useState([])
     const [localidades,setLocalidades] = useState([])
     const [barrios,setBarrios] = useState([])
     const [calles,setCalles] = useState([])
-
+    
     const detallesValidos = detalles.filter(d => d.producto && d.cantidad > 0);
     const puedeGuardar = detallesValidos.length > 0;
 
-    const fetchData_Productos = async () => {
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products`)
-            .then((a)=>{
-                return a.json();
+    const fetchData_Presupuestos = () => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if(s.ok){
+                    setPresupuestos(s.data)
+                }
             })
-                .then((s)=>{
-                    if(s.ok){
-                        setProductos(s.data);
-                    }
-                })
-            .catch((err)=>{console.log("Error al cargar vinos.\nError: ",err)})
+        .catch((err)=>{console.log("Error al cargar vinos.\nError: ",err)})
     }
     
     const fetchData_TipoProductos = () => {
@@ -60,6 +59,19 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                 }
             })
         .catch((err)=>{console.log("Error al cargar tipos de productos.\nError: ",err)})
+    }
+
+    const fetchData_Productos = () => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if(s.ok){
+                    setProductos(s.data)
+                }
+            })
+        .catch((err)=>{console.log("Error al cargar productos.\nError: ",err)})
     }
     
     const fetchData_Provincias = () => {
@@ -113,125 +125,43 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
             })
         .catch((err)=>{console.log("Error al cargar calles.\nError: ",err)})
     }
-
-    const ajustarStockTemporal = (param) => {
-        if (productos.length === 0) return; 
-        const nuevosProductos = [...productos];
-
-        param.forEach((p) => {
-            if (p.producto) {
-            const prod = nuevosProductos.find((a) => a._id === p.producto);
-            
-            if (prod) {
-                prod.stock += p.cantidad;
-            }
-            }
-        });
-
-        setProductos(nuevosProductos);
-    };
-
-    const fetchData_NotaPedidoDetalle = async (notaPedidoID) => {
-    await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedidoDetalle/notaPedido/${notaPedidoID}`)
-        .then((a) => a.json())
-        .then((s) => {
-            if (s.ok) {
-                setDetalles(
-                    s.data.map(d => ({
-                        ...initialDetalle,
-                        ...d
-                    }))
-                );
-            }
-        })
-        .catch((err) => console.log("Error al cargar vinos.\nError: ", err));
-};
-
-    const fetchData_NotaPedido = async (notaPedidoID) => {
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido/${notaPedidoID}`)
-            .then((a)=>{
-                return a.json();
-            })
-                .then((s)=>{
-                    const total = s.data.total;
-                    const cliente = Number(s.data.cliente);
-                    const fechaEntrega = s.data.fechaEntrega.split("T")[0];
-                    const empleado = Number(s.data.empleado);
-                    const envio = s.data.envio;
-                    const presupuesto = Number(s.data.presupuesto);
-                    const medioPago = Number(s.data.medioPago);
-                    const provincia = Number(s.data.provincia);
-                    const localidad = Number(s.data.localidad);
-                    const barrio = Number(s.data.barrio);
-                    const calle = Number(s.data.calle);
-                    const altura = Number(s.data.altura);
-                    const deptoNumero = s.data.deptoNumero;
-                    const deptoLetra = s.data.deptoLetra;
-
-                    setNotaPedido({
-                        total: total , cliente: cliente , empleado: empleado , envio: envio , 
-                        presupuesto: presupuesto , medioPago: medioPago , fechaEntrega: fechaEntrega , provincia: provincia , localidad: localidad , 
-                        barrio: barrio , calle: calle , altura: altura , deptoNumero: deptoNumero , deptoLetra: deptoLetra
-                    })
-                    setHabilitado(s.data.envio ?? false);
-                })
-            .catch((err)=>{console.log("Error al cargar nota de pedido.\nError: ",err)})
-    }
-
-
-    const fetchData_Presupuestos = async () => {
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto`)
-            .then((a)=>{
-                return a.json();
-            })
-                .then((s)=>{
-                    if(s.ok){
-                        setPresupuestos(s.data)
-                    }
-                })
-            .catch((err)=>{console.log("Error al cargar vinos.\nError: ",err)})
-    }
     
-    
-    const fetchData_Clientes = async () => {
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente`)
+    const fetchData_Clientes = () => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente`)
             .then((a)=>{return a.json()})
                 .then((s)=>{
                     setClientes(s.data)
                 })
     }
 
-    const fetchData_Empleados = async () => {
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/empleado`)
+    const fetchData_Empleados = () => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/empleado`)
             .then((a)=>{return a.json()})
                 .then((s)=>{
                     setEmpleados(s.data)
                 })
     }
 
-    const fetchData_MediosPago = async () => {
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/mediopago`)
+    const fetchData_MediosPago = () => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/mediopago`)
             .then((a)=>{return a.json()})
                 .then((s)=>{
                     setMediosPago(s.data)
                 })
     }
-     useEffect(() => {
-        if (!notaPedidoID) return;
-
+    useEffect(()=>{
+        setDetalles([]);
         fetchData_Clientes();
         fetchData_Empleados();
-        fetchData_MediosPago();
-        fetchData_TipoProductos();
         fetchData_Presupuestos();
+        fetchData_MediosPago();
         fetchData_Productos();
+        fetchData_TipoProductos();
         fetchData_Provincias();
         fetchData_Localidades();
         fetchData_Barrios();
         fetchData_Calles();
-        fetchData_NotaPedido(notaPedidoID);
-        fetchData_NotaPedidoDetalle(notaPedidoID);
-    }, [notaPedidoID]);
+    }, [])
 
     useEffect(() => {
         if (!productos.length || !detalles.length) return;
@@ -260,23 +190,21 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
         });
     };
 
-    const formatDateInput = (dateStr) => {
-        if (!dateStr) return '';
-        return new Date(dateStr).toISOString().split('T')[0]; 
-    };
-
 
     const clickChange = async(e) => {
-
-         e.preventDefault();
-         const bodyData = {
+        e.preventDefault();
+        const bodyData = {
             total: notaPedido.total,
             cliente: notaPedido.cliente,
             empleado: notaPedido.empleado,
             medioPago: notaPedido.medioPago,
-            fechaEntrega: notaPedido.fechaEntrega.split("T")[0],
+            fechaEntrega: notaPedido.fechaEntrega,
             envio: notaPedido.envio
         };
+
+        if (notaPedido.presupuesto) {
+            bodyData.presupuesto = notaPedido.presupuesto;
+        }
         
         if(notaPedido.envio){
             bodyData.provincia = notaPedido.provincia;
@@ -288,36 +216,14 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
             bodyData.deptoLetra = notaPedido.deptoLetra;
         }
 
-        if (notaPedido.presupuesto) {
-            bodyData.presupuesto = notaPedido.presupuesto;
-        }
-
-
-         const resNotaPedido = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido/${notaPedidoID}`,
-            {
-                method: 'PUT',
-                headers: {'Content-Type':'application/json'},
-                body: JSON.stringify(bodyData)
-            }
-        )
+        const resNotaPedido = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bodyData)
+        })
 
         const notaPedidoCreado = await resNotaPedido.json();
-        const identificador = notaPedidoCreado.data._id;
-
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedidoDetalle/${identificador}`,
-            {
-                method:'DELETE',
-                headers: {
-                    'Content-Type':'application/json',
-                }
-            }
-        ).then((a)=>{return a.json()})
-            .then((res)=>{
-                console.log(res.message);
-            })
-            .catch((err)=>{
-                console.log("Error al enviar producto para su eliminación. \n Error: ",err);
-            })
+        const notaPedidoID = notaPedidoCreado.data._id;
 
         // GUARDAMOS DETALLES
         for (const detalle of detalles) {
@@ -331,9 +237,11 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                     subtotal: detalle.subtotal,
                     notaPedido: notaPedidoID
             })
-                });
+            
+            
+            });
             if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
-    
+        
             const resStock = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/stock/${detalle.producto}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
@@ -343,23 +251,13 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
             });
 
             if (!resStock.ok) throw new Error("Error al actualizar stock del producto");
+            
+            setDetalles([initialDetalle]);
+            setNotaPedido(initialStateNotaPedido);
+            exito();
         }
-       
-        
-        setDetalles([initialDetalle]);
-        setNotaPedido(initialStateNotaPedido);
-        exito();
     }
-
-    const inputChange = (e) => {
-        const value = e.target.value;
-        const name = e.target.name;
-        
-        setNotaPedido({
-            ...notaPedido , 
-                [name]:value
-        })   
-    }
+  
 
 
     const handleDetalleChange = (index, field, value) => {
@@ -400,15 +298,48 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
             ...notaPedido,
             [name]: value,
         });
+
+        if (name === 'presupuesto' && value) {
+            agregarDetallePresupuesto(value);
+        }
     };
 
+    const inputChange = (e) => {
+        const value = e.target.value;
+        const name = e.target.name;
+        
+        setNotaPedido({
+            ...notaPedido , 
+                [name]:value
+        })   
+    }
+
     const agregarDetalle = () => {
-        setDetalles([...detalles, { ...{tipoProducto:"", producto: "", cantidad: 0, precio: 0, subtotal: 0 } }]);
+        setDetalles([...detalles, { ...{tipoProducto:"" , producto: "", cantidad: 0, precio: 0, subtotal: 0 } }]);
     };
     
+    const agregarDetallePresupuesto = async (presupuestoID) => {
+    try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuestoDetalle/presupuesto/${presupuestoID}`);
+        const s = await res.json();
+
+        if (s.ok) {
+            setDetalles(s.data);
+            calcularTotal(s.data);
+        } else {
+            console.error('Error al cargar detalles del presupuesto:', s.message);
+        }
+    } catch (error) {
+        console.error('Error de red al cargar detalles del presupuesto:', error);
+    }
+};
+
+    
     const calcularTotal = (detalles) => {
-        const totalNotaPedido = detalles.reduce((acc, d) => acc + d.subtotal, 0);
-        setNotaPedido((prev) => ({ ...prev, total:totalNotaPedido }));
+        const totalPedido = Array.isArray(detalles) && detalles.length > 0
+            ? detalles.reduce((acc, d) => acc + (d.subtotal || 0), 0)
+                : 0;
+        setNotaPedido((prev) => ({ ...prev, total:totalPedido }));
     };
 
     const [mostrarModalCreate1, setMostrarModalCreate1] = useState(false);
@@ -432,18 +363,16 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
     const opciones_clientes = clientes.map(v => ({ value: v._id,label: v.name }));
     const opciones_mediosPago = mediosPago.map(v => ({ value: v._id,label: v.name }));
     const opciones_presupuestos = presupuestos.filter((s)=>{return s.cliente === notaPedido.cliente })
-            .map(v => {
-                const cliente = clientes.find(c => c._id === v.cliente);
-                return {
-                    value: v._id,
-                    label: `${v.fecha.split("T")[0]} - $${v.total}`,
-                    cliente: v.cliente,
-                    total: v.total
-                };
-            }
-        );
-    
-    
+        .map(v => {
+            const cliente = clientes.find(c => c._id === v.cliente);
+            return {
+                value: v._id,
+                label: `${v.fecha.split("T")[0]} - $${v.total}`,
+                cliente: v.cliente,
+                total: v.total
+            };
+        }
+    );
     const opciones_provincias = provincias.map(v => ({ value: v._id,label: v.name }));
     const opciones_localidades = localidades
         .filter((s)=>{return s.provincia === Number(notaPedido.provincia)})
@@ -454,7 +383,6 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
     const opciones_calles = calles
         .filter((s)=>{return s.barrio === Number(notaPedido.barrio)})
         .map(v => ({ value: v._id,label: v.name }));
-    
 
     return(
         <>
@@ -503,7 +431,7 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
             <div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
-                        <h1 className="titulo-pagina">Modificar Nota Pedido</h1>
+                        <h1 className="titulo-pagina">Cargar Nota Pedido</h1>
                     </div>
                 </div>
 
@@ -838,7 +766,7 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                                             placeholder="Cantidad"
                                             min={1}
                                             max={opciones_productos.find((p) => p.value === d.producto)?.stock || 0}
-                                            value={d.cantidad ?? 0}
+                                            value={d.cantidad}
                                             onChange={(e) => handleDetalleChange(i, "cantidad", e.target.value)}
                                             required
                                         />
@@ -1156,7 +1084,7 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                                         clickChange(e);
                                     }}
                                     >
-                                    Guardar
+                                    Cargar Pedido
                                     </button>
                                 </div>
                             </div>
@@ -1164,7 +1092,7 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                     </div>
                 </form>
             </div>
-             <style jsx>
+            <style jsx>
                 {`
                         .modal {
                             position: fixed;
@@ -1544,4 +1472,4 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
     )
 }
 
-export default updateNotaPedido;
+export default newNotaPedido;

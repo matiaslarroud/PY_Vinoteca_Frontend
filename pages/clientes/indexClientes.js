@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit , FaFileInvoiceDollar, FaFileAlt, FaReceipt, FaTruck  } from "react-icons/fa";
+import { FaPlus, FaShoppingCart , FaHome, FaArrowLeft, FaTrash, FaEdit , FaFileInvoiceDollar, FaFileAlt, FaReceipt, FaTruck  } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import Link from "next/link";
 import FormularioClienteUpdate from './updateCliente'
 import FormularioClienteCreate from './createCliente'
+import RightSidebar from "@/components/Clientes_rigth_sidebar";
+import CreateNotaPedido from "./notaPedido/createNotaPedido";
 
 export default function indexClientes() {
 const router = useRouter();
@@ -11,6 +13,7 @@ const [clientes,setClientes] = useState([]);
 const [localidades,setLocalidades] = useState([]);    
 const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
 const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
+const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
 
 const [filtroClienteNombre, setFiltroClienteNombre] = useState('');
 const [filtroClienteLocalidad, setFiltroClienteLocalidad] = useState('');  
@@ -148,6 +151,29 @@ const deleteCliente = async(clienteID) => {
     </div>
   )}
 
+  {mostrarPedidoCreate && (
+    <div className="modal">
+      <div className="modal-content">
+        <button className="close" onClick={() => 
+            {
+                setmostrarPedidoCreate(null)
+                fetchData()
+            }
+        }>
+            &times;
+        </button>
+        <CreateNotaPedido 
+            param={mostrarPedidoCreate}
+            tipo="cliente"
+            exito={() => 
+                {
+                    setmostrarPedidoCreate(false)
+                    fetchData()
+                }}
+        />
+      </div>
+    </div>
+  )}
 
   <h1 className="titulo-pagina">Clientes</h1>
   <div className="botonera">
@@ -164,25 +190,7 @@ const deleteCliente = async(clienteID) => {
         </button>               
   </div>
 
-  <div className="menu-grid">
-  <Link href="./presupuesto/indexPresupuesto" className="boton-acceso">
-    <FaFileInvoiceDollar className="icono-menu" />
-    <span>Presupuesto</span>
-  </Link>
-  <Link href="./notaPedido/indexNotaPedido" className="boton-acceso">
-    <FaFileAlt className="icono-menu" />
-    <span>Nota de Pedido</span>
-  </Link>
-  <Link href="./comprobanteVenta/indexComprobanteVenta" className="boton-acceso">
-    <FaReceipt className="icono-menu" />
-    <span>Comprobante de Venta</span>
-  </Link>
-  <Link href="./remito/indexRemito" className="boton-acceso">
-    <FaTruck className="icono-menu" />
-    <span>Remito</span>
-  </Link>
-</div>
-
+  <RightSidebar/>
 
   <div className="contenedor-tabla">
     <div className="filtros">
@@ -220,6 +228,9 @@ const deleteCliente = async(clienteID) => {
                       <td className="columna">{localidadEncontrada?.name}</td>
                       <td className="columna">
                         <div className="acciones">
+                          <button onClick={() => setmostrarPedidoCreate(_id)} className="btn-icon" title="Generar Pedido">
+                              <FaShoppingCart />
+                          </button>
                           <button onClick={() => setMostrarModalUpdate(_id)} className="btn-icon" title="Modificar">
                               <FaEdit />
                           </button>

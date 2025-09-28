@@ -5,16 +5,7 @@ const { default: Link } = require("next/link")
 const initialState = {name:'', tipoVino:''}
 const formUva = ({exito}) => {
     const [uva , setUva] = useState(initialState);
-    const [tiposVino, setTiposVinos] = useState([])
     
-    const fetchTiposVino = () => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/tipoVino`)
-            .then((a)=>{return a.json()})
-                .then((s)=>{
-                    setTiposVinos(s.data);
-                })
-                .catch((err)=>{console.log(err)})
-    }
 
     const inputChange = (e) => {
         const value = e.target.value;
@@ -26,10 +17,6 @@ const formUva = ({exito}) => {
         })   
     }
 
-    useEffect(()=>{
-        fetchTiposVino()
-    } , [])
-
     const clickChange = (e) => {
         e.preventDefault();
          fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/uva`,
@@ -37,8 +24,7 @@ const formUva = ({exito}) => {
                 method: 'POST',
                 headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({
-                    name: uva.name,
-                    tipoVino: uva.tipoVino
+                    name: uva.name
                 })
             }
          ).then((a) => {
@@ -62,22 +48,6 @@ const formUva = ({exito}) => {
                     <div className="form-group input-centered">
                         <label htmlFor="nombre">Nombre:</label>
                         <input type="text" onChange={inputChange} value={uva.name} name="name" placeholder="Ingresa el nombre de la uva" required></input>
-                    </div>
-                    
-                    <div className="form-group input-centered">
-                        <label htmlFor="nombre">Tipo de Vino:</label>
-                        <select name="tipoVino" onChange={inputChange} value={uva.tipoVino}>
-                            <option value=''>Seleccione un tipo de vino...</option>
-                            {
-                                tiposVino.map(({_id,name}) => 
-                                    (
-                                        <option key={_id} value={_id}>
-                                            {name}
-                                        </option>                                        
-                                    )
-                                )
-                            }
-                        </select>
                     </div>
                     </fieldset>
                     <div className="button-area">

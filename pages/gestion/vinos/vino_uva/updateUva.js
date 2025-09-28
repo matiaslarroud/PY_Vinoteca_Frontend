@@ -5,7 +5,6 @@ const initialState = {name:'',tipoVino:''}
 
 const updateUva = ({uvaID,exito}) => {
     const [uva , setUva] = useState(initialState);
-    const [tiposVino, setTiposVino] = useState([])
     
     const fetchDataUva = async(uvaID) => {
             await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/uva/${uvaID}`)
@@ -22,19 +21,9 @@ const updateUva = ({uvaID,exito}) => {
                         })
                     .catch((err) => {console.log('No se encontro uva con este id. \n Error: ',err)})
     }
-
-    const fetchDataTiposVino = ()=>{
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/tipoVino`)
-            .then((a)=>{return a.json()})
-                .then((s)=>{
-                    setTiposVino(s.data)
-                })
-            .catch((err)=>{console.log(err)})
-    }
     useEffect(() => {
         if(!uvaID){return}
         fetchDataUva(uvaID);
-        fetchDataTiposVino()
     } , [uvaID]);
 
     const inputChange = (e) => {
@@ -54,8 +43,7 @@ const updateUva = ({uvaID,exito}) => {
                 method: 'PUT',
                 headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({
-                    name: uva.name,
-                    tipoVino: uva.tipoVino
+                    name: uva.name
                 })
             }
         )
@@ -76,22 +64,6 @@ const updateUva = ({uvaID,exito}) => {
                     <div className="form-group input-centered">
                         <label htmlFor="nombre">Nombre:</label>
                         <input type="text" onChange={inputChange} value={uva.name} name="name" placeholder="Ingresa el nombre de la uva" required></input>
-                    </div>
-                    
-                    <div className="form-group input-centered">
-                        <label htmlFor="nombre">Tipo de Vino:</label>
-                        <select name="tipoVino" onChange={inputChange} value={uva.tipoVino}>
-                            <option value=''>Seleccione un tipo de vino...</option>
-                            {
-                                tiposVino.map(({_id,name}) => 
-                                    (
-                                        <option key={_id} value={_id}>
-                                            {name}
-                                        </option>                                        
-                                    )
-                                )
-                            }
-                        </select>
                     </div>
                     </fieldset>
                     <div className="button-area">

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaHome, FaArrowLeft, FaTrash , FaFileInvoice  } from "react-icons/fa";
+import { FaPlus, FaHome, FaArrowLeft, FaTrash ,FaPrint  } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import FormularioRemitoCreate from './new_RemitoCliente'
 
@@ -56,8 +56,9 @@ const indexRemitoCliente = () => {
 
   const remitosFiltrados = remitos
     .filter(p => {
-      const coincideComprobanteVenta = p.comprobanteVentaID.toLowerCase().includes(filtroComprobanteVenta.toLowerCase());
-
+      
+      const comprobanteVentaID = comprobantesVenta.find(d => d._id === p.comprobanteVentaID)?._id || '';
+      const coincideComprobanteVenta = comprobanteVentaID.toString().includes(filtroComprobanteVenta);
       return coincideComprobanteVenta;
     })
     .sort((a, b) => {
@@ -108,6 +109,33 @@ const indexRemitoCliente = () => {
         fetchData();
         fetchData_ComprobantesVenta();
     }, [] )
+
+    const imprimirRemito = async (id) => {
+        if (!id) {
+            console.error("Error con el ID del remito al querer imprimirlo.");
+            return;
+        }
+
+        try {
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/remito/imprimir/${id}`
+            );
+
+            if (!res.ok) throw new Error("No se pudo generar el PDF");
+
+            // 📌 Convertir respuesta en blob (PDF)
+            const blob = await res.blob();
+
+            // Crear una URL temporal para el PDF
+            const url = URL.createObjectURL(blob);
+
+            // Abrir en una nueva pestaña
+            window.open(url, "_blank");
+
+        } catch (err) {
+            console.error("Error al imprimir remito:", err);
+        }
+    };
 
     const deleteRemito = async(remitoID) => {
         if(!remitoID) {
@@ -222,6 +250,9 @@ const indexRemitoCliente = () => {
                                         <td className="columna">{totalBultos}</td>
                                         <td className="columna">
                                             <div className="acciones">
+                                                <button onClick={() => imprimirRemito(_id)}  className="btn-icon" title="Imprimir">
+                                                    <FaPrint />
+                                                </button>
                                                 <button onClick={() => deleteRemito(_id)}  className="btn-icon" title="Eliminar">
                                                     <FaTrash />
                                                 </button>

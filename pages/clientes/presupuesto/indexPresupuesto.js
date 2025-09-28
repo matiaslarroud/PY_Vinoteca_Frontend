@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit , FaPrint } from "react-icons/fa";
+import { FaPlus, FaShoppingCart , FaHome, FaArrowLeft, FaTrash, FaEdit , FaPrint } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import FormularioPresupuestoUpdate from './updatePresupuesto'
 import FormularioPresupuestoCreate from './createPresupuesto'
+import CreateNotaPedido from "../notaPedido/createNotaPedido";
 
 const { default: Link } = require("next/link")
 
@@ -12,6 +13,7 @@ const indexPresupuesto = () => {
     const [clientes,setClientes] = useState([]);  
     const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
     const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
+const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
     
     const [filtroNombre, setFiltroNombre] = useState('');
     const [filtroPrecio, setFiltroPrecio] = useState('');   
@@ -164,6 +166,31 @@ const indexPresupuesto = () => {
                     </div>
                 </div>
             )}
+
+            {mostrarPedidoCreate && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => 
+                        {
+                            setmostrarPedidoCreate(null)
+                            fetchData()
+                        }
+                    }>
+                        &times;
+                    </button>
+                    <CreateNotaPedido 
+                        param={mostrarPedidoCreate}
+                        tipo="presupuesto"
+                        exito={() => 
+                            {
+                                setmostrarPedidoCreate(false)
+                                fetchData()
+                            }}
+                    />
+                </div>
+                </div>
+            )}
+
             <h1 className="titulo-pagina">Presupuesto</h1>
             
             <div className="botonera">
@@ -216,6 +243,9 @@ const indexPresupuesto = () => {
                                         <td className="columna">${total}</td>
                                         <td className="columna">
                                             <div className="acciones">
+                                                <button onClick={() => setmostrarPedidoCreate(_id)} className="btn-icon" title="Generar Pedido">
+                                                    <FaShoppingCart />
+                                                </button>
                                                 <button onClick={() => setMostrarModalUpdate(_id)} className="btn-icon" title="Modificar">
                                                     <FaEdit />
                                                 </button>
