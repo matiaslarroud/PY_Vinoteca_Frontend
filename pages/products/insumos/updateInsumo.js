@@ -3,7 +3,7 @@ import Select from 'react-select';
 
 const { default: Link } = require("next/link")
 
-const initialState = {name:'',stock:0 , precioCosto:0 , ganancia:0 , deposito:'' , proveedor:''}
+const initialState = {name:'',stock:0 , stockMinimo:'', precioCosto:0 , ganancia:0 , deposito:'' , proveedor:''}
 
 const updateProducto = ({exito , insumoID}) => {
     const [product , setProduct] = useState(initialState);
@@ -29,6 +29,7 @@ const updateProducto = ({exito , insumoID}) => {
                     const nameI= s.data.name; 
                     const precioCostoI  = s.data.precioCosto ;
                     const stockI = s.data.stock ;
+                    const stockMinimoI = s.data.stockMinimo ;
                     const gananciaI = s.data.ganancia ;
                     const depositoI = s.data.deposito ;
                     const proveedorI = s.data.proveedor;
@@ -37,6 +38,7 @@ const updateProducto = ({exito , insumoID}) => {
                         name: nameI,
                         precioCosto: precioCostoI,
                         stock: stockI,
+                        stockMinimo: stockMinimoI,
                         ganancia: gananciaI,
                         deposito: depositoI,
                         proveedor: proveedorI
@@ -84,18 +86,24 @@ const updateProducto = ({exito , insumoID}) => {
 
     const clickChange = (e) => {
         e.preventDefault();
+        const bodyData = {
+            name: product.name , 
+            precioCosto: product.precioCosto , 
+            stock: product.stock , 
+            ganancia: product.ganancia , 
+            deposito: product.deposito , 
+            proveedor: product.proveedor
+        }
+
+        if(product.stockMinimo){
+            bodyData.stockMinimo = product.stockMinimo
+        }
+
          fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productInsumo/${insumoID}`,
             {
                 method: 'PUT',
                 headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({
-                    name: product.name , 
-                    precioCosto: product.precioCosto , 
-                    stock: product.stock , 
-                    ganancia: product.ganancia , 
-                    deposito: product.deposito , 
-                    proveedor: product.proveedor
-                })
+                body: JSON.stringify(bodyData)
             }
          ).then((a) => {
                         return a.json();
@@ -235,9 +243,13 @@ const updateProducto = ({exito , insumoID}) => {
                     <div className="form-group">
                         <label htmlFor="stock">Stock:</label>
                         <input type="number" onChange={inputChange} value={product.stock} name="stock" placeholder="Ingresa el stock del insumo" required></input>
-                    </div>                    
+                    </div>             
                     <div className="form-group">
-                        <label htmlFor="precioC">Precio Costo:</label>
+                        <label htmlFor="stock">Stock minimo:</label>
+                        <input type="number" onChange={inputChange} value={product.stockMinimo} name="stockMinimo" placeholder="Ingresa el stock minimo del insumo"></input>
+                    </div>          
+                    <div className="form-group">
+                        <label htmlFor="precioC">Precio costo:</label>
                         <input type="number" onChange={inputChange} value={product.precioCosto} name="precioCosto" placeholder="Ingresa el precio costo del insumo" required></input>
                     </div>
                     

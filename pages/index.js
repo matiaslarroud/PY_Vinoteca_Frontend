@@ -1,7 +1,21 @@
+import { useEffect, useState } from "react";
 import { FaWineGlassAlt, FaCog , FaUserFriends, FaTruck, FaClipboardList, FaChartBar } from "react-icons/fa";
 import Link from "next/link";
+import LowStockGrid from "@/components/lowStock-grid";
 
 export default function Home() {
+  const [lowStockProducts, setLowStockProducts] = useState([]);
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/lowStock`)
+      .then((res) => {return res.json()})
+        .then((s) => {
+          console.log(s.data)
+          setLowStockProducts(s.data)
+        }
+      )
+      .catch((err) => console.error(err));
+  }, []);
+
   return (
   <>
   <h1 className="titulo-pagina">Entusiasmo por el Vino</h1>
@@ -38,6 +52,12 @@ export default function Home() {
         </Link>
       </div>
   </div>
+   <div className="lowstock-wrapper">
+      <LowStockGrid
+        products={lowStockProducts}
+        title="Productos con Stock Bajo"
+      />
+    </div>
 
   <style jsx>{`
     .titulo-pagina {
@@ -74,6 +94,15 @@ export default function Home() {
       font-size: 3rem;
       margin-bottom: 12px;
     }
+
+    .lowstock-wrapper {
+      width: 100%;
+      display: flex;
+      justify-content: center; /* Centra horizontalmente el grid */
+      margin-top: 40px;
+    }
+
+
   `}
   </style>
 </>

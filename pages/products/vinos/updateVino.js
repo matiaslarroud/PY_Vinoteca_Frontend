@@ -6,7 +6,7 @@ import Select from 'react-select';
 
 const { default: Link } = require("next/link")
 
-const initialState = {name:'',stock:0 , bodega:'' , paraje:'' , crianza : '' , precioCosto:0 , ganancia:0 , tipo:'', uva:'' , varietal:'' , volumen:'' , deposito:''}
+const initialState = {name:'',stock:0, stockMinimo:'' , bodega:'' , paraje:'' , crianza : '' , precioCosto:0 , ganancia:0 , tipo:'', uva:'' , varietal:'' , volumen:'' , deposito:''}
 const initialDetalle = { 
          vino: "", uva: ""
     };
@@ -166,6 +166,10 @@ const updateProducto = ({exito,vinoID}) => {
             volumen: product.volumen,
             deposito: product.deposito
         };
+
+        if(product.stockMinimo){
+            bodyData.stockMinimo=product.stockMinimo;
+        }
 
         const resVino = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productVino/${vinoID}`, {
             method: 'PUT',
@@ -619,6 +623,12 @@ const updateProducto = ({exito,vinoID}) => {
                                 Stock:
                             </label>
                             <input type='number' onChange={inputChange}  name='stock' value={product.stock} placeholder='Escriba aqui el stock...' required/>
+                        </div>
+                        <div className="form-col1">
+                            <label>
+                                Stock minimo:
+                            </label>
+                            <input type='number' onChange={inputChange}  name='stockMinimo' value={product.stockMinimo} placeholder='Escriba aqui el stock minimo...'/>
                         </div>
                     </div>
                     <div className="form-row">

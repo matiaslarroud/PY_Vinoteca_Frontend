@@ -4,13 +4,12 @@ import { FaTrash} from "react-icons/fa";
 import FormularioDepositoCreate from '../../gestion/ubicaciones/deposito/createDeposito'
 import FormularioInsumoCreate from '../../products/insumos/createInsumo'
 
-const initialState = {name:'',stock:0 , precioVenta:0 , deposito:''}
+const initialState = {name:'',stock:0, stockMinimo:'' , precioVenta:0 , deposito:''}
 const initialStateDetalle = {picada:'',insumo:'', cantidad:0}
 
 const formProducto = ({exito}) => {
     const [insumos , setinsumos] = useState([]);
     const [depositos, setDepositos] = useState([]);
-    const [tiposVino, setTiposVino] = useState([]);
     const [picada , setPicada] = useState(initialState)
     const [detalles, setDetalles] = useState([initialStateDetalle]);
 
@@ -78,16 +77,20 @@ const formProducto = ({exito}) => {
 
     const clickChange = async(e) => {
          e.preventDefault();
+         const bodyData = {
+             name: picada.name,
+             stock: picada.stock,
+             deposito: picada.deposito,
+             precioVenta: picada.precioVenta,
+         }
+         if(picada.stockMinimo){
+            bodyData.stockMinimo = picada.stockMinimo
+         }
          const resPicada = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productPicada`,
             {
                 method: 'POST',
                 headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({
-                    name: picada.name,
-                    stock: picada.stock,
-                    deposito: picada.deposito,
-                    precioVenta: picada.precioVenta,
-                })
+                body: JSON.stringify(bodyData)
             }
         )
 
@@ -197,6 +200,19 @@ const formProducto = ({exito}) => {
                                 name="stock"
                                 placeholder="Cantidad en stock"
                                 required
+                            />
+                        </div>
+
+                        <div className="form-col">
+                            <label htmlFor="stockMinimo">
+                                Stock minimo:
+                            </label>
+                            <input
+                                type="number"
+                                onChange={inputChange}
+                                value={picada.stockMinimo}
+                                name="stock"
+                                placeholder="Cantidad en stock minima"
                             />
                         </div>
 
