@@ -39,7 +39,7 @@ export default function Home() {
           <span>Proveedores</span>
         </Link>
       </div>
-      <div className="boton-acceso">
+      {/* <div className="boton-acceso">
         <Link href="/gestion/createBodega" className="boton-acceso">
           <FaChartBar className="icono" />
           <span>Reportes</span>
@@ -50,7 +50,7 @@ export default function Home() {
           <FaCog className="icono" />
           <span>Gestion</span>
         </Link>
-      </div>
+      </div> */}
   </div>
    <div className="lowstock-wrapper">
       <LowStockGrid
