@@ -260,7 +260,7 @@ const newRemitoCliente = ({exito}) => {
             .filter(v => pedidos.some(p => p._id === v.notaPedido))
             .map(v => ({
                 value: v._id,
-                label: `${v.tipoComprobante} - ${v.fecha.split("T")[0]} - $${v.total}`,
+                label: `${v._id} - ${v.tipoComprobante} - ${v.fecha.split("T")[0]} - $${v.total}`,
                 total: v.total
             }))
         : []; 

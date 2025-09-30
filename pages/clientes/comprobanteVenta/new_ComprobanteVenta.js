@@ -248,7 +248,7 @@ const createComprobanteVenta = ({exito}) => {
         .map(v => {
             return {
                 value: v._id,
-                label: `${v.fecha.split("T")[0]} - $${v.total}`,
+                label: `${v._id} - ${v.fecha.split("T")[0]} - $${v.total}`,
                 total: v.total
             };
         }

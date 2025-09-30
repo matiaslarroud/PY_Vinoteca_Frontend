@@ -43,6 +43,11 @@ const proveedoresFiltrados = proveedores
       bVal = localidades.find(loc => loc._id === b.localidad)?.name || '';
     }
 
+    if (campo === 'codigo') {
+        aVal = a._id;
+        bVal = b._id;
+    }
+
     if (typeof aVal === 'string') aVal = aVal.toLowerCase();
     if (typeof bVal === 'string') bVal = bVal.toLowerCase();
 
@@ -197,6 +202,7 @@ const deleteProveedor = async(proveedorID) => {
         <table id="tablaVinos">
             <thead>
               <tr className="fila">
+                  <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
                   <th onClick={() => toggleOrden('name')}>Nombre ⬍</th>
                   <th onClick={() => toggleOrden('localidad')}>Localidad ⬍</th>
                   <th>Acciones</th>
@@ -208,6 +214,7 @@ const deleteProveedor = async(proveedorID) => {
                   const localidadEncontrada = localidades.find((p)=>{return p._id === localidad})
 
                   return <tr key={_id}>
+                      <td className="columna">{_id}</td>
                       <td className="columna">{name}</td>
                       <td className="columna">{localidadEncontrada?.name}</td>
                       <td className="columna">

@@ -52,12 +52,14 @@ export default function Home() {
         </Link>
       </div> */}
   </div>
-   <div className="lowstock-wrapper">
+  <div className="menu-grid">
+    <div className="lowstock-wrapper">
       <LowStockGrid
         products={lowStockProducts}
         title="Productos con Stock Bajo"
       />
     </div>
+  </div>
 
   <style jsx>{`
     .titulo-pagina {
@@ -68,6 +70,7 @@ export default function Home() {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);
     }
+
     .menu-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -77,31 +80,42 @@ export default function Home() {
       margin: 0 auto;
     }
 
-    .boton-acceso {
-      display: flex;
-      background-color:rgba(42, 39, 39,.7);
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 2rem;
-      padding: 30px
-    }
-    .boton-acceso:hover {
-      background-color: #a30000;
-      transform: translateY(-5px);
-    }
-    .icono {
-      font-size: 3rem;
-      margin-bottom: 12px;
-    }
-
     .lowstock-wrapper {
       width: 100%;
       display: flex;
       justify-content: center; /* Centra horizontalmente el grid */
       margin-top: 40px;
     }
+    
+    .boton-acceso {
+      display: flex;
+      flex-direction: column; /* Ícono arriba, texto abajo */
+      align-items: center;
+      justify-content: center;
 
+      background: linear-gradient(145deg, rgba(42, 39, 39, 0.9), rgba(25, 23, 23, 0.8));
+      color: white;
+      font-size: 1.5rem;
+      padding: 30px;
+
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .boton-acceso:hover {
+      background: linear-gradient(145deg, #a30000, #c70000);
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+    }
+
+    .icono {
+      font-size: 3rem;
+      margin-bottom: 10px; /* separa icono del texto */
+    }
 
   `}
   </style>

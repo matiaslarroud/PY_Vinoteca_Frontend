@@ -71,6 +71,10 @@ const indexRemitoCliente = () => {
         aVal = comprobantesVenta.find(d => d._id === a.comprobanteVentaID)?._id || '';
         bVal = comprobantesVenta.find(d => d._id === b.comprobanteVentaID)?._id || '';
         }
+        if (campo === 'codigo') {
+        aVal = Number(a._id);
+        bVal = Number(b._id);
+        }
 
         else {
         aVal = a[campo];
@@ -222,6 +226,7 @@ const indexRemitoCliente = () => {
                     <table id="tablaVinos">
                         <thead>
                         <tr className="fila">
+                            <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
                             <th onClick={() => toggleOrden('comprobanteVenta')}>Comprobante de Venta ⬍</th>
                             <th onClick={() => toggleOrden('fecha')}>Fecha ⬍</th>
                             <th onClick={() => toggleOrden('totalPrecio')}>Total ⬍</th>
@@ -235,6 +240,7 @@ const indexRemitoCliente = () => {
                                 remitosFiltrados.map(({_id, comprobanteVentaID , fecha, totalPrecio , totalBultos , entregado}) => {
 
                                     return <tr key={_id}>
+                                        <td className="columna">{_id}</td>
                                         <td className="columna">{comprobanteVentaID}</td>
                                         <td className="columna">{fecha.split("T")[0]}</td>
                                         <td className="columna">${totalPrecio}</td>

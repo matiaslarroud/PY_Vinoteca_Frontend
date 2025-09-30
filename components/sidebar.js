@@ -8,6 +8,10 @@ const Sidebar = () => {
   const [clientesOpen, setClientesOpen] = useState(false);
   const [productosOpen, setProductosOpen] = useState(false);
   const [proveedoresOpen, setProveedoresOpen] = useState(false);
+  const [gestionOpen, setGestionOpen] = useState(false);
+  const [ubicacionesOpen, setUbicacionesesOpen] = useState(false);
+  const [vinosOpen, setVinosOpen] = useState(false);
+  const [generalOpen, setGeneralOpen] = useState(false);
 
   const isActive = (path) => pathname === path;
 
@@ -48,7 +52,7 @@ const Sidebar = () => {
                       isActive('/clientes/presupuesto/indexPresupuesto') ? styles.active : ''
                     }`}
                   >
-                    Presupuestos
+                    Presupuesto
                   </Link>
                 </li>
                 <li>
@@ -58,7 +62,7 @@ const Sidebar = () => {
                       isActive('/clientes/notaPedido/indexNotaPedido') ? styles.active : ''
                     }`}
                   >
-                    Notas de Pedido
+                    Nota de Pedido
                   </Link>
                 </li>
                 <li>
@@ -68,7 +72,7 @@ const Sidebar = () => {
                       isActive('/clientes/comprobanteVenta/indexComprobanteVenta') ? styles.active : ''
                     }`}
                   >
-                    Comprobantes de Venta
+                    Comprobante de Venta
                   </Link>
                 </li>
                 <li>
@@ -78,7 +82,7 @@ const Sidebar = () => {
                       isActive('/clientes/remito/indexRemito') ? styles.active : ''
                     }`}
                   >
-                    Remitos
+                    Remito
                   </Link>
                 </li>
               </ul>
@@ -146,7 +150,7 @@ const Sidebar = () => {
                       isActive('/products/vinos/indexVino') ? styles.active : ''
                     }`}
                   >
-                    Vinos
+                    Vino
                   </Link>
                 </li>
                 <li>
@@ -156,7 +160,7 @@ const Sidebar = () => {
                       isActive('/products/picadas/indexPicada') ? styles.active : ''
                     }`}
                   >
-                    Picadas
+                    Picada
                   </Link>
                 </li>
                 <li>
@@ -166,7 +170,7 @@ const Sidebar = () => {
                       isActive('/products/insumos/indexInsumo') ? styles.active : ''
                     }`}
                   >
-                    Insumos
+                    Insumo
                   </Link>
                 </li>
                 <li>
@@ -183,12 +187,277 @@ const Sidebar = () => {
             )}
           </li>
           <li>
-            <Link
-              href="/gestion/indexGestion"
-              className={`${styles.menuItem} ${isActive('/gestion/indexGestion') ? styles.active : ''}`}
+            <button
+              onClick={() => setGestionOpen(!gestionOpen)}
+              className={`${styles.menuItem} ${styles.dropdownToggle} ${
+                pathname.startsWith('/gestion/indexGestion') ? styles.active : ''
+              }`}
             >
-              Gestión
-            </Link>
+              Gestion {gestionOpen ? '▲' : '▼'}
+            </button>
+            {gestionOpen && (
+              <ul className={styles.submenu}>
+                <li>
+                  <Link href="/gestion/indexGestion" className={`${styles.menuItem} ${isActive('/gestion/indexGestion') ? styles.active : ''}`}>
+                    Listado
+                  </Link>
+                </li>
+                {/* UBICACIONES */}
+                <li>
+                  <button
+                    onClick={() => setUbicacionesesOpen(!ubicacionesOpen)}
+                    className={`${styles.menuItem} ${styles.dropdownToggle} ${
+                      pathname.startsWith('/gestion/ubicaciones/indexUbicaciones') ? styles.active : ''
+                    }`}
+                  >
+                    Gestion Ubicaciones {ubicacionesOpen ? '▲' : '▼'}
+                  </button>
+                  {ubicacionesOpen && (
+                    <ul className={styles.submenu}>
+                      <li>
+                        <Link
+                          href="/gestion/ubicaciones/indexUbicaciones"
+                          className={`${styles.submenuItem} ${
+                            isActive('/gestion/ubicaciones/indexUbicaciones') ? styles.active : ''
+                          }`}
+                        >
+                          Listado
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/gestion/ubicaciones/pais/indexPais"
+                          className={`${styles.submenuItem} ${
+                            isActive('/gestion/ubicaciones/pais/indexPais') ? styles.active : ''
+                          }`}
+                        >
+                          Pais
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/gestion/ubicaciones/provincia/indexProvincia"
+                          className={`${styles.submenuItem} ${
+                            isActive('/gestion/ubicaciones/provincia/indexProvincia') ? styles.active : ''
+                          }`}
+                        >
+                          Provincia
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/gestion/ubicaciones/localidad/indexLocalidad"
+                          className={`${styles.submenuItem} ${
+                            isActive("/gestion/ubicaciones/localidad/indexLocalidad") ? styles.active : ''
+                          }`}
+                        >
+                          Localidad
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/gestion/ubicaciones/barrio/indexBarrio"
+                          className={`${styles.submenuItem} ${
+                            isActive("/gestion/ubicaciones/barrio/indexBarrio") ? styles.active : ''
+                          }`}
+                        >
+                          Barrio
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/gestion/ubicaciones/calle/indexCalle"
+                          className={`${styles.submenuItem} ${
+                            isActive("/gestion/ubicaciones/calle/indexCalle") ? styles.active : ''
+                          }`}
+                        >
+                          Calle
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/gestion/ubicaciones/deposito/indexDeposito"
+                          className={`${styles.submenuItem} ${
+                            isActive("/gestion/ubicaciones/deposito/indexDeposito") ? styles.active : ''
+                          }`}
+                        >
+                          Deposito
+                        </Link>
+                      </li>
+                    </ul>
+                  )}
+                </li>
+                {/* VINOS */}
+                <li>
+                  <button
+                    onClick={() => setVinosOpen(!vinosOpen)}
+                    className={`${styles.menuItem} ${styles.dropdownToggle} ${
+                      pathname.startsWith('/gestion/vinos/indexVinos') ? styles.active : ''
+                    }`}
+                  >
+                    Gestion Vinos {vinosOpen ? '▲' : '▼'}
+                  </button>
+                  {vinosOpen && (
+                    <ul className={styles.submenu}>
+                      <li>
+                        <Link
+                          href="/gestion/vinos/indexVinos"
+                          className={`${styles.submenuItem} ${
+                            isActive('/gestion/vinos/indexVinos') ? styles.active : ''
+                          }`}
+                        >
+                          Listado
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/gestion/vinos/bodega/indexBodega"
+                          className={`${styles.submenuItem} ${
+                            isActive('/gestion/vinos/bodega/indexBodega') ? styles.active : ''
+                          }`}
+                        >
+                          Bodega
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/gestion/vinos/bodega_paraje/indexParaje"
+                          className={`${styles.submenuItem} ${
+                            isActive('/gestion/vinos/bodega_paraje/indexParaje') ? styles.active : ''
+                          }`}
+                        >
+                          Paraje
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/gestion/vinos/vino_crianza/indexCrianza"
+                          className={`${styles.submenuItem} ${
+                            isActive("/gestion/vinos/vino_crianza/indexCrianza") ? styles.active : ''
+                          }`}
+                        >
+                          Crianza
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/gestion/vinos/vino_tipo/indexVinoTipo"
+                          className={`${styles.submenuItem} ${
+                            isActive("/gestion/vinos/vino_tipo/indexVinoTipo") ? styles.active : ''
+                          }`}
+                        >
+                          Tipo de Vino
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/gestion/vinos/vino_uva/indexUva"
+                          className={`${styles.submenuItem} ${
+                            isActive("/gestion/vinos/vino_uva/indexUva") ? styles.active : ''
+                          }`}
+                        >
+                          Uva
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/gestion/vinos/vino_varietal/indexVarietal"
+                          className={`${styles.submenuItem} ${
+                            isActive("/gestion/vinos/vino_varietal/indexVarietal") ? styles.active : ''
+                          }`}
+                        >
+                          Varietal
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/gestion/vinos/vino_volumen/indexVolumen"
+                          className={`${styles.submenuItem} ${
+                            isActive("/gestion/vinos/vino_volumen/indexVolumen") ? styles.active : ''
+                          }`}
+                        >
+                          Volumen
+                        </Link>
+                      </li>
+                    </ul>
+                  )}
+                </li>{/* GENERAL */}
+                <li>
+                  <button
+                    onClick={() => setGeneralOpen(!generalOpen)}
+                    className={`${styles.menuItem} ${styles.dropdownToggle} ${
+                      pathname.startsWith('/gestion/general/indexGeneral') ? styles.active : ''
+                    }`}
+                  >
+                    Gestion General {generalOpen ? '▲' : '▼'}
+                  </button>
+                  {generalOpen && (
+                    <ul className={styles.submenu}>
+                      <li>
+                        <Link
+                          href="/gestion/general/indexGeneral"
+                          className={`${styles.submenuItem} ${
+                            isActive('/gestion/general/indexGeneral') ? styles.active : ''
+                          }`}
+                        >
+                          Listado
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/gestion/general/empleado/indexEmpleado"
+                          className={`${styles.submenuItem} ${
+                            isActive('/gestion/general/empleado/indexEmpleado') ? styles.active : ''
+                          }`}
+                        >
+                          Empleado
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/gestion/general/iva/indexCondicionIva"
+                          className={`${styles.submenuItem} ${
+                            isActive("/gestion/general/iva/indexCondicionIva") ? styles.active : ''
+                          }`}
+                        >
+                          Condicion de Iva
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/gestion/general/medioPago/indexMedioPago"
+                          className={`${styles.submenuItem} ${
+                            isActive("/gestion/general/medioPago/indexMedioPago") ? styles.active : ''
+                          }`}
+                        >
+                          Medio Pago
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/gestion/general/tipoComprobante/indexTipo"
+                          className={`${styles.submenuItem} ${
+                            isActive("/gestion/general/tipoComprobante/indexTipo") ? styles.active : ''
+                          }`}
+                        >
+                          Tipo de Comprobante
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/gestion/general/transporte/indexTransporte"
+                          className={`${styles.submenuItem} ${
+                            isActive("/gestion/general/transporte/indexTransporte") ? styles.active : ''
+                          }`}
+                        >
+                          Transporte
+                        </Link>
+                      </li>
+                    </ul>
+                  )}
+                </li>
+              </ul>
+            )}
           </li>
         </ul>
       </nav>

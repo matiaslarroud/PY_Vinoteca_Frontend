@@ -107,23 +107,34 @@ export default function indexUbicaciones() {
       max-width: 1000px;
       margin: 0 auto;
     }
-
-    .boton-acceso {
-      display: flex;
-      background-color:rgba(42, 39, 39,.7);
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 2rem;
-      padding: 30px
-    }
-    .boton-acceso:hover {
-      background-color: #a30000;
-      transform: translateY(-5px);
-    }
     .icono {
       font-size: 3rem;
       margin-bottom: 12px;
+    }
+
+    .boton-acceso {
+      display: flex;
+      flex-direction: column; /* Ícono arriba, texto abajo */
+      align-items: center;
+      justify-content: center;
+
+      background: linear-gradient(145deg, rgba(42, 39, 39, 0.9), rgba(25, 23, 23, 0.8));
+      color: white;
+      font-size: 1.5rem;
+      padding: 30px;
+
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .boton-acceso:hover {
+      background: linear-gradient(145deg, #a30000, #c70000);
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
     }
   `}
   </style>

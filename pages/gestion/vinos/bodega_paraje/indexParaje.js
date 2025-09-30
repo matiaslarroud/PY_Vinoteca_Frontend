@@ -40,6 +40,11 @@ const indexParaje = () => {
         let aVal = a[campo];
         let bVal = b[campo];
 
+        if(campo==='codigo'){
+            aVal=a._id;
+            bVal=b._id;
+        }
+
         // Si el campo es localidad, obtenemos el nombre para ordenar
         if (campo === 'bodega') {
         aVal = bodegas.find(loc => loc._id === a.bodega)?.name || '';
@@ -171,6 +176,7 @@ const fetchData = ()=>{
                     <table id="tablaVinos">
                         <thead>
                             <tr className="fila">
+                                <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
                                 <th onClick={() => toggleOrden('name')}>Paraje ⬍</th>
                                 <th onClick={() => toggleOrden('bodega')}>Bodega ⬍</th>
                                 <th>Acciones</th>
@@ -183,6 +189,7 @@ const fetchData = ()=>{
 
                                     return (
                                     <tr key={_id}>
+                                        <td className="columna">{_id}</td>
                                         <td className="columna">{name}</td>
                                         <td className="columna">{ bodegaEncontrada?.name }</td>
                                         <td className="columna">

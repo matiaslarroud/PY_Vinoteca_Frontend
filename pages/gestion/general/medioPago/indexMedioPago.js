@@ -36,6 +36,10 @@ const indexMedioPago = () => {
         if (typeof aVal === 'string') aVal = aVal.toLowerCase();
         if (typeof bVal === 'string') bVal = bVal.toLowerCase();
 
+        if(campo === 'codigo'){
+            aVal=a._id;
+            bVal=b._id;
+        }
         if (aVal < bVal) return orden.asc ? -1 : 1;
         if (aVal > bVal) return orden.asc ? 1 : -1;
         return 0;
@@ -153,6 +157,7 @@ const indexMedioPago = () => {
                     <table id="tablaVinos">
                         <thead>
                         <tr className="fila">
+                            <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
                             <th onClick={() => toggleOrden('name')}>Nombre ⬍</th>
                             <th onClick={() => toggleOrden('interes')}>Interes ⬍</th>
                             <th>Acciones</th>
@@ -162,6 +167,7 @@ const indexMedioPago = () => {
                             {
                                 mediosPagoFiltrados.map(({_id,name , interes}) => (
                                     <tr key={_id}>
+                                        <td className="columna">{_id}</td>
                                         <td className="columna">{name}</td>
                                         <td className="columna">{interes}</td>
                                         <td className="columna">

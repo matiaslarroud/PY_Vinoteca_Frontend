@@ -53,6 +53,11 @@ const indexComprobantesVenta = () => {
         bVal = pedidos.find(d => d._id === b.notaPedido)?._id || '';
         }
 
+        if (campo === 'codigo') {
+        aVal = Number(a._id);
+        bVal = Number(b._id);
+        }
+
         else {
         aVal = a[campo];
         bVal = b[campo];
@@ -219,6 +224,7 @@ const indexComprobantesVenta = () => {
                     <table id="tablaVinos">
                         <thead>
                         <tr className="fila">
+                            <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
                             <th onClick={() => toggleOrden('cliente')}>Cliente ⬍</th>
                             <th onClick={() => toggleOrden('notaPedido')}>Nota de Pedido ⬍</th>
                             <th onClick={() => toggleOrden('fecha')}>Fecha ⬍</th>
@@ -233,6 +239,7 @@ const indexComprobantesVenta = () => {
                                     const clienteEncontrado = clientes.find((p)=>{return p._id === pedidoEncontrado?.cliente})
 
                                     return <tr key={_id}>
+                                        <td className="columna">{_id}</td>
                                         <td className="columna">{clienteEncontrado?.name}</td>
                                         <td className="columna">{notaPedido}</td>
                                         <td className="columna">{fecha.split("T")[0]}</td>

@@ -63,6 +63,11 @@ const indexTransporte = () => {
     let aVal = a[campo];
     let bVal = b[campo];
 
+    if (campo === 'codigo'){
+      aVal=a._id;
+      bVal=b._id;
+    }
+
     if (typeof aVal === "string") aVal = aVal.toLowerCase();
     if (typeof bVal === "string") bVal = bVal.toLowerCase();
 
@@ -136,6 +141,7 @@ const indexTransporte = () => {
             <table>
               <thead>
                 <tr>
+                  <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
                   <th onClick={() => toggleOrden('name')}>Nombre ⬍</th>
                   <th>Acciones</th>
                 </tr>
@@ -144,6 +150,7 @@ const indexTransporte = () => {
                 {transportesFiltrados.map(({ _id, name}) => {
                   return (
                     <tr key={_id}>
+                      <td>{_id}</td>
                       <td>{name}</td>
                       <td>
                         <div className="acciones">

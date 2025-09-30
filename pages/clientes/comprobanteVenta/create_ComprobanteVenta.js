@@ -117,24 +117,23 @@ const createComprobanteVenta = ({exito , pedidoID}) => {
         
         const resNota = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido/${param}`);
         const s = await resNota.json();
-        if (s.ok) {
-            let clienteData = s.data.cliente;
-            // Si solo viene el ID, traemos los datos del cliente
-            if (typeof clienteData === "string") {
-                const resCliente = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente/${clienteData}`);
-                const clienteJson = await resCliente.json();
-                if (clienteJson.ok) {
-                    clienteData = clienteJson.data;
-                }
+        if (s.ok) {            
+            const resCliente = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente/${s.data.cliente}`);
+            const clienteJson = await resCliente.json();
+            if (clienteJson.ok) {
+                setComprobanteVenta(prev => ({
+                    ...prev,
+                    cliente: { value: Number(clienteJson.data._id), label: clienteJson.data.name },
+                }));
             }
+
             const resTipoCOmprobante = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/tipoComprobante`);
             const tipoComprobanteJson = await resTipoCOmprobante.json();
             if (tipoComprobanteJson.ok) {setPuedeGuardar(true)}
-            const tipoPorDefecto = tipoComprobanteJson.data.find(tc => tc.condicionIVA === clienteData.condicionIVA);
+            const tipoPorDefecto = tipoComprobanteJson.data.find(tc => tc.condicionIVA === clienteJson.data.condicionIVA);
             setTiposComprobante({ value: tipoPorDefecto._id, label: tipoPorDefecto.name });
             setComprobanteVenta(prev => ({
                 ...prev,
-                cliente: { value: clienteData._id, label: clienteData.name },
                 notaPedido: s.data._id,
                 total: s.data.total,
                 tipoComprobante: tipoPorDefecto._id,
@@ -223,7 +222,7 @@ const createComprobanteVenta = ({exito , pedidoID}) => {
     const opciones_notasPedido = notaPedidos.map(v => (
             {
                 value: v._id,
-                label: `${v.fecha.split("T")[0]} - $${v.total}`,
+                label: `${v._id} - ${v.fecha.split("T")[0]} - $${v.total}`,
                 total: v.total
             }
     ));

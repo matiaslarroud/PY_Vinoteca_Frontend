@@ -39,7 +39,12 @@ const indexInsumo = () => {
     const campo = orden.campo;
     if (!campo) return 0;
 
-    let aVal, bVal;
+    let aVal = a[campo];
+    let bVal = b[campo];
+    if (campo === 'codigo') {
+      aVal = a._id;
+      bVal = b._id;
+    }
 
     if (campo === 'deposito') {
       aVal = depositos.find(d => d._id === a.deposito)?.name || '';
@@ -175,6 +180,7 @@ const indexInsumo = () => {
                     <table id="tablaInsumos">
                         <thead>
                             <tr>
+                            <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
                             <th onClick={() => toggleOrden('name')}>Nombre ⬍</th>
                             <th onClick={() => toggleOrden('deposito')}>Depósito ⬍</th>
                             <th onClick={() => toggleOrden('stock')}>Stock ⬍</th>
@@ -187,6 +193,7 @@ const indexInsumo = () => {
                                     const depositoEncontrado = depositos.find((p)=>{return p._id === deposito});
                                     
                                     return <tr key={_id}>                                        
+                                        <td className="columna">{_id}</td>                                      
                                         <td className="columna">{name}</td>
                                         <td className="columna">{depositoEncontrado?.name}</td>
                                         <td className="columna">{stock}</td>

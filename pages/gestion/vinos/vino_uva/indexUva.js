@@ -38,6 +38,11 @@ const indexUva = () => {
         let aVal = a[campo];
         let bVal = b[campo];
 
+        if (campo === 'codigo'){
+            aVal = a._id;
+            bVal = b._id;
+        }
+
         if (typeof aVal === 'string') aVal = aVal.toLowerCase();
         if (typeof bVal === 'string') bVal = bVal.toLowerCase();
 
@@ -146,6 +151,7 @@ const indexUva = () => {
                     <table id="tablaVinos">
                         <thead>
                         <tr className="fila">
+                            <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
                             <th onClick={() => toggleOrden('name')}>Nombre ⬍</th>
                             <th>Acciones</th>
                         </tr>
@@ -155,6 +161,7 @@ const indexUva = () => {
                                 uvasFiltradas.map(({_id, name }) => {
                                     return (
                                     <tr key={_id}>
+                                        <td className="columna">{_id}</td>
                                         <td className="columna">{name}</td>
                                         <td className="columna">
                                             <div className="acciones">

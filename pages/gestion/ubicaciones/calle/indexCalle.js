@@ -46,6 +46,11 @@ const indexCalle = () => {
         bVal = barrios.find(p => p._id === b.barrio)?.name || '';
         }
 
+        if ( campo === "codigo"){
+            aVal = a._id;
+            bVal = b._id;
+        }
+
         if (typeof aVal === 'string') aVal = aVal.toLowerCase();
         if (typeof bVal === 'string') bVal = bVal.toLowerCase();
 
@@ -170,6 +175,7 @@ const indexCalle = () => {
                     <table id="tablaVinos">
                         <thead>
                         <tr className="fila">
+                            <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
                             <th onClick={() => toggleOrden('name')}>Nombre ⬍</th>
                             <th onClick={() => toggleOrden('barrio')}>Barrio ⬍</th>
                             <th>Acciones</th>
@@ -182,6 +188,7 @@ const indexCalle = () => {
 
                                     return (
                                     <tr key={_id}>
+                                        <td className="columna">{_id}</td>
                                         <td className="columna">{name}</td>
                                         <td className="columna">{ barrioEncontrado?.name }</td>
                                         <td className="columna">

@@ -33,6 +33,10 @@ const paisesFiltrados = paises
     let aVal = a[campo];
     let bVal = b[campo];
 
+    if(campo === "codigo"){
+        aVal = a._id;
+        bVal = b._id;
+    }
     
     if (typeof aVal === 'string') aVal = aVal.toLowerCase();
     if (typeof bVal === 'string') bVal = bVal.toLowerCase();
@@ -142,6 +146,7 @@ const router = useRouter();
                     <table id="tablaVinos">
                         <thead>
                         <tr className="fila">
+                            <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
                             <th onClick={() => toggleOrden('name')}>Nombre ⬍</th>
                             <th>Acciones</th>
                         </tr>
@@ -150,6 +155,7 @@ const router = useRouter();
                             {
                                 paisesFiltrados.map(({_id,name}) => (
                                     <tr key={_id} className="fila">
+                                        <td className="columna">{_id}</td>
                                         <td className="columna">{name}</td>
                                         <td className="columna">
                                             <div className="acciones">

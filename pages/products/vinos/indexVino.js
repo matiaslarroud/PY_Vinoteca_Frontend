@@ -45,7 +45,10 @@ const vinosFiltrados = vinos
   if (!campo) return 0;
 
   let aVal, bVal;
-
+    if (campo === 'codigo') {
+        aVal = a._id;
+        bVal = b._id;
+    } 
   if (campo === 'price') {
     aVal = a.precioCosto + (a.precioCosto * a.ganancia) / 100;
     bVal = b.precioCosto + (b.precioCosto * b.ganancia) / 100;
@@ -211,6 +214,7 @@ const vinosFiltrados = vinos
                     <table id="tablaVinos">
                         <thead>
                         <tr className="fila">
+                            <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
                             <th onClick={() => toggleOrden('name')}>Nombre ⬍</th>
                             <th onClick={() => toggleOrden('tipo')}>Tipo ⬍</th>
                             <th onClick={() => toggleOrden('bodega')}>Bodega ⬍</th>
@@ -225,6 +229,7 @@ const vinosFiltrados = vinos
                                     const tipoEncontrada = tiposV.find((p)=>{return p._id === tipo})
 
                                     return <tr key={_id}>                                        
+                                        <td className="columna">{_id}</td>                     
                                         <td className="columna">{name}</td>
                                         <td className="columna">{tipoEncontrada?.name}</td>
                                         <td className="columna">{bodegaEncontrada?.name}</td>

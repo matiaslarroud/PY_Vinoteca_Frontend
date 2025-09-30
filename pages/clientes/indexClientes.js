@@ -48,6 +48,10 @@ const clientesFiltrados = clientes
       aVal = localidades.find(loc => loc._id === a.localidad)?.name || '';
       bVal = localidades.find(loc => loc._id === b.localidad)?.name || '';
     }
+    if (campo === 'codigo') {
+      aVal = a._id;
+      bVal = b._id;
+    }
 
     if (typeof aVal === 'string') aVal = aVal.toLowerCase();
     if (typeof bVal === 'string') bVal = bVal.toLowerCase();
@@ -212,6 +216,7 @@ const deleteCliente = async(clienteID) => {
         <table id="tablaVinos">
             <thead>
               <tr className="fila">
+                  <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
                   <th onClick={() => toggleOrden('name')}>Nombre ⬍</th>
                   <th onClick={() => toggleOrden('cuentaCorriente')}>Cuenta Corriente ⬍</th>
                   <th onClick={() => toggleOrden('localidad')}>Localidad ⬍</th>
@@ -223,6 +228,7 @@ const deleteCliente = async(clienteID) => {
                 clientesFiltrados.map(({_id,name , cuentaCorriente, localidad}) => {
                   const localidadEncontrada = localidades.find((p)=>{return p._id === localidad })
                   return <tr key={_id}>
+                      <td className="columna">{_id}</td>
                       <td className="columna">{name}</td>
                       <td className="columna">{cuentaCorriente ? "SI" : "NO"}</td>
                       <td className="columna">{localidadEncontrada?.name}</td>

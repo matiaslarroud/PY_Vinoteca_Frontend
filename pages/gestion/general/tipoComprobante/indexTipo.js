@@ -41,6 +41,11 @@ const indexTipo = () => {
         bVal = tiposIva.find(d => d._id === b.condicionIva)?.name || '';
         }
 
+        if ( campo === 'codigo'){
+            aVal = a._id;
+            bVal = b._id;
+        }
+
         else {
         aVal = a[campo];
         bVal = b[campo];
@@ -182,6 +187,7 @@ const indexTipo = () => {
                     <table id="tablaVinos">
                         <thead>
                         <tr className="fila">
+                            <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
                             <th onClick={() => toggleOrden('name')}>Nombre ⬍</th>
                             <th onClick={() => toggleOrden('condicionIva')}>Condicion de Iva ⬍</th>
                             <th>Acciones</th>
@@ -192,6 +198,7 @@ const indexTipo = () => {
                                 tiposComprobantesFiltrados.map(({_id,name, condicionIva}) => {
                                     const ivaEncontrado = tiposIva.find((p)=>{return p._id === condicionIva})
                                     return <tr key={_id}>
+                                        <td className="columna">{_id}</td>
                                         <td className="columna">{name}</td>
                                         <td className="columna">{ivaEncontrado?.name}</td>
                                         <td className="columna">

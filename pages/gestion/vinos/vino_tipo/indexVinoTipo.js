@@ -36,6 +36,11 @@ const indexVinoTipo = () => {
         let aVal = a[campo];
         let bVal = b[campo];
 
+        if(campo === 'codigo'){
+            aVal=a._id;
+            bVal=b._id;
+        }
+
         if (typeof aVal === 'string') aVal = aVal.toLowerCase();
         if (typeof bVal === 'string') bVal = bVal.toLowerCase();
 
@@ -143,6 +148,7 @@ const indexVinoTipo = () => {
                     <table id="tablaVinos">
                         <thead>
                         <tr className="fila">
+                            <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
                             <th onClick={() => toggleOrden('name')}>Nombre ⬍</th>
                             <th>Acciones</th>
                         </tr>
@@ -153,6 +159,7 @@ const indexVinoTipo = () => {
 
                                     return (
                                     <tr key={_id}>
+                                        <td className="columna">{_id}</td>
                                         <td className="columna">{name}</td>
                                         <td className="columna">
                                             <div className="acciones">

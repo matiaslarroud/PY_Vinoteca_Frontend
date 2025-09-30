@@ -436,7 +436,7 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                 const cliente = clientes.find(c => c._id === v.cliente);
                 return {
                     value: v._id,
-                    label: `${v.fecha.split("T")[0]} - $${v.total}`,
+                    label: `${v._id} - ${v.fecha.split("T")[0]} - $${v.total}`,
                     cliente: v.cliente,
                     total: v.total
                 };

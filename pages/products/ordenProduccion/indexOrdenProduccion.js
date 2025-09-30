@@ -35,6 +35,28 @@ const indexOrdenProduccion = () => {
     fetchData_Picadas();
   }, []);
 
+  const ordenesFiltradas = ordenes
+    .sort((a, b) => {
+
+      const campo = orden.campo;
+      if (!campo) return 0;
+
+      let aVal = a[campo];
+      let bVal = b[campo];
+
+    if (campo === 'codigo') {
+        aVal = a._id;
+        bVal = b._id;
+    }
+
+      if (typeof aVal === 'string') aVal = aVal.toLowerCase();
+      if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+
+      if (aVal < bVal) return orden.asc ? -1 : 1;
+      if (aVal > bVal) return orden.asc ? 1 : -1;
+      return 0;
+    });
+
   const deleteOrden = async (ordenID) => {
     if (!ordenID) return;
     await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/ordenProduccion/${ordenID}`, {
@@ -107,14 +129,16 @@ const indexOrdenProduccion = () => {
             <table>
               <thead>
                 <tr>
+                  <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
                   <th onClick={() => toggleOrden('fechaElaboracion')}>Fecha de elaboracion ⬍</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {ordenes.map(({ _id, fechaElaboracion }) => {
+                {ordenesFiltradas.map(({ _id, fechaElaboracion }) => {
                   return (
                     <tr key={_id}>
+                      <td>{_id}</td>
                       <td>{fechaElaboracion.split("T")[0]}</td>
                       <td>
                         <div className="acciones">

@@ -69,7 +69,10 @@ const IndexPicada = () => {
     if (!campo) return 0;
 
     let aVal, bVal;
-
+    if (campo === 'codigo') {
+      aVal = a._id;
+      bVal = b._id;
+    }
     if (campo === 'deposito') {
       aVal = depositos.find(d => d._id === a.deposito)?.name || '';
       bVal = depositos.find(d => d._id === b.deposito)?.name || '';
@@ -168,6 +171,7 @@ const IndexPicada = () => {
             <table>
               <thead>
                 <tr>
+                  <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
                   <th onClick={() => toggleOrden('name')}>Nombre ⬍</th>
                   <th onClick={() => toggleOrden('deposito')}>Depósito ⬍</th>
                   <th onClick={() => toggleOrden('precioVenta')}>Precio ⬍</th>
@@ -179,6 +183,7 @@ const IndexPicada = () => {
                   const depositoEncontrado = depositos.find((p) => p._id === deposito);
                   return (
                     <tr key={_id}>
+                      <td>{_id}</td>
                       <td>{name}</td>
                       <td>{depositoEncontrado?.name}</td>
                       <td>${precioVenta}</td>

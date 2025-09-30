@@ -51,6 +51,10 @@ const indexDeposito = () => {
         let aVal = a[campo];
         let bVal = b[campo];
 
+        if (campo === 'codigo'){
+            aVal=a._id;
+            bVal=b._id;
+        }
         
         if (campo === 'localidad') {
         aVal = localidades.find(p => p._id === a.localidad)?.name || '';
@@ -225,6 +229,7 @@ const indexDeposito = () => {
                     <table id="tablaVinos">
                         <thead>
                         <tr className="fila">
+                            <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
                             <th onClick={() => toggleOrden('name')}>Nombre ⬍</th>
                             <th onClick={() => toggleOrden('localidad')}>Localidad ⬍</th>
                             <th onClick={() => toggleOrden('barrio')}>Barrio ⬍</th>
@@ -242,6 +247,7 @@ const indexDeposito = () => {
 
                                     return (
                                     <tr key={_id}>
+                                        <td className="columna">{_id}</td>
                                         <td className="columna">{name}</td>
                                         <td className="columna">{ localidadEncontrada?.name }</td>
                                         <td className="columna">{ barrioEncontrado?.name }</td>

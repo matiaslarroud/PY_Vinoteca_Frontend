@@ -54,6 +54,11 @@ const indexPedido = () => {
         bVal = presupuestos.find(d => d._id === b.presupuesto)?._id || '';
         }
 
+        if (campo === 'codigo') {
+        aVal = Number(a._id);
+        bVal = Number(b._id);
+        }
+
         else {
         aVal = a[campo];
         bVal = b[campo];
@@ -239,6 +244,7 @@ const indexPedido = () => {
                     <table id="tablaVinos">
                         <thead>
                         <tr className="fila">
+                            <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
                             <th onClick={() => toggleOrden('cliente')}>Cliente ⬍</th>
                             <th onClick={() => toggleOrden('presupuesto')}>Presupuesto ⬍</th>
                             <th onClick={() => toggleOrden('fecha')}>Fecha ⬍</th>
@@ -254,6 +260,7 @@ const indexPedido = () => {
                                     const clienteEncontrado = clientes.find((p)=>{return p._id === cliente})
 
                                     return <tr key={_id}>
+                                        <td className="columna">{_id}</td>
                                         <td className="columna">{clienteEncontrado?.name}</td>
                                         <td className="columna">{presupuesto}</td>
                                         <td className="columna">{fecha.split("T")[0]}</td>

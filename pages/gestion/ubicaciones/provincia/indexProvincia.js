@@ -45,6 +45,11 @@ const indexProvincia = () => {
         aVal = paises.find(p => p._id === a.pais)?.name || '';
         bVal = paises.find(p => p._id === b.pais)?.name || '';
         }
+        
+        if(campo === 'codigo'){
+            aVal = a._id;
+            bVal = b._id;
+        }
 
         if (typeof aVal === 'string') aVal = aVal.toLowerCase();
         if (typeof bVal === 'string') bVal = bVal.toLowerCase();
@@ -166,6 +171,7 @@ const indexProvincia = () => {
                     <table id="tablaVinos">
                         <thead>
                         <tr className="fila">
+                            <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
                             <th onClick={() => toggleOrden('name')}>Nombre ⬍</th>
                             <th onClick={() => toggleOrden('pais')}>Pais ⬍</th>
                             <th>Acciones</th>
@@ -178,6 +184,7 @@ const indexProvincia = () => {
 
                                     return (
                                     <tr key={_id}>
+                                        <td className="columna">{_id}</td>
                                         <td className="columna">{name}</td>
                                         <td className="columna">{ paisEncontrado?.name }</td>
                                         <td className="columna">
