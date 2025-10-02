@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit , FaFileInvoiceDollar, FaFileAlt, FaReceipt, FaTruck  } from "react-icons/fa";
+import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit , FaFileAlt , FaFileInvoice , FaShoppingCart , FaFileInvoiceDollar  } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import Link from "next/link";
 import FormularioProveedorUpdate from './updateProveedor'
@@ -161,26 +161,7 @@ const deleteProveedor = async(proveedorID) => {
              <FaPlus />
         </button>               
   </div>
-
-  <div className="menu-grid">
-    <Link href="./presupuesto/indexPresupuesto" className="boton-acceso">
-      <FaFileInvoiceDollar className="icono-menu" />
-      <span>Presupuesto</span>
-    </Link>
-    <Link href="./notaPedido/indexNotaPedido" className="boton-acceso">
-      <FaFileAlt className="icono-menu" />
-      <span>Nota de Pedido</span>
-    </Link>
-    <Link href="./comprobanteVenta/indexComprobanteVenta" className="boton-acceso">
-      <FaReceipt className="icono-menu" />
-      <span>Comprobante de Venta</span>
-    </Link>
-    <Link href="./remito/indexRemito" className="boton-acceso">
-      <FaTruck className="icono-menu" />
-      <span>Remito</span>
-    </Link>
-  </div>
-
+  
   <div className="contenedor-tabla">
     <div className="filtros">
           <input
@@ -197,6 +178,28 @@ const deleteProveedor = async(proveedorID) => {
           />
 
     </div>
+        <div className="filtros">
+            <button className="submit-btn" onClick={() => router.back()} title="Presupuestos">
+                <FaFileAlt />
+                Solicitudes de Presupuesto
+            </button>
+            <button className="submit-btn" onClick={() => router.back()} title="Presupuestos">
+                <FaFileInvoice />
+                Presupuestos
+            </button>
+            <button className="submit-btn" onClick={() => router.back()} title="Presupuestos">
+                <FaShoppingCart />
+                Notas de Pedido
+            </button>
+            <button className="submit-btn" onClick={() => router.back()} title="Presupuestos">
+                <FaFileInvoiceDollar />
+                Comprobantes de Venta
+            </button>
+            <button className="submit-btn" onClick={() => router.back()} title="Presupuestos">
+                <FaFileInvoice />
+                Remitos
+            </button>
+        </div>
     
     <div className="tabla-scroll">
         <table id="tablaVinos">
@@ -233,160 +236,9 @@ const deleteProveedor = async(proveedorID) => {
             </tbody>
         </table>
     </div>
-            </div>
-    <style>
+  </div>
+  <style>
     {`
-        .columna{
-            text-align: center;
-          }
-    
-        .botonera {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin: 2rem auto;
-          } 
-        .btn-icon {
-            background-color: #8b0000;
-            color: white;
-            padding: 0.8rem;
-            font-size: 1.2rem;
-            border-radius: 50%;
-            border: none;
-            cursor: pointer;
-            width: 3.2rem;
-            height: 3.2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.3s, transform 0.2s;
-        }
-        
-        .btn-icon:hover {
-          background-color: #a30000;
-          transform: translateY(-3px);
-        }
-        .titulo-pagina {
-            font-size: 3rem;
-            color: white;
-            text-align: center;
-            margin-top: 2rem;
-        }
-        .contenedor-tabla {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-            background-color: #222;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-          }
-        .menu-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-          gap: 1rem;
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 2rem;
-        }
-        .filtros {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-            justify-content: center;
-           }
-        .filtros input {
-            padding: 10px;
-            font-size: 1rem;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-            min-width: 220px;
-         }
-        .tabla-scroll {
-            overflow-x: auto;
-            max-height: 500px;
-         } 
-        table {
-           width: 100%;
-            border-collapse: collapse;
-            background-color: #333;
-            color: white;
-         }
-        th, td {
-            text-align: center;
-            padding: 12px;
-            border-bottom: 1px solid #555;
-         }
-        th {
-            background-color: #111;
-            cursor: pointer;
-        }
-        .acciones {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        .modal {
-          position: fixed;
-          inset: 0;
-          background-color: rgba(0, 0, 0, 0.5);
-          z-index: 1000; /* Asegura que esté por encima de todo */
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          padding: 1rem;
-          overflow-y: auto;
-        }
-
-        .modal-content {
-            background-color: #121212;
-            padding: 2rem;
-            border-radius: 10px;
-            width: 100%;
-            max-width: 900px;
-            max-height: 90vh;
-            overflow-y: auto;
-            position: relative;
-         }
-        .close {
-            position: absolute;
-            top: 1rem;
-            right: 1.5rem;
-            font-size: 1.5rem;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-          }
-        .boton-acceso {
-          background-color: #1f1f1f;
-          color: #f1f1f1;
-          border: 1px solid #444;
-          border-radius: 12px;
-          padding: 1rem;
-          text-align: center;
-          font-size: 1rem;
-          font-weight: 500;
-          text-decoration: none;
-          transition: all 0.3s ease;
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-        }
-        .boton-acceso:hover {
-          background-color: #333;
-          transform: scale(1.03);
-          cursor: pointer;
-          border-color: #888;
-        }
-        .icono-menu {
-          font-size: 1.5rem;
-          margin-bottom: 0.5rem;
-          color: #f1f1f1;
-        }
-
   `}
   </style>
 </>

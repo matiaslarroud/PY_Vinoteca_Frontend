@@ -29,15 +29,15 @@ const newRemitoCliente = ({exito}) => {
                 const precio = prod.precioCosto + ((prod.precioCosto * ganancia) / 100);
 
                 nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].subtotal = precio * nuevosDetalles[index].cantidad;
+                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
             } else if (prod.precioVenta) {
                 const precio = prod.precioVenta;
                 nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].subtotal = precio * nuevosDetalles[index].cantidad;
+                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
             }
         } else {
             nuevosDetalles[index].precio = 0;
-            nuevosDetalles[index].subtotal = 0;
+            nuevosDetalles[index].importe = 0;
         }
 
         setDetalles(nuevosDetalles);
@@ -47,7 +47,7 @@ const newRemitoCliente = ({exito}) => {
 
     const calcularTotalPrecio = (detalles) => {
         const totalPedido = Array.isArray(detalles) && detalles.length > 0
-            ? detalles.reduce((acc, d) => acc + (d.subtotal || 0), 0)
+            ? detalles.reduce((acc, d) => acc + (d.importe || 0), 0)
             : 0;
         setRemito((prev) => ({ ...prev, totalPrecio: totalPedido }));
     };

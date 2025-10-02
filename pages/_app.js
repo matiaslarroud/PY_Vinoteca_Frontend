@@ -1,4 +1,5 @@
 import "@/styles/globals.css";
+import "@/styles/tablas.css";
 import Layout from "@/components/layout.js";
 
 export default function App({ Component, pageProps }) {

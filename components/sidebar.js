@@ -77,6 +77,16 @@ const Sidebar = () => {
                 </li>
                 <li>
                   <Link
+                    href="/clientes/reciboPago/indexReciboPago"
+                    className={`${styles.submenuItem} ${
+                      isActive("/clientes/reciboPago/indexReciboPago") ? styles.active : ''
+                    }`}
+                  >
+                    Recibo de Pago
+                  </Link>
+                </li>
+                <li>
+                  <Link
                     href="/clientes/remito/indexRemito"
                     className={`${styles.submenuItem} ${
                       isActive('/clientes/remito/indexRemito') ? styles.active : ''
@@ -101,9 +111,29 @@ const Sidebar = () => {
               <ul className={styles.submenu}>
                 <li>
                   <Link
-                    href="/proveedores/presupuesto"
+                    href="/proveedores/indexProveedor"
                     className={`${styles.submenuItem} ${
-                      isActive('/proveedores/presupuesto') ? styles.active : ''
+                      isActive("/proveedores/indexProveedor") ? styles.active : ''
+                    }`}
+                  >
+                    Listado
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/proveedores/presupuestoSolicitud/indexSolicitud"
+                    className={`${styles.submenuItem} ${
+                      isActive("/proveedores/presupuestoSolicitud/indexSolicitud") ? styles.active : ''
+                    }`}
+                  >
+                    Solicitud de Presupuesto
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/proveedores/presupuesto/indexPresupuesto"
+                    className={`${styles.submenuItem} ${
+                      isActive("/proveedores/presupuesto/indexPresupuesto") ? styles.active : ''
                     }`}
                   >
                     Presupuesto
@@ -111,12 +141,42 @@ const Sidebar = () => {
                 </li>
                 <li>
                   <Link
-                    href="/proveedores/compras"
+                    href="/proveedores/ordenCompra/indexOrdenCompra"
                     className={`${styles.submenuItem} ${
-                      isActive('/proveedores/compras') ? styles.active : ''
+                      isActive("/proveedores/ordenCompra/indexOrdenCompra") ? styles.active : ''
                     }`}
                   >
-                    Compras
+                    Orden de Compra
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/proveedores/comprobanteCompra/indexComprobanteCompra"
+                    className={`${styles.submenuItem} ${
+                      isActive("/proveedores/comprobanteCompra/indexComprobanteCompra") ? styles.active : ''
+                    }`}
+                  >
+                    Comprobante de Compra
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/proveedores/comprobantePago/indexComprobantePago"
+                    className={`${styles.submenuItem} ${
+                      isActive("/proveedores/comprobantePago/indexComprobantePago") ? styles.active : ''
+                    }`}
+                  >
+                    Comprobante de Pago
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/proveedores/remito/indexRemito"
+                    className={`${styles.submenuItem} ${
+                      isActive("/proveedores/remito/indexRemito") ? styles.active : ''
+                    }`}
+                  >
+                    Remito
                   </Link>
                 </li>
               </ul>

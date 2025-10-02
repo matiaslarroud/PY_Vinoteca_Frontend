@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react"
 import { FaPlus, FaShoppingCart , FaHome, FaArrowLeft, FaTrash, FaEdit , FaPrint } from "react-icons/fa";
 import { useRouter } from 'next/router';
-import FormularioPresupuestoUpdate from './updatePresupuesto'
-import FormularioPresupuestoCreate from './createPresupuesto'
-import CreateNotaPedido from "../notaPedido/createNotaPedido";
+import FormularioPresupuestoUpdate from './updateSolicitud'
+import FormularioPresupuestoCreate from './createSolicitud'
+import CreateNotaPedido from "../ordenCompra/createOrdenCompra";
 
 const { default: Link } = require("next/link")
 
 const indexPresupuesto = () => {
     const router = useRouter();
     const [presupuestos,setPresupuestos] = useState([]);   
-    const [clientes,setClientes] = useState([]);  
+    const [proveedores,setProveedores] = useState([]);  
     const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
     const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
-const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
+    const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
     
     const [filtroNombre, setFiltroNombre] = useState('');
     const [filtroPrecio, setFiltroPrecio] = useState('');   
@@ -28,9 +28,9 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
 
   const presupuestosFiltrados = presupuestos
     .filter(p => {
-      const clienteNombre = clientes.find(d => d._id === p.cliente)?.name || '';
+      const proveedorNombre = proveedores.find(d => d._id === p.proveedor)?.name || '';
       return (
-        clienteNombre.toLowerCase().includes(filtroNombre.toLowerCase()) &&
+        proveedorNombre.toLowerCase().includes(filtroNombre.toLowerCase()) &&
         (filtroPrecio === '' || p.total.toString().includes(filtroPrecio))
       );
     })
@@ -38,11 +38,11 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
       const campo = orden.campo;
       if (!campo) return 0;
 
-      let aVal = campo === 'cliente'
-        ? (clientes.find(d => d._id === a.cliente)?.name || '')
+      let aVal = campo === 'proveedor'
+        ? (proveedores.find(d => d._id === a.proveedor)?.name || '')
         : a[campo];
-      let bVal = campo === 'cliente'
-        ? (clientes.find(d => d._id === b.cliente)?.name || '')
+      let bVal = campo === 'proveedor'
+        ? (proveedores.find(d => d._id === b.proveedor)?.name || '')
         : b[campo];
 
     if (campo === 'codigo') {
@@ -59,7 +59,7 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
     });
 
     const fetchData = () => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto`)
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuesto`)
                 .then((a) => {
                         return a.json()
                 })
@@ -67,20 +67,20 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
                         setPresupuestos(s.data);
                     })
         }
-    const fetchData_Clientes = () => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente`)
+    const fetchData_Proveedores = () => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/proveedor`)
                 .then((a) => {
                         return a.json()
                 })
                     .then ((s) => {
-                        setClientes(s.data);
+                        setProveedores(s.data);
                     })
         }
     
 
     useEffect(() => { 
         fetchData();
-        fetchData_Clientes();
+        fetchData_Proveedores();
     }, [] )
 
     const deletePresupuesto = async(presupuestoID) => {
@@ -88,7 +88,7 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
             console.log("Error con el ID del presupuesto al querer eliminarlo.")
             return
         }
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto/${presupuestoID}`,
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuesto/${presupuestoID}`,
             {
                 method:'DELETE',
                 headers: {
@@ -113,7 +113,7 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
 
         try {
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto/imprimir/${presupuestoID}`
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuesto/imprimir/${presupuestoID}`
             );
 
             if (!res.ok) throw new Error("No se pudo generar el PDF");
@@ -126,10 +126,6 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
 
             // Abrir en una nueva pestaña
             window.open(url, "_blank");
-
-            // 🔹 Si querés que directamente abra el diálogo de impresión:
-            // const win = window.open(url, "_blank");
-            // win.print();
 
         } catch (err) {
             console.error("Error al imprimir presupuesto:", err);
@@ -196,7 +192,7 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
                 </div>
             )}
 
-            <h1 className="titulo-pagina">Presupuesto</h1>
+            <h1 className="titulo-pagina">Solicitud de Presupuesto</h1>
             
             <div className="botonera">
                 <button className="btn-icon" onClick={() => router.back()} title="Volver atrás">
@@ -215,7 +211,7 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
                 <div className="filtros">
                     <input
                         type="text"
-                        placeholder="Filtrar por cliente..."
+                        placeholder="Filtrar por proveedor..."
                         value={filtroNombre}
                         onChange={(e) => setFiltroNombre(e.target.value)}
                     />
@@ -232,7 +228,7 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
                         <thead>
                         <tr className="fila">
                             <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
-                            <th onClick={() => toggleOrden('cliente')}>Cliente ⬍</th>
+                            <th onClick={() => toggleOrden('proveedor')}>Proveedor ⬍</th>
                             <th onClick={() => toggleOrden('fecha')}>Fecha ⬍</th>
                             <th onClick={() => toggleOrden('total')}>Total ⬍</th>
                             <th>Acciones</th>
@@ -240,12 +236,12 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
                         </thead>
                         <tbody>
                             {
-                                presupuestosFiltrados.map(({_id,cliente , fecha, total}) => {
-                                    const clienteEncontrado = clientes.find((p)=>{return p._id === cliente})
+                                presupuestosFiltrados.map(({_id,proveedor , fecha, total}) => {
+                                    const proveedorEncontrado = proveedores.find((p)=>{return p._id === proveedor})
 
                                     return <tr key={_id}>
                                         <td className="columna">{_id}</td>
-                                        <td className="columna">{clienteEncontrado?.name}</td>
+                                        <td className="columna">{proveedorEncontrado?.name}</td>
                                         <td className="columna">{fecha.split("T")[0]}</td>
                                         <td className="columna">${total}</td>
                                         <td className="columna">
@@ -274,6 +270,7 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
 
             <style>
                 {`
+                    
                 `}
             </style>
         </>

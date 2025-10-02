@@ -1,22 +1,23 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaShoppingCart , FaHome, FaArrowLeft, FaTrash, FaEdit , FaPrint } from "react-icons/fa";
+import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit , FaPrint , FaFileInvoiceDollar } from "react-icons/fa";
 import { useRouter } from 'next/router';
-import FormularioPresupuestoUpdate from './updatePresupuesto'
-import FormularioPresupuestoCreate from './createPresupuesto'
-import CreateNotaPedido from "../notaPedido/createNotaPedido";
+import FormularioNotaPedidoUpdate from './updateOrdenCompra'
+import FormularioNotaPedidoCreate from './newOrdenCompra'
+import FormularioComprobanteVentaByNotaPedido from '../comprobanteVenta/create_ComprobanteVenta'
 
 const { default: Link } = require("next/link")
 
-const indexPresupuesto = () => {
+const indexPedido = () => {
     const router = useRouter();
     const [presupuestos,setPresupuestos] = useState([]);   
+    const [pedidos,setPedidos] = useState([]);
     const [clientes,setClientes] = useState([]);  
     const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
     const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
-const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
+    const [mostrarModalComprobanteVenta, setMostrarModalComprobanteVenta] = useState(null);
     
     const [filtroNombre, setFiltroNombre] = useState('');
-    const [filtroPrecio, setFiltroPrecio] = useState('');   
+    const [filtroPresupuesto , setFiltroPresupuesto] = useState('');  
     const [orden, setOrden] = useState({ campo: '', asc: true });
 
     const toggleOrden = (campo) => {
@@ -26,30 +27,42 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
         }));
     };                
 
-  const presupuestosFiltrados = presupuestos
+  const pedidosFiltrados = pedidos
     .filter(p => {
       const clienteNombre = clientes.find(d => d._id === p.cliente)?.name || '';
-      return (
-        clienteNombre.toLowerCase().includes(filtroNombre.toLowerCase()) &&
-        (filtroPrecio === '' || p.total.toString().includes(filtroPrecio))
-      );
+      const coincideNombre = clienteNombre.toLowerCase().includes(filtroNombre.toLowerCase())
+      
+      const presupuestoID = presupuestos.find(d => d._id === p.presupuesto)?._id || '';
+      const coincidePresupuesto = presupuestoID.toString().includes(filtroPresupuesto);
+
+      
+      return coincideNombre && coincidePresupuesto;
     })
     .sort((a, b) => {
       const campo = orden.campo;
       if (!campo) return 0;
 
-      let aVal = campo === 'cliente'
-        ? (clientes.find(d => d._id === a.cliente)?.name || '')
-        : a[campo];
-      let bVal = campo === 'cliente'
-        ? (clientes.find(d => d._id === b.cliente)?.name || '')
-        : b[campo];
+        let aVal, bVal;
 
-    if (campo === 'codigo') {
+        if (campo === 'cliente') {
+        aVal = clientes.find(d => d._id === a.cliente)?.name || '';
+        bVal = clientes.find(d => d._id === b.cliente)?.name || '';
+        }
+
+        if (campo === 'presupuesto') {
+        aVal = presupuestos.find(d => d._id === a.presupuesto)?._id || '';
+        bVal = presupuestos.find(d => d._id === b.presupuesto)?._id || '';
+        }
+
+        if (campo === 'codigo') {
         aVal = Number(a._id);
         bVal = Number(b._id);
-    }
+        }
 
+        else {
+        aVal = a[campo];
+        bVal = b[campo];
+        }
       if (typeof aVal === 'string') aVal = aVal.toLowerCase();
       if (typeof bVal === 'string') bVal = bVal.toLowerCase();
 
@@ -58,7 +71,18 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
       return 0;
     });
 
+
     const fetchData = () => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido`)
+                .then((a) => {
+                        return a.json()
+                })
+                    .then ((s) => {
+                        setPedidos(s.data);
+                    })
+        }
+
+    const fetchData_Presupuestos = () => {
         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto`)
                 .then((a) => {
                         return a.json()
@@ -80,40 +104,19 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
 
     useEffect(() => { 
         fetchData();
+        fetchData_Presupuestos();
         fetchData_Clientes();
     }, [] )
 
-    const deletePresupuesto = async(presupuestoID) => {
-        if(!presupuestoID) {
-            console.log("Error con el ID del presupuesto al querer eliminarlo.")
-            return
-        }
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto/${presupuestoID}`,
-            {
-                method:'DELETE',
-                headers: {
-                    'Content-Type':'application/json',
-                }
-            }
-        ).then((a)=>{return a.json()})
-            .then((res)=>{
-                fetchData();
-                console.log(res.message);
-            })
-            .catch((err)=>{
-                console.log("Error al enviar presupuesto para su eliminación. \n Error: ",err);
-            })
-    }
-
-    const imprimirPresupuesto = async (presupuestoID) => {
-        if (!presupuestoID) {
-            console.error("Error con el ID del presupuesto al querer imprimirlo.");
+    const imprimirPedido = async (pedidoID) => {
+        if (!pedidoID) {
+            console.error("Error con el ID del pedido al querer imprimirlo.");
             return;
         }
 
         try {
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto/imprimir/${presupuestoID}`
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido/imprimir/${pedidoID}`
             );
 
             if (!res.ok) throw new Error("No se pudo generar el PDF");
@@ -127,15 +130,33 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
             // Abrir en una nueva pestaña
             window.open(url, "_blank");
 
-            // 🔹 Si querés que directamente abra el diálogo de impresión:
-            // const win = window.open(url, "_blank");
-            // win.print();
-
         } catch (err) {
-            console.error("Error al imprimir presupuesto:", err);
+            console.error("Error al imprimir pedido:", err);
         }
     };
 
+
+    const deletePedido = async(pedidoID) => {
+        if(!pedidoID) {
+            console.log("Error con el ID del pedido al querer eliminarlo.")
+            return
+        }
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido/${pedidoID}`,
+            {
+                method:'DELETE',
+                headers: {
+                    'Content-Type':'application/json',
+                }
+            }
+        ).then((a)=>{return a.json()})
+            .then((res)=>{
+                fetchData();
+                console.log(res.message);
+            })
+            .catch((err)=>{
+                console.log("Error al enviar nota de pedido para su eliminación. \n Error: ",err);
+            })
+    }
 
     return(
         <>
@@ -145,7 +166,7 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
                         <button className="close" onClick={() => setMostrarModalCreate(false)}>
                             &times;
                         </button>
-                        <FormularioPresupuestoCreate 
+                        <FormularioNotaPedidoCreate 
                             exito={()=>{
                                 setMostrarModalCreate(false);
                                 fetchData();
@@ -161,8 +182,8 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
                         <button className="close" onClick={() => setMostrarModalUpdate(null)}>
                             &times;
                         </button>
-                        <FormularioPresupuestoUpdate 
-                            presupuestoID={mostrarModalUpdate} 
+                        <FormularioNotaPedidoUpdate 
+                            notaPedidoID={mostrarModalUpdate} 
                             exito={()=>{
                                 setMostrarModalUpdate(null);
                                 fetchData();
@@ -172,31 +193,23 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
                 </div>
             )}
 
-            {mostrarPedidoCreate && (
+            {mostrarModalComprobanteVenta && (
                 <div className="modal">
-                <div className="modal-content">
-                    <button className="close" onClick={() => 
-                        {
-                            setmostrarPedidoCreate(null)
-                            fetchData()
-                        }
-                    }>
-                        &times;
-                    </button>
-                    <CreateNotaPedido 
-                        param={mostrarPedidoCreate}
-                        tipo="presupuesto"
-                        exito={() => 
-                            {
-                                setmostrarPedidoCreate(false)
-                                fetchData()
-                            }}
-                    />
-                </div>
+                    <div className="modal-content">
+                        <button className="close" onClick={() => setMostrarModalComprobanteVenta(null)}>
+                            &times;
+                        </button>
+                        <FormularioComprobanteVentaByNotaPedido 
+                            pedidoID={mostrarModalComprobanteVenta} 
+                            exito={()=>{
+                                setMostrarModalComprobanteVenta(null);
+                                fetchData();
+                            }}    
+                        />
+                    </div>
                 </div>
             )}
-
-            <h1 className="titulo-pagina">Presupuesto</h1>
+            <h1 className="titulo-pagina">Nota de Pedido</h1>
             
             <div className="botonera">
                 <button className="btn-icon" onClick={() => router.back()} title="Volver atrás">
@@ -207,7 +220,7 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
                         <FaHome />
                     </Link>
                 </button>
-                <button className="btn-icon" onClick={() => setMostrarModalCreate(true)} title="Agregar Presupuesto">
+                <button className="btn-icon" onClick={() => setMostrarModalCreate(true)} title="Agregar Pedido">
                      <FaPlus />
                 </button>               
             </div>
@@ -221,9 +234,9 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
                     />
                     <input
                         type="text"
-                        placeholder="Filtrar por precio..."
-                        value={filtroPrecio}
-                        onChange={(e) => setFiltroPrecio(e.target.value)}
+                        placeholder="Filtrar por presupuesto..."
+                        value={filtroPresupuesto}
+                        onChange={(e) => setFiltroPresupuesto(e.target.value)}
                     />
                 </div>
 
@@ -233,33 +246,53 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
                         <tr className="fila">
                             <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
                             <th onClick={() => toggleOrden('cliente')}>Cliente ⬍</th>
+                            <th onClick={() => toggleOrden('presupuesto')}>Presupuesto ⬍</th>
                             <th onClick={() => toggleOrden('fecha')}>Fecha ⬍</th>
+                            <th onClick={() => toggleOrden('envio')}>Envio ⬍</th>
+                            <th onClick={() => toggleOrden('fechaEntrega')}>Fecha Entrega ⬍</th>
                             <th onClick={() => toggleOrden('total')}>Total ⬍</th>
                             <th>Acciones</th>
                         </tr>
                         </thead>
                         <tbody>
                             {
-                                presupuestosFiltrados.map(({_id,cliente , fecha, total}) => {
+                                pedidosFiltrados.map(({_id,facturado, cliente , envio , fechaEntrega , fecha, total , presupuesto}) => {
                                     const clienteEncontrado = clientes.find((p)=>{return p._id === cliente})
 
                                     return <tr key={_id}>
                                         <td className="columna">{_id}</td>
                                         <td className="columna">{clienteEncontrado?.name}</td>
+                                        <td className="columna">{presupuesto}</td>
                                         <td className="columna">{fecha.split("T")[0]}</td>
+                                        <td className="columna">{envio ? "SI" : "NO"}</td>
+                                        <td className="columna">{fechaEntrega.split("T")[0]}</td>
                                         <td className="columna">${total}</td>
                                         <td className="columna">
                                             <div className="acciones">
-                                                <button onClick={() => setmostrarPedidoCreate(_id)} className="btn-icon" title="Generar Pedido">
-                                                    <FaShoppingCart />
-                                                </button>
-                                                <button onClick={() => setMostrarModalUpdate(_id)} className="btn-icon" title="Modificar">
+                                                <button className="btn-icon" title={facturado ? "Ya facturado, no se puede modificar" : "Modificar"}
+                                                    onClick={() => {
+                                                        if (facturado) {
+                                                        alert("Este pedido ya fue facturado y no se puede modificar.");
+                                                        return;
+                                                        }
+                                                        setMostrarModalUpdate(_id);
+                                                    }} 
+                                                >
                                                     <FaEdit />
                                                 </button>
-                                                <button onClick={() => imprimirPresupuesto(_id)}  className="btn-icon" title="Imprimir">
+                                                <button onClick={() => imprimirPedido(_id)}  className="btn-icon" title="Imprimir">
                                                     <FaPrint />
                                                 </button>
-                                                <button onClick={() => deletePresupuesto(_id)}  className="btn-icon" title="Eliminar">
+                                                <button   className="btn-icon" title="Generar comprobante de venta">
+                                                    <FaFileInvoiceDollar onClick={() => {
+                                                        if (facturado) {
+                                                        alert("Este pedido ya fue facturado y no se puede modificar.");
+                                                        return;
+                                                        }
+                                                        setMostrarModalComprobanteVenta(_id);
+                                                    }} />
+                                                </button>
+                                                <button onClick={() => deletePedido(_id)}  className="btn-icon" title="Eliminar">
                                                     <FaTrash />
                                                 </button>
                                             </div>
@@ -280,4 +313,4 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
     )
 }
 
-export default indexPresupuesto;
+export default indexPedido;

@@ -1,15 +1,15 @@
 const { useState, useEffect } = require("react")
-import Select from 'react-select';          
+import Select from 'react-select';      
 import { FaTrash} from "react-icons/fa";
 import FormularioEmpleadoCreate from '../../gestion/general/empleado/createEmpleado'
-import FormularioClienteCreate from '../../clientes/createCliente'
+import FormularioClienteCreate from '../../clientes/createCliente' 
 
 const { default: Link } = require("next/link")
 
-const initialStatePresupuesto = {total:'', cliente:'', empleado:''}
-const initialDetalle = { tipoProducto: "",producto: "", cantidad: 0, precio: 0, importe: 0, presupuesto:'' };
+const initialStatePresupuesto = {total:'', cliente:'', empleado:'' }
+const initialDetalle = { tipoProducto: '', producto: "", cantidad: 0, precio: 0, subtotal: 0, presupuesto:'' };
 
-const createPresupuesto = ({exito}) => {
+const updatePresupuesto = ({exito,presupuestoID}) => {
     const [presupuesto , setPresupuesto] = useState(initialStatePresupuesto);
     
     const [clientes,setClientes] = useState([])
@@ -21,8 +21,34 @@ const createPresupuesto = ({exito}) => {
     const detallesValidos = detalles.filter(d => d.producto && d.cantidad > 0);
     const puedeGuardar = detallesValidos.length > 0;
 
-    const fetchData_Productos = () => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products`)
+    const fetchData_Presupuesto = async (presupuestoID) => {
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto/${presupuestoID}`)
+            .then((a)=>{
+                return a.json();
+            })
+                .then((s)=>{
+                    if(s.ok){
+                        setPresupuesto(s.data)
+                    }
+                })
+            .catch((err)=>{console.log("Error al cargar vinos.\nError: ",err)})
+    }
+    
+    const fetchData_PresupuestoDetalle = async (presupuestoID) => {
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuestoDetalle/presupuesto/${presupuestoID}`);
+            const s = await res.json();
+            if (s.ok) {
+                setDetalles(s.data); // guardamos directo
+            }
+        } catch (err) {
+            console.log("Error al cargar detalles.\nError: ", err);
+        }
+    };
+
+    
+    const fetchData_Productos = async() => {
+    await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products`)
         .then((a)=>{
             return a.json();
         })
@@ -31,7 +57,7 @@ const createPresupuesto = ({exito}) => {
                     setProductos(s.data)
                 }
             })
-        .catch((err)=>{console.log("Error al cargar productos.\nError: ",err)})
+        .catch((err)=>{console.log("Error al cargar vinos.\nError: ",err)})
     }
     
     const fetchData_TipoProductos = () => {
@@ -46,46 +72,84 @@ const createPresupuesto = ({exito}) => {
             })
         .catch((err)=>{console.log("Error al cargar tipos de productos.\nError: ",err)})
     }
-
-    const fetchData_Clientes = () => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente`)
+    
+    const fetchData_Clientes = async () => {
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente`)
             .then((a)=>{return a.json()})
                 .then((s)=>{
                     setClientes(s.data)
                 })
     }
 
-    const fetchData_Empleados = () => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/empleado`)
+    const fetchData_Empleados = async () => {
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/empleado`)
             .then((a)=>{return a.json()})
                 .then((s)=>{
                     setEmpleados(s.data)
                 })
     }
-    useEffect(()=>{
-        setDetalles([]);
+
+    useEffect(() => {
+        if (!presupuestoID) return;
+
         fetchData_Clientes();
         fetchData_Empleados();
-        fetchData_Productos();
         fetchData_TipoProductos();
-    }, [])
+        fetchData_Productos();
+        fetchData_Presupuesto(presupuestoID);
+        fetchData_PresupuestoDetalle(presupuestoID);
+    }, [presupuestoID]);
+
+    useEffect(() => {
+        if (!productos.length || !detalles.length) return;
+
+        const detallesConTipo = detalles.map((d) => {
+            const prod = productos.find((p) => p._id === d.producto);
+
+            return {
+                ...d,
+                tipoProducto: d.tipoProducto || (prod ? prod.tipoProducto : ""),
+            };
+        });
+        
+        const isDifferent = JSON.stringify(detalles) !== JSON.stringify(detallesConTipo);
+        if (isDifferent) {
+            setDetalles(detallesConTipo);
+        }
+    }, [productos, detalles]);
+
 
     const clickChange = async(e) => {
          e.preventDefault();
-         const resPresupuesto = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto`,
+         const resPresupuesto = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto/${presupuestoID}`,
             {
-                method: 'POST',
+                method: 'PUT',
                 headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({
-                    total: presupuesto.total,
                     cliente: presupuesto.cliente,
                     empleado: presupuesto.empleado,
+                    total: presupuesto.total,
                 })
             }
         )
 
         const presupuestoCreado = await resPresupuesto.json();
-        const presupuestoID = presupuestoCreado.data._id;
+        const identificador = presupuestoCreado.data._id;
+
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuestoDetalle/${identificador}`,
+            {
+                method:'DELETE',
+                headers: {
+                    'Content-Type':'application/json',
+                }
+            }
+        ).then((a)=>{return a.json()})
+            .then((res)=>{
+                console.log(res.message);
+            })
+            .catch((err)=>{
+                console.log("Error al envia Picada para su eliminación. \n Error: ",err);
+            })
 
         // GUARDAMOS DETALLES
         for (const detalle of detalles) {
@@ -94,9 +158,9 @@ const createPresupuesto = ({exito}) => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     producto: detalle.producto,
-                    precio: detalle.precio,
                     cantidad: detalle.cantidad,
-                    importe: detalle.importe,
+                    precio: detalle.precio,
+                    subtotal: detalle.subtotal,
                     presupuesto: presupuestoID
             })
                 });
@@ -124,25 +188,25 @@ const createPresupuesto = ({exito}) => {
         nuevosDetalles[index][field] = field === "cantidad" ? parseFloat(value) : value;
         
         const prod = productos.find(p => p._id === nuevosDetalles[index].producto);
-       
+
         if (prod) {
             if(prod.precioCosto){
                 const ganancia = prod.ganancia;
                 const precio = prod.precioCosto + ((prod.precioCosto * ganancia) / 100);
-                
+
                 nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
+                nuevosDetalles[index].subtotal = precio * nuevosDetalles[index].cantidad;
             }
             if(!prod.precioCosto && prod.precioVenta){
                 const precio = prod.precioVenta;
 
                 nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
+                nuevosDetalles[index].subtotal = precio * nuevosDetalles[index].cantidad;
             }
 
         } else {
             nuevosDetalles[index].precio = 0;
-            nuevosDetalles[index].importe = 0;
+            nuevosDetalles[index].subtotal = 0;
         }
 
         setDetalles(nuevosDetalles);
@@ -160,20 +224,20 @@ const createPresupuesto = ({exito}) => {
     };
 
     const agregarDetalle = () => {
-        setDetalles([...detalles, { ...{tipoProducto:"",producto: "", cantidad: 0, precio: 0, importe: 0 } }]);
+        setDetalles([...detalles, { ...{tipoProducto:"", producto: "", cantidad: 0, precio: 0, subtotal: 0 } }]);
     };
     
     const calcularTotal = (detalles) => {
         const totalPresupuesto = Array.isArray(detalles) && detalles.length > 0
-            ? detalles.reduce((acc, d) => acc + (d.importe || 0), 0)
+            ? detalles.reduce((acc, d) => acc + (d.subtotal || 0), 0)
                 : 0;
         setPresupuesto((prev) => ({ ...prev, total:totalPresupuesto }));
     };
-
+    
     const [mostrarModalCreate2, setMostrarModalCreate2] = useState(false);
     const [mostrarModalCreate3, setMostrarModalCreate3] = useState(false);
 
-    const opciones_tipoProductos = tipoProductos.map(v => ({
+     const opciones_tipoProductos = tipoProductos.map(v => ({
         value: v,
         label: v === "ProductoVino" ? "Vino" :
                 v === "ProductoPicada" ? "Picada" :
@@ -189,9 +253,9 @@ const createPresupuesto = ({exito}) => {
     const opciones_empleados = empleados.map(v => ({ value: v._id,label: v.name }));
     const opciones_clientes = clientes.map(v => ({ value: v._id,label: v.name }));
 
+
     return(
         <>
-           
             {mostrarModalCreate2 && (
                 <div className="modal">
                 <div className="modal-content">
@@ -224,7 +288,7 @@ const createPresupuesto = ({exito}) => {
             <div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
-                        <h1 className="titulo-pagina">Cargar Presupuesto</h1>
+                        <h1 className="titulo-pagina">Modificar Presupuesto</h1>
                     </div>
                 </div>
 
@@ -336,21 +400,20 @@ const createPresupuesto = ({exito}) => {
                             />
                         </div>
 
-                        
                     </div>
                     <div className="form-row">
                         <div className="form-col-productos">
                             <label>
                                     Productos:
+                                    {/* <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button> */}
                                     <button type="button" className="btn-add-producto" onClick={agregarDetalle}>
                                         + Agregar Producto
                                     </button>
                             </label>
                             <div className="form-group-presupuesto">
                                 
-                                {detalles.map((d, i) => {
-
-                                return <div key={i} className="presupuesto-item">
+                                {detalles.map((d, i) => (
+                                <div key={i} className="presupuesto-item">
                                     <div className='form-col-item1'>
                                         <Select
                                             className="form-select-react"
@@ -463,7 +526,7 @@ const createPresupuesto = ({exito}) => {
                                     </div>
 
                                     <div className='form-col-item2'>
-                                        <span>Importe: ${d.importe.toFixed(2)}</span>
+                                        <span>Subtotal: ${d.subtotal.toFixed(2)}</span>
                                     </div>
 
                                     <div className='form-col-item2'>
@@ -480,7 +543,7 @@ const createPresupuesto = ({exito}) => {
                                         </button>
                                     </div>
                                 </div>
-                                })}
+                                ))}
                             </div>
                         </div> 
                         <div className="form-col-precioVenta">
@@ -530,18 +593,20 @@ const createPresupuesto = ({exito}) => {
                         align-items: center;
                         z-index: 1000;
                     }
-                    
 
-
-                    .close {
-                        position: absolute;
-                        top: 1rem;
-                        right: 1.5rem;
-                        font-size: 1.5rem;
-                        background: transparent;
-                        border: none;
-                        cursor: pointer;
+                    .modal-content {
+                        background-color: #121212;
+                        padding: 40px;
+                        border-radius: 12px;
+                        width: 90%;
+                        height:80%;
+                        max-width: 500px;
+                        max-height: 800px;
+                        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                        position: relative;
+                        margin: 20px;
                     }
+                        
                     .btn-icon {
                         background-color: #8b0000;
                         color: white;
@@ -563,18 +628,6 @@ const createPresupuesto = ({exito}) => {
                     transform: translateY(-3px);
                     }
 
-                    .modal-content {
-                        background-color: #121212;
-                        padding: 40px;
-                        border-radius: 12px;
-                        width: 90%;
-                        height:80%;
-                        max-width: 500px;
-                        max-height: 800px;
-                        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                        position: relative;
-                        margin: 20px;
-                    }
 
                     .form-container {
                         background-color: #1f1f1f;
@@ -647,7 +700,6 @@ const createPresupuesto = ({exito}) => {
                         flex-direction: column;
                     }
 
-
                     label {
                         font-weight: 500;
                         margin-bottom: 0.5rem;
@@ -671,7 +723,7 @@ const createPresupuesto = ({exito}) => {
                         flex: 1;
                     }
 
-                        .btn-plus {
+                    .btn-plus {
                         background-color: transparent;
                         color: #651616ff;
                         border: none;
@@ -693,6 +745,7 @@ const createPresupuesto = ({exito}) => {
                         padding-right: 8px;
                     }
 
+
                     .presupuesto-item {
                         display: flex;
                         align-items: center;
@@ -701,7 +754,7 @@ const createPresupuesto = ({exito}) => {
                     }
 
                     .presupuesto-item input[type="number"] {
-                        width: 80px;
+                        width: 120px;
                     }
 
                     .btn-remove {
@@ -795,4 +848,4 @@ const createPresupuesto = ({exito}) => {
     )
 }
 
-export default createPresupuesto;
+export default updatePresupuesto;

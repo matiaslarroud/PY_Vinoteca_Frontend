@@ -13,7 +13,7 @@ const initialStateNotaPedido = {
         provincia:0 , localidad:0 , barrio:0, calle:0,altura:0,deptoNumero:0,deptoLetra:0
     }
 const initialDetalle = { 
-         tipoProducto: "", producto: "", cantidad: 0, precio: 0, subtotal: 0, notaPedido:'' 
+         tipoProducto: "", producto: "", cantidad: 0, precio: 0, importe: 0, notaPedido:'' 
     };
 
 const createNotaPedido = ({exito , param , tipo}) => {
@@ -261,7 +261,7 @@ const createNotaPedido = ({exito , param , tipo}) => {
                     producto: detalle.producto,
                     precio: detalle.precio,
                     cantidad: detalle.cantidad,
-                    subtotal: detalle.subtotal,
+                    importe: detalle.importe,
                     notaPedido: notaPedidoID
             })
             
@@ -299,18 +299,18 @@ const createNotaPedido = ({exito , param , tipo}) => {
                 const precio = prod.precioCosto + ((prod.precioCosto * ganancia) / 100);
 
                 nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].subtotal = precio * nuevosDetalles[index].cantidad;
+                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
             }
             if(!prod.precioCosto && prod.precioVenta){
                 const precio = prod.precioVenta;
 
                 nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].subtotal = precio * nuevosDetalles[index].cantidad;
+                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
             }
 
         } else {
             nuevosDetalles[index].precio = 0;
-            nuevosDetalles[index].subtotal = 0;
+            nuevosDetalles[index].importe = 0;
         }
 
         setDetalles(nuevosDetalles);
@@ -342,7 +342,7 @@ const createNotaPedido = ({exito , param , tipo}) => {
     }
 
     const agregarDetalle = () => {
-        setDetalles([...detalles, { ...{tipoProducto:"" , producto: "", cantidad: 0, precio: 0, subtotal: 0 } }]);
+        setDetalles([...detalles, { ...{tipoProducto:"" , producto: "", cantidad: 0, precio: 0, importe: 0 } }]);
     };
     
     const agregarDetallePresupuesto = async (presupuestoID) => {
@@ -364,7 +364,7 @@ const createNotaPedido = ({exito , param , tipo}) => {
     
     const calcularTotal = (detalles) => {
         const totalPedido = Array.isArray(detalles) && detalles.length > 0
-            ? detalles.reduce((acc, d) => acc + (d.subtotal || 0), 0)
+            ? detalles.reduce((acc, d) => acc + (d.importe || 0), 0)
                 : 0;
         setNotaPedido((prev) => ({ ...prev, total:totalPedido }));
     };
@@ -800,7 +800,7 @@ const createNotaPedido = ({exito , param , tipo}) => {
                                     </div>
 
                                     <div className='form-col-item2'>
-                                        <span>Subtotal: ${d.subtotal.toFixed(2)}</span>
+                                        <span>Importe: ${d.importe.toFixed(2)}</span>
                                     </div>
 
                                     <div className='form-col-item2'>

@@ -9,7 +9,6 @@ export default function Layout({ children }) {
       <Sidebar />
       <div className={styles.mainWrapper}>
         <main className={styles.content}>{children}</main>
-        
       </div>
     </div>
   );

@@ -6,14 +6,15 @@ import FormularioClienteCreate from '../../clientes/createCliente'
 
 const { default: Link } = require("next/link")
 
-const initialStatePresupuesto = {total:'', cliente:'', empleado:''}
-const initialDetalle = { tipoProducto: "",producto: "", cantidad: 0, precio: 0, importe: 0, presupuesto:'' };
+const initialStatePresupuesto = {total:'', proveedor:'', empleado:'', medioPago:''}
+const initialDetalle = { tipoProducto: "",producto: "", cantidad: 0, precio: 0, subtotal: 0, presupuesto:'' };
 
 const createPresupuesto = ({exito}) => {
     const [presupuesto , setPresupuesto] = useState(initialStatePresupuesto);
     
-    const [clientes,setClientes] = useState([])
+    const [proveedores,setProveedores] = useState([])
     const [empleados,setEmpleados] = useState([])
+    const [mediosPago,setMediosPago] = useState([])
     const [detalles,setDetalles] = useState([initialDetalle])
     const [productos,setProductos] = useState([]);
     const [tipoProductos,setTipoProductos] = useState([]);
@@ -34,6 +35,19 @@ const createPresupuesto = ({exito}) => {
         .catch((err)=>{console.log("Error al cargar productos.\nError: ",err)})
     }
     
+    const fetchData_MediosPago = () => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/medioPago`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if(s.ok){
+                    setMediosPago(s.data);
+                }
+            })
+        .catch((err)=>{console.log("Error al cargar los medios de pago.\nError: ",err)})
+    }
+    
     const fetchData_TipoProductos = () => {
     fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/tipos`)
         .then((a)=>{
@@ -47,11 +61,11 @@ const createPresupuesto = ({exito}) => {
         .catch((err)=>{console.log("Error al cargar tipos de productos.\nError: ",err)})
     }
 
-    const fetchData_Clientes = () => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente`)
+    const fetchData_Proveedores = () => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/proveedor`)
             .then((a)=>{return a.json()})
                 .then((s)=>{
-                    setClientes(s.data)
+                    setProveedores(s.data)
                 })
     }
 
@@ -64,22 +78,24 @@ const createPresupuesto = ({exito}) => {
     }
     useEffect(()=>{
         setDetalles([]);
-        fetchData_Clientes();
+        fetchData_Proveedores();
         fetchData_Empleados();
         fetchData_Productos();
+        fetchData_MediosPago();
         fetchData_TipoProductos();
     }, [])
 
     const clickChange = async(e) => {
          e.preventDefault();
-         const resPresupuesto = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto`,
+         const resPresupuesto = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuesto`,
             {
                 method: 'POST',
                 headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({
                     total: presupuesto.total,
-                    cliente: presupuesto.cliente,
+                    proveedor: presupuesto.proveedor,
                     empleado: presupuesto.empleado,
+                    medioPago: presupuesto.medioPago,
                 })
             }
         )
@@ -89,14 +105,14 @@ const createPresupuesto = ({exito}) => {
 
         // GUARDAMOS DETALLES
         for (const detalle of detalles) {
-            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuestoDetalle`, {
+            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuestoDetalle`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     producto: detalle.producto,
                     precio: detalle.precio,
                     cantidad: detalle.cantidad,
-                    importe: detalle.importe,
+                    subtotal: detalle.subtotal,
                     presupuesto: presupuestoID
             })
                 });
@@ -131,18 +147,18 @@ const createPresupuesto = ({exito}) => {
                 const precio = prod.precioCosto + ((prod.precioCosto * ganancia) / 100);
                 
                 nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
+                nuevosDetalles[index].subtotal = precio * nuevosDetalles[index].cantidad;
             }
             if(!prod.precioCosto && prod.precioVenta){
                 const precio = prod.precioVenta;
 
                 nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
+                nuevosDetalles[index].subtotal = precio * nuevosDetalles[index].cantidad;
             }
 
         } else {
             nuevosDetalles[index].precio = 0;
-            nuevosDetalles[index].importe = 0;
+            nuevosDetalles[index].subtotal = 0;
         }
 
         setDetalles(nuevosDetalles);
@@ -160,12 +176,12 @@ const createPresupuesto = ({exito}) => {
     };
 
     const agregarDetalle = () => {
-        setDetalles([...detalles, { ...{tipoProducto:"",producto: "", cantidad: 0, precio: 0, importe: 0 } }]);
+        setDetalles([...detalles, { ...{tipoProducto:"",producto: "", cantidad: 0, precio: 0, subtotal: 0 } }]);
     };
     
     const calcularTotal = (detalles) => {
         const totalPresupuesto = Array.isArray(detalles) && detalles.length > 0
-            ? detalles.reduce((acc, d) => acc + (d.importe || 0), 0)
+            ? detalles.reduce((acc, d) => acc + (d.subtotal || 0), 0)
                 : 0;
         setPresupuesto((prev) => ({ ...prev, total:totalPresupuesto }));
     };
@@ -186,8 +202,9 @@ const createPresupuesto = ({exito}) => {
             stock: v.stock,
             tipoProducto: v.tipoProducto
         }));
-    const opciones_empleados = empleados.map(v => ({ value: v._id,label: v.name }));
-    const opciones_clientes = clientes.map(v => ({ value: v._id,label: v.name }));
+    const opciones_empleados = empleados.map(v => ({ value: v._id,label: `${v._id} - ${v.name}` }));
+    const opciones_proveedores = proveedores.map(v => ({ value: v._id,label: `${v._id} - ${v.name}` }));
+    const opciones_mediosPago = mediosPago.map(v => ({ value: v._id,label: `${v.name}` }));
 
     return(
         <>
@@ -232,17 +249,17 @@ const createPresupuesto = ({exito}) => {
                     <div className="form-row">
                         <div className="form-col">
                             <label>
-                                Cliente:
+                                Proveedor:
                                 <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
                                 classNamePrefix="rs"
-                                options={opciones_clientes}
-                                value={opciones_clientes.find(op => op.value === presupuesto.cliente) || null}
+                                options={opciones_proveedores}
+                                value={opciones_proveedores.find(op => op.value === presupuesto.proveedor) || null}
                                 onChange={selectChange}
-                                name='cliente'
-                                placeholder="Cliente..."
+                                name='proveedor'
+                                placeholder="Proveedor..."
                                 isClearable
                                 styles={{
                                     container: (base) => ({
@@ -336,6 +353,58 @@ const createPresupuesto = ({exito}) => {
                             />
                         </div>
 
+                        <div className="form-col">
+                            <label>
+                                Medio de Pago:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate2(true)}>+</button>
+                            </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_mediosPago}
+                                value={opciones_mediosPago.find(op => op.value === presupuesto.medioPago) || null}
+                                onChange={selectChange}
+                                name='medioPago'
+                                placeholder="Medio de Pago..."
+                                isClearable
+                                styles={{
+                                    container: (base) => ({
+                                    ...base,
+                                    width: 220, // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 220,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }}
+                            />
+                        </div>
                         
                     </div>
                     <div className="form-row">
@@ -463,7 +532,7 @@ const createPresupuesto = ({exito}) => {
                                     </div>
 
                                     <div className='form-col-item2'>
-                                        <span>Importe: ${d.importe.toFixed(2)}</span>
+                                        <span>Subtotal: ${d.subtotal.toFixed(2)}</span>
                                     </div>
 
                                     <div className='form-col-item2'>

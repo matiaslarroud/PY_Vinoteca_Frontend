@@ -7,7 +7,7 @@ import FormularioClienteCreate from '../../clientes/createCliente'
 const { default: Link } = require("next/link")
 
 const initialStatePresupuesto = {total:'', cliente:'', empleado:'' }
-const initialDetalle = { tipoProducto: '', producto: "", cantidad: 0, precio: 0, subtotal: 0, presupuesto:'' };
+const initialDetalle = { tipoProducto: '', producto: "", cantidad: 0, precio: 0, importe: 0, presupuesto:'' };
 
 const updatePresupuesto = ({exito,presupuestoID}) => {
     const [presupuesto , setPresupuesto] = useState(initialStatePresupuesto);
@@ -160,7 +160,7 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                     producto: detalle.producto,
                     cantidad: detalle.cantidad,
                     precio: detalle.precio,
-                    subtotal: detalle.subtotal,
+                    importe: detalle.importe,
                     presupuesto: presupuestoID
             })
                 });
@@ -195,18 +195,18 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                 const precio = prod.precioCosto + ((prod.precioCosto * ganancia) / 100);
 
                 nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].subtotal = precio * nuevosDetalles[index].cantidad;
+                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
             }
             if(!prod.precioCosto && prod.precioVenta){
                 const precio = prod.precioVenta;
 
                 nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].subtotal = precio * nuevosDetalles[index].cantidad;
+                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
             }
 
         } else {
             nuevosDetalles[index].precio = 0;
-            nuevosDetalles[index].subtotal = 0;
+            nuevosDetalles[index].importe = 0;
         }
 
         setDetalles(nuevosDetalles);
@@ -224,12 +224,12 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
     };
 
     const agregarDetalle = () => {
-        setDetalles([...detalles, { ...{tipoProducto:"", producto: "", cantidad: 0, precio: 0, subtotal: 0 } }]);
+        setDetalles([...detalles, { ...{tipoProducto:"", producto: "", cantidad: 0, precio: 0, importe: 0 } }]);
     };
     
     const calcularTotal = (detalles) => {
         const totalPresupuesto = Array.isArray(detalles) && detalles.length > 0
-            ? detalles.reduce((acc, d) => acc + (d.subtotal || 0), 0)
+            ? detalles.reduce((acc, d) => acc + (d.importe || 0), 0)
                 : 0;
         setPresupuesto((prev) => ({ ...prev, total:totalPresupuesto }));
     };
@@ -526,7 +526,7 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                                     </div>
 
                                     <div className='form-col-item2'>
-                                        <span>Subtotal: ${d.subtotal.toFixed(2)}</span>
+                                        <span>Importe: ${d.importe.toFixed(2)}</span>
                                     </div>
 
                                     <div className='form-col-item2'>

@@ -1,152 +1,51 @@
-const { useState , useEffect } = require("react")
-import Select from 'react-select';        
+const { useState, useEffect } = require("react")
+import Select from 'react-select';          
+import { FaTrash} from "react-icons/fa";
+import FormularioEmpleadoCreate from '../../gestion/general/empleado/createEmpleado'
 import FormularioClienteCreate from '../createCliente'
+import FormularioMedioPagoCreate from '../../gestion/general/medioPago/createMedioPago'
+
 const { default: Link } = require("next/link")
 
-const initialStateComprobanteVenta = {
-    tipoComprobante:'', fecha:'' , descuentoBandera:false , descuento:0 ,total:0, notaPedido:'', cliente:''
-}
+const initialStateNotaPedido = {
+        total:'', fecha:'', fechaEntrega:'', cliente:'', empleado:'',
+        envio:false , presupuesto:'', medioPago:'',
+        provincia:0 , localidad:0 , barrio:0, calle:0,altura:0,deptoNumero:0,deptoLetra:0
+    }
 const initialDetalle = { 
-    tipoProducto:"",producto: "", cantidad: 0, precio: 0, importe: 0, notaPedido:'' 
-};
+         tipoProducto: "", producto: "", cantidad: 0, precio: 0, subtotal: 0, notaPedido:'' 
+    };
 
-
-const createComprobanteVenta = ({exito}) => {
-    const [comprobanteVenta , setComprobanteVenta] = useState(initialStateComprobanteVenta);
-    const [detalles , setDetalles] = useState([initialDetalle]);
-    const [notaPedidos , setNotaPedidos] = useState([]);
-    const [clientes, setClientes] = useState([]);
-    const [puedeGuardar, setPuedeGuardar] = useState(false);
-    const [productos, setProductos] = useState([]);
-    const [tiposComprobante, setTiposComprobante] = useState([]);
+const newNotaPedido = ({exito}) => {
+    const [notaPedido , setNotaPedido] = useState(initialStateNotaPedido);
+    
+    const [clientes,setClientes] = useState([])
+    const [presupuestos,setPresupuestos] = useState([])
+    const [empleados,setEmpleados] = useState([])
+    const [mediosPago,setMediosPago] = useState([])
+    const [detalles,setDetalles] = useState([initialDetalle])
+    const [productos,setProductos] = useState([]);
     const [tipoProductos,setTipoProductos] = useState([]);
+    const [habilitado, setHabilitado] = useState(false);
+    const [provincias,setProvincias] = useState([])
+    const [localidades,setLocalidades] = useState([])
+    const [barrios,setBarrios] = useState([])
+    const [calles,setCalles] = useState([])
     
-    const inputChange = (e) => {
-        const value = e.target.value;
-        const name = e.target.name;
-        
-        setComprobanteVenta({
-            ...comprobanteVenta , 
-                [name]:value
-        })   
-    }
+    const detallesValidos = detalles.filter(d => d.producto && d.cantidad > 0);
+    const puedeGuardar = detallesValidos.length > 0;
 
-    const handleDetalleChange = (index, field, value) => {
-        const nuevosDetalles = [...detalles];
-        nuevosDetalles[index][field] = field === "cantidad" ? parseFloat(value) : value;
-        
-        const prod = productos.find(p => p._id === nuevosDetalles[index].producto);
-
-        if (prod) {
-            if(prod.precioCosto){
-                const ganancia = prod.ganancia;
-                const precio = prod.precioCosto + ((prod.precioCosto * ganancia) / 100);
-
-                nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
-            }
-            if(!prod.precioCosto && prod.precioVenta){
-                const precio = prod.precioVenta;
-
-                nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
-            }
-
-        } else {
-            nuevosDetalles[index].precio = 0;
-            nuevosDetalles[index].importe = 0;
-        }
-
-        setDetalles(nuevosDetalles);
-        calcularTotal(nuevosDetalles);
-    };
-    
-    const selectChange = (selectedOption, actionMeta) => {
-        const name = actionMeta.name;
-        const value = selectedOption ? selectedOption.value : "";
-
-        setComprobanteVenta({
-            ...comprobanteVenta,
-            [name]: value,
-        });
-
-        if (name === 'presupuesto' && value) {
-            agregarDetalleNotaPedido(value);
-        }
-        if (name === 'notaPedido' && value) {
-            setPuedeGuardar(true);
-            fetchData_NotaPedidoDetalle(value)
-        };
-    }
-
-    const agregarDetalleNotaPedido = async (comprobanteID) => {
-    try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/comprobanteVentaDetalle/ComprobanteVenta/${comprobanteID}`);
-        const s = await res.json();
-
-        if (s.ok) {
-            setDetalles(s.data);
-            calcularTotal(s.data);
-        } else {
-            console.error('Error al cargar detalles del comprobante de venta:', s.message);
-        }
-            } catch (error) {
-                console.error('Error de red al cargar detalles del comprobante de venta:', error);
-            }
-    };
-
-    
-    const calcularTotal = (detalles) => {
-        const totalPedido = Array.isArray(detalles) && detalles.length > 0
-            ? detalles.reduce((acc, d) => acc + (d.importe || 0), 0)
-                : 0;
-        setComprobanteVenta((prev) => ({ ...prev, total:totalPedido }));
-    };
-
-    const fetchData_NotaPedidoDetalle = async (notaPedidoID) => {
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedidoDetalle/notaPedido/${notaPedidoID}`)
-            .then((a) => a.json())
-            .then((s) => {
-                if (s.ok) {
-                    setDetalles(
-                        s.data.map(d => ({
-                            ...initialDetalle,
-                            ...d
-                        }))
-                    );
-                    calcularTotal(s.data);
-                }
-            })
-            .catch((err) => console.log("Error al cargar vinos.\nError: ", err));
-        };
-
-    const fetchData_Clientes = () => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente`)
-            .then((a)=>{return a.json()})
-                .then((s)=>{
-                    setClientes(s.data)
-                })
-    }
-
-    const fetchData_TipoComprobante = () => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/tipoComprobante`)
-            .then((a)=>{return a.json()})
-                .then((s)=>{
-                    setTiposComprobante(s.data)
-                })
-    }
-
-    const fetchData_Productos = () => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products`)
+    const fetchData_Presupuestos = () => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto`)
         .then((a)=>{
             return a.json();
         })
             .then((s)=>{
                 if(s.ok){
-                    setProductos(s.data)
+                    setPresupuestos(s.data)
                 }
             })
-        .catch((err)=>{console.log("Error al cargar productos.\nError: ",err)})
+        .catch((err)=>{console.log("Error al cargar vinos.\nError: ",err)})
     }
     
     const fetchData_TipoProductos = () => {
@@ -162,119 +61,108 @@ const createComprobanteVenta = ({exito}) => {
         .catch((err)=>{console.log("Error al cargar tipos de productos.\nError: ",err)})
     }
 
-    const fetchData_NotaPedido = () => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido`)
+    const fetchData_Productos = () => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products`)
         .then((a)=>{
             return a.json();
         })
             .then((s)=>{
                 if(s.ok){
-                    const pedidosNoFacturados = s.data.filter(pedido => pedido.facturado === false);
-                    setNotaPedidos(pedidosNoFacturados);
+                    setProductos(s.data)
                 }
             })
-        .catch((err)=>{console.log("Error al cargar pedidos.\nError: ",err)})
+        .catch((err)=>{console.log("Error al cargar productos.\nError: ",err)})
     }
-
-    const handleCheckboxChange = (e) => {
-        setComprobanteVenta({
-            ...comprobanteVenta,
-            descuentoBandera: e.target.checked,
-        });
-    };
-
-    const clickChange = async(e) => {
-        e.preventDefault();
-        const bodyData = {
-            tipoComprobante: comprobanteVenta.tipoComprobante,
-            descuento: comprobanteVenta.descuento,
-            total: comprobanteVenta.total,  
-        };
-
-        if (comprobanteVenta.notaPedido) {
-            bodyData.notaPedido = comprobanteVenta.notaPedido;
-        }
-
-        const resNotaComprobanteVenta = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/comprobanteVenta`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(bodyData)
+    
+    const fetchData_Provincias = () => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/provincia`)
+        .then((a)=>{
+            return a.json();
         })
-
-        const comprobanteVentaCreado = await resNotaComprobanteVenta.json();
-        const comprobanteVentaID = comprobanteVentaCreado.data._id;
-
-        // GUARDAMOS DETALLES
-        for (const detalle of detalles) {
-            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/comprobanteVentaDetalle`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    producto: detalle.producto,
-                    precio: detalle.precio,
-                    cantidad: detalle.cantidad,
-                    importe: detalle.importe,
-                    comprobanteVenta: comprobanteVentaID
+            .then((s)=>{
+                if(s.ok){
+                    setProvincias(s.data);
+                }
             })
-            
-            
-            });
-            if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
-        
-            setDetalles([initialDetalle]);
-            setComprobanteVenta(initialStateComprobanteVenta);
-            exito();
-        }
+        .catch((err)=>{console.log("Error al cargar provincias.\nError: ",err)})
+    }
+    
+    const fetchData_Localidades = () => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/localidad`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if(s.ok){
+                    setLocalidades(s.data);
+                }
+            })
+        .catch((err)=>{console.log("Error al cargar localidades.\nError: ",err)})
+    }
+    
+    const fetchData_Barrios = () => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/barrio`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if(s.ok){
+                    setBarrios(s.data);
+                }
+            })
+        .catch((err)=>{console.log("Error al cargar barrios.\nError: ",err)})
+    }
+    
+    const fetchData_Calles = () => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/calle`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if(s.ok){
+                    setCalles(s.data);
+                }
+            })
+        .catch((err)=>{console.log("Error al cargar calles.\nError: ",err)})
+    }
+    
+    const fetchData_Clientes = () => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente`)
+            .then((a)=>{return a.json()})
+                .then((s)=>{
+                    setClientes(s.data)
+                })
     }
 
-    const [mostrarModalCreate1, setMostrarModalCreate1] = useState(false);
-    const [mostrarModalCreate3, setMostrarModalCreate3] = useState(false);
+    const fetchData_Empleados = () => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/empleado`)
+            .then((a)=>{return a.json()})
+                .then((s)=>{
+                    setEmpleados(s.data)
+                })
+    }
 
-     const opciones_tipoProductos = tipoProductos.map(v => ({
-        value: v,
-        label: v === "ProductoVino" ? "Vino" :
-                v === "ProductoPicada" ? "Picada" :
-                v === "ProductoInsumo" ? "Insumo" : v
-    }));
-    const opciones_productos = productos
-        .map(v => ({
-            value: v._id,
-            label: v.name,
-            stock: v.stock,
-            tipoProducto: v.tipoProducto
-        }));
-    const opciones_clientes = clientes.map(v => ({ value: v._id,label: v.name }));
-    const opciones_notasPedido = notaPedidos.filter((s)=>{return s.cliente === comprobanteVenta.cliente })
-        .map(v => {
-            return {
-                value: v._id,
-                label: `${v._id} - ${v.fecha.split("T")[0]} - $${v.total}`,
-                total: v.total
-            };
-        }
-    );
-    const opciones_tiposComprobante = tiposComprobante
-    .filter(tc => {
-        const cliente = clientes.find(c => c._id === comprobanteVenta.cliente);
-        if (!cliente) return false; // Si no existe cliente, no mostrar ningún comprobante
-
-        return tc.condicionIva === cliente.condicionIva;
-    })
-    .map(tc => ({
-        value: tc._id,
-        label: tc.name
-    }));
-
-
+    const fetchData_MediosPago = () => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/mediopago`)
+            .then((a)=>{return a.json()})
+                .then((s)=>{
+                    setMediosPago(s.data)
+                })
+    }
     useEffect(()=>{
         setDetalles([]);
+        fetchData_Clientes();
+        fetchData_Empleados();
+        fetchData_Presupuestos();
+        fetchData_MediosPago();
         fetchData_Productos();
         fetchData_TipoProductos();
-        fetchData_NotaPedido();
-        fetchData_Clientes();
-        fetchData_TipoComprobante();
+        fetchData_Provincias();
+        fetchData_Localidades();
+        fetchData_Barrios();
+        fetchData_Calles();
     }, [])
-    
+
     useEffect(() => {
         if (!productos.length || !detalles.length) return;
 
@@ -292,7 +180,210 @@ const createComprobanteVenta = ({exito}) => {
             setDetalles(detallesConTipo);
         }
     }, [productos, detalles]);
+
+    const handleCheckboxChange = (e) => {
+        setHabilitado(e.target.checked);
+
+        setNotaPedido({
+            ...notaPedido,
+            envio: e.target.checked,
+        });
+    };
+
+
+    const clickChange = async(e) => {
+        e.preventDefault();
+        const bodyData = {
+            total: notaPedido.total,
+            cliente: notaPedido.cliente,
+            empleado: notaPedido.empleado,
+            medioPago: notaPedido.medioPago,
+            fechaEntrega: notaPedido.fechaEntrega,
+            envio: notaPedido.envio
+        };
+
+        if (notaPedido.presupuesto) {
+            bodyData.presupuesto = notaPedido.presupuesto;
+        }
         
+        if(notaPedido.envio){
+            bodyData.provincia = notaPedido.provincia;
+            bodyData.localidad = notaPedido.localidad;
+            bodyData.barrio = notaPedido.barrio;
+            bodyData.calle = notaPedido.calle;
+            bodyData.altura = notaPedido.altura;
+            bodyData.deptoNumero = notaPedido.deptoNumero;
+            bodyData.deptoLetra = notaPedido.deptoLetra;
+        }
+
+        const resNotaPedido = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bodyData)
+        })
+
+        const notaPedidoCreado = await resNotaPedido.json();
+        const notaPedidoID = notaPedidoCreado.data._id;
+
+        // GUARDAMOS DETALLES
+        for (const detalle of detalles) {
+            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedidoDetalle`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    producto: detalle.producto,
+                    precio: detalle.precio,
+                    cantidad: detalle.cantidad,
+                    subtotal: detalle.subtotal,
+                    notaPedido: notaPedidoID
+            })
+            
+            
+            });
+            if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
+        
+            const resStock = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/stock/${detalle.producto}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        cantidadVendida: detalle.cantidad 
+                })
+            });
+
+            if (!resStock.ok) throw new Error("Error al actualizar stock del producto");
+            
+            setDetalles([initialDetalle]);
+            setNotaPedido(initialStateNotaPedido);
+            exito();
+        }
+    }
+  
+
+
+    const handleDetalleChange = (index, field, value) => {
+        const nuevosDetalles = [...detalles];
+        nuevosDetalles[index][field] = field === "cantidad" ? parseFloat(value) : value;
+        
+        const prod = productos.find(p => p._id === nuevosDetalles[index].producto);
+
+        if (prod) {
+            if(prod.precioCosto){
+                const ganancia = prod.ganancia;
+                const precio = prod.precioCosto + ((prod.precioCosto * ganancia) / 100);
+
+                nuevosDetalles[index].precio = precio;
+                nuevosDetalles[index].subtotal = precio * nuevosDetalles[index].cantidad;
+            }
+            if(!prod.precioCosto && prod.precioVenta){
+                const precio = prod.precioVenta;
+
+                nuevosDetalles[index].precio = precio;
+                nuevosDetalles[index].subtotal = precio * nuevosDetalles[index].cantidad;
+            }
+
+        } else {
+            nuevosDetalles[index].precio = 0;
+            nuevosDetalles[index].subtotal = 0;
+        }
+
+        setDetalles(nuevosDetalles);
+        calcularTotal(nuevosDetalles);
+    };
+    
+    const selectChange = (selectedOption, actionMeta) => {
+        const name = actionMeta.name;
+        const value = selectedOption ? selectedOption.value : "";
+
+        setNotaPedido({
+            ...notaPedido,
+            [name]: value,
+        });
+
+        if (name === 'presupuesto' && value) {
+            agregarDetallePresupuesto(value);
+        }
+    };
+
+    const inputChange = (e) => {
+        const value = e.target.value;
+        const name = e.target.name;
+        
+        setNotaPedido({
+            ...notaPedido , 
+                [name]:value
+        })   
+    }
+
+    const agregarDetalle = () => {
+        setDetalles([...detalles, { ...{tipoProducto:"" , producto: "", cantidad: 0, precio: 0, subtotal: 0 } }]);
+    };
+    
+    const agregarDetallePresupuesto = async (presupuestoID) => {
+    try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuestoDetalle/presupuesto/${presupuestoID}`);
+        const s = await res.json();
+
+        if (s.ok) {
+            setDetalles(s.data);
+            calcularTotal(s.data);
+        } else {
+            console.error('Error al cargar detalles del presupuesto:', s.message);
+        }
+    } catch (error) {
+        console.error('Error de red al cargar detalles del presupuesto:', error);
+    }
+};
+
+    
+    const calcularTotal = (detalles) => {
+        const totalPedido = Array.isArray(detalles) && detalles.length > 0
+            ? detalles.reduce((acc, d) => acc + (d.subtotal || 0), 0)
+                : 0;
+        setNotaPedido((prev) => ({ ...prev, total:totalPedido }));
+    };
+
+    const [mostrarModalCreate1, setMostrarModalCreate1] = useState(false);
+    const [mostrarModalCreate2, setMostrarModalCreate2] = useState(false);
+    const [mostrarModalCreate3, setMostrarModalCreate3] = useState(false);
+
+    const opciones_tipoProductos = tipoProductos.map(v => ({
+        value: v,
+        label: v === "ProductoVino" ? "Vino" :
+                v === "ProductoPicada" ? "Picada" :
+                v === "ProductoInsumo" ? "Insumo" : v
+    }));
+    const opciones_productos = productos
+        .map(v => ({
+            value: v._id,
+            label: v.name,
+            stock: v.stock,
+            tipoProducto: v.tipoProducto
+        }));
+    const opciones_empleados = empleados.map(v => ({ value: v._id,label: v.name }));
+    const opciones_clientes = clientes.map(v => ({ value: v._id,label: v.name }));
+    const opciones_mediosPago = mediosPago.map(v => ({ value: v._id,label: v.name }));
+    const opciones_presupuestos = presupuestos.filter((s)=>{return s.cliente === notaPedido.cliente })
+        .map(v => {
+            const cliente = clientes.find(c => c._id === v.cliente);
+            return {
+                value: v._id,
+                label: `${v._id} - ${v.fecha.split("T")[0]} - $${v.total}`,
+                cliente: v.cliente,
+                total: v.total
+            };
+        }
+    );
+    const opciones_provincias = provincias.map(v => ({ value: v._id,label: v.name }));
+    const opciones_localidades = localidades
+        .filter((s)=>{return s.provincia === Number(notaPedido.provincia)})
+        .map(v => ({ value: v._id,label: v.name }));
+    const opciones_barrios = barrios
+        .filter((s)=>{return s.localidad === Number(notaPedido.localidad)})
+        .map(v => ({ value: v._id,label: v.name }));
+    const opciones_calles = calles
+        .filter((s)=>{return s.barrio === Number(notaPedido.barrio)})
+        .map(v => ({ value: v._id,label: v.name }));
+
     return(
         <>
             {mostrarModalCreate1 && (
@@ -307,6 +398,19 @@ const createComprobanteVenta = ({exito}) => {
                     />
                 </div>
             </div>
+            )}
+            {mostrarModalCreate2 && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalCreate2(false)}>&times;</button>
+                    <FormularioEmpleadoCreate
+                    exito={() => {
+                        setMostrarModalCreate2(false);
+                        fetchData_Empleados();
+                    }}
+                    />
+                </div>
+                </div>
             )}
 
             {mostrarModalCreate3 && (
@@ -327,13 +431,13 @@ const createComprobanteVenta = ({exito}) => {
             <div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
-                        <h1 className="titulo-pagina">Cargar Comprobante de Venta</h1>
+                        <h1 className="titulo-pagina">Cargar Nota Pedido</h1>
                     </div>
                 </div>
 
                 <form id="formProducto" className="formulario-presupuesto">
                     <div className="form-row">
-                        <div className="form-col">
+                        <div className="form-col1">
                             <label>
                                 Cliente:
                                 <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
@@ -342,7 +446,7 @@ const createComprobanteVenta = ({exito}) => {
                                 className="form-select-react"
                                 classNamePrefix="rs"
                                 options={opciones_clientes}
-                                value={opciones_clientes.find(op => op.value === comprobanteVenta.cliente) || null}
+                                value={opciones_clientes.find(op => op.value === notaPedido.cliente) || null}
                                 onChange={selectChange}
                                 name='cliente'
                                 placeholder="Cliente..."
@@ -386,18 +490,19 @@ const createComprobanteVenta = ({exito}) => {
                             />
                         </div>
 
-                        <div className="form-col">
+                        <div className="form-col1">
                             <label>
-                                Nota de Pedido:
+                                Empleado:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate2(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
                                 classNamePrefix="rs"
-                                options={opciones_notasPedido}
-                                value={opciones_notasPedido.find(op => op.value === comprobanteVenta.notaPedido) || null}
+                                options={opciones_empleados}
+                                value={opciones_empleados.find(op => op.value === notaPedido.empleado) || null}
                                 onChange={selectChange}
-                                name='notaPedido'
-                                placeholder="Nota de Pedido..."
+                                name='empleado'
+                                placeholder="Empleado..."
                                 isClearable
                                 styles={{
                                     container: (base) => ({
@@ -437,18 +542,19 @@ const createComprobanteVenta = ({exito}) => {
                                 }}
                             />
                         </div>
-                        <div className="form-col">
+
+                        <div className="form-col1">
                             <label>
-                                Tipo de Comprobante:
+                                Presupuesto:
                             </label>
                             <Select
                                 className="form-select-react"
                                 classNamePrefix="rs"
-                                options={opciones_tiposComprobante}
-                                value={opciones_tiposComprobante.find(op => op.value === comprobanteVenta.tipoComprobante) || null}
+                                options={opciones_presupuestos}
+                                value={opciones_presupuestos.find(op => op.value === notaPedido.presupuesto) || null}
                                 onChange={selectChange}
-                                name='tipoComprobante'
-                                placeholder="Tipo de comprobante..."
+                                name='presupuesto'
+                                placeholder="Presupuesto..."
                                 isClearable
                                 styles={{
                                     container: (base) => ({
@@ -488,13 +594,68 @@ const createComprobanteVenta = ({exito}) => {
                                 }}
                             />
                         </div>
-                        
-                        
+
+                        <div className="form-col1">
+                            <label>
+                                Medio de Pago:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate1(true)}>+</button>
+                            </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_mediosPago}
+                                value={opciones_mediosPago.find(op => op.value === notaPedido.medioPago) || null}
+                                onChange={selectChange}
+                                name='medioPago'
+                                placeholder="Medio de Pago..."
+                                isClearable
+                                styles={{
+                                    container: (base) => ({
+                                    ...base,
+                                    width: 220, // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 220,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }}
+                            />
+                        </div>
                     </div>
                     <div className="form-row">
                         <div className="form-col-productos">
                             <label>
                                     Productos:
+                                    {/* <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button> */}
+                                    <button type="button" className="btn-add-producto" onClick={agregarDetalle}>
+                                        + Agregar Producto
+                                    </button>
                             </label>
                             <div className="form-group-presupuesto">
                                 
@@ -511,7 +672,6 @@ const createComprobanteVenta = ({exito}) => {
                                             }
                                             placeholder="Tipo de Producto..."
                                             isClearable
-                                            isDisabled={true}
                                             styles={{
                                                 container: (base) => ({
                                                 ...base,
@@ -561,7 +721,6 @@ const createComprobanteVenta = ({exito}) => {
                                             }
                                             placeholder="Producto..."
                                             isClearable
-                                            isDisabled={true}
                                             styles={{
                                                 container: (base) => ({
                                                 ...base,
@@ -608,14 +767,27 @@ const createComprobanteVenta = ({exito}) => {
                                             min={1}
                                             max={opciones_productos.find((p) => p.value === d.producto)?.stock || 0}
                                             value={d.cantidad}
-                                            disabled={true}
                                             onChange={(e) => handleDetalleChange(i, "cantidad", e.target.value)}
                                             required
                                         />
                                     </div>
 
                                     <div className='form-col-item2'>
-                                        <span>Importe: ${d.importe.toFixed(2)}</span>
+                                        <span>Subtotal: ${d.subtotal.toFixed(2)}</span>
+                                    </div>
+
+                                    <div className='form-col-item2'>
+                                        <button
+                                            type="button"
+                                            className="btn-icon"
+                                            onClick={() => {
+                                                const productos = detalles.filter((_, index) => index !== i);
+                                                setDetalles(productos);
+                                                calcularTotal(productos);
+                                            }}
+                                            >                                    
+                                            <FaTrash />
+                                        </button>
                                     </div>
                                 </div>
                                 ))}
@@ -624,29 +796,268 @@ const createComprobanteVenta = ({exito}) => {
 
 
                         <div className="form-col-precioVenta">
-                            
+                            <div className="form-secondary">
+                                <label>
+                                    Fecha de Entrega:
+                                </label>
+                                <input type="date" onChange={inputChange} value={notaPedido.fechaEntrega} name="fechaEntrega" required />
+                            </div>
                             
                             <div className="form-secondary">
-                                <label className="label-box">
-                                    <input
-                                    type="checkbox"
-                                    checked={comprobanteVenta.descuentoBandera}
-                                    onChange={handleCheckboxChange}
-                                    className="checkbox-envio"
-                                    />
-                                    ¿Descuento?
-                                </label>
+                                
+                            <label className="label-box">
+                                <input
+                                type="checkbox"
+                                checked={habilitado}
+                                onChange={handleCheckboxChange}
+                                className="checkbox-envio"
+                                />
+                                ¿Envío?
+                            </label>
 
-                                {comprobanteVenta.descuentoBandera && (
+                            {habilitado && (
+                                <>
+                                <div className="form-col">
+                                    <label>Provincia:</label>
+                                    <Select
+                                    className="form-select-react"
+                                    classNamePrefix="rs"
+                                    options={opciones_provincias}
+                                    value={
+                                        opciones_provincias.find(op => op.value === notaPedido.provincia) ||
+                                        null
+                                    }
+                                    onChange={selectChange}
+                                    name="provincia"
+                                    placeholder="Provincia..."
+                                    isClearable
+                                    styles={{
+                                        container: base => ({
+                                        ...base,
+                                        width: "100%", // ⬅️ ocupa todo el ancho
+                                        }),
+                                        control: base => ({
+                                        ...base,
+                                        width: "100%",
+                                        backgroundColor: "#2c2c2c",
+                                        color: "white",
+                                        border: "1px solid #444",
+                                        borderRadius: 8,
+                                        }),
+                                        singleValue: base => ({
+                                        ...base,
+                                        color: "white",
+                                        whiteSpace: "nowrap",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        }),
+                                        menu: base => ({
+                                        ...base,
+                                        backgroundColor: "#2c2c2c",
+                                        color: "white",
+                                        }),
+                                        option: (base, { isFocused }) => ({
+                                        ...base,
+                                        backgroundColor: isFocused ? "#444" : "#2c2c2c",
+                                        color: "white",
+                                        }),
+                                        input: base => ({
+                                        ...base,
+                                        color: "white",
+                                        }),
+                                    }}
+                                    />
+                                </div>
+
+                                <div className="form-col">
+                                    <label>Localidad:</label>
+                                    <Select
+                                    className="form-select-react"
+                                    classNamePrefix="rs"
+                                    options={opciones_localidades}
+                                    value={
+                                        opciones_localidades.find(op => op.value === notaPedido.localidad) ||
+                                        null
+                                    }
+                                    onChange={selectChange}
+                                    name="localidad"
+                                    placeholder="Localidad..."
+                                    isClearable
+                                    styles={{
+                                        container: base => ({
+                                        ...base,
+                                        width: "100%",
+                                        }),
+                                        control: base => ({
+                                        ...base,
+                                        width: "100%",
+                                        backgroundColor: "#2c2c2c",
+                                        color: "white",
+                                        border: "1px solid #444",
+                                        borderRadius: 8,
+                                        }),
+                                        singleValue: base => ({
+                                        ...base,
+                                        color: "white",
+                                        whiteSpace: "nowrap",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        }),
+                                        menu: base => ({
+                                        ...base,
+                                        backgroundColor: "#2c2c2c",
+                                        color: "white",
+                                        }),
+                                        option: (base, { isFocused }) => ({
+                                        ...base,
+                                        backgroundColor: isFocused ? "#444" : "#2c2c2c",
+                                        color: "white",
+                                        }),
+                                        input: base => ({
+                                        ...base,
+                                        color: "white",
+                                        }),
+                                    }}
+                                    />
+                                </div>
+
+                                <div className="form-col">
+                                    <label>Barrio:</label>
+                                    <Select
+                                    className="form-select-react"
+                                    classNamePrefix="rs"
+                                    options={opciones_barrios}
+                                    value={
+                                        opciones_barrios.find(op => op.value === notaPedido.barrio) || null
+                                    }
+                                    onChange={selectChange}
+                                    name="barrio"
+                                    placeholder="Barrio..."
+                                    isClearable
+                                    styles={{
+                                        container: base => ({
+                                        ...base,
+                                        width: "100%",
+                                        }),
+                                        control: base => ({
+                                        ...base,
+                                        width: "100%",
+                                        backgroundColor: "#2c2c2c",
+                                        color: "white",
+                                        border: "1px solid #444",
+                                        borderRadius: 8,
+                                        }),
+                                        singleValue: base => ({
+                                        ...base,
+                                        color: "white",
+                                        whiteSpace: "nowrap",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        }),
+                                        menu: base => ({
+                                        ...base,
+                                        backgroundColor: "#2c2c2c",
+                                        color: "white",
+                                        }),
+                                        option: (base, { isFocused }) => ({
+                                        ...base,
+                                        backgroundColor: isFocused ? "#444" : "#2c2c2c",
+                                        color: "white",
+                                        }),
+                                        input: base => ({
+                                        ...base,
+                                        color: "white",
+                                        }),
+                                    }}
+                                    />
+                                </div>
+
+                                <div className="form-col">
+                                    <label>Calle:</label>
+                                    <Select
+                                    className="form-select-react"
+                                    classNamePrefix="rs"
+                                    options={opciones_calles}
+                                    value={
+                                        opciones_calles.find(op => op.value === notaPedido.calle) || null
+                                    }
+                                    onChange={selectChange}
+                                    name="calle"
+                                    placeholder="Calle..."
+                                    isClearable
+                                    styles={{
+                                        container: base => ({
+                                        ...base,
+                                        width: "100%",
+                                        }),
+                                        control: base => ({
+                                        ...base,
+                                        width: "100%",
+                                        backgroundColor: "#2c2c2c",
+                                        color: "white",
+                                        border: "1px solid #444",
+                                        borderRadius: 8,
+                                        }),
+                                        singleValue: base => ({
+                                        ...base,
+                                        color: "white",
+                                        whiteSpace: "nowrap",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        }),
+                                        menu: base => ({
+                                        ...base,
+                                        backgroundColor: "#2c2c2c",
+                                        color: "white",
+                                        }),
+                                        option: (base, { isFocused }) => ({
+                                        ...base,
+                                        backgroundColor: isFocused ? "#444" : "#2c2c2c",
+                                        color: "white",
+                                        }),
+                                        input: base => ({
+                                        ...base,
+                                        color: "white",
+                                        }),
+                                    }}
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Altura:</label>
                                     <input
                                     type="number"
                                     onChange={inputChange}
-                                    name='descuento'
-                                    value={comprobanteVenta.descuento}
-                                    placeholder="Escriba aquí el descuento ..."
-                                    className="input-secondary"
+                                    value={notaPedido.altura}
+                                    name="altura"
+                                    placeholder="Altura"
+                                    required
                                     />
-                                )}
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Depto. N°:</label>
+                                    <input
+                                    type="number"
+                                    onChange={inputChange}
+                                    value={notaPedido.deptoNumero}
+                                    name="deptoNumero"
+                                    placeholder="Depto. N°"
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Depto. Letra:</label>
+                                    <input
+                                    type="text"
+                                    onChange={inputChange}
+                                    value={notaPedido.deptoLetra}
+                                    name="deptoLetra"
+                                    placeholder="Depto. Letra"
+                                    />
+                                </div>
+                                </>
+                            )}
                             </div>
                             <div className="form-secondary">
                                 <label htmlFor="precioVenta" className="label-box">
@@ -655,7 +1066,7 @@ const createComprobanteVenta = ({exito}) => {
                                 <input
                                     type="number"
                                     className="input-secondary"
-                                    value={comprobanteVenta.total}
+                                    value={notaPedido.total}
                                     name="total"
                                     disabled
                                     />
@@ -666,14 +1077,14 @@ const createComprobanteVenta = ({exito}) => {
                                     className="submit-btn"
                                     onClick={(e) => {
                                         if (!puedeGuardar) {
-                                        alert("No se puede guardar un comprobante de venta sin una nota de pedido.");
+                                        alert("No se puede guardar una nota de pedido sin al menos un producto con cantidad.");
                                         e.preventDefault();
                                         return;
                                         }
                                         clickChange(e);
                                     }}
                                     >
-                                    Cargar Comprobante
+                                    Cargar Pedido
                                     </button>
                                 </div>
                             </div>
@@ -772,12 +1183,7 @@ const createComprobanteVenta = ({exito}) => {
                             gap: 1.5rem;
                         }
 
-                        .form-col {
-                            flex: 1;
-                            min-width: 200px;
-                            display: flex;
-                            flex-direction: column;
-                        }
+                        
 
                         .form-col-productos {
                             flex: 8;
@@ -797,7 +1203,6 @@ const createComprobanteVenta = ({exito}) => {
                             flex: 2;
                             min-width: 0; /* Importante para que no desborde */
                             display: flex;
-                            font-size: 12px;
                             flex-direction: column;
                         }
 
@@ -864,6 +1269,49 @@ const createComprobanteVenta = ({exito}) => {
                         .presupuesto-item input[type="number"] {
                             width: 80px;
                         }
+
+                        .form-secondary {
+                            display: grid;
+                            grid-template-columns: repeat(2, 1fr); /* 2 columnas */
+                            gap: 16px;
+                            margin-top: 12px;
+                            }
+
+                            .form-col,
+                            .form-group {
+                            display: flex;
+                            flex-direction: column;
+                            width: 100%;
+                            }
+                            
+                            .form-col1,
+                            .form-group {
+                            display: flex;
+                            flex-direction: column;
+                            width: 250;
+                            }
+
+                            .form-col label,
+                            .form-group label {
+                            margin-bottom: 4px;
+                            font-size: 14px;
+                            color: #ddd;
+                            }
+
+                            .form-group input {
+                            background-color: #2c2c2c;
+                            border: 1px solid #444;
+                            border-radius: 8px;
+                            padding: 8px;
+                            color: white;
+                            width: 100%;
+                            }
+
+                            .form-group input:focus {
+                            outline: none;
+                            border-color: #666;
+                            }
+
 
                         .btn-remove {
                             background-color: #651616ff;
@@ -961,7 +1409,7 @@ const createComprobanteVenta = ({exito}) => {
                             box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
                             font-family: 'Segoe UI', sans-serif;
                             color: #f0f0f0;
-                            max-width: 400px;
+                            max-width: 200px;
                         }
 
                         .label-box {
@@ -1024,4 +1472,4 @@ const createComprobanteVenta = ({exito}) => {
     )
 }
 
-export default createComprobanteVenta;
+export default newNotaPedido;

@@ -1,9 +1,18 @@
-.container {
-  display: flex;
-}
+/* layout.module.css */
 
 .content {
-  margin-left: 260px; /* ancho del sidebar */
+  margin-left: 260px; /* ancho del sidebarLeft */
   padding: 2rem;
   flex: 1;
 }
+
+.container {
+  display: flex;
+  width: 100%;
+}
+
+.mainWrapper {
+  flex: 1; /* ocupa el espacio restante */
+  padding: 1rem;
+}
+

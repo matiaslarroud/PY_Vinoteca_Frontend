@@ -8,7 +8,7 @@ const initialStateComprobanteVenta = {
     tipoComprobante:'', fecha:'' , descuentoBandera:false , descuento:0 ,total:0, notaPedido:'', cliente:''
 }
 const initialDetalle = { 
-    tipoProducto:"", producto: "", cantidad: 0, precio: 0, subtotal: 0, notaPedido:'' 
+    tipoProducto:"", producto: "", cantidad: 0, precio: 0, importe: 0, notaPedido:'' 
 };
 
 
@@ -43,18 +43,18 @@ const createComprobanteVenta = ({exito , pedidoID}) => {
                 const precio = prod.precioCosto + ((prod.precioCosto * ganancia) / 100);
 
                 nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].subtotal = precio * nuevosDetalles[index].cantidad;
+                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
             }
             if(!prod.precioCosto && prod.precioVenta){
                 const precio = prod.precioVenta;
 
                 nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].subtotal = precio * nuevosDetalles[index].cantidad;
+                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
             }
 
         } else {
             nuevosDetalles[index].precio = 0;
-            nuevosDetalles[index].subtotal = 0;
+            nuevosDetalles[index].importe = 0;
         }
 
         setDetalles(nuevosDetalles);
@@ -64,7 +64,7 @@ const createComprobanteVenta = ({exito , pedidoID}) => {
     
     const calcularTotal = (detalles) => {
         const totalPedido = Array.isArray(detalles) && detalles.length > 0
-            ? detalles.reduce((acc, d) => acc + (d.subtotal || 0), 0)
+            ? detalles.reduce((acc, d) => acc + (d.importe || 0), 0)
                 : 0;
         setComprobanteVenta((prev) => ({ ...prev, total:totalPedido }));
     };
@@ -188,7 +188,7 @@ const createComprobanteVenta = ({exito , pedidoID}) => {
                     producto: detalle.producto,
                     precio: detalle.precio,
                     cantidad: detalle.cantidad,
-                    subtotal: detalle.subtotal,
+                    importe: detalle.importe,
                     comprobanteVenta: comprobanteVentaID
             })
             
@@ -579,7 +579,7 @@ const createComprobanteVenta = ({exito , pedidoID}) => {
                                     </div>
 
                                     <div className='form-col-item2'>
-                                        <span>Subtotal: ${d.subtotal.toFixed(2)}</span>
+                                        <span>Importe: ${d.importe.toFixed(2)}</span>
                                     </div>
                                 </div>
                                 ))}
