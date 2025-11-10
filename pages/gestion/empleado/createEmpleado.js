@@ -1,10 +1,10 @@
 const { useState, useEffect } = require("react")
 
-import FormularioPaisCreate from '../../ubicaciones/pais/createPais'
-import FormularioProvinciaCreate from '../../ubicaciones//provincia/createProvincia'
-import FormularioLocalidadCreate from '../../ubicaciones/localidad/createLocalidad'
-import FormularioBarrioCreate from '../../ubicaciones/barrio/createBarrio'
-import FormularioCalleCreate from '../../ubicaciones/calle/createCalle'
+import FormularioPaisCreate from '../../tablasVarias/pais/createPais'
+import FormularioProvinciaCreate from '../../tablasVarias//provincia/createProvincia'
+import FormularioLocalidadCreate from '../../tablasVarias/localidad/createLocalidad'
+import FormularioBarrioCreate from '../../tablasVarias/barrio/createBarrio'
+import FormularioCalleCreate from '../../tablasVarias/calle/createCalle'
 
 const { default: Link } = require("next/link")
 
