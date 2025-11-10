@@ -1,11 +1,11 @@
 const { useState, useEffect } = require("react")
 const { default: Link } = require("next/link")
 
-import FormularioPaisCreate from '../../tablasVarias/pais/createPais'
-import FormularioProvinciaCreate from '../../tablasVarias//provincia/createProvincia'
-import FormularioLocalidadCreate from '../../tablasVarias/localidad/createLocalidad'
-import FormularioBarrioCreate from '../../tablasVarias/barrio/createBarrio'
-import FormularioCalleCreate from '../../tablasVarias/calle/createCalle'
+import FormularioPaisCreate from '../tablasVarias/pais/createPais'
+import FormularioProvinciaCreate from '../tablasVarias//provincia/createProvincia'
+import FormularioLocalidadCreate from '../tablasVarias/localidad/createLocalidad'
+import FormularioBarrioCreate from '../tablasVarias/barrio/createBarrio'
+import FormularioCalleCreate from '../tablasVarias/calle/createCalle'
 
 
 const initialState = {
