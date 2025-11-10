@@ -1,9 +1,9 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';
 import { FaTrash} from "react-icons/fa";
-import FormularioTipoVinoCreate from '../../gestion/vinos/vino_tipo/createVinoTipo'
-import FormularioDepositoCreate from '../../gestion/ubicaciones/deposito/createDeposito'
-import FormularioInsumoCreate from '../insumos/createInsumo'
+import FormularioTipoVinoCreate from '../../gestion/tablasVarias/vino_tipo/createVinoTipo'
+import FormularioDepositoCreate from '../../gestion/deposito/createDeposito'
+
 
 const initialState = {fechaElaboracion:'' , fechaEntrega:'' , empleado:''}
 const initialStateDetalle = {ordenProduccion:'',picada:'', cantidad:0}
