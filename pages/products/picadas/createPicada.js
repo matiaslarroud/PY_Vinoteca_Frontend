@@ -1,7 +1,7 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';
 import { FaTrash} from "react-icons/fa";
-import FormularioDepositoCreate from '../../gestion/ubicaciones/deposito/createDeposito'
+import FormularioDepositoCreate from '../../gestion/deposito/createDeposito'
 import FormularioInsumoCreate from '../../products/insumos/createInsumo'
 
 const initialState = {name:'',stock:0, stockMinimo:'' , precioVenta:0 , deposito:''}
