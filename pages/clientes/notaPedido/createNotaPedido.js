@@ -1,9 +1,9 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';          
 import { FaTrash} from "react-icons/fa";
-import FormularioEmpleadoCreate from '../../gestion/general/empleado/createEmpleado'
+import FormularioEmpleadoCreate from '../../gestion/empleado/createEmpleado'
 import FormularioClienteCreate from '../../clientes/createCliente'
-import FormularioMedioPagoCreate from '../../gestion/general/medioPago/createMedioPago'
+import FormularioMedioPagoCreate from '../../gestion/tablasVarias/medioPago/createMedioPago'
 
 const { default: Link } = require("next/link")
 
@@ -349,7 +349,6 @@ const createNotaPedido = ({exito , param , tipo}) => {
     try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuestoDetalle/presupuesto/${presupuestoID}`);
         const s = await res.json();
-
         if (s.ok) {
             setDetalles(s.data);
             calcularTotal(s.data);
@@ -1297,12 +1296,6 @@ const createNotaPedido = ({exito , param , tipo}) => {
                             width: 80px;
                         }
 
-                        .form-secondary {
-                            display: grid;
-                            grid-template-columns: repeat(2, 1fr); /* 2 columnas */
-                            gap: 16px;
-                            margin-top: 12px;
-                            }
 
                             .form-col,
                             .form-group {
@@ -1365,12 +1358,34 @@ const createNotaPedido = ({exito , param , tipo}) => {
                             background-color: #571212ff;
                             transform: translateY(-3px);
                         }
-
-                        .form-submit {
-                            justify-content: center;
-                            margin-top: 1rem;
+                        
+                        .form-secondary {
+                            display: flex;
+                            flex-direction: column;
+                            gap: 0.5rem;
+                            padding: 1rem;
+                            background-color: #1e1e1e;
+                            border-radius: 12px;
+                            box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+                            font-family: 'Segoe UI', sans-serif;
+                            color: #f0f0f0;
+                            max-width: 200px;
                         }
 
+                        .form-secondary {
+                            display: grid;
+                            grid-template-columns: repeat(2, 1fr); /* 2 columnas */
+                            gap: 16px;
+                            margin-top: 12px;
+                            }
+
+                        .form-col-precioVenta {
+                            flex: 2;
+                            min-width: 0;
+                            display: flex;
+                            flex-direction: column;
+                        }
+                            
                         .submit-btn {
                             background-color: #651616ff;
                             color: white;
@@ -1385,7 +1400,7 @@ const createNotaPedido = ({exito , param , tipo}) => {
                         .submit-btn:hover {
                             background-color: #571212ff;
                             transform: translateY(-3px);
-                        }
+                        }   
 
                         button.submit-btn {
                             padding: 0.75rem 1rem;
@@ -1396,13 +1411,14 @@ const createNotaPedido = ({exito , param , tipo}) => {
                             font-size: 1rem;
                             font-weight: 600;
                             cursor: pointer;
+                            width: 100%;
                             transition: background-color 0.3s ease;
                         }
 
                         button.submit-btn:hover {
                             background-color: rgb(115, 8, 8);
                             transform: translateY(-3px);
-                        }
+                        }   
                         
                         .titulo-pagina {
                             font-size: 2rem;
@@ -1437,6 +1453,7 @@ const createNotaPedido = ({exito , param , tipo}) => {
                             font-family: 'Segoe UI', sans-serif;
                             color: #f0f0f0;
                             max-width: 200px;
+                            
                         }
 
                         .label-box {

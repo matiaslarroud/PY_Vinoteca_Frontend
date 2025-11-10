@@ -211,7 +211,7 @@ const formProducto = ({exito}) => {
                                 type="number"
                                 onChange={inputChange}
                                 value={picada.stockMinimo}
-                                name="stock"
+                                name="stockMinimo"
                                 placeholder="Cantidad en stock minima"
                             />
                         </div>
@@ -387,7 +387,7 @@ const formProducto = ({exito}) => {
                                         clickChange(e);
                                     }}
                                     >
-                                    Cargar Picada
+                                    Cargar
                                     </button>
                                 </div>
                             </div>

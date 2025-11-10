@@ -6,8 +6,8 @@ import FormularioClienteCreate from '../../clientes/createCliente'
 
 const { default: Link } = require("next/link")
 
-const initialStatePresupuesto = {total:'', proveedor:'', empleado:'', medioPago:''}
-const initialDetalle = { tipoProducto: "",producto: "", cantidad: 0, precio: 0, subtotal: 0, presupuesto:'' };
+const initialStatePresupuesto = {total:'', proveedor:'', solicitudPresupuesto:'', empleado:'', medioPago:''}
+const initialDetalle = { tipoProducto: "",producto: "", cantidad: 0, precio: 0, importe: 0, presupuesto:'' };
 
 const createPresupuesto = ({exito}) => {
     const [presupuesto , setPresupuesto] = useState(initialStatePresupuesto);
@@ -18,6 +18,7 @@ const createPresupuesto = ({exito}) => {
     const [detalles,setDetalles] = useState([initialDetalle])
     const [productos,setProductos] = useState([]);
     const [tipoProductos,setTipoProductos] = useState([]);
+    const [solicitudesPresupuesto,setSolicitudesPresupuesto] = useState([]);
     
     const detallesValidos = detalles.filter(d => d.producto && d.cantidad > 0);
     const puedeGuardar = detallesValidos.length > 0;
@@ -60,6 +61,19 @@ const createPresupuesto = ({exito}) => {
             })
         .catch((err)=>{console.log("Error al cargar tipos de productos.\nError: ",err)})
     }
+    
+    const fetchData_Solicitudes = () => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuesto`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if(s.ok){
+                    setSolicitudesPresupuesto(s.data);
+                }
+            })
+        .catch((err)=>{console.log("Error al cargar tipos de productos.\nError: ",err)})
+    }
 
     const fetchData_Proveedores = () => {
         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/proveedor`)
@@ -76,6 +90,7 @@ const createPresupuesto = ({exito}) => {
                     setEmpleados(s.data)
                 })
     }
+
     useEffect(()=>{
         setDetalles([]);
         fetchData_Proveedores();
@@ -83,20 +98,45 @@ const createPresupuesto = ({exito}) => {
         fetchData_Productos();
         fetchData_MediosPago();
         fetchData_TipoProductos();
+        fetchData_Solicitudes();
     }, [])
+
+    useEffect(() => {
+        if (!productos.length || !detalles.length) return;
+
+        const detallesConTipo = detalles.map((d) => {
+            const prod = productos.find((p) => p._id === d.producto);
+
+            return {
+                ...d,
+                tipoProducto: d.tipoProducto || (prod ? prod.tipoProducto : ""),
+            };
+        });
+        
+        const isDifferent = JSON.stringify(detalles) !== JSON.stringify(detallesConTipo);
+        if (isDifferent) {
+            setDetalles(detallesConTipo);
+        }
+    }, [productos, detalles]);
 
     const clickChange = async(e) => {
          e.preventDefault();
+         const bodyData = {
+            total: presupuesto.total,
+            proveedor: presupuesto.proveedor,
+            empleado: presupuesto.empleado,
+            medioPago: presupuesto.medioPago
+         }
+
+         if(presupuesto.solicitudPresupuesto){
+            bodyData.solicitudPresupuesto = presupuesto.solicitudPresupuesto;
+         }
+
          const resPresupuesto = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuesto`,
             {
                 method: 'POST',
                 headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({
-                    total: presupuesto.total,
-                    proveedor: presupuesto.proveedor,
-                    empleado: presupuesto.empleado,
-                    medioPago: presupuesto.medioPago,
-                })
+                body: JSON.stringify(bodyData)
             }
         )
 
@@ -112,7 +152,7 @@ const createPresupuesto = ({exito}) => {
                     producto: detalle.producto,
                     precio: detalle.precio,
                     cantidad: detalle.cantidad,
-                    subtotal: detalle.subtotal,
+                    importe: detalle.importe,
                     presupuesto: presupuestoID
             })
                 });
@@ -133,6 +173,67 @@ const createPresupuesto = ({exito}) => {
                 [name]:value
         })   
     }
+    
+const agregarDetallePresupuesto = async (solicitudID) => {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuestoDetalle/solicitudPresupuesto/${solicitudID}`
+    );
+    const s = await res.json();
+
+    if (!s.ok) {
+      console.error("Error al cargar detalles de la solicitud:", s.message);
+      return;
+    }
+
+    // s.data es un array de detalles [{producto, cantidad}, ...]
+    const nuevosDetalles = await Promise.all(
+      s.data.map(async (detalle) => {
+        let precio = 0;
+        let importe = 0;
+        // Buscamos los datos del producto
+        const prodRes = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/${detalle.producto}`
+        );
+        const prodData = await prodRes.json();
+
+        if (!prodData.ok) return null;
+
+
+        if(prodData.data.precioCosto){
+            ganancia = ( prodData.data.ganancia ) / 100;
+            precio = prodData.data.precioCosto + ( prodData.data.precioCosto * ganancia )
+            importe = precio * detalle.cantidad;
+        }
+
+        if(prodData.data.precioVenta){
+            precio = prodData.data.precioVenta
+            importe = ( prodData.data.precioVenta)* detalle.cantidad ;
+        }
+
+        return {
+          tipoProducto: prodData.data.tipo || "",
+          producto: detalle.producto,
+          cantidad: detalle.cantidad,
+          precio,
+          importe
+        };
+      })
+    );
+
+    // Filtramos por si alguno vino como null
+    const filtrados = nuevosDetalles.filter((d) => d !== null);
+
+    // Actualizamos el estado con todos los detalles nuevos
+    setDetalles((prev) => [...prev, ...filtrados]);
+
+    // Si tenés una función que recalcula el total:
+    calcularTotal(filtrados);
+
+  } catch (error) {
+    console.error("Error de red al cargar detalles del presupuesto:", error);
+  }
+};
 
 
     const handleDetalleChange = (index, field, value) => {
@@ -147,18 +248,18 @@ const createPresupuesto = ({exito}) => {
                 const precio = prod.precioCosto + ((prod.precioCosto * ganancia) / 100);
                 
                 nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].subtotal = precio * nuevosDetalles[index].cantidad;
+                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
             }
             if(!prod.precioCosto && prod.precioVenta){
                 const precio = prod.precioVenta;
 
                 nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].subtotal = precio * nuevosDetalles[index].cantidad;
+                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
             }
 
         } else {
             nuevosDetalles[index].precio = 0;
-            nuevosDetalles[index].subtotal = 0;
+            nuevosDetalles[index].importe = 0;
         }
 
         setDetalles(nuevosDetalles);
@@ -173,15 +274,19 @@ const createPresupuesto = ({exito}) => {
             ...presupuesto,
             [name]: value,
         });
+
+        if (name === 'solicitudPresupuesto' && value) {
+            agregarDetallePresupuesto(value);
+        }
     };
 
     const agregarDetalle = () => {
-        setDetalles([...detalles, { ...{tipoProducto:"",producto: "", cantidad: 0, precio: 0, subtotal: 0 } }]);
+        setDetalles([...detalles, { ...{tipoProducto:"",producto: "", cantidad: 0, precio: 0, importe: 0 } }]);
     };
     
     const calcularTotal = (detalles) => {
         const totalPresupuesto = Array.isArray(detalles) && detalles.length > 0
-            ? detalles.reduce((acc, d) => acc + (d.subtotal || 0), 0)
+            ? detalles.reduce((acc, d) => acc + (d.importe || 0), 0)
                 : 0;
         setPresupuesto((prev) => ({ ...prev, total:totalPresupuesto }));
     };
@@ -205,6 +310,14 @@ const createPresupuesto = ({exito}) => {
     const opciones_empleados = empleados.map(v => ({ value: v._id,label: `${v._id} - ${v.name}` }));
     const opciones_proveedores = proveedores.map(v => ({ value: v._id,label: `${v._id} - ${v.name}` }));
     const opciones_mediosPago = mediosPago.map(v => ({ value: v._id,label: `${v.name}` }));
+    const opciones_solicitudes = solicitudesPresupuesto.filter((s)=>{return s.proveedor === presupuesto.proveedor })
+        .map(v => {
+            return {
+                value: v._id,
+                label: `${v._id}`
+            };
+        }
+    );
 
     return(
         <>
@@ -260,6 +373,59 @@ const createPresupuesto = ({exito}) => {
                                 onChange={selectChange}
                                 name='proveedor'
                                 placeholder="Proveedor..."
+                                isClearable
+                                styles={{
+                                    container: (base) => ({
+                                    ...base,
+                                    width: 220, // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 220,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }}
+                            />
+                        </div>
+
+                        <div className="form-col">
+                            <label>
+                                Solicitud de Presupuesto:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate2(true)}>+</button>
+                            </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_solicitudes}
+                                value={opciones_solicitudes.find(op => op.value === presupuesto.solicitudPresupuesto) || null}
+                                onChange={selectChange}
+                                name='solicitudPresupuesto'
+                                placeholder="Solicitud de presupuesto..."
                                 isClearable
                                 styles={{
                                     container: (base) => ({
@@ -532,7 +698,7 @@ const createPresupuesto = ({exito}) => {
                                     </div>
 
                                     <div className='form-col-item2'>
-                                        <span>Subtotal: ${d.subtotal.toFixed(2)}</span>
+                                        <span>Importe: ${d.importe.toFixed(2)}</span>
                                     </div>
 
                                     <div className='form-col-item2'>

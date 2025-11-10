@@ -1,19 +1,25 @@
 import { useEffect, useState } from "react";
-import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit } from "react-icons/fa";
+import { FaPlus, FaHome, FaArrowLeft , FaSearch, FaTrash, FaEdit } from "react-icons/fa";
 import { useRouter } from "next/router";
 import FormularioPicadaCreate from "./createPicada";
 import FormularioPicadaUpdate from "./updatePicada";
+import BusquedaAvanzadaPicadas from "./busquedaPicada";
 
 const { default: Link } = require("next/link");
 
-const IndexPicada = () => {
+const indexPicada = () => {
   const router = useRouter();
 
   const [picadas, setPicadas] = useState([]);
+  const [insumos , setinsumos] = useState([]);
   const [depositos, setDepositos] = useState([]);
+  const initialState = {name:'',stock:0, stockMinimo:'' , precioVenta:0 , deposito:''}
+  const initialStateDetalle = {picada:'',insumo:'', cantidad:0}
+    const [filtro , setFiltro] = useState(initialState);
 
   const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
   const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
+  const [mostrarModalBuscar, setMostrarModalBuscar] = useState(null);
 
   const [filtroNombre, setFiltroNombre] = useState('');
   const [filtroDeposito, setFiltroDeposito] = useState('');
@@ -26,6 +32,15 @@ const IndexPicada = () => {
     setPicadas(data);
   };
 
+  const fetch_Insumos = async () => {
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productInsumo`)
+          .then ((a)=>{return a.json()})
+              .then ((s)=>{
+                  setinsumos(s.data)
+              })
+          .catch((err)=>{console.log(err)});
+  }
+
   const fetchData_Depositos = async () => {
     const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/deposito`);
     const { data } = await res.json();
@@ -35,10 +50,12 @@ const IndexPicada = () => {
   useEffect(() => {
     fetchData();
     fetchData_Depositos();
+    fetch_Insumos();
   }, []);
 
   const deleteProduct = async (productID) => {
     if (!productID) return;
+    const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
     await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productPicada/${productID}`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
@@ -128,6 +145,34 @@ const IndexPicada = () => {
             </div>
           </div>
         )}
+  
+        {mostrarModalBuscar && (
+        <div className="modal">
+            <div className="modal-content">
+            <button
+                className="close"
+                onClick={() => {
+                setMostrarModalBuscar(null);
+                fetchData();
+                }}
+            >
+                &times;
+            </button>
+            <BusquedaAvanzadaPicadas
+                filtro={filtro} // ✅ le pasamos el estado actual
+                exito={(resultados) => {
+                if (resultados && resultados.length > 0) {
+                    setPicadas(resultados);
+                    setMostrarModalBuscar(false);
+                } else {
+                    alert("No se encontraron resultados");
+                }
+                }}
+                onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)} // ✅ manejamos los cambios desde el hijo
+            />
+            </div>
+        </div>
+        )}
 
         <h1 className="titulo-pagina">Picadas</h1>
 
@@ -147,6 +192,12 @@ const IndexPicada = () => {
 
         <div className="contenedor-tabla">
           <div className="filtros">
+            <button onClick={() => 
+                    setMostrarModalBuscar(true)
+                }            
+                className="btn-icon" title="Busqueda avanzada de picada">
+                <FaSearch />
+            </button>  
             <input
               type="text"
               placeholder="Filtrar por nombre..."
@@ -212,4 +263,4 @@ const IndexPicada = () => {
   );
 };
 
-export default IndexPicada;
+export default indexPicada;

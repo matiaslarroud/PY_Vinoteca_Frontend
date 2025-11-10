@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "./LowStockGrid.module.css";
+import styles from "@/styles/LowStockGrid.module.css";
 
 export default function LowStockGrid({ products = [], title = "Productos con Stock Bajo" }) {
   return (

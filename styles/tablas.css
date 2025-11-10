@@ -53,6 +53,12 @@ th {
     cursor: pointer;
 }
 
+tr:hover {
+  background-color: #222;
+  box-shadow: inset 0 0 5px #000;
+  transition: 0.2s ease;
+}
+
 .acciones {
     display: flex;
     justify-content: center;
@@ -69,6 +75,7 @@ th {
     align-items: c;
     padding: 1rem; /* para espacio lateral en pantallas pequeñas */
     overflow-y: auto;
+    
 }
 
 .modal-content {
@@ -101,21 +108,21 @@ th {
 }
 
 .contenedor-tabla {
-  min-width: 1000px;
-  max-width: 1400;
-  margin: 0 auto;
+  width: calc(100% - 100px); /* 50px de cada lado */
+  margin: 0 auto;           /* centra el bloque */
   padding: 20px;
-  margin-right: 240px;
   background-color: #222;
   border-radius: 12px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  overflow-x: auto;
 }
+
 
 .menu-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 250px));
   gap: 30px;
-  width: 1000px;
+  width: 100%;
   margin: 0 auto;
   justify-content: center;
 }
@@ -160,13 +167,14 @@ th {
 
 button.submit-btn {
   padding: 0.75rem 2rem;
-  background-color: #8B0000;
+  background-color: #3939398d;
   color: white;
   border: none;
   border-radius: 8px;
   font-size: 1.1rem;
   font-weight: bold;
   cursor: pointer;
+  width: 200px;
 }
 
 button.submit-btn:hover {

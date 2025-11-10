@@ -88,6 +88,7 @@ const indexPresupuesto = () => {
             console.log("Error con el ID del presupuesto al querer eliminarlo.")
             return
         }
+        const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
         await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuesto/${presupuestoID}`,
             {
                 method:'DELETE',

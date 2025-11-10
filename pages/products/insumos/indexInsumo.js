@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit } from "react-icons/fa";
+import { FaPlus, FaHome, FaArrowLeft, FaSearch , FaTrash, FaEdit } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import FormularioInsumoCreate from './createInsumo';
 import FormularioInsumoUpdate from './updateInsumo';
-
+import BusquedaAvanzadaInsumos from "./busquedaInsumo";
 
 const { default: Link } = require("next/link")
 
@@ -15,6 +15,11 @@ const indexInsumo = () => {
 
     const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
     const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
+    const [mostrarModalBuscar, setMostrarModalBuscar] = useState(null);
+    
+    const initialState = {name:'',stock:0, stockMinimo:'' , precioCosto:0 , ganancia:0 , deposito:'' , proveedor:''}
+
+    const [filtro , setFiltro] = useState(initialState);
     
     const [filtroNombre, setFiltroNombre] = useState('');
     const [filtroDeposito, setFiltroDeposito] = useState('');
@@ -94,6 +99,7 @@ const indexInsumo = () => {
             console.log("Error con el ID de la insumo al querer eliminarla.")
             return
         }
+            const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
         await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productInsumo/${productID}`,
             {
                 method:'DELETE',
@@ -145,6 +151,35 @@ const indexInsumo = () => {
                     </div>
                 </div>
             )}
+  
+            {mostrarModalBuscar && (
+            <div className="modal">
+                <div className="modal-content">
+                <button
+                    className="close"
+                    onClick={() => {
+                    setMostrarModalBuscar(null);
+                    fetchData();
+                    }}
+                >
+                    &times;
+                </button>
+
+                <BusquedaAvanzadaInsumos
+                    filtro={filtro} // ✅ le pasamos el estado actual
+                    exito={(resultados) => {
+                    if (resultados && resultados.length > 0) {
+                        setInsumos(resultados);
+                        setMostrarModalBuscar(false);
+                    } else {
+                        alert("No se encontraron resultados");
+                    }
+                    }}
+                    onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)} // ✅ manejamos los cambios desde el hijo
+                />
+                </div>
+            </div>
+            )}
             <h1 className="titulo-pagina">Insumos</h1>
             
             <div className="botonera">
@@ -162,6 +197,12 @@ const indexInsumo = () => {
         </div>
             <div className="contenedor-tabla">
                 <div className="filtros">
+                    <button onClick={() => 
+                            setMostrarModalBuscar(true)
+                        }            
+                        className="btn-icon" title="Busqueda avanzada de insumo">
+                        <FaSearch />
+                    </button>  
                     <input
                     type="text"
                     placeholder="Filtrar por nombre..."

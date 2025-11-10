@@ -59,6 +59,7 @@ const indexOrdenProduccion = () => {
 
   const deleteOrden = async (ordenID) => {
     if (!ordenID) return;
+    const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
     await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/ordenProduccion/${ordenID}`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },

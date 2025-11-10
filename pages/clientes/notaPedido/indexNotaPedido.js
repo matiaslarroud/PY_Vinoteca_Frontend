@@ -1,13 +1,21 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit , FaPrint , FaFileInvoiceDollar } from "react-icons/fa";
+import { FaPlus, FaHome , FaEye , FaSearch  , FaArrowLeft, FaTrash, FaEdit , FaPrint , FaFileInvoiceDollar } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import FormularioNotaPedidoUpdate from './updateNotaPedido'
 import FormularioNotaPedidoCreate from './newNotaPedido'
 import FormularioComprobanteVentaByNotaPedido from '../comprobanteVenta/create_ComprobanteVenta'
+import ViewPedido from './viewNotaPedido'
+import BusquedaAvanzada from "../notaPedido/busquedaNotaPedido";
 
 const { default: Link } = require("next/link")
 
 const indexPedido = () => {
+    const initialStateNotaPedido = {
+        total:'', fecha:'', fechaEntrega:'', cliente:'', empleado:'',
+        notaPedidoID:'', envio:'' , presupuesto:'', medioPago:'',
+        provincia:0 , localidad:0 , barrio:0, calle:0,altura:0,deptoNumero:0,deptoLetra:0
+    }
+
     const router = useRouter();
     const [presupuestos,setPresupuestos] = useState([]);   
     const [pedidos,setPedidos] = useState([]);
@@ -15,9 +23,11 @@ const indexPedido = () => {
     const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
     const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
     const [mostrarModalComprobanteVenta, setMostrarModalComprobanteVenta] = useState(null);
+    const [viewPedido, setViewPedido] = useState(null);
+    const [mostrarBusqueda, setmostrarBusqueda] = useState(null);
     
-    const [filtroNombre, setFiltroNombre] = useState('');
-    const [filtroPresupuesto , setFiltroPresupuesto] = useState('');  
+    const [filtro , setFiltro] = useState(initialStateNotaPedido); 
+    const [filtroDetalle , setFiltroDetalle] = useState([]);  
     const [orden, setOrden] = useState({ campo: '', asc: true });
 
     const toggleOrden = (campo) => {
@@ -28,16 +38,6 @@ const indexPedido = () => {
     };                
 
   const pedidosFiltrados = pedidos
-    .filter(p => {
-      const clienteNombre = clientes.find(d => d._id === p.cliente)?.name || '';
-      const coincideNombre = clienteNombre.toLowerCase().includes(filtroNombre.toLowerCase())
-      
-      const presupuestoID = presupuestos.find(d => d._id === p.presupuesto)?._id || '';
-      const coincidePresupuesto = presupuestoID.toString().includes(filtroPresupuesto);
-
-      
-      return coincideNombre && coincidePresupuesto;
-    })
     .sort((a, b) => {
       const campo = orden.campo;
       if (!campo) return 0;
@@ -91,21 +91,11 @@ const indexPedido = () => {
                         setPresupuestos(s.data);
                     })
         }
-    const fetchData_Clientes = () => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente`)
-                .then((a) => {
-                        return a.json()
-                })
-                    .then ((s) => {
-                        setClientes(s.data);
-                    })
-        }
     
 
     useEffect(() => { 
         fetchData();
         fetchData_Presupuestos();
-        fetchData_Clientes();
     }, [] )
 
     const imprimirPedido = async (pedidoID) => {
@@ -141,6 +131,7 @@ const indexPedido = () => {
             console.log("Error con el ID del pedido al querer eliminarlo.")
             return
         }
+        const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
         await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido/${pedidoID}`,
             {
                 method:'DELETE',
@@ -157,6 +148,34 @@ const indexPedido = () => {
                 console.log("Error al enviar nota de pedido para su eliminación. \n Error: ",err);
             })
     }
+
+    useEffect(() => {
+        const cargarClientes = async () => {
+        const nuevoMapa = {};
+        
+        const idsClientes = [...new Set(pedidosFiltrados.map(p => p.cliente))];
+        await Promise.all(
+            idsClientes.map(async (id) => {
+            try {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente/${id}`);
+                const data = await res.json();
+                if (!data.ok || !data.data) {
+                nuevoMapa[id] = { name: "Cliente eliminado" };
+                return;
+                }
+                nuevoMapa[id] = data.data;
+            } catch (err) {
+                console.error("Error cargando cliente:", id, err);
+                nuevoMapa[id] = { name: "Error al cargar cliente" };
+            }
+            })
+        );
+        setClientes(nuevoMapa);
+        };
+        if (pedidosFiltrados.length > 0) {
+        cargarClientes();
+        }
+    }, [pedidosFiltrados]);
 
     return(
         <>
@@ -193,6 +212,22 @@ const indexPedido = () => {
                 </div>
             )}
 
+            {viewPedido && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="close" onClick={() => setViewPedido(null)}>
+                            &times;
+                        </button>
+                        <ViewPedido 
+                            notaPedidoID={viewPedido} 
+                            exito={()=>{
+                                setViewPedido(null);
+                            }}    
+                        />
+                    </div>
+                </div>
+            )}
+
             {mostrarModalComprobanteVenta && (
                 <div className="modal">
                     <div className="modal-content">
@@ -209,6 +244,37 @@ const indexPedido = () => {
                     </div>
                 </div>
             )}
+  
+            {mostrarBusqueda && (
+            <div className="modal">
+                <div className="modal-content">
+                <button
+                    className="close"
+                    onClick={() => {
+                    setmostrarBusqueda(null);
+                    }}
+                >
+                    &times;
+                </button>
+
+                <BusquedaAvanzada
+                    filtro={filtro} // ✅ le pasamos el estado actual
+                    filtroDetalle={filtroDetalle}
+                    exito={(resultados) => {
+                    if (resultados.length > 0) {
+                        setPedidos(resultados);
+                        setmostrarBusqueda(false);
+                    } else {
+                        alert("No se encontraron resultados");
+                    }
+                    }}
+                    onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)} // ✅ manejamos los cambios desde el hijo
+                    onChangeFiltroDetalle={(nuevoFiltroDetalle) => setFiltroDetalle(nuevoFiltroDetalle)}
+                />
+                </div>
+            </div>
+            )}
+
             <h1 className="titulo-pagina">Nota de Pedido</h1>
             
             <div className="botonera">
@@ -222,24 +288,15 @@ const indexPedido = () => {
                 </button>
                 <button className="btn-icon" onClick={() => setMostrarModalCreate(true)} title="Agregar Pedido">
                      <FaPlus />
-                </button>               
+                </button>         
+                <button onClick={() => 
+                    setmostrarBusqueda(true)
+                    }            
+                    className="btn-icon" title="Busqueda avanzada de nota de pedido">
+                    <FaSearch />
+                </button>                  
             </div>
             <div className="contenedor-tabla">
-                <div className="filtros">
-                    <input
-                        type="text"
-                        placeholder="Filtrar por cliente..."
-                        value={filtroNombre}
-                        onChange={(e) => setFiltroNombre(e.target.value)}
-                    />
-                    <input
-                        type="text"
-                        placeholder="Filtrar por presupuesto..."
-                        value={filtroPresupuesto}
-                        onChange={(e) => setFiltroPresupuesto(e.target.value)}
-                    />
-                </div>
-
                 <div className="tabla-scroll">
                     <table id="tablaVinos">
                         <thead>
@@ -257,7 +314,7 @@ const indexPedido = () => {
                         <tbody>
                             {
                                 pedidosFiltrados.map(({_id,facturado, cliente , envio , fechaEntrega , fecha, total , presupuesto}) => {
-                                    const clienteEncontrado = clientes.find((p)=>{return p._id === cliente})
+                                    const clienteEncontrado = clientes[cliente];
 
                                     return <tr key={_id}>
                                         <td className="columna">{_id}</td>
@@ -269,6 +326,26 @@ const indexPedido = () => {
                                         <td className="columna">${total}</td>
                                         <td className="columna">
                                             <div className="acciones">
+                                                <button className="btn-icon" title={"Visualizar"}
+                                                    onClick={() => {
+                                                        
+                                                        setViewPedido(_id);
+                                                    }} 
+                                                >
+                                                    <FaEye />
+                                                </button>
+                                                <button   className="btn-icon" title="Generar comprobante de venta">
+                                                    <FaFileInvoiceDollar onClick={() => {
+                                                        if (facturado) {
+                                                        alert("Este pedido ya fue facturado y no se puede modificar.");
+                                                        return;
+                                                        }
+                                                        setMostrarModalComprobanteVenta(_id);
+                                                    }} />
+                                                </button>
+                                                <button onClick={() => imprimirPedido(_id)}  className="btn-icon" title="Imprimir">
+                                                    <FaPrint />
+                                                </button>
                                                 <button className="btn-icon" title={facturado ? "Ya facturado, no se puede modificar" : "Modificar"}
                                                     onClick={() => {
                                                         if (facturado) {
@@ -279,18 +356,6 @@ const indexPedido = () => {
                                                     }} 
                                                 >
                                                     <FaEdit />
-                                                </button>
-                                                <button onClick={() => imprimirPedido(_id)}  className="btn-icon" title="Imprimir">
-                                                    <FaPrint />
-                                                </button>
-                                                <button   className="btn-icon" title="Generar comprobante de venta">
-                                                    <FaFileInvoiceDollar onClick={() => {
-                                                        if (facturado) {
-                                                        alert("Este pedido ya fue facturado y no se puede modificar.");
-                                                        return;
-                                                        }
-                                                        setMostrarModalComprobanteVenta(_id);
-                                                    }} />
                                                 </button>
                                                 <button onClick={() => deletePedido(_id)}  className="btn-icon" title="Eliminar">
                                                     <FaTrash />

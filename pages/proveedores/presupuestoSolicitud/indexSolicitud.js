@@ -59,7 +59,7 @@ const indexPresupuesto = () => {
     });
 
     const fetchData = () => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuesto`)
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuesto`)
                 .then((a) => {
                         return a.json()
                 })
@@ -85,10 +85,11 @@ const indexPresupuesto = () => {
 
     const deletePresupuesto = async(presupuestoID) => {
         if(!presupuestoID) {
-            console.log("Error con el ID del presupuesto al querer eliminarlo.")
+            console.log("Error con el ID de la solicitud de presupuesto al querer eliminarlo.")
             return
         }
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuesto/${presupuestoID}`,
+        const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuesto/${presupuestoID}`,
             {
                 method:'DELETE',
                 headers: {
@@ -101,7 +102,7 @@ const indexPresupuesto = () => {
                 console.log(res.message);
             })
             .catch((err)=>{
-                console.log("Error al enviar presupuesto para su eliminación. \n Error: ",err);
+                console.log("Error al enviar solicitud de presupuesto para su eliminación. \n Error: ",err);
             })
     }
 
@@ -158,7 +159,7 @@ const indexPresupuesto = () => {
                             &times;
                         </button>
                         <FormularioPresupuestoUpdate 
-                            presupuestoID={mostrarModalUpdate} 
+                            solicitudID={mostrarModalUpdate} 
                             exito={()=>{
                                 setMostrarModalUpdate(null);
                                 fetchData();
@@ -203,7 +204,7 @@ const indexPresupuesto = () => {
                         <FaHome />
                     </Link>
                 </button>
-                <button className="btn-icon" onClick={() => setMostrarModalCreate(true)} title="Agregar Presupuesto">
+                <button className="btn-icon" onClick={() => setMostrarModalCreate(true)} title="Agregar Solicitud de Presupuesto">
                      <FaPlus />
                 </button>               
             </div>
@@ -215,12 +216,6 @@ const indexPresupuesto = () => {
                         value={filtroNombre}
                         onChange={(e) => setFiltroNombre(e.target.value)}
                     />
-                    <input
-                        type="text"
-                        placeholder="Filtrar por precio..."
-                        value={filtroPrecio}
-                        onChange={(e) => setFiltroPrecio(e.target.value)}
-                    />
                 </div>
 
                 <div className="tabla-scroll">
@@ -230,23 +225,21 @@ const indexPresupuesto = () => {
                             <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
                             <th onClick={() => toggleOrden('proveedor')}>Proveedor ⬍</th>
                             <th onClick={() => toggleOrden('fecha')}>Fecha ⬍</th>
-                            <th onClick={() => toggleOrden('total')}>Total ⬍</th>
                             <th>Acciones</th>
                         </tr>
                         </thead>
                         <tbody>
                             {
-                                presupuestosFiltrados.map(({_id,proveedor , fecha, total}) => {
+                                presupuestosFiltrados.map(({_id,proveedor , fecha}) => {
                                     const proveedorEncontrado = proveedores.find((p)=>{return p._id === proveedor})
 
                                     return <tr key={_id}>
                                         <td className="columna">{_id}</td>
                                         <td className="columna">{proveedorEncontrado?.name}</td>
                                         <td className="columna">{fecha.split("T")[0]}</td>
-                                        <td className="columna">${total}</td>
                                         <td className="columna">
                                             <div className="acciones">
-                                                <button onClick={() => setmostrarPedidoCreate(_id)} className="btn-icon" title="Generar Pedido">
+                                                <button onClick={() => setmostrarPedidoCreate(_id)} className="btn-icon" title="Generar Orden de Compra">
                                                     <FaShoppingCart />
                                                 </button>
                                                 <button onClick={() => setMostrarModalUpdate(_id)} className="btn-icon" title="Modificar">

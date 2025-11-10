@@ -1,13 +1,11 @@
-// components/Layout.js
-import Sidebar from "./sidebar";
-import styles from "./Layout.module.css";
+import Navbar from "./navBar";
+import styles from "@/styles/Layout.module.css";
 
-export default function Layout({ children }) {
-
+export default function Layout({ children, usuario }) {
   return (
     <div className={styles.container}>
-      <Sidebar />
       <div className={styles.mainWrapper}>
+        <Navbar usuario={usuario} />
         <main className={styles.content}>{children}</main>
       </div>
     </div>

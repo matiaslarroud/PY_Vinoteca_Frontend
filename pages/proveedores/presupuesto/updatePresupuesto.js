@@ -1,54 +1,30 @@
 const { useState, useEffect } = require("react")
-import Select from 'react-select';      
+import Select from 'react-select';          
 import { FaTrash} from "react-icons/fa";
 import FormularioEmpleadoCreate from '../../gestion/general/empleado/createEmpleado'
-import FormularioClienteCreate from '../../clientes/createCliente' 
+import FormularioClienteCreate from '../../clientes/createCliente'
 
 const { default: Link } = require("next/link")
 
-const initialStatePresupuesto = {total:'', cliente:'', empleado:'' }
-const initialDetalle = { tipoProducto: '', producto: "", cantidad: 0, precio: 0, subtotal: 0, presupuesto:'' };
+const initialStatePresupuesto = {total:'', proveedor:'', solicitudPresupuesto:'', empleado:'', medioPago:''}
+const initialDetalle = { tipoProducto: "",producto: "", cantidad: 0, precio: 0, importe: 0, presupuesto:'' };
 
-const updatePresupuesto = ({exito,presupuestoID}) => {
+const updatePresupuesto = ({exito, presupuestoID}) => {
     const [presupuesto , setPresupuesto] = useState(initialStatePresupuesto);
     
-    const [clientes,setClientes] = useState([])
+    const [proveedores,setProveedores] = useState([])
     const [empleados,setEmpleados] = useState([])
+    const [mediosPago,setMediosPago] = useState([])
     const [detalles,setDetalles] = useState([initialDetalle])
     const [productos,setProductos] = useState([]);
     const [tipoProductos,setTipoProductos] = useState([]);
+    const [solicitudesPresupuesto,setSolicitudesPresupuesto] = useState([]);
     
     const detallesValidos = detalles.filter(d => d.producto && d.cantidad > 0);
     const puedeGuardar = detallesValidos.length > 0;
 
-    const fetchData_Presupuesto = async (presupuestoID) => {
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto/${presupuestoID}`)
-            .then((a)=>{
-                return a.json();
-            })
-                .then((s)=>{
-                    if(s.ok){
-                        setPresupuesto(s.data)
-                    }
-                })
-            .catch((err)=>{console.log("Error al cargar vinos.\nError: ",err)})
-    }
-    
-    const fetchData_PresupuestoDetalle = async (presupuestoID) => {
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuestoDetalle/presupuesto/${presupuestoID}`);
-            const s = await res.json();
-            if (s.ok) {
-                setDetalles(s.data); // guardamos directo
-            }
-        } catch (err) {
-            console.log("Error al cargar detalles.\nError: ", err);
-        }
-    };
-
-    
-    const fetchData_Productos = async() => {
-    await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products`)
+    const fetchData_Productos = () => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products`)
         .then((a)=>{
             return a.json();
         })
@@ -57,7 +33,46 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                     setProductos(s.data)
                 }
             })
-        .catch((err)=>{console.log("Error al cargar vinos.\nError: ",err)})
+        .catch((err)=>{console.log("Error al cargar productos.\nError: ",err)})
+    }
+    
+    const fetchData_MediosPago = () => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/medioPago`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if(s.ok){
+                    setMediosPago(s.data);
+                }
+            })
+        .catch((err)=>{console.log("Error al cargar los medios de pago.\nError: ",err)})
+    }
+    
+    const fetchData_Presupuesto = (param) => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuesto/${param}`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if(s.ok){
+                    setPresupuesto(s.data);
+                }
+            })
+        .catch((err)=>{console.log("Error al cargar el presupuesto.\nError: ",err)})
+    }
+    
+    const fetchData_PresupuestoDetalle = (param) => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuestoDetalle/presupuesto/${param}`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if(s.ok){
+                    setDetalles(s.data);
+                }
+            })
+        .catch((err)=>{console.log("Error al cargar los medios de pago.\nError: ",err)})
     }
     
     const fetchData_TipoProductos = () => {
@@ -73,32 +88,46 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
         .catch((err)=>{console.log("Error al cargar tipos de productos.\nError: ",err)})
     }
     
-    const fetchData_Clientes = async () => {
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente`)
+    const fetchData_Solicitudes = () => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuesto`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if(s.ok){
+                    setSolicitudesPresupuesto(s.data);
+                }
+            })
+        .catch((err)=>{console.log("Error al cargar tipos de productos.\nError: ",err)})
+    }
+
+    const fetchData_Proveedores = () => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/proveedor`)
             .then((a)=>{return a.json()})
                 .then((s)=>{
-                    setClientes(s.data)
+                    setProveedores(s.data)
                 })
     }
 
-    const fetchData_Empleados = async () => {
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/empleado`)
+    const fetchData_Empleados = () => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/empleado`)
             .then((a)=>{return a.json()})
                 .then((s)=>{
                     setEmpleados(s.data)
                 })
     }
 
-    useEffect(() => {
-        if (!presupuestoID) return;
-
-        fetchData_Clientes();
+    useEffect(()=>{
+        setDetalles([]);
+        fetchData_Proveedores();
         fetchData_Empleados();
-        fetchData_TipoProductos();
         fetchData_Productos();
+        fetchData_MediosPago();
+        fetchData_TipoProductos();
+        fetchData_Solicitudes();
         fetchData_Presupuesto(presupuestoID);
         fetchData_PresupuestoDetalle(presupuestoID);
-    }, [presupuestoID]);
+    }, [presupuestoID])
 
     useEffect(() => {
         if (!productos.length || !detalles.length) return;
@@ -118,25 +147,31 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
         }
     }, [productos, detalles]);
 
-
     const clickChange = async(e) => {
          e.preventDefault();
-         const resPresupuesto = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto/${presupuestoID}`,
+         const bodyData = {
+            total: presupuesto.total,
+            proveedor: presupuesto.proveedor,
+            empleado: presupuesto.empleado,
+            medioPago: presupuesto.medioPago
+         }
+
+         if(presupuesto.solicitudPresupuesto){
+            bodyData.solicitudPresupuesto = presupuesto.solicitudPresupuesto;
+         }
+
+         const resPresupuesto = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuesto/${presupuestoID}`,
             {
                 method: 'PUT',
                 headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({
-                    cliente: presupuesto.cliente,
-                    empleado: presupuesto.empleado,
-                    total: presupuesto.total,
-                })
+                body: JSON.stringify(bodyData)
             }
         )
 
         const presupuestoCreado = await resPresupuesto.json();
         const identificador = presupuestoCreado.data._id;
 
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuestoDetalle/${identificador}`,
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuestoDetalle/${identificador}`,
             {
                 method:'DELETE',
                 headers: {
@@ -148,20 +183,20 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                 console.log(res.message);
             })
             .catch((err)=>{
-                console.log("Error al envia Picada para su eliminación. \n Error: ",err);
+                console.log("Error al enviar detalle de presupuesto para su eliminación. \n Error: ",err);
             })
 
         // GUARDAMOS DETALLES
         for (const detalle of detalles) {
-            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuestoDetalle`, {
+            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuestoDetalle`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     producto: detalle.producto,
-                    cantidad: detalle.cantidad,
                     precio: detalle.precio,
-                    subtotal: detalle.subtotal,
-                    presupuesto: presupuestoID
+                    cantidad: detalle.cantidad,
+                    importe: detalle.importe,
+                    presupuesto: identificador
             })
                 });
             
@@ -181,6 +216,67 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                 [name]:value
         })   
     }
+    
+const agregarDetallePresupuesto = async (solicitudID) => {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuestoDetalle/solicitudPresupuesto/${solicitudID}`
+    );
+    const s = await res.json();
+
+    if (!s.ok) {
+      console.error("Error al cargar detalles de la solicitud:", s.message);
+      return;
+    }
+
+    // s.data es un array de detalles [{producto, cantidad}, ...]
+    const nuevosDetalles = await Promise.all(
+      s.data.map(async (detalle) => {
+        let precio = 0;
+        let importe = 0;
+        // Buscamos los datos del producto
+        const prodRes = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/${detalle.producto}`
+        );
+        const prodData = await prodRes.json();
+
+        if (!prodData.ok) return null;
+
+
+        if(prodData.data.precioCosto){
+            ganancia = ( prodData.data.ganancia ) / 100;
+            precio = prodData.data.precioCosto + ( prodData.data.precioCosto * ganancia )
+            importe = precio * detalle.cantidad;
+        }
+
+        if(prodData.data.precioVenta){
+            precio = prodData.data.precioVenta
+            importe = ( prodData.data.precioVenta)* detalle.cantidad ;
+        }
+
+        return {
+          tipoProducto: prodData.data.tipo || "",
+          producto: detalle.producto,
+          cantidad: detalle.cantidad,
+          precio,
+          importe
+        };
+      })
+    );
+
+    // Filtramos por si alguno vino como null
+    const filtrados = nuevosDetalles.filter((d) => d !== null);
+
+    // Actualizamos el estado con todos los detalles nuevos
+    setDetalles((prev) => [...prev, ...filtrados]);
+
+    // Si tenés una función que recalcula el total:
+    calcularTotal(filtrados);
+
+  } catch (error) {
+    console.error("Error de red al cargar detalles del presupuesto:", error);
+  }
+};
 
 
     const handleDetalleChange = (index, field, value) => {
@@ -188,25 +284,25 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
         nuevosDetalles[index][field] = field === "cantidad" ? parseFloat(value) : value;
         
         const prod = productos.find(p => p._id === nuevosDetalles[index].producto);
-
+       
         if (prod) {
             if(prod.precioCosto){
                 const ganancia = prod.ganancia;
                 const precio = prod.precioCosto + ((prod.precioCosto * ganancia) / 100);
-
+                
                 nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].subtotal = precio * nuevosDetalles[index].cantidad;
+                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
             }
             if(!prod.precioCosto && prod.precioVenta){
                 const precio = prod.precioVenta;
 
                 nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].subtotal = precio * nuevosDetalles[index].cantidad;
+                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
             }
 
         } else {
             nuevosDetalles[index].precio = 0;
-            nuevosDetalles[index].subtotal = 0;
+            nuevosDetalles[index].importe = 0;
         }
 
         setDetalles(nuevosDetalles);
@@ -221,23 +317,27 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
             ...presupuesto,
             [name]: value,
         });
+
+        if (name === 'solicitudPresupuesto' && value) {
+            agregarDetallePresupuesto(value);
+        }
     };
 
     const agregarDetalle = () => {
-        setDetalles([...detalles, { ...{tipoProducto:"", producto: "", cantidad: 0, precio: 0, subtotal: 0 } }]);
+        setDetalles([...detalles, { ...{tipoProducto:"",producto: "", cantidad: 0, precio: 0, importe: 0 } }]);
     };
     
     const calcularTotal = (detalles) => {
         const totalPresupuesto = Array.isArray(detalles) && detalles.length > 0
-            ? detalles.reduce((acc, d) => acc + (d.subtotal || 0), 0)
+            ? detalles.reduce((acc, d) => acc + (d.importe || 0), 0)
                 : 0;
         setPresupuesto((prev) => ({ ...prev, total:totalPresupuesto }));
     };
-    
+
     const [mostrarModalCreate2, setMostrarModalCreate2] = useState(false);
     const [mostrarModalCreate3, setMostrarModalCreate3] = useState(false);
 
-     const opciones_tipoProductos = tipoProductos.map(v => ({
+    const opciones_tipoProductos = tipoProductos.map(v => ({
         value: v,
         label: v === "ProductoVino" ? "Vino" :
                 v === "ProductoPicada" ? "Picada" :
@@ -250,12 +350,21 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
             stock: v.stock,
             tipoProducto: v.tipoProducto
         }));
-    const opciones_empleados = empleados.map(v => ({ value: v._id,label: v.name }));
-    const opciones_clientes = clientes.map(v => ({ value: v._id,label: v.name }));
-
+    const opciones_empleados = empleados.map(v => ({ value: v._id,label: `${v._id} - ${v.name}` }));
+    const opciones_proveedores = proveedores.map(v => ({ value: v._id,label: `${v._id} - ${v.name}` }));
+    const opciones_mediosPago = mediosPago.map(v => ({ value: v._id,label: `${v.name}` }));
+    const opciones_solicitudes = solicitudesPresupuesto.filter((s)=>{return s.proveedor === presupuesto.proveedor })
+        .map(v => {
+            return {
+                value: v._id,
+                label: `${v._id}`
+            };
+        }
+    );
 
     return(
         <>
+           
             {mostrarModalCreate2 && (
                 <div className="modal">
                 <div className="modal-content">
@@ -288,7 +397,7 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
             <div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
-                        <h1 className="titulo-pagina">Modificar Presupuesto</h1>
+                        <h1 className="titulo-pagina">Cargar Presupuesto</h1>
                     </div>
                 </div>
 
@@ -296,17 +405,70 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                     <div className="form-row">
                         <div className="form-col">
                             <label>
-                                Cliente:
+                                Proveedor:
                                 <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
                                 classNamePrefix="rs"
-                                options={opciones_clientes}
-                                value={opciones_clientes.find(op => op.value === presupuesto.cliente) || null}
+                                options={opciones_proveedores}
+                                value={opciones_proveedores.find(op => op.value === presupuesto.proveedor) || null}
                                 onChange={selectChange}
-                                name='cliente'
-                                placeholder="Cliente..."
+                                name='proveedor'
+                                placeholder="Proveedor..."
+                                isClearable
+                                styles={{
+                                    container: (base) => ({
+                                    ...base,
+                                    width: 220, // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 220,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }}
+                            />
+                        </div>
+
+                        <div className="form-col">
+                            <label>
+                                Solicitud de Presupuesto:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate2(true)}>+</button>
+                            </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_solicitudes}
+                                value={opciones_solicitudes.find(op => op.value === presupuesto.solicitudPresupuesto) || null}
+                                onChange={selectChange}
+                                name='solicitudPresupuesto'
+                                placeholder="Solicitud de presupuesto..."
                                 isClearable
                                 styles={{
                                     container: (base) => ({
@@ -400,20 +562,73 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                             />
                         </div>
 
+                        <div className="form-col">
+                            <label>
+                                Medio de Pago:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate2(true)}>+</button>
+                            </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_mediosPago}
+                                value={opciones_mediosPago.find(op => op.value === presupuesto.medioPago) || null}
+                                onChange={selectChange}
+                                name='medioPago'
+                                placeholder="Medio de Pago..."
+                                isClearable
+                                styles={{
+                                    container: (base) => ({
+                                    ...base,
+                                    width: 220, // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 220,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }}
+                            />
+                        </div>
+                        
                     </div>
                     <div className="form-row">
                         <div className="form-col-productos">
                             <label>
                                     Productos:
-                                    {/* <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button> */}
                                     <button type="button" className="btn-add-producto" onClick={agregarDetalle}>
                                         + Agregar Producto
                                     </button>
                             </label>
                             <div className="form-group-presupuesto">
                                 
-                                {detalles.map((d, i) => (
-                                <div key={i} className="presupuesto-item">
+                                {detalles.map((d, i) => {
+
+                                return <div key={i} className="presupuesto-item">
                                     <div className='form-col-item1'>
                                         <Select
                                             className="form-select-react"
@@ -526,7 +741,7 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                                     </div>
 
                                     <div className='form-col-item2'>
-                                        <span>Subtotal: ${d.subtotal.toFixed(2)}</span>
+                                        <span>Importe: ${d.importe.toFixed(2)}</span>
                                     </div>
 
                                     <div className='form-col-item2'>
@@ -543,7 +758,7 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                                         </button>
                                     </div>
                                 </div>
-                                ))}
+                                })}
                             </div>
                         </div> 
                         <div className="form-col-precioVenta">
@@ -593,20 +808,18 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                         align-items: center;
                         z-index: 1000;
                     }
+                    
 
-                    .modal-content {
-                        background-color: #121212;
-                        padding: 40px;
-                        border-radius: 12px;
-                        width: 90%;
-                        height:80%;
-                        max-width: 500px;
-                        max-height: 800px;
-                        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                        position: relative;
-                        margin: 20px;
+
+                    .close {
+                        position: absolute;
+                        top: 1rem;
+                        right: 1.5rem;
+                        font-size: 1.5rem;
+                        background: transparent;
+                        border: none;
+                        cursor: pointer;
                     }
-                        
                     .btn-icon {
                         background-color: #8b0000;
                         color: white;
@@ -628,6 +841,18 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                     transform: translateY(-3px);
                     }
 
+                    .modal-content {
+                        background-color: #121212;
+                        padding: 40px;
+                        border-radius: 12px;
+                        width: 90%;
+                        height:80%;
+                        max-width: 500px;
+                        max-height: 800px;
+                        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                        position: relative;
+                        margin: 20px;
+                    }
 
                     .form-container {
                         background-color: #1f1f1f;
@@ -700,6 +925,7 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                         flex-direction: column;
                     }
 
+
                     label {
                         font-weight: 500;
                         margin-bottom: 0.5rem;
@@ -723,7 +949,7 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                         flex: 1;
                     }
 
-                    .btn-plus {
+                        .btn-plus {
                         background-color: transparent;
                         color: #651616ff;
                         border: none;
@@ -745,7 +971,6 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                         padding-right: 8px;
                     }
 
-
                     .presupuesto-item {
                         display: flex;
                         align-items: center;
@@ -754,7 +979,7 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                     }
 
                     .presupuesto-item input[type="number"] {
-                        width: 120px;
+                        width: 80px;
                     }
 
                     .btn-remove {

@@ -1,22 +1,28 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaHome, FaArrowLeft, FaTrash , FaPrint , FaFileInvoice  } from "react-icons/fa";
+import { FaPlus, FaHome , FaSearch , FaArrowLeft, FaTrash , FaPrint , FaFileInvoice  } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import FormularioComprobanteVentaCreate from './new_ComprobanteVenta'
 import FormularioCreateRemitoCliente from '../remito/create_RemitoCliente'
+import BusquedaAvanzada from "../comprobanteVenta/busquedaComprobanteVenta";
 
 
 const { default: Link } = require("next/link")
 
 const indexComprobantesVenta = () => {
+    const initialStateComprobanteVenta = {
+        comprobanteVentaID:'' , tipoComprobante:'', fecha:'' , descuentoBandera:'' , descuento:0 ,total:0, notaPedido:'', cliente:''
+    }
+
     const router = useRouter();
     const [pedidos,setPedidos] = useState([]);   
     const [comprobantesVenta,setComprobantesVenta] = useState([]);
     const [clientes,setClientes] = useState([]);  
     const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
     const [mostrarModalRemito, setMostrarModalRemito] = useState(null);
+    const [mostrarBusqueda, setmostrarBusqueda] = useState(null);
     
-    const [filtroNombre, setFiltroNombre] = useState('');
-    const [filtroNotaPedido , setFiltroNotaPedido] = useState('');  
+    const [filtro , setFiltro] = useState(initialStateComprobanteVenta); 
+    const [filtroDetalle , setFiltroDetalle] = useState([]);  
     const [orden, setOrden] = useState({ campo: '', asc: true });
 
     const toggleOrden = (campo) => {
@@ -27,16 +33,6 @@ const indexComprobantesVenta = () => {
     };                
 
   const comprobantesVentaFiltrados = comprobantesVenta
-    .filter(p => {
-      const clienteNombre = clientes.find(d => d._id === p.cliente)?.name || '';
-      const coincideNombre = clienteNombre.toLowerCase().includes(filtroNombre.toLowerCase())
-      
-      const pedidoID = pedidos.find(d => d._id === p.notaPedido)?._id || '';
-      const coincidePedido = pedidoID.toString().includes(filtroNotaPedido);
-
-      
-      return coincideNombre && coincidePedido;
-    })
     .sort((a, b) => {
       const campo = orden.campo;
       if (!campo) return 0;
@@ -89,22 +85,49 @@ const indexComprobantesVenta = () => {
                         setPedidos(s.data);
                     })
         }
-    const fetchData_Clientes = () => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente`)
-                .then((a) => {
-                        return a.json()
-                })
-                    .then ((s) => {
-                        setClientes(s.data);
-                    })
-        }
     
 
     useEffect(() => { 
         fetchData();
         fetchData_pedidos();
-        fetchData_Clientes();
     }, [] )
+
+    useEffect(() => {
+        const cargarClientes = async () => {
+        const nuevoMapa = {};
+        
+        // 1️⃣ Obtener los IDs de los pedidos que aparecen en los comprobantes
+        const idsPedidos = [...new Set(comprobantesVentaFiltrados.map(cv => cv.notaPedido))];
+
+        // 2️⃣ Buscar esos pedidos dentro del array de pedidos
+        const pedidosRelacionados = pedidos.filter(p => idsPedidos.includes(p._id));
+
+        // 3️⃣ Extraer los IDs de clientes desde esos pedidos
+        const idsClientes = [...new Set(pedidosRelacionados.map(p => p.cliente))];
+
+        await Promise.all(
+            idsClientes.map(async (id) => {
+            try {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente/${id}`);
+                const data = await res.json();
+
+                if (!data.ok || !data.data) {
+                nuevoMapa[id] = { name: "Cliente eliminado" };
+                return;
+                }
+                nuevoMapa[id] = data.data;
+            } catch (err) {
+                console.error("Error cargando cliente:", id, err);
+                nuevoMapa[id] = { name: "Error al cargar cliente" };
+            }
+            })
+        );
+        setClientes(nuevoMapa);
+        };
+        if (comprobantesVentaFiltrados.length > 0) {
+        cargarClientes();
+        }
+    }, [comprobantesVentaFiltrados]);
 
     const imprimirComprobanteVenta = async (id) => {
         if (!id) {
@@ -138,6 +161,8 @@ const indexComprobantesVenta = () => {
             console.log("Error con el ID del comprobante de venta al querer eliminarlo.")
             return
         }
+        const confirmar = window.confirm("¿Estás seguro de que querés eliminar este recibo?"); if (!confirmar) return;
+
         await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/comprobanteVenta/${comprobanteVentaID}`,
             {
                 method:'DELETE',
@@ -189,6 +214,36 @@ const indexComprobantesVenta = () => {
                     </div>
                 </div>
             )}
+  
+            {mostrarBusqueda && (
+            <div className="modal">
+                <div className="modal-content">
+                <button
+                    className="close"
+                    onClick={() => {
+                    setmostrarBusqueda(null);
+                    }}
+                >
+                    &times;
+                </button>
+
+                <BusquedaAvanzada
+                    filtro={filtro} 
+                    filtroDetalle={filtroDetalle}
+                    exito={(resultados) => {
+                    if (resultados.length > 0) {
+                        setComprobantesVenta(resultados);
+                        setmostrarBusqueda(false);
+                    } else {
+                        alert("No se encontraron resultados");
+                    }
+                    }}
+                    onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)} 
+                    onChangeFiltroDetalle={(nuevoFiltroDetalle) => setFiltroDetalle(nuevoFiltroDetalle)}
+                />
+                </div>
+            </div>
+            )}
             <h1 className="titulo-pagina">Comprobante de Venta</h1>
             
             <div className="botonera">
@@ -202,24 +257,15 @@ const indexComprobantesVenta = () => {
                 </button>
                 <button className="btn-icon" onClick={() => setMostrarModalCreate(true)} title="Agregar Comprobante Venta">
                      <FaPlus />
+                </button>        
+                <button onClick={() => 
+                    setmostrarBusqueda(true)
+                    }            
+                    className="btn-icon" title="Busqueda avanzada de comprobante de venta">
+                    <FaSearch />
                 </button>               
             </div>
             <div className="contenedor-tabla">
-                <div className="filtros">
-                    <input
-                        type="text"
-                        placeholder="Filtrar por cliente..."
-                        value={filtroNombre}
-                        onChange={(e) => setFiltroNombre(e.target.value)}
-                    />
-                    <input
-                        type="text"
-                        placeholder="Filtrar por nota de pedido..."
-                        value={filtroNotaPedido}
-                        onChange={(e) => setFiltroNotaPedido(e.target.value)}
-                    />
-                </div>
-
                 <div className="tabla-scroll">
                     <table id="tablaVinos">
                         <thead>
@@ -236,8 +282,8 @@ const indexComprobantesVenta = () => {
                             {
                                 comprobantesVentaFiltrados.map(({_id, facturado ,cliente , fecha, total , notaPedido, remitoCreado}) => {
                                     const pedidoEncontrado = pedidos.find((p)=>{return p._id === notaPedido})
-                                    const clienteEncontrado = clientes.find((p)=>{return p._id === pedidoEncontrado?.cliente})
-
+                                    // const clienteEncontrado = clientes.find((p)=>{return p._id === pedidoEncontrado?.cliente})
+                                    const clienteEncontrado = clientes[pedidoEncontrado?.cliente];    
                                     return <tr key={_id}>
                                         <td className="columna">{_id}</td>
                                         <td className="columna">{clienteEncontrado?.name}</td>

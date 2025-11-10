@@ -1,40 +1,40 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaShoppingCart , FaHome, FaArrowLeft, FaTrash, FaEdit , FaFileInvoiceDollar, FaFileInvoice } from "react-icons/fa";
+import { FaPlus, FaShoppingCart , FaHome, FaCartArrowDown, FaArrowLeft, FaTrash, FaEdit , FaFileInvoiceDollar, FaFileInvoice , FaSearch  , FaReceipt } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import Link from "next/link";
 import FormularioClienteUpdate from './updateCliente'
 import FormularioClienteCreate from './createCliente'
 import CreateNotaPedido from "./notaPedido/createNotaPedido";
+import CreatePresupuesto from "./presupuesto/createPresupuesto";
+import BusquedaAvanzadaClientes from "./busquedaCliente";
 
 export default function indexClientes() {
-const router = useRouter();
-const [clientes,setClientes] = useState([]);
-const [localidades,setLocalidades] = useState([]);    
-const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
-const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
-const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
-
-const [filtroClienteNombre, setFiltroClienteNombre] = useState('');
-const [filtroClienteLocalidad, setFiltroClienteLocalidad] = useState('');  
+  const router = useRouter();
+  const [clientes,setClientes] = useState([]);
+  const [localidades,setLocalidades] = useState([]);    
+  const [mostrarModalCreate, setMostrarModalCreate] = useState(null);
+  const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
+  const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
+  const [mostrarPresupuestoCreate, setmostrarPresupuestoCreate] = useState(null);
+  const [mostrarModalBuscar, setMostrarModalBuscar] = useState(null);
 const [orden, setOrden] = useState({ campo: '', asc: true });
+
+const initialState = {
+    name:'', lastname:'', fechaNacimiento:'', telefono:'', email:'', cuit:'',
+    pais:'', provincia:'', localidad:'', barrio:'', calle:'', condicionIva:'', cuentaCorriente:'',
+    altura:0, deptoNumero:0, deptoLetra:''
+}
+  const [filtro , setFiltro] = useState(initialState);
 
 const toggleOrden = (campo) => {
     setOrden((prev) => ({
     campo,
     asc: prev.campo === campo ? !prev.asc : true
     }));
-};   
+};  
+
 
 const clientesFiltrados = clientes
-  .filter(c => {
-    const localidadNombre = localidades.find(loc => loc._id === c.localidad)?.name || '';
-
-    const coincideNombre = c.name.toLowerCase().includes(filtroClienteNombre.toLowerCase());
-
-    const coincideLocalidad = localidadNombre.toLowerCase().includes(filtroClienteLocalidad.toLowerCase());
-
-    return coincideNombre && coincideLocalidad;
-  })
   .sort((a, b) => {
     const campo = orden.campo;
     if (!campo) return 0;
@@ -91,6 +91,7 @@ const deleteCliente = async(clienteID) => {
         console.log("Error con el ID del cliente al querer eliminarlo.")
         return
     }
+    const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
     await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente/${clienteID}`,
         {
             method:'DELETE',
@@ -153,6 +154,35 @@ const deleteCliente = async(clienteID) => {
       </div>
     </div>
   )}
+  
+  {mostrarModalBuscar && (
+  <div className="modal">
+    <div className="modal-content">
+      <button
+        className="close"
+        onClick={() => {
+          setMostrarModalBuscar(null);
+          fetchData();
+        }}
+      >
+        &times;
+      </button>
+
+      <BusquedaAvanzadaClientes
+        filtro={filtro} // ✅ le pasamos el estado actual
+        exito={(resultados) => {
+          if (resultados && resultados.length > 0) {
+            setClientes(resultados);
+            setMostrarModalBuscar(false);
+          } else {
+            alert("No se encontraron resultados");
+          }
+        }}
+        onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)} // ✅ manejamos los cambios desde el hijo
+      />
+    </div>
+  </div>
+)}
 
   {mostrarPedidoCreate && (
     <div className="modal">
@@ -178,6 +208,30 @@ const deleteCliente = async(clienteID) => {
     </div>
   )}
 
+  {mostrarPresupuestoCreate && (
+    <div className="modal">
+      <div className="modal-content">
+        <button className="close" onClick={() => 
+            {
+                setmostrarPresupuestoCreate(null)
+                fetchData()
+            }
+        }>
+            &times;
+        </button>
+        <CreatePresupuesto 
+            param={mostrarPresupuestoCreate}
+            tipo="cliente"
+            exito={() => 
+                {
+                    setmostrarPresupuestoCreate(false)
+                    fetchData()
+                }}
+        />
+      </div>
+    </div>
+  )}
+
   <h1 className="titulo-pagina">Clientes</h1>
   <div className="botonera">
         <button className="btn-icon" onClick={() => router.back()} title="Volver atrás">
@@ -190,42 +244,16 @@ const deleteCliente = async(clienteID) => {
         </button>
         <button className="btn-icon" onClick={() => setMostrarModalCreate(true)} title="Agregar Presupuesto">
              <FaPlus />
-        </button>               
+        </button>    
+        <button onClick={() => 
+              setMostrarModalBuscar(true)
+            }            
+            className="btn-icon" title="Busqueda avanzada de cliente">
+            <FaSearch />
+        </button>       
   </div>
 
   <div className="contenedor-tabla">
-    <div className="filtros">
-          <input
-              type="text"
-              placeholder="Filtrar por cliente..."
-              value={filtroClienteNombre}
-              onChange={(e) => setFiltroClienteNombre(e.target.value)}
-          />
-          <input
-              type="text"
-              placeholder="Filtrar por localidad..."
-              value={filtroClienteLocalidad}
-              onChange={(e) => setFiltroClienteLocalidad(e.target.value)}
-          />
-    </div>
-    <div className="filtros">
-        <button className="submit-btn" onClick={() => router.back()} title="Presupuestos">
-            <FaFileInvoice />
-            Presupuestos
-        </button>
-        <button className="submit-btn" onClick={() => router.back()} title="Presupuestos">
-            <FaShoppingCart />
-            Notas de Pedido
-        </button>
-        <button className="submit-btn" onClick={() => router.back()} title="Presupuestos">
-            <FaFileInvoiceDollar />
-            Comprobantes de Venta
-        </button>
-        <button className="submit-btn" onClick={() => router.back()} title="Presupuestos">
-            <FaFileInvoice />
-            Remitos
-        </button>
-    </div>
     <div className="tabla-scroll">
         <table id="tablaVinos">
             <thead>
@@ -248,6 +276,9 @@ const deleteCliente = async(clienteID) => {
                       <td className="columna">{localidadEncontrada?.name}</td>
                       <td className="columna">
                         <div className="acciones">
+                          <button onClick={() => setmostrarPresupuestoCreate(_id)} className="btn-icon" title="Generar Presupuesto">
+                              <FaCartArrowDown />
+                          </button>
                           <button onClick={() => setmostrarPedidoCreate(_id)} className="btn-icon" title="Generar Pedido">
                               <FaShoppingCart />
                           </button>

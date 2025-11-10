@@ -1,20 +1,20 @@
 import { useEffect, useState } from "react"
 import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit , FaPrint , FaFileInvoiceDollar } from "react-icons/fa";
 import { useRouter } from 'next/router';
-import FormularioNotaPedidoUpdate from './updateOrdenCompra'
-import FormularioNotaPedidoCreate from './newOrdenCompra'
-import FormularioComprobanteVentaByNotaPedido from '../comprobanteVenta/create_ComprobanteVenta'
+import FormularioOrdenCompraUpdate from './updateOrdenCompra'
+import FormularioOrdenCompraCreate from './newOrdenCompra'
+// import FormularioComprobanteVentaByNotaPedido from '../comprobanteVenta/create_ComprobanteVenta'
 
 const { default: Link } = require("next/link")
 
-const indexPedido = () => {
+const indexOrdenCompra = () => {
     const router = useRouter();
     const [presupuestos,setPresupuestos] = useState([]);   
-    const [pedidos,setPedidos] = useState([]);
-    const [clientes,setClientes] = useState([]);  
+    const [ordenes,setOrdenes] = useState([]);
+    const [proveedores,setProveedores] = useState([]);  
     const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
     const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
-    const [mostrarModalComprobanteVenta, setMostrarModalComprobanteVenta] = useState(null);
+    // const [mostrarModalComprobanteVenta, setMostrarModalComprobanteVenta] = useState(null);
     
     const [filtroNombre, setFiltroNombre] = useState('');
     const [filtroPresupuesto , setFiltroPresupuesto] = useState('');  
@@ -27,10 +27,10 @@ const indexPedido = () => {
         }));
     };                
 
-  const pedidosFiltrados = pedidos
+  const ordenesFiltrados = ordenes
     .filter(p => {
-      const clienteNombre = clientes.find(d => d._id === p.cliente)?.name || '';
-      const coincideNombre = clienteNombre.toLowerCase().includes(filtroNombre.toLowerCase())
+      const proveedorNombre = proveedores.find(d => d._id === p.proveedor)?.name || '';
+      const coincideNombre = proveedorNombre.toLowerCase().includes(filtroNombre.toLowerCase())
       
       const presupuestoID = presupuestos.find(d => d._id === p.presupuesto)?._id || '';
       const coincidePresupuesto = presupuestoID.toString().includes(filtroPresupuesto);
@@ -44,9 +44,9 @@ const indexPedido = () => {
 
         let aVal, bVal;
 
-        if (campo === 'cliente') {
-        aVal = clientes.find(d => d._id === a.cliente)?.name || '';
-        bVal = clientes.find(d => d._id === b.cliente)?.name || '';
+        if (campo === 'proveedor') {
+        aVal = proveedores.find(d => d._id === a.proveedor)?.name || '';
+        bVal = proveedores.find(d => d._id === b.proveedor)?.name || '';
         }
 
         if (campo === 'presupuesto') {
@@ -73,17 +73,17 @@ const indexPedido = () => {
 
 
     const fetchData = () => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido`)
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/ordenCompra`)
                 .then((a) => {
                         return a.json()
                 })
                     .then ((s) => {
-                        setPedidos(s.data);
+                        setOrdenes(s.data);
                     })
         }
 
     const fetchData_Presupuestos = () => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto`)
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuesto`)
                 .then((a) => {
                         return a.json()
                 })
@@ -91,13 +91,13 @@ const indexPedido = () => {
                         setPresupuestos(s.data);
                     })
         }
-    const fetchData_Clientes = () => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente`)
+    const fetchData_Proveedores = () => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/proveedor`)
                 .then((a) => {
                         return a.json()
                 })
                     .then ((s) => {
-                        setClientes(s.data);
+                        setProveedores(s.data);
                     })
         }
     
@@ -105,18 +105,18 @@ const indexPedido = () => {
     useEffect(() => { 
         fetchData();
         fetchData_Presupuestos();
-        fetchData_Clientes();
+        fetchData_Proveedores();
     }, [] )
 
-    const imprimirPedido = async (pedidoID) => {
-        if (!pedidoID) {
-            console.error("Error con el ID del pedido al querer imprimirlo.");
+    const imprimirOrden = async (ordenID) => {
+        if (!ordenID) {
+            console.error("Error con el ID de la orden de compra al querer imprimirla.");
             return;
         }
 
         try {
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido/imprimir/${pedidoID}`
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/ordenCompra/imprimir/${ordenID}`
             );
 
             if (!res.ok) throw new Error("No se pudo generar el PDF");
@@ -131,17 +131,18 @@ const indexPedido = () => {
             window.open(url, "_blank");
 
         } catch (err) {
-            console.error("Error al imprimir pedido:", err);
+            console.error("Error al imprimir orden de compra:", err);
         }
     };
 
 
-    const deletePedido = async(pedidoID) => {
-        if(!pedidoID) {
-            console.log("Error con el ID del pedido al querer eliminarlo.")
+    const deleteOrden = async(ordenID) => {
+        if(!ordenID) {
+            console.log("Error con el ID de la orden de compra al querer eliminarla.")
             return
         }
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido/${pedidoID}`,
+        const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/ordenCompra/${ordenID}`,
             {
                 method:'DELETE',
                 headers: {
@@ -154,7 +155,7 @@ const indexPedido = () => {
                 console.log(res.message);
             })
             .catch((err)=>{
-                console.log("Error al enviar nota de pedido para su eliminación. \n Error: ",err);
+                console.log("Error al enviar orden de compra para su eliminación. \n Error: ",err);
             })
     }
 
@@ -166,7 +167,7 @@ const indexPedido = () => {
                         <button className="close" onClick={() => setMostrarModalCreate(false)}>
                             &times;
                         </button>
-                        <FormularioNotaPedidoCreate 
+                        <FormularioOrdenCompraCreate 
                             exito={()=>{
                                 setMostrarModalCreate(false);
                                 fetchData();
@@ -182,8 +183,8 @@ const indexPedido = () => {
                         <button className="close" onClick={() => setMostrarModalUpdate(null)}>
                             &times;
                         </button>
-                        <FormularioNotaPedidoUpdate 
-                            notaPedidoID={mostrarModalUpdate} 
+                        <FormularioOrdenCompraUpdate 
+                            ordenID={mostrarModalUpdate} 
                             exito={()=>{
                                 setMostrarModalUpdate(null);
                                 fetchData();
@@ -193,23 +194,7 @@ const indexPedido = () => {
                 </div>
             )}
 
-            {mostrarModalComprobanteVenta && (
-                <div className="modal">
-                    <div className="modal-content">
-                        <button className="close" onClick={() => setMostrarModalComprobanteVenta(null)}>
-                            &times;
-                        </button>
-                        <FormularioComprobanteVentaByNotaPedido 
-                            pedidoID={mostrarModalComprobanteVenta} 
-                            exito={()=>{
-                                setMostrarModalComprobanteVenta(null);
-                                fetchData();
-                            }}    
-                        />
-                    </div>
-                </div>
-            )}
-            <h1 className="titulo-pagina">Nota de Pedido</h1>
+            <h1 className="titulo-pagina">Orden de Compra</h1>
             
             <div className="botonera">
                 <button className="btn-icon" onClick={() => router.back()} title="Volver atrás">
@@ -220,7 +205,7 @@ const indexPedido = () => {
                         <FaHome />
                     </Link>
                 </button>
-                <button className="btn-icon" onClick={() => setMostrarModalCreate(true)} title="Agregar Pedido">
+                <button className="btn-icon" onClick={() => setMostrarModalCreate(true)} title="Agregar Orden de Compra">
                      <FaPlus />
                 </button>               
             </div>
@@ -228,7 +213,7 @@ const indexPedido = () => {
                 <div className="filtros">
                     <input
                         type="text"
-                        placeholder="Filtrar por cliente..."
+                        placeholder="Filtrar por proveedor..."
                         value={filtroNombre}
                         onChange={(e) => setFiltroNombre(e.target.value)}
                     />
@@ -245,45 +230,37 @@ const indexPedido = () => {
                         <thead>
                         <tr className="fila">
                             <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
-                            <th onClick={() => toggleOrden('cliente')}>Cliente ⬍</th>
+                            <th onClick={() => toggleOrden('cliente')}>Proveedor ⬍</th>
                             <th onClick={() => toggleOrden('presupuesto')}>Presupuesto ⬍</th>
                             <th onClick={() => toggleOrden('fecha')}>Fecha ⬍</th>
-                            <th onClick={() => toggleOrden('envio')}>Envio ⬍</th>
-                            <th onClick={() => toggleOrden('fechaEntrega')}>Fecha Entrega ⬍</th>
                             <th onClick={() => toggleOrden('total')}>Total ⬍</th>
                             <th>Acciones</th>
                         </tr>
                         </thead>
                         <tbody>
                             {
-                                pedidosFiltrados.map(({_id,facturado, cliente , envio , fechaEntrega , fecha, total , presupuesto}) => {
-                                    const clienteEncontrado = clientes.find((p)=>{return p._id === cliente})
+                                ordenesFiltrados.map(({_id, proveedor , fecha, total , presupuesto}) => {
+                                    const proveedorEncontrado = proveedores.find((p)=>{return p._id === proveedor})
 
                                     return <tr key={_id}>
                                         <td className="columna">{_id}</td>
-                                        <td className="columna">{clienteEncontrado?.name}</td>
+                                        <td className="columna">{proveedorEncontrado?.name}</td>
                                         <td className="columna">{presupuesto}</td>
                                         <td className="columna">{fecha.split("T")[0]}</td>
-                                        <td className="columna">{envio ? "SI" : "NO"}</td>
-                                        <td className="columna">{fechaEntrega.split("T")[0]}</td>
                                         <td className="columna">${total}</td>
                                         <td className="columna">
                                             <div className="acciones">
-                                                <button className="btn-icon" title={facturado ? "Ya facturado, no se puede modificar" : "Modificar"}
+                                                <button className="btn-icon"
                                                     onClick={() => {
-                                                        if (facturado) {
-                                                        alert("Este pedido ya fue facturado y no se puede modificar.");
-                                                        return;
-                                                        }
                                                         setMostrarModalUpdate(_id);
                                                     }} 
                                                 >
                                                     <FaEdit />
                                                 </button>
-                                                <button onClick={() => imprimirPedido(_id)}  className="btn-icon" title="Imprimir">
+                                                <button onClick={() => imprimirOrden(_id)}  className="btn-icon" title="Imprimir">
                                                     <FaPrint />
                                                 </button>
-                                                <button   className="btn-icon" title="Generar comprobante de venta">
+                                                {/* <button   className="btn-icon" title="Generar comprobante de compra">
                                                     <FaFileInvoiceDollar onClick={() => {
                                                         if (facturado) {
                                                         alert("Este pedido ya fue facturado y no se puede modificar.");
@@ -291,8 +268,8 @@ const indexPedido = () => {
                                                         }
                                                         setMostrarModalComprobanteVenta(_id);
                                                     }} />
-                                                </button>
-                                                <button onClick={() => deletePedido(_id)}  className="btn-icon" title="Eliminar">
+                                                </button> */}
+                                                <button onClick={() => deleteOrden(_id)}  className="btn-icon" title="Eliminar">
                                                     <FaTrash />
                                                 </button>
                                             </div>
@@ -313,4 +290,4 @@ const indexPedido = () => {
     )
 }
 
-export default indexPedido;
+export default indexOrdenCompra;

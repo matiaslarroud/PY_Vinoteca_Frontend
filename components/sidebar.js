@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import styles from './Sidebar.module.css';
+import styles from '@/styles/Sidebar.module.css';
 
 const Sidebar = () => {
   const pathname = usePathname();
@@ -121,9 +121,9 @@ const Sidebar = () => {
                 </li>
                 <li>
                   <Link
-                    href="/proveedores/presupuestoSolicitud/indexSolicitud"
+                    href="/proveedores/solicitud/indexSolicitud"
                     className={`${styles.submenuItem} ${
-                      isActive("/proveedores/presupuestoSolicitud/indexSolicitud") ? styles.active : ''
+                      isActive("/proveedores/solicitud/indexSolicitud") ? styles.active : ''
                     }`}
                   >
                     Solicitud de Presupuesto

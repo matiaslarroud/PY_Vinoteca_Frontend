@@ -1,22 +1,26 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaShoppingCart , FaHome, FaArrowLeft, FaTrash, FaEdit , FaPrint } from "react-icons/fa";
+import { FaPlus, FaShoppingCart , FaHome, FaArrowLeft, FaTrash, FaEdit , FaSearch , FaPrint } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import FormularioPresupuestoUpdate from './updatePresupuesto'
-import FormularioPresupuestoCreate from './createPresupuesto'
+import FormularioPresupuestoCreate from './newPresupuesto'
 import CreateNotaPedido from "../notaPedido/createNotaPedido";
+import BusquedaAvanzada from "../presupuesto/busquedaPresupuesto";
 
 const { default: Link } = require("next/link")
 
 const indexPresupuesto = () => {
+    const initialState = {presupuestoID:'' , total:'', cliente:'', empleado:''}                             
+
     const router = useRouter();
     const [presupuestos,setPresupuestos] = useState([]);   
     const [clientes,setClientes] = useState([]);  
     const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
     const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
-const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
+    const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
+    const [mostrarBusqueda, setmostrarBusqueda] = useState(null);
     
-    const [filtroNombre, setFiltroNombre] = useState('');
-    const [filtroPrecio, setFiltroPrecio] = useState('');   
+    const [filtro , setFiltro] = useState(initialState); 
+    const [filtroDetalle , setFiltroDetalle] = useState([]); 
     const [orden, setOrden] = useState({ campo: '', asc: true });
 
     const toggleOrden = (campo) => {
@@ -27,13 +31,6 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
     };                
 
   const presupuestosFiltrados = presupuestos
-    .filter(p => {
-      const clienteNombre = clientes.find(d => d._id === p.cliente)?.name || '';
-      return (
-        clienteNombre.toLowerCase().includes(filtroNombre.toLowerCase()) &&
-        (filtroPrecio === '' || p.total.toString().includes(filtroPrecio))
-      );
-    })
     .sort((a, b) => {
       const campo = orden.campo;
       if (!campo) return 0;
@@ -67,20 +64,9 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
                         setPresupuestos(s.data);
                     })
         }
-    const fetchData_Clientes = () => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente`)
-                .then((a) => {
-                        return a.json()
-                })
-                    .then ((s) => {
-                        setClientes(s.data);
-                    })
-        }
-    
 
     useEffect(() => { 
         fetchData();
-        fetchData_Clientes();
     }, [] )
 
     const deletePresupuesto = async(presupuestoID) => {
@@ -88,6 +74,7 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
             console.log("Error con el ID del presupuesto al querer eliminarlo.")
             return
         }
+        const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
         await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto/${presupuestoID}`,
             {
                 method:'DELETE',
@@ -136,6 +123,37 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
         }
     };
 
+    useEffect(() => {
+        // esta función va a traer los clientes para cada presupuesto
+        const cargarClientes = async () => {
+        const nuevoMapa = {};
+        
+        // obtener los IDs únicos de cliente en los presupuestos
+        const idsClientes = [...new Set(presupuestosFiltrados.map(p => p.cliente))];
+        // buscar cada cliente por su ID
+        await Promise.all(
+            idsClientes.map(async (id) => {
+            try {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente/${id}`);
+                const data = await res.json();
+                // si no existe el cliente (por ejemplo fue eliminado)
+                if (!data.ok || !data.data) {
+                nuevoMapa[id] = { name: "Cliente eliminado" };
+                return;
+                }
+                nuevoMapa[id] = data.data;
+            } catch (err) {
+                console.error("Error cargando cliente:", id, err);
+                nuevoMapa[id] = { name: "Error al cargar cliente" };
+            }
+            })
+        );
+        setClientes(nuevoMapa);
+        };
+        if (presupuestosFiltrados.length > 0) {
+        cargarClientes();
+        }
+    }, [presupuestosFiltrados]);
 
     return(
         <>
@@ -153,6 +171,36 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
                         />
                     </div>
                 </div>
+            )}
+  
+            {mostrarBusqueda && (
+            <div className="modal">
+                <div className="modal-content">
+                <button
+                    className="close"
+                    onClick={() => {
+                    setmostrarBusqueda(null);
+                    }}
+                >
+                    &times;
+                </button>
+
+                <BusquedaAvanzada
+                    filtro={filtro} // ✅ le pasamos el estado actual
+                    filtroDetalle={filtroDetalle}
+                    exito={(resultados) => {
+                    if (resultados.length > 0) {
+                        setPresupuestos(resultados);
+                        setmostrarBusqueda(false);
+                    } else {
+                        alert("No se encontraron resultados");
+                    }
+                    }}
+                    onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)} // ✅ manejamos los cambios desde el hijo
+                    onChangeFiltroDetalle={(nuevoFiltroDetalle) => setFiltroDetalle(nuevoFiltroDetalle)}
+                />
+                </div>
+            </div>
             )}
 
             {mostrarModalUpdate && (
@@ -209,23 +257,15 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
                 </button>
                 <button className="btn-icon" onClick={() => setMostrarModalCreate(true)} title="Agregar Presupuesto">
                      <FaPlus />
-                </button>               
+                </button>         
+                <button onClick={() => 
+                    setmostrarBusqueda(true)
+                    }            
+                    className="btn-icon" title="Busqueda avanzada de presupuesto">
+                    <FaSearch />
+                </button>          
             </div>
             <div className="contenedor-tabla">
-                <div className="filtros">
-                    <input
-                        type="text"
-                        placeholder="Filtrar por cliente..."
-                        value={filtroNombre}
-                        onChange={(e) => setFiltroNombre(e.target.value)}
-                    />
-                    <input
-                        type="text"
-                        placeholder="Filtrar por precio..."
-                        value={filtroPrecio}
-                        onChange={(e) => setFiltroPrecio(e.target.value)}
-                    />
-                </div>
 
                 <div className="tabla-scroll">
                     <table id="tablaVinos">
@@ -240,8 +280,9 @@ const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
                         </thead>
                         <tbody>
                             {
+                                
                                 presupuestosFiltrados.map(({_id,cliente , fecha, total}) => {
-                                    const clienteEncontrado = clientes.find((p)=>{return p._id === cliente})
+                                    const clienteEncontrado = clientes[cliente];
 
                                     return <tr key={_id}>
                                         <td className="columna">{_id}</td>

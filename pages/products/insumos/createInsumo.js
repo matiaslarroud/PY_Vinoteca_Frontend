@@ -4,7 +4,6 @@ import Select from 'react-select';
 const { default: Link } = require("next/link")
 
 const initialState = {name:'',stock:0, stockMinimo:'' , precioCosto:0 , ganancia:0 , deposito:'' , proveedor:''}
-const initialStateDetalle = {picada:'',insumo:'', cantidad:0}
 
 const formProducto = ({exito}) => {
     const [product , setProduct] = useState(initialState);
@@ -85,8 +84,7 @@ const formProducto = ({exito}) => {
                             }
                         })
                 .catch((err) => {console.log('Error al enviar datos. \n Error: ',err)})
-    }
-
+                    }
 
 
     const opciones_proveedores = proveedores.map(v => ({ value: v._id,label: v.name }))

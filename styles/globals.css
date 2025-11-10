@@ -1,6 +1,6 @@
 html,
 body {
-  max-width: 1500px;
+  width: 100%;
   overflow-x: hidden;
   background-image: url('wallpaper.jpeg');
 }

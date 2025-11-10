@@ -1,38 +1,35 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';          
 import { FaTrash} from "react-icons/fa";
-import FormularioEmpleadoCreate from '../../gestion/general/empleado/createEmpleado'
-import FormularioClienteCreate from '../../clientes/createCliente'
+import FormularioEmpleadoCreate from '../../gestion/empleado/createEmpleado'
+import FormularioClienteCreate from '../createCliente'
+import FormularioMedioPagoCreate from '../../gestion/tablasVarias/medioPago/createMedioPago'
 
 const { default: Link } = require("next/link")
 
 const initialStatePresupuesto = {total:'', cliente:'', empleado:''}
 const initialDetalle = { tipoProducto: "",producto: "", cantidad: 0, precio: 0, importe: 0, presupuesto:'' };
 
-const createPresupuesto = ({exito}) => {
-    const [presupuesto , setPresupuesto] = useState(initialStatePresupuesto);
+const createpresupuesto = ({exito , param , tipo}) => {
+    const [presupuesto, setPresupuesto] = useState(() => {
+        if (tipo === "cliente") {
+            return {
+                ...initialStatePresupuesto,
+                cliente: param
+            }
+        }
+        return initialStatePresupuesto
+    });
     
     const [clientes,setClientes] = useState([])
     const [empleados,setEmpleados] = useState([])
     const [detalles,setDetalles] = useState([initialDetalle])
     const [productos,setProductos] = useState([]);
     const [tipoProductos,setTipoProductos] = useState([]);
+    const [habilitado, setHabilitado] = useState(false);
     
     const detallesValidos = detalles.filter(d => d.producto && d.cantidad > 0);
     const puedeGuardar = detallesValidos.length > 0;
-
-    const fetchData_Productos = () => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products`)
-        .then((a)=>{
-            return a.json();
-        })
-            .then((s)=>{
-                if(s.ok){
-                    setProductos(s.data)
-                }
-            })
-        .catch((err)=>{console.log("Error al cargar productos.\nError: ",err)})
-    }
     
     const fetchData_TipoProductos = () => {
     fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/tipos`)
@@ -47,10 +44,24 @@ const createPresupuesto = ({exito}) => {
         .catch((err)=>{console.log("Error al cargar tipos de productos.\nError: ",err)})
     }
 
+    const fetchData_Productos = () => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if(s.ok){
+                    setProductos(s.data)
+                }
+            })
+        .catch((err)=>{console.log("Error al cargar productos.\nError: ",err)})
+    }
+    
     const fetchData_Clientes = () => {
         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente`)
             .then((a)=>{return a.json()})
                 .then((s)=>{
+
                     setClientes(s.data)
                 })
     }
@@ -62,6 +73,7 @@ const createPresupuesto = ({exito}) => {
                     setEmpleados(s.data)
                 })
     }
+
     useEffect(()=>{
         setDetalles([]);
         fetchData_Clientes();
@@ -70,21 +82,49 @@ const createPresupuesto = ({exito}) => {
         fetchData_TipoProductos();
     }, [])
 
-    const clickChange = async(e) => {
-         e.preventDefault();
-         const resPresupuesto = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto`,
-            {
-                method: 'POST',
-                headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({
-                    total: presupuesto.total,
-                    cliente: presupuesto.cliente,
-                    empleado: presupuesto.empleado,
-                })
-            }
-        )
+    useEffect(() => {
+        if (!productos.length || !detalles.length) return;
 
-        const presupuestoCreado = await resPresupuesto.json();
+        const detallesConTipo = detalles.map((d) => {
+            const prod = productos.find((p) => p._id === d.producto);
+
+            return {
+                ...d,
+                tipoProducto: d.tipoProducto || (prod ? prod.tipoProducto : ""),
+            };
+        });
+        
+        const isDifferent = JSON.stringify(detalles) !== JSON.stringify(detallesConTipo);
+        if (isDifferent) {
+            setDetalles(detallesConTipo);
+        }
+    }, [productos, detalles]);
+
+    const handleCheckboxChange = (e) => {
+        setHabilitado(e.target.checked);
+
+        setPresupuesto({
+            ...presupuesto,
+            envio: e.target.checked,
+        });
+    };
+
+
+    const clickChange = async(e) => {
+        e.preventDefault();
+        const bodyData = {
+            total: presupuesto.total,
+            cliente: presupuesto.cliente,
+            empleado: presupuesto.empleado,
+        };
+
+        const respresupuesto = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bodyData)
+        })
+
+        const presupuestoCreado = await respresupuesto.json();
         const presupuestoID = presupuestoCreado.data._id;
 
         // GUARDAMOS DETALLES
@@ -99,24 +139,17 @@ const createPresupuesto = ({exito}) => {
                     importe: detalle.importe,
                     presupuesto: presupuestoID
             })
-                });
             
+            
+            });
             if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
+            
+            setDetalles([initialDetalle]);
+            setPresupuesto(initialStatePresupuesto);
+            exito();
         }
-        setDetalles([initialDetalle]);
-        setPresupuesto(initialStatePresupuesto);
-        exito();
     }
-
-    const inputChange = (e) => {
-        const value = e.target.value;
-        const name = e.target.name;
-        
-        setPresupuesto({
-            ...presupuesto , 
-                [name]:value
-        })   
-    }
+  
 
 
     const handleDetalleChange = (index, field, value) => {
@@ -124,12 +157,12 @@ const createPresupuesto = ({exito}) => {
         nuevosDetalles[index][field] = field === "cantidad" ? parseFloat(value) : value;
         
         const prod = productos.find(p => p._id === nuevosDetalles[index].producto);
-       
+
         if (prod) {
             if(prod.precioCosto){
                 const ganancia = prod.ganancia;
                 const precio = prod.precioCosto + ((prod.precioCosto * ganancia) / 100);
-                
+
                 nuevosDetalles[index].precio = precio;
                 nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
             }
@@ -157,19 +190,50 @@ const createPresupuesto = ({exito}) => {
             ...presupuesto,
             [name]: value,
         });
+
+        if (name === 'presupuesto' && value) {
+            agregarDetallePresupuesto(value);
+        }
     };
+
+    const inputChange = (e) => {
+        const value = e.target.value;
+        const name = e.target.name;
+        
+        setPresupuesto({
+            ...presupuesto , 
+                [name]:value
+        })   
+    }
 
     const agregarDetalle = () => {
-        setDetalles([...detalles, { ...{tipoProducto:"",producto: "", cantidad: 0, precio: 0, importe: 0 } }]);
+        setDetalles([...detalles, { ...{tipoProducto:"" , producto: "", cantidad: 0, precio: 0, importe: 0 } }]);
     };
     
+    const agregarDetallePresupuesto = async (presupuestoID) => {
+    try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuestoDetalle/presupuesto/${presupuestoID}`);
+        const s = await res.json();
+        if (s.ok) {
+            setDetalles(s.data);
+            calcularTotal(s.data);
+        } else {
+            console.error('Error al cargar detalles del presupuesto:', s.message);
+        }
+    } catch (error) {
+        console.error('Error de red al cargar detalles del presupuesto:', error);
+    }
+};
+
+    
     const calcularTotal = (detalles) => {
-        const totalPresupuesto = Array.isArray(detalles) && detalles.length > 0
+        const totalPedido = Array.isArray(detalles) && detalles.length > 0
             ? detalles.reduce((acc, d) => acc + (d.importe || 0), 0)
                 : 0;
-        setPresupuesto((prev) => ({ ...prev, total:totalPresupuesto }));
+        setPresupuesto((prev) => ({ ...prev, total:totalPedido }));
     };
 
+    const [mostrarModalCreate1, setMostrarModalCreate1] = useState(false);
     const [mostrarModalCreate2, setMostrarModalCreate2] = useState(false);
     const [mostrarModalCreate3, setMostrarModalCreate3] = useState(false);
 
@@ -191,7 +255,19 @@ const createPresupuesto = ({exito}) => {
 
     return(
         <>
-           
+            {mostrarModalCreate1 && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalCreate1(false)}>&times;</button>
+                    <FormularioMedioPagoCreate
+                    exito={() => {
+                        setMostrarModalCreate1(false);
+                        fetchData_MediosPago();
+                    }}
+                    />
+                </div>
+            </div>
+            )}
             {mostrarModalCreate2 && (
                 <div className="modal">
                 <div className="modal-content">
@@ -224,13 +300,13 @@ const createPresupuesto = ({exito}) => {
             <div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
-                        <h1 className="titulo-pagina">Cargar Presupuesto</h1>
+                        <h1 className="titulo-pagina">Cargar Nota Pedido</h1>
                     </div>
                 </div>
 
                 <form id="formProducto" className="formulario-presupuesto">
                     <div className="form-row">
-                        <div className="form-col">
+                        <div className="form-col1">
                             <label>
                                 Cliente:
                                 <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
@@ -283,7 +359,7 @@ const createPresupuesto = ({exito}) => {
                             />
                         </div>
 
-                        <div className="form-col">
+                        <div className="form-col1">
                             <label>
                                 Empleado:
                                 <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate2(true)}>+</button>
@@ -336,21 +412,20 @@ const createPresupuesto = ({exito}) => {
                             />
                         </div>
 
-                        
                     </div>
                     <div className="form-row">
                         <div className="form-col-productos">
                             <label>
                                     Productos:
+                                    {/* <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button> */}
                                     <button type="button" className="btn-add-producto" onClick={agregarDetalle}>
                                         + Agregar Producto
                                     </button>
                             </label>
                             <div className="form-group-presupuesto">
                                 
-                                {detalles.map((d, i) => {
-
-                                return <div key={i} className="presupuesto-item">
+                                {detalles.map((d, i) => (
+                                <div key={i} className="presupuesto-item">
                                     <div className='form-col-item1'>
                                         <Select
                                             className="form-select-react"
@@ -480,319 +555,414 @@ const createPresupuesto = ({exito}) => {
                                         </button>
                                     </div>
                                 </div>
-                                })}
+                                ))}
                             </div>
                         </div> 
                         <div className="form-col-precioVenta">
-                            <div className="box-cargar" >
-                                <label htmlFor="precioVenta">Total:
-                                    <input
-                                        type="number"
-                                        className='precio-venta'
-                                        onChange={inputChange}
-                                        value={presupuesto.total}
-                                        name="total"
-                                        disabled
-                                    />
+                            <div className="form-secondary">
+                                <label htmlFor="precioVenta" className="label-box">
+                                    Total:
                                 </label>
-                                <div className="form-submit">
-                                    <button
+                                <input
+                                    type="number"
+                                    className="input-secondary"
+                                    value={presupuesto.total}
+                                    name="total"
+                                    disabled
+                                    />
+
+                                <button
                                     type="submit"
                                     className="submit-btn"
                                     onClick={(e) => {
-                                        if (!puedeGuardar) {
-                                        alert("No se puede guardar un presupuesto sin al menos un producto con cantidad.");
-                                        e.preventDefault();
-                                        return;
-                                        }
                                         clickChange(e);
                                     }}
                                     >
-                                    Cargar Presupuesto
+                                    Cargar
                                     </button>
-                                </div>
                             </div>
                         </div>
+
                     </div>
                 </form>
             </div>
             <style jsx>
                 {`
-                    .modal {
-                        position: fixed;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: rgba(0,0,0,0.5); /* oscurece fondo */
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        z-index: 1000;
-                    }
-                    
-
-
-                    .close {
-                        position: absolute;
-                        top: 1rem;
-                        right: 1.5rem;
-                        font-size: 1.5rem;
-                        background: transparent;
-                        border: none;
-                        cursor: pointer;
-                    }
-                    .btn-icon {
-                        background-color: #8b0000;
-                        color: white;
-                        padding: 0.8rem;
-                        font-size: 1.2rem;
-                        border-radius: 50%;
-                        border: none;
-                        cursor: pointer;
-                        width: 2.5rem;
-                        height: 2.5rem;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        transition: background-color 0.3s, transform 0.2s;
-                    }
-                    
-                    .btn-icon:hover {
-                    background-color: #a30000;
-                    transform: translateY(-3px);
-                    }
-
-                    .modal-content {
-                        background-color: #121212;
-                        padding: 40px;
-                        border-radius: 12px;
-                        width: 90%;
-                        height:80%;
-                        max-width: 500px;
-                        max-height: 800px;
-                        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                        position: relative;
-                        margin: 20px;
-                    }
-
-                    .form-container {
-                        background-color: #1f1f1f;
-                        color: #fff;
-                        padding: 2rem;
-                        border-radius: 16px;
-                        width: 100%;
-                        height: 100%;
-                        margin: 0 auto;
-                        box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
-                    }
+                        .modal {
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                            background-color: rgba(0,0,0,0.5); /* oscurece fondo */
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            z-index: 1000;
+                        }
                         
-                    .box-cargar{
-                        justify-content: center;
-                        align-items: center;
-                    }
 
-                    .titulo-pagina {
-                        text-align: center;
-                        font-size: 2rem;
-                        margin-bottom: 1.5rem;
-                        font-weight: bold;
-                        color: #f5f5f5;
-                    }
 
-                    .formulario-presupuesto {
-                        display: flex;
-                        flex-direction: column;
-                        gap: 2rem;
-                    }
-
-                    .form-row {
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: 1.5rem;
-                    }
-
-                    .form-col {
-                        flex: 1;
-                        min-width: 250px;
-                        display: flex;
-                        flex-direction: column;
-                    }
-
-                    .form-col-productos {
-                        flex: 8;
-                        min-width: 0; /* Importante para que no desborde */
-                        display: flex;
-                        flex-direction: column;
-                    }
+                        .close {
+                            position: absolute;
+                            top: 1rem;
+                            right: 1.5rem;
+                            font-size: 1.5rem;
+                            background: transparent;
+                            border: none;
+                            cursor: pointer;
+                        }
+                        .btn-icon {
+                            background-color: #8b0000;
+                            color: white;
+                            padding: 0.8rem;
+                            font-size: 1.2rem;
+                            border-radius: 50%;
+                            border: none;
+                            cursor: pointer;
+                            width: 2.5rem;
+                            height: 2.5rem;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            transition: background-color 0.3s, transform 0.2s;
+                        }
                         
-                    .form-col-item1 {
-                        flex: 3;
-                        min-width: 0; /* Importante para que no desborde */
-                        display: flex;
-                        flex-direction: column;
-                    }
+                        .btn-icon:hover {
+                        background-color: #a30000;
+                        transform: translateY(-3px);
+                        }
+
+                        .modal-content {
+                            background-color: #121212;
+                            padding: 40px;
+                            border-radius: 12px;
+                            width: 90%;
+                            height:80%;
+                            max-width: 500px;
+                            max-height: 800px;
+                            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                            position: relative;
+                            margin: 20px;
+                        }
+
+                        .form-container {
+                            background-color: #1f1f1f;
+                            color: #fff;
+                            padding: 2rem;
+                            border-radius: 16px;
+                            width: 100%;
+                            height: 100%;
+                            margin: 0 auto;
+                            box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
+                        }
+
+                        .titulo-pagina {
+                            text-align: center;
+                            font-size: 2rem;
+                            margin-bottom: 1.5rem;
+                            font-weight: bold;
+                            color: #f5f5f5;
+                        }
+
+                        .formulario-presupuesto {
+                            display: flex;
+                            flex-direction: column;
+                            gap: 2rem;
+                        }
+
+                        .form-row {
+                            display: flex;
+                            flex-wrap: wrap;
+                            gap: 1.5rem;
+                        }
+
                         
-                    .form-col-item2 {
-                        flex: 2;
-                        min-width: 0; /* Importante para que no desborde */
-                        display: flex;
-                        flex-direction: column;
-                    }
 
-                    .form-col-precioVenta {
-                        flex: 2;
-                        min-width: 0;
-                        display: flex;
-                        flex-direction: column;
-                    }
+                        .form-col-productos {
+                            flex: 8;
+                            min-width: 0; /* Importante para que no desborde */
+                            display: flex;
+                            flex-direction: column;
+                        }
+                            
+                        .form-col-item1 {
+                            flex: 3;
+                            min-width: 0; /* Importante para que no desborde */
+                            display: flex;
+                            flex-direction: column;
+                        }
+                            
+                        .form-col-item2 {
+                            flex: 2;
+                            min-width: 0; /* Importante para que no desborde */
+                            display: flex;
+                            flex-direction: column;
+                        }
+
+                        .form-col-precioVenta {
+                            flex: 2;
+                            min-width: 0;
+                            display: flex;
+                            flex-direction: column;
+                        }
 
 
-                    label {
-                        font-weight: 500;
-                        margin-bottom: 0.5rem;
-                        display: flex;
-                        align-items: center;
-                        gap: 0.5rem;
-                    }
+                        label {
+                            font-weight: 500;
+                            margin-bottom: 0.5rem;
+                            display: flex;
+                            align-items: center;
+                            gap: 0.5rem;
+                        }
 
-                    .precio-venta {
-                        max-width: 100px;
-                    }
+                        .precio-venta {
+                            max-width: 100px;
+                        }
 
-                    input:focus {
-                        border-color: #571212ff;
-                    }
+                        input:focus {
+                            border-color: #571212ff;
+                        }
 
-                    .precio-venta {
-                        flex-direction: column;
-                        align-items: flex-end;
-                        justify-content: flex-start;
-                        flex: 1;
-                    }
+                        .precio-venta {
+                            flex-direction: column;
+                            align-items: flex-end;
+                            justify-content: flex-start;
+                            flex: 1;
+                        }
 
-                        .btn-plus {
-                        background-color: transparent;
-                        color: #651616ff;
-                        border: none;
-                        font-size: 1.2rem;
-                        cursor: pointer;
-                    }
+                            .btn-plus {
+                            background-color: transparent;
+                            color: #651616ff;
+                            border: none;
+                            font-size: 1.2rem;
+                            cursor: pointer;
+                        }
 
-                    .btn-plus:hover {
-                        color: #571212ff;
-                        transform: translateY(-3px);
-                    }
+                        .btn-plus:hover {
+                            color: #571212ff;
+                            transform: translateY(-3px);
+                        }
 
-                    .form-group-presupuesto {
-                        display: flex;
-                        flex-direction: column;
-                        gap: 1rem;
-                        height: 160px;
-                        overflow-y: auto;
-                        padding-right: 8px;
-                    }
+                        .form-group-presupuesto {
+                            display: flex;
+                            flex-direction: column;
+                            gap: 1rem;
+                            height: 160px;
+                            overflow-y: auto;
+                            padding-right: 8px;
+                        }
 
-                    .presupuesto-item {
-                        display: flex;
-                        align-items: center;
-                        gap: 1rem;
-                        flex-wrap: wrap;
-                    }
+                        .presupuesto-item {
+                            display: flex;
+                            align-items: center;
+                            gap: 1rem;
+                            flex-wrap: wrap;
+                        }
 
-                    .presupuesto-item input[type="number"] {
-                        width: 80px;
-                    }
+                        .presupuesto-item input[type="number"] {
+                            width: 80px;
+                        }
 
-                    .btn-remove {
-                        background-color: #651616ff;
-                        color: white;
-                        border: none;
-                        padding: 0.4rem 0.8rem;
-                        border-radius: 8px;
-                        cursor: pointer;
-                        transition: background-color 0.2s ease-in-out;
-                    }
+                            .form-col,
+                            .form-group {
+                            display: flex;
+                            flex-direction: column;
+                            width: 100%;
+                            }
+                            
+                            .form-col1,
+                            .form-group {
+                            display: flex;
+                            flex-direction: column;
+                            width: 250;
+                            }
 
-                    .btn-add-producto {
-                        background-color: #651616ff;
-                        color: white;
-                        border: none;
-                        padding: 0.5rem 1rem;
-                        border-radius: 8px;
-                        cursor: pointer;
-                        align-self: flex-start;
-                        transition: background-color 0.2s ease-in-out;
-                    }
+                            .form-col label,
+                            .form-group label {
+                            margin-bottom: 4px;
+                            font-size: 14px;
+                            color: #ddd;
+                            }
 
-                    .btn-add-producto:hover {
-                        background-color: #571212ff;
-                        transform: translateY(-3px);
-                    }
+                            .form-group input {
+                            background-color: #2c2c2c;
+                            border: 1px solid #444;
+                            border-radius: 8px;
+                            padding: 8px;
+                            color: white;
+                            width: 100%;
+                            }
 
-                    .form-submit {
-                        justify-content: center;
-                        margin-top: 1rem;
-                    }
+                            .form-group input:focus {
+                            outline: none;
+                            border-color: #666;
+                            }
 
-                    .submit-btn {
-                        background-color: #651616ff;
-                        color: white;
-                        border: none;
-                        padding: 0.8rem 1.5rem;
-                        font-size: 1rem;
-                        border-radius: 10px;
-                        cursor: pointer;
-                        transition: background-color 0.2s ease-in-out;
-                    }
 
-                    .submit-btn:hover {
-                        background-color: #571212ff;
-                        transform: translateY(-3px);
-                    }
+                        .btn-remove {
+                            background-color: #651616ff;
+                            color: white;
+                            border: none;
+                            padding: 0.4rem 0.8rem;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            transition: background-color 0.2s ease-in-out;
+                        }
 
-                    button.submit-btn {
-                        padding: 0.75rem 1rem;
-                        background-color: #8B0000;
-                        color: #fff;
-                        border: none;
-                        border-radius: 8px;
-                        font-size: 1rem;
-                        font-weight: 600;
-                        cursor: pointer;
-                        transition: background-color 0.3s ease;
-                    }
+                        .btn-add-producto {
+                            background-color: #8B0000;
+                            color: white;
+                            border: none;
+                            padding: 0.5rem 1rem;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            align-self: flex-start;
+                            transition: background-color 0.2s ease-in-out;
+                        }
 
-                    button.submit-btn:hover {
-                        background-color: rgb(115, 8, 8);
-                        transform: translateY(-3px);
-                    }
-                    
-                    .titulo-pagina {
-                        font-size: 2rem;
-                        color: white;
-                        text-align: center;
-                        margin-top: 2px;
-                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-                    }
+                        .btn-add-producto:hover {
+                            background-color: #571212ff;
+                            transform: translateY(-3px);
+                        }
 
-                    
-                    input[type="text"],
-                    input[type="number"] {
-                        background-color: #2c2c2c;
-                        color: white;
-                        border: 1px solid #444;
-                        border-radius: 8px;
-                        padding: 0.6rem;
-                        font-size: 1rem;
-                        outline: none;
-                        transition: border-color 0.2s ease-in-out;
-                    }
+                        .form-submit {
+                            justify-content: center;
+                            margin-top: 1rem;
+                            width:100%
+                        }
+
+                        .submit-btn {
+                            background-color: #651616ff;
+                            color: white;
+                            border: none;
+                            padding: 0.8rem 1.5rem;
+                            font-size: 1rem;
+                            border-radius: 10px;
+                            cursor: pointer;
+                            transition: background-color 0.2s ease-in-out;
+                            max-width: 300;
+                        }
+
+                        .submit-btn:hover {
+                            background-color: #571212ff;
+                            transform: translateY(-3px);
+                        }
+
+                        button.submit-btn {
+                            padding: 0.75rem 1rem;
+                            background-color: #8B0000;
+                            color: #fff;
+                            border: none;
+                            border-radius: 8px;
+                            font-size: 1rem;
+                            font-weight: 600;
+                            cursor: pointer;
+                            width:100%;
+                            transition: background-color 0.3s ease;
+                        }
+
+                        button.submit-btn:hover {
+                            background-color: rgb(115, 8, 8);
+                            transform: translateY(-3px);
+                        }
+                        
+                        .titulo-pagina {
+                            font-size: 2rem;
+                            color: white;
+                            text-align: center;
+                            margin-top: 2px;
+                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+                        }
+
+                        
+                        input[type="text"],
+                        input[type="number"] {
+                            background-color: #2c2c2c;
+                            color: white;
+                            border: 1px solid #444;
+                            border-radius: 8px;
+                            padding: 0.6rem;
+                            font-size: 1rem;
+                            outline: none;
+                            transition: border-color 0.2s ease-in-out;
+                        }
+                        
+                        .form-secondary {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center; /* centra horizontalmente */
+                           gap: 0.5rem;
+                        }
+                        
+                        .form-secondary {
+                            display: flex;
+                            flex-direction: column;
+                            gap: 0.5rem;
+                            padding: 1rem;
+                            background-color: #1e1e1e;
+                            border-radius: 12px;
+                            box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+                            font-family: 'Segoe UI', sans-serif;
+                            color: #f0f0f0;
+                            max-width: 200px;
+                        }
+
+
+                        .label-box {
+                            display: flex;
+                            align-items: center;
+                            gap: 0.5rem;
+                            font-size: 1rem;
+                            cursor: pointer;
+                        }
+
+                        .checkbox-envio {
+                            width: 18px;
+                            height: 18px;
+                            accent-color: #8B0000; /* color vino para el checkbox */
+                        }
+
+                        .input-secondary {
+                            padding: 0.65rem 1rem;
+                            font-size: 1rem;
+                            border-radius: 8px;
+                            border: 1px solid #ccc;
+                            background-color: #f9f9f9;
+                            color: #333;
+                            width:100%;
+                            transition: border-color 0.3s, box-shadow 0.3s;
+                        }
+
+                        .form-col label {
+                            display: flex;
+                            align-items: center;
+                            color: white;
+                            font-weight: bold;
+                            margin-bottom: 0.5rem;
+                        }
+
+                        .form-col input[type="date"] {
+                            width: 220px;
+                            background-color: #2c2c2c;
+                            color: white;
+                            border: 1px solid #444;
+                            border-radius: 8px;
+                            padding: 0.4rem 0.6rem;
+                            font-size: 1rem;
+                            outline: none;
+                        }
+
+                        .form-col input[type="date"]::-webkit-calendar-picker-indicator {
+                            filter: invert(1); /* icono blanco en navegadores webkit */
+                        }
+
+
                 `}
             </style>
         </>
     )
 }
 
-export default createPresupuesto;
+export default createpresupuesto;

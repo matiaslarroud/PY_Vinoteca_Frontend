@@ -1,9 +1,9 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';          
 import { FaTrash} from "react-icons/fa";
-import FormularioEmpleadoCreate from '../../gestion/general/empleado/createEmpleado'
+import FormularioEmpleadoCreate from '../../gestion/empleado/createEmpleado'
 import FormularioClienteCreate from '../createCliente'
-import FormularioMedioPagoCreate from '../../gestion/general/medioPago/createMedioPago'
+import FormularioMedioPagoCreate from '../../gestion/tablasVarias/medioPago/createMedioPago'
 
 const { default: Link } = require("next/link")
 
@@ -1070,9 +1070,9 @@ const newNotaPedido = ({exito}) => {
                                     name="total"
                                     disabled
                                     />
+                                    
 
-                                <div className="form-submit">
-                                    <button
+                                <button
                                     type="submit"
                                     className="submit-btn"
                                     onClick={(e) => {
@@ -1084,9 +1084,8 @@ const newNotaPedido = ({exito}) => {
                                         clickChange(e);
                                     }}
                                     >
-                                    Cargar Pedido
-                                    </button>
-                                </div>
+                                    Cargar
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -1105,8 +1104,25 @@ const newNotaPedido = ({exito}) => {
                             justify-content: center;
                             align-items: center;
                             z-index: 1000;
+                        }   
+
+                        button.submit-btn {
+                            padding: 0.75rem 1rem;
+                            background-color: #8B0000;
+                            color: #fff;
+                            border: none;
+                            border-radius: 8px;
+                            font-size: 1rem;
+                            font-weight: 600;
+                            cursor: pointer;
+                            width: 100%;
+                            transition: background-color 0.3s ease;
                         }
-                        
+
+                        button.submit-btn:hover {
+                            background-color: rgb(115, 8, 8);
+                            transform: translateY(-3px);
+                        }                   
 
 
                         .close {
@@ -1181,9 +1197,7 @@ const newNotaPedido = ({exito}) => {
                             display: flex;
                             flex-wrap: wrap;
                             gap: 1.5rem;
-                        }
-
-                        
+                        }                        
 
                         .form-col-productos {
                             flex: 8;
@@ -1324,7 +1338,7 @@ const newNotaPedido = ({exito}) => {
                         }
 
                         .btn-add-producto {
-                            background-color: #651616ff;
+                            background-color: #8B0000;
                             color: white;
                             border: none;
                             padding: 0.5rem 1rem;
@@ -1339,41 +1353,28 @@ const newNotaPedido = ({exito}) => {
                             transform: translateY(-3px);
                         }
 
-                        .form-submit {
-                            justify-content: center;
-                            margin-top: 1rem;
+                        .input-secondary {
+                            padding: 0.65rem 1rem;
+                            font-size: 1rem;
+                            border-radius: 8px;
+                            border: 1px solid #ccc;
+                            background-color: #f9f9f9;
+                            color: #333;
+                            transition: border-color 0.3s, box-shadow 0.3s;
                         }
 
                         .submit-btn {
-                            background-color: #651616ff;
+                            background-color: #8B0000;;
                             color: white;
-                            border: none;
-                            padding: 0.8rem 1.5rem;
+                            padding: 0.65rem 1rem;
                             font-size: 1rem;
                             border-radius: 10px;
                             cursor: pointer;
-                            transition: background-color 0.2s ease-in-out;
+                            transition: border-color 0.3s, box-shadow 0.3s;
                         }
 
                         .submit-btn:hover {
                             background-color: #571212ff;
-                            transform: translateY(-3px);
-                        }
-
-                        button.submit-btn {
-                            padding: 0.75rem 1rem;
-                            background-color: #8B0000;
-                            color: #fff;
-                            border: none;
-                            border-radius: 8px;
-                            font-size: 1rem;
-                            font-weight: 600;
-                            cursor: pointer;
-                            transition: background-color 0.3s ease;
-                        }
-
-                        button.submit-btn:hover {
-                            background-color: rgb(115, 8, 8);
                             transform: translateY(-3px);
                         }
                         
@@ -1402,7 +1403,7 @@ const newNotaPedido = ({exito}) => {
                         .form-secondary {
                             display: flex;
                             flex-direction: column;
-                            gap: 0.75rem;
+                            gap: 0.5rem;
                             padding: 1rem;
                             background-color: #1e1e1e;
                             border-radius: 12px;
@@ -1424,22 +1425,6 @@ const newNotaPedido = ({exito}) => {
                             width: 18px;
                             height: 18px;
                             accent-color: #8B0000; /* color vino para el checkbox */
-                        }
-
-                        .input-secondary {
-                            padding: 0.65rem 1rem;
-                            font-size: 1rem;
-                            border-radius: 8px;
-                            border: 1px solid #ccc;
-                            background-color: #f9f9f9;
-                            color: #333;
-                            transition: border-color 0.3s, box-shadow 0.3s;
-                        }
-
-                        .input-secondary:focus {
-                            border-color: #8B0000;
-                            box-shadow: 0 0 5px rgba(139, 0, 0, 0.6);
-                            outline: none;
                         }
 
                         .form-col label {

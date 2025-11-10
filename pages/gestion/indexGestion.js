@@ -13,14 +13,20 @@ export default function indexGestion() {
     </button>             
   </div>
   <div className="menu-grid">
-      <Link href="./ubicaciones/indexUbicaciones" className="boton-acceso">
-          <span>Gestion ubicaciones</span>
+      <Link href="./tablasVarias/indexGeneral" className="boton-acceso">
+          <span>Tablas Varias</span>
       </Link>
-      <Link href="./vinos/indexVinos" className="boton-acceso">
-          <span>Gestion vinos</span>
+      <Link href="./deposito/indexDeposito" className="boton-acceso">
+          <span>Deposito</span>
       </Link>
-      <Link href="./general/indexGeneral" className="boton-acceso">
-          <span>Gestion general</span>
+      <Link href="./empleado/indexEmpleado" className="boton-acceso">
+          <span>Empleado</span>
+      </Link>
+      <Link href="./transporte/indexTransporte" className="boton-acceso">
+          <span>Transporte</span>
+      </Link>
+      <Link href="./usuario/indexUsuario" className="boton-acceso">
+          <span>Usuario</span>
       </Link>
   </div>
 

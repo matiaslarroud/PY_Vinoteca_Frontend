@@ -1,20 +1,25 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaHome, FaArrowLeft, FaTrash ,FaPrint  } from "react-icons/fa";
+import { FaPlus, FaHome , FaSearch , FaArrowLeft, FaTrash ,FaPrint  } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import FormularioRemitoCreate from './new_RemitoCliente'
-
+import BusquedaAvanzada from "../remito/busquedaRemitoCliente";
 
 const { default: Link } = require("next/link")
 
 const indexRemitoCliente = () => {
+    const initialState = {remitoID: '',cliente:'',totalPrecio:0, totalBultos:0, fecha:'', comprobanteVentaID:'', transporteID:'', entregado:''}
+    const initialDetalle = { tipoProducto:"", producto:''};
+    
     const router = useRouter();
     const [remitos,setRemitos] = useState([]);   
     const [comprobantesVenta,setComprobantesVenta] = useState([]);
     
     const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
     const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
+    const [mostrarBusqueda, setmostrarBusqueda] = useState(null);
     
-    const [filtroComprobanteVenta , setFiltroComprobanteVenta] = useState('');  
+    const [filtro , setFiltro] = useState(initialState); 
+    const [filtroDetalle , setFiltroDetalle] = useState([]);  
     const [orden, setOrden] = useState({ campo: '', asc: true });
 
     const toggleOrden = (campo) => {
@@ -55,12 +60,6 @@ const indexRemitoCliente = () => {
   };
 
   const remitosFiltrados = remitos
-    .filter(p => {
-      
-      const comprobanteVentaID = comprobantesVenta.find(d => d._id === p.comprobanteVentaID)?._id || '';
-      const coincideComprobanteVenta = comprobanteVentaID.toString().includes(filtroComprobanteVenta);
-      return coincideComprobanteVenta;
-    })
     .sort((a, b) => {
       const campo = orden.campo;
       if (!campo) return 0;
@@ -146,6 +145,7 @@ const indexRemitoCliente = () => {
             console.log("Error con el ID del remito al querer eliminarlo.")
             return
         }
+        const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
         await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/remito/${remitoID}`,
             {
                 method:'DELETE',
@@ -188,7 +188,7 @@ const indexRemitoCliente = () => {
                             &times;
                         </button>
                         <FormularioComprobanteVentaUpdate 
-                            omprobanteVentaID={mostrarModalUpdate} 
+                            comprobanteVentaID={mostrarModalUpdate} 
                             exito={()=>{
                                 setMostrarModalUpdate(null);
                                 fetchData();
@@ -196,6 +196,36 @@ const indexRemitoCliente = () => {
                         />
                     </div>
                 </div>
+            )}
+  
+            {mostrarBusqueda && (
+            <div className="modal">
+                <div className="modal-content">
+                <button
+                    className="close"
+                    onClick={() => {
+                    setmostrarBusqueda(null);
+                    }}
+                >
+                    &times;
+                </button>
+
+                <BusquedaAvanzada
+                    filtro={filtro} 
+                    filtroDetalle={filtroDetalle}
+                    exito={(resultados) => {
+                    if (resultados.length > 0) {
+                        setRemitos(resultados);
+                        setmostrarBusqueda(false);
+                    } else {
+                        alert("No se encontraron resultados");
+                    }
+                    }}
+                    onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)} 
+                    onChangeFiltroDetalle={(nuevoFiltroDetalle) => setFiltroDetalle(nuevoFiltroDetalle)}
+                />
+                </div>
+            </div>
             )}
             <h1 className="titulo-pagina">Remitos</h1>
             
@@ -210,18 +240,15 @@ const indexRemitoCliente = () => {
                 </button>
                 <button className="btn-icon" onClick={() => setMostrarModalCreate(true)} title="Agregar Remito">
                      <FaPlus />
-                </button>               
+                </button>        
+                <button onClick={() => 
+                    setmostrarBusqueda(true)
+                    }            
+                    className="btn-icon" title="Busqueda avanzada de remito">
+                    <FaSearch />
+                </button>                 
             </div>
             <div className="contenedor-tabla">
-                <div className="filtros">
-                    <input
-                        type="text"
-                        placeholder="Filtrar por comprobante de venta..."
-                        value={filtroComprobanteVenta}
-                        onChange={(e) => setFiltroComprobanteVenta(e.target.value)}
-                    />
-                </div>
-
                 <div className="tabla-scroll">
                     <table id="tablaVinos">
                         <thead>

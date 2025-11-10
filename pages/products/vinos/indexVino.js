@@ -120,6 +120,7 @@ const vinosFiltrados = vinos
             console.log("Error con el ID del vino al querer eliminarlo.")
             return
         }
+        const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
         await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productVino/${productID}`,
             {
                 method:'DELETE',

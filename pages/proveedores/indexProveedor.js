@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit , FaFileAlt , FaFileInvoice , FaShoppingCart , FaFileInvoiceDollar  } from "react-icons/fa";
+import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit , FaFileAlt , FaFileInvoice , FaShoppingCart , FaSearch , FaFileInvoiceDollar , FaReceipt  } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import Link from "next/link";
 import FormularioProveedorUpdate from './updateProveedor'
 import FormularioProveedorCreate from './createProveedor'
+import BusquedaAvanzadaProveeedores from "./busquedaProveedor";
 
 export default function indexProveedor() {
 const router = useRouter();
@@ -11,9 +12,14 @@ const [proveedores,setProveedores] = useState([]);
 const [localidades, setlocalidades] = useState([]);
 const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
 const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
+const [mostrarModalBuscar, setMostrarModalBuscar] = useState(null);
 
-const [filtroProveedorNombre, setFiltroProveedorNombre] = useState('');
-const [filtroProveedorLocalidad, setFiltroProveedorLocalidad] = useState('');  
+const initialState = {
+    name:'', telefono:'', email:'', cuit:'',
+    pais:'', provincia:'', localidad:'', barrio:'', calle:'' , altura:'', condicionIva:''
+}
+  const [filtro , setFiltro] = useState(initialState);
+ 
 const [orden, setOrden] = useState({ campo: '', asc: true });
 
 const toggleOrden = (campo) => {
@@ -24,12 +30,6 @@ const toggleOrden = (campo) => {
 };
 
 const proveedoresFiltrados = proveedores
-  .filter(c => {
-    const localidadNombre = localidades.find(loc => loc._id === c.localidad)?.name || '';
-    const coincideNombre = c.name.toLowerCase().includes(filtroProveedorNombre.toLowerCase());
-    const coincideLocalidad = localidadNombre.toLowerCase().includes(filtroProveedorLocalidad.toLowerCase());
-    return coincideNombre && coincideLocalidad;
-  })
   .sort((a, b) => {
     const campo = orden.campo;
     if (!campo) return 0;
@@ -83,6 +83,9 @@ const deleteProveedor = async(proveedorID) => {
         console.log("Error con el ID del proveedor al querer eliminarlo.")
         return
     }
+
+    const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
+    
     await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/proveedor/${proveedorID}`,
         {
             method:'DELETE',
@@ -145,6 +148,35 @@ const deleteProveedor = async(proveedorID) => {
       </div>
     </div>
   )}
+  
+  {mostrarModalBuscar && (
+  <div className="modal">
+    <div className="modal-content">
+      <button
+        className="close"
+        onClick={() => {
+          setMostrarModalBuscar(null);
+          fetchData();
+        }}
+      >
+        &times;
+      </button>
+
+      <BusquedaAvanzadaProveeedores
+        filtro={filtro} // ✅ le pasamos el estado actual
+        exito={(resultados) => {
+          if (resultados && resultados.length > 0) {
+            setProveedores(resultados);
+            setMostrarModalBuscar(false);
+          } else {
+            alert("No se encontraron resultados");
+          }
+        }}
+        onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)} // ✅ manejamos los cambios desde el hijo
+      />
+    </div>
+  </div>
+)}
 
 
   <h1 className="titulo-pagina">Proveedores</h1>
@@ -163,41 +195,48 @@ const deleteProveedor = async(proveedorID) => {
   </div>
   
   <div className="contenedor-tabla">
-    <div className="filtros">
-          <input
-              type="text"
-              placeholder="Filtrar por proveedor..."
-              value={filtroProveedorNombre}
-              onChange={(e) => setFiltroProveedorNombre(e.target.value)}
-          />
-          <input
-              type="text"
-              placeholder="Filtrar por localidad..."
-              value={filtroProveedorLocalidad}
-              onChange={(e) => setFiltroProveedorLocalidad(e.target.value)}
-          />
-
-    </div>
         <div className="filtros">
-            <button className="submit-btn" onClick={() => router.back()} title="Presupuestos">
-                <FaFileAlt />
-                Solicitudes de Presupuesto
+                  <button onClick={() => 
+                      setMostrarModalBuscar(true)
+                    }            
+                    className="btn-icon" title="Busqueda avanzada de proveedor">
+                     <FaSearch />
+                </button>  
+            <button className="submit-btn" title="Solicitudes de Presupuestos">
+                <Link href='./presupuestoSolicitud/indexSolicitud'>
+                  <FaFileAlt /><br/>
+                  <h6>Solicitudes de Presupuesto</h6>
+                </Link>                
             </button>
-            <button className="submit-btn" onClick={() => router.back()} title="Presupuestos">
-                <FaFileInvoice />
-                Presupuestos
+            <button className="submit-btn" title="Presupuestos">
+                <Link href='./presupuesto/indexPresupuesto'>
+                  <FaFileInvoice /><br/>
+                  <h6>Presupuestos</h6>
+                </Link>
             </button>
-            <button className="submit-btn" onClick={() => router.back()} title="Presupuestos">
-                <FaShoppingCart />
-                Notas de Pedido
+            <button className="submit-btn" title="Ordenes de Compra">
+                <Link href='./ordenCompra/indexOrdenCompra'>
+                  <FaShoppingCart /> <br/>
+                  <h6>Ordenes de Compra</h6>
+                </Link>
             </button>
-            <button className="submit-btn" onClick={() => router.back()} title="Presupuestos">
-                <FaFileInvoiceDollar />
-                Comprobantes de Venta
+            <button className="submit-btn" title="Comprobantes de Compra">
+                <Link href='./comprobanteCompra/indexComprobanteCompra'>
+                  <FaFileInvoiceDollar /><br/>
+                  <h6>Comprobantes de Compra</h6>
+                </Link>
             </button>
-            <button className="submit-btn" onClick={() => router.back()} title="Presupuestos">
-                <FaFileInvoice />
-                Remitos
+            <button className="submit-btn" title="Comprobantes de Pago">
+                <Link href='./comprobantePago/indexComprobantePago'>
+                  <FaReceipt /><br/>
+                  <h6>Comprobantes de Pago</h6>
+                </Link>
+            </button>
+            <button className="submit-btn" title="Remitos">
+                <Link href='./remito/indexRemito'>
+                  <FaFileInvoice /><br/>
+                  <h6>Remitos</h6>
+                </Link>
             </button>
         </div>
     

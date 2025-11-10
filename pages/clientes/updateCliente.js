@@ -1,6 +1,13 @@
 const { useState, useEffect } = require("react")
 const { default: Link } = require("next/link")
+import Select from "react-select";
 
+import Formulario_Pais from '../gestion/tablasVarias/pais/createPais'
+import Formulario_Provincia from '../gestion/tablasVarias/provincia/createProvincia'
+import Formulario_Localidad from '../gestion/tablasVarias/localidad/createLocalidad'
+import Formulario_Barrio from '../gestion/tablasVarias/barrio/createBarrio'
+import Formulario_Calle from '../gestion/tablasVarias/calle/createCalle'
+import Formulario_CondicionIva from '../gestion/tablasVarias/iva/createCondicionIva'
 
 const initialState = {
     name:'', lastname:'', fechaNacimiento:'', telefono:'', email:'', cuit:'',
@@ -9,6 +16,14 @@ const initialState = {
 }
 
 const updateCliente = ({clienteID, exito}) => {
+    const [mostrarPais , setMostrarPais] = useState(false)
+    const [mostrarProvincia , setMostrarProvincia] = useState(false)
+    const [mostrarLocalidad , setMostrarLocalidad] = useState(false)
+    const [mostrarBarrio , setMostrarBarrio] = useState(false)
+    const [mostrarCalle , setMostrarCalle] = useState(false)
+    const [mostrarCondicionIva , setMostrarCondicionIva] = useState(false)
+
+
     const [cliente , setCliente] = useState(initialState);
     const [paises , setPaises] = useState([]);
     const [provincias, setProvincias] = useState([]);
@@ -16,6 +31,16 @@ const updateCliente = ({clienteID, exito}) => {
     const [barrios , setBarrrios] = useState([]);
     const [calles , setCalles] = useState([]);
     const [condicionesIva , setCondicionesIva] = useState([]);
+
+    const selectChange = (selectedOption, actionMeta) => {
+        const name = actionMeta.name;
+        const value = selectedOption ? selectedOption.value : "";
+
+        setCliente({
+            ...cliente,
+            [name]: value,
+        });
+    };
     
     const fetchData = (clienteID) => {
     fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente/${clienteID}`)
@@ -142,221 +167,968 @@ const fetchPaises = () => {
                 .catch((err) => {console.log('Error al enviar datos. \n Error: ',err)})
     }
 
+    const opciones_paises = paises.map(v => ({ value: v._id,label: v.name }));
+    const opciones_provincias = provincias.filter(a => a.pais === cliente.pais).map(v => ({ value: v._id,label: v.name }));
+    const opciones_localidades = localidades.filter(a => a.provincia === cliente.provincia).map(v => ({ value: v._id,label: v.name }));
+    const opciones_barrios = barrios.filter(a => a.localidad === cliente.localidad).map(v => ({ value: v._id,label: v.name }));
+    const opciones_calles = calles.filter(a => a.barrio === cliente.barrio).map(v => ({ value: v._id,label: v.name }));
+    const opciones_iva = condicionesIva.map(v => ({ value: v._id,label: v.name }));
+
     return(
         <>
+            {mostrarPais && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => 
+                        {
+                            setMostrarPais(null)
+                            fetchPaises();
+                        }
+                    }>
+                        &times;
+                    </button>
+                    <Formulario_Pais
+                        exito={() => 
+                            {
+                                setMostrarPais(false)
+                                fetchPaises();
+                            }}
+                    />
+                </div>
+                </div>
+            )}
+            {mostrarProvincia && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => 
+                        {
+                            setMostrarProvincia(null)
+                            fetchData()
+                        }
+                    }>
+                        &times;
+                    </button>
+                    <Formulario_Provincia
+                        exito={() => 
+                            {
+                                setMostrarProvincia(false)
+                                fetchData()
+                            }}
+                    />
+                </div>
+                </div>
+            )}
+
+            {mostrarLocalidad && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => 
+                        {
+                            setMostrarLocalidad(null)
+                            fetchData()
+                        }
+                    }>
+                        &times;
+                    </button>
+                    <Formulario_Localidad
+                        exito={() => 
+                            {
+                                setMostrarLocalidad(false)
+                                fetchData()
+                            }}
+                    />
+                </div>
+                </div>
+            )}
+
+            {mostrarBarrio && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => 
+                        {
+                            setMostrarBarrio(null)
+                            fetchData()
+                        }
+                    }>
+                        &times;
+                    </button>
+                    <Formulario_Barrio
+                        exito={() => 
+                            {
+                                setMostrarBarrio(false)
+                                fetchData()
+                            }}
+                    />
+                </div>
+                </div>
+            )}
+
+            {mostrarCalle && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => 
+                        {
+                            setMostrarCalle(null)
+                            fetchData()
+                        }
+                    }>
+                        &times;
+                    </button>
+                    <Formulario_Calle
+                        exito={() => 
+                            {
+                                setMostrarCalle(false)
+                                fetchData()
+                            }}
+                    />
+                </div>
+                </div>
+            )}
+
+            {mostrarCondicionIva && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => 
+                        {
+                            setMostrarCondicionIva(null)
+                            fetchData()
+                        }
+                    }>
+                        &times;
+                    </button>
+                    <Formulario_CondicionIva
+                        exito={() => 
+                            {
+                                setMostrarCondicionIva(false)
+                                fetchData()
+                            }}
+                    />
+                </div>
+                </div>
+            )}
+
+
             <div className="form-container">
                 <h1 className="titulo-pagina">Modificar Cliente</h1>
-                <form id="formC" onSubmit={clickChange}>
-                    <fieldset className="grid-container">
-                    <div className="form-group">
-                        <label>Nombre:</label>
-                        <input type="text" onChange={inputChange} value={cliente.name} name="name" placeholder="Nombre del cliente" required />
+
+                <form id="formProducto" className="formulario-presupuesto">
+                    <div className="form-row">
+                        <div className="form-col">
+                            <label>
+                                Nombre:
+                            </label>
+                            <input
+                                name="name"
+                                type="text"
+                                placeholder="Nombre"
+                                value={cliente.name}
+                                onChange={(e) => inputChange(e)}
+                                required
+                            />
+                        </div>        
+                        <div className="form-col">
+                            <label>
+                                Apellido:
+                            </label>
+                            <input
+                                type="text"
+                                name="lastname"
+                                placeholder="Apellido"
+                                value={cliente.lastname}
+                                onChange={(e) => inputChange(e)}
+                                required
+                            />
+                        </div>    
+                        <div className="form-col">
+                            <label>
+                                Telefono:
+                            </label>
+                            <input
+                                type="text"
+                                name="telefono"
+                                placeholder="Telefono"
+                                value={cliente.telefono}
+                                onChange={(e) => inputChange(e)}
+                                required
+                            />
+                        </div>
+                        <div className="form-col">
+                            <label>
+                                E-Mail:
+                            </label>
+                            <input
+                                type="text"
+                                name="email"
+                                placeholder="E-Mail"
+                                value={cliente.email}
+                                onChange={(e) => inputChange(e)}
+                                required
+                            />
+                        </div>                 
                     </div>
-                    <div className="form-group">
-                        <label>Apellido:</label>
-                        <input type="text" onChange={inputChange} value={cliente.lastname} name="lastname" placeholder="Apellido del cliente" required />
-                    </div>
-                    <div className="form-group">
+                    <div className="form-row">
+                        <div className="form-col">
+                            <label>
+                                Cuit:
+                            </label>
+                            <input
+                                type="text"
+                                name="cuit"
+                                placeholder="Cuit"
+                                value={cliente.cuit}
+                                onChange={(e) => inputChange(e)}
+                                required
+                            />
+                        </div>
+                        <div className="form-col">
                         <label>Fecha de Nacimiento:</label>
-                        <input type="date" onChange={inputChange} value={cliente.fechaNacimiento} name="fechaNacimiento" required />
-                    </div>
-                    <div className="form-group">
-                        <label>Teléfono:</label>
-                        <input type="text" onChange={inputChange} value={cliente.telefono} name="telefono" placeholder="Teléfono" required />
-                    </div>
-                    <div className="form-group">
-                        <label>Email:</label>
-                        <input type="email" onChange={inputChange} value={cliente.email} name="email" placeholder="Email" required />
-                    </div>
-                    <div className="form-group">
-                        <label>CUIT:</label>
-                        <input type="text" onChange={inputChange} value={cliente.cuit} name="cuit" placeholder="CUIT" required />
-                    </div>
+                            <input
+                                type="date"
+                                name="fechaNacimiento"
+                                placeholder="Fecha de nacimiento"
+                                value={cliente.fechaNacimiento}
+                                onChange={inputChange}
+                                required
+                                className="input-date"
+                            />
+                        </div>
 
-                    <div className="form-group">
-                        <label>País:</label>
-                        <select name="pais" onChange={inputChange} value={cliente.pais}>
-                        <option value="">Seleccione un país...</option>
-                        {paises.map(({ _id, name }) => (
-                            <option key={_id} value={_id}>{name}</option>
-                        ))}
-                        </select>
+                        <div className="form-col">
+                            <label>
+                                Condicion de Iva:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarCondicionIva(true)}>+</button>
+                            </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_iva}
+                                value={opciones_iva.find(op => op.value === cliente.condicionIva) || null}
+                                onChange={selectChange}
+                                name='condicionIva'
+                                placeholder="Condicion Iva..."
+                                isClearable
+                                styles={{
+                                    container: (base) => ({
+                                    ...base,
+                                    width: 220, // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 220,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }}
+                            />
+                        </div>
+                        <div className="form-col">
+                            <label>
+                                Cuenta Corriente:
+                            </label>
+                            <div className="checkbox-modern">
+                                <input
+                                    type="checkbox"
+                                    id="cuentaCorriente"
+                                    name="cuentaCorriente"
+                                    checked={cliente.cuentaCorriente}
+                                    onChange={(e) =>
+                                    setCliente({
+                                        ...cliente,
+                                        cuentaCorriente: e.target.checked,
+                                    })
+                                    }
+                                />
+                            </div>
+                        </div>
                     </div>
+                    <div className="form-row">
+                        <div className="form-col">
+                            <label>
+                                Pais:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarPais(true)}>+</button>
+                            </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_paises}
+                                value={opciones_paises.find(op => op.value === cliente.pais) || null}
+                                onChange={selectChange}
+                                name='pais'
+                                placeholder="Pais..."
+                                isClearable
+                                styles={{
+                                    container: (base) => ({
+                                    ...base,
+                                    width: 220, // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 220,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }}
+                            />
+                        </div>
 
-                    <div className="form-group">
-                        <label>Provincia:</label>
-                        <select name="provincia" onChange={inputChange} value={cliente.provincia}>
-                        <option value="">Seleccione una provincia...</option>
-                        {provincias.filter(p => p.pais === Number(cliente.pais)).map(({ _id, name }) => (
-                            <option key={_id} value={_id}>{name}</option>
-                        ))}
-                        </select>
-                    </div>
+                        <div className="form-col">
+                            <label>
+                                Provincia:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarProvincia(true)}>+</button>
+                            </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_provincias}
+                                value={opciones_provincias.find(op => op.value === cliente.provincia) || null}
+                                onChange={selectChange}
+                                name='provincia'
+                                placeholder="Provincia..."
+                                isClearable
+                                styles={{
+                                    container: (base) => ({
+                                    ...base,
+                                    width: 220, // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 220,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }}
+                            />
+                        </div>
 
-                    <div className="form-group">
-                        <label>Localidad:</label>
-                        <select name="localidad" onChange={inputChange} value={cliente.localidad}>
-                        <option value="">Seleccione una localidad...</option>
-                        {localidades.filter(p => p.provincia === Number(cliente.provincia)).map(({ _id, name }) => (
-                            <option key={_id} value={_id}>{name}</option>
-                        ))}
-                        </select>
-                    </div>
+                        <div className="form-col">
+                            <label>
+                                Localidad:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarLocalidad(true)}>+</button>
+                            </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_localidades}
+                                value={opciones_localidades.find(op => op.value === cliente.localidad) || null}
+                                onChange={selectChange}
+                                name='localidad'
+                                placeholder="Localidad..."
+                                isClearable
+                                styles={{
+                                    container: (base) => ({
+                                    ...base,
+                                    width: 220, // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 220,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }}
+                            />
+                        </div>
 
-                    <div className="form-group">
-                        <label>Barrio:</label>
-                        <select name="barrio" onChange={inputChange} value={cliente.barrio}>
-                        <option value="">Seleccione un barrio...</option>
-                        {barrios.filter(p => p.localidad === Number(cliente.localidad)).map(({ _id, name }) => (
-                            <option key={_id} value={_id}>{name}</option>
-                        ))}
-                        </select>
+                        <div className="form-col">
+                            <label>
+                                Barrio:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarBarrio(true)}>+</button>
+                            </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_barrios}
+                                value={opciones_barrios.find(op => op.value === cliente.barrio) || null}
+                                onChange={selectChange}
+                                name='barrio'
+                                placeholder="Barrio..."
+                                isClearable
+                                styles={{
+                                    container: (base) => ({
+                                    ...base,
+                                    width: 220, // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 220,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }}
+                            />
+                        </div>               
                     </div>
+                    <div className="form-row">
 
-                    <div className="form-group">
-                        <label>Calle:</label>
-                        <select name="calle" onChange={inputChange} value={cliente.calle}>
-                        <option value="">Seleccione una calle...</option>
-                        {calles.filter(p => p.barrio === Number(cliente.barrio)).map(({ _id, name }) => (
-                            <option key={_id} value={_id}>{name}</option>
-                        ))}
-                        </select>
-                    </div>
+                        <div className="form-col">
+                            <label>
+                                Calle:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarCalle(true)}>+</button>
+                            </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_calles}
+                                value={opciones_calles.find(op => op.value === cliente.calle) || null}
+                                onChange={selectChange}
+                                name='calle'
+                                placeholder="Calle..."
+                                required
+                                isClearable
+                                styles={{
+                                    container: (base) => ({
+                                    ...base,
+                                    width: 220, // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 220,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }}
+                            />
+                        </div>
+                        
+                        <div className="form-col">
+                            <label>
+                                Altura:
+                            </label>
+                            <input
+                                type="number"
+                                name="altura"
+                                placeholder="Altura"
+                                value={cliente.altura}
+                                onChange={(e) => inputChange(e)}
+                                required
+                            />
+                        </div>
+                        
+                        <div className="form-col">
+                            <label>
+                                Depto. N°:
+                            </label>
+                            <input
+                                type="number"
+                                name="deptoNumero"
+                                placeholder="Depto. N°"
+                                value={cliente.deptoNumero}
+                                onChange={(e) => inputChange(e)}
+                                required
+                            />
+                        </div>
+                        
+                        <div className="form-col">
+                            <label>
+                                Depto. Letra:
+                            </label>
+                            <input
+                                type="text"
+                                name="deptoLetra"
+                                placeholder="Depto. Letra"
+                                value={cliente.deptoLetra}
+                                onChange={(e) => inputChange(e)}
+                                required
+                            />
+                        </div>
 
-                    <div className="form-group">
-                        <label>Condición IVA:</label>
-                        <select name="condicionIva" onChange={inputChange} value={cliente.condicionIva}>
-                        <option value="">Seleccione una condición IVA...</option>
-                        {condicionesIva.map(({ _id, name }) => (
-                            <option key={_id} value={_id}>{name}</option>
-                        ))}
-                        </select>
                     </div>
-                    <div className="form-group">
-                        <label>Altura:</label>
-                        <input type="number" onChange={inputChange} value={cliente.altura} name="altura" placeholder="Altura" required />
-                    </div>
-                    <div className="form-group">
-                        <label>Depto. N°:</label>
-                        <input type="number" onChange={inputChange} value={cliente.deptoNumero} name="deptoNumero" placeholder="Depto. N°" />
-                    </div>
-                    <div className="form-group">
-                        <label>Depto. Letra:</label>
-                        <input type="text" onChange={inputChange} value={cliente.deptoLetra} name="deptoLetra" placeholder="Depto. Letra" />
-                    </div>
-
-                    <div className="form-group checkbox-group">
-                        <label>
-                        <input type="checkbox" onChange={(e) => setCliente({ ...cliente, [e.target.name]: e.target.checked })} checked={cliente.cuentaCorriente} name="cuentaCorriente" />
-                        Cuenta Corriente
-                        </label>
-                    </div>
-                    </fieldset>
-
-                    <div className="form-footer">
-                    <button type="submit" className="submit-btn">Guardar</button>
+                    
+                    <div className="form-submit">
+                        <button
+                            type="submit"
+                            className="submit-btn"
+                            onClick={(e) => {
+                                clickChange(e);
+                            }}
+                        >
+                        Guardar
+                        </button>
                     </div>
                 </form>
-                </div>
-
+            </div>
             <style jsx>
                 {`
+                    .modal {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background-color: rgba(0,0,0,0.5); /* oscurece fondo */
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        z-index: 1000;
+                    }
+                    
+                    .checkbox-modern {
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        cursor: pointer;
+                        user-select: none;
+                        position: relative;
+                    }
+
+                    .checkbox-modern input[type='checkbox'] {
+                        appearance: none;
+                        -webkit-appearance: none;
+                        width: 22px;
+                        height: 22px;
+                        border: 2px solid #a30000;
+                        border-radius: 6px;
+                        background-color: #2c2c2c;
+                        cursor: pointer;
+                        position: relative;
+                        transition: all 0.25s ease;
+                    }
+
+                    .checkbox-modern input[type='checkbox']:hover {
+                        border-color: #cc0000;
+                    }
+
+                    .checkbox-modern input[type='checkbox']:checked {
+                        background-color: #a30000;
+                        border-color: #a30000;
+                    }
+
+                    .checkbox-modern input[type='checkbox']:checked::after {
+                        content: '✔';
+                        color: white;
+                        font-size: 14px;
+                        position: absolute;
+                        top: 0;
+                        left: 4px;
+                        font-weight: bold;
+                    }
+
+                    .checkbox-modern label {
+                        color: #fff;
+                        font-size: 1rem;
+                        font-weight: 500;
+                        cursor: pointer;
+                    }
+
+                    .input-date {
+                        width: 100%;
+                        padding: 0.6rem;
+                        border-radius: 6px;
+                        border: 1px solid #444;
+                        background-color: #1f1f1f;
+                        color: #fff;
+                        font-size: 1rem;
+                        transition: 0.2s;
+                    }
+
+                    .input-date:focus {
+                        border-color: #a30000;
+                        outline: none;
+                    }
+
+                    .input-date::-webkit-calendar-picker-indicator {
+                        filter: invert(1);
+                        cursor: pointer;
+                    }
+
+
+                    .close {
+                        position: absolute;
+                        top: 1rem;
+                        right: 1.5rem;
+                        font-size: 1.5rem;
+                        background: transparent;
+                        border: none;
+                        cursor: pointer;
+                    }
+                    .btn-icon {
+                        background-color: #8b0000;
+                        color: white;
+                        padding: 0.8rem;
+                        font-size: 1.2rem;
+                        border-radius: 50%;
+                        border: none;
+                        cursor: pointer;
+                        width: 2.5rem;
+                        height: 2.5rem;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        transition: background-color 0.3s, transform 0.2s;
+                    }
+                    
+                    .btn-icon:hover {
+                    background-color: #a30000;
+                    transform: translateY(-3px);
+                    }
+
+                    .modal-content {
+                        background-color: #121212;
+                        padding: 40px;
+                        border-radius: 12px;
+                        width: 90%;
+                        height:80%;
+                        max-width: 500px;
+                        max-height: 800px;
+                        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                        position: relative;
+                        margin: 20px;
+                    }
+
                     .form-container {
-                    display: flex;
-                    flex-direction: column;
-                    width: 100%;
-                    max-width: 900px;
-                    max-height: 90vh;
-                    padding: 1rem;
-                    overflow-y: auto;
-                    border-radius: 12px;
-                    background: #1a1a1a;
-                    box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
+                        background-color: #1f1f1f;
+                        color: #fff;
+                        padding: 2rem;
+                        border-radius: 16px;
+                        width: 100%;
+                        height: 100%;
+                        margin: 0 auto;
+                        box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
+                    }
+                        
+                    .box-cargar{
+                        justify-content: center;
+                        align-items: center;
                     }
 
-                    .titulo-pagina {
-                    font-size: 2rem;
-                    color: white;
-                    text-align: center;
-                    margin-bottom: 1rem;
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                    text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+                    .formulario-presupuesto {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 2rem;
                     }
 
-                    .grid-container {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 1rem;
+                    .form-row {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 1.5rem;
                     }
 
-                    .form-group {
-                    display: flex;
-                    flex-direction: column;
+                    .form-col {
+                        flex: 1;
+                        max-width: 220px;
+                        display: flex;
+                        flex-direction: column;
                     }
 
-                    .form-group label {
-                    font-weight: 600;
-                    color: white;
-                    margin-bottom: 0.4rem;
+                    .form-col-productos {
+                        flex: 8;
+                        min-width: 0; /* Importante para que no desborde */
+                        display: flex;
+                        flex-direction: column;
+                    }
+                        
+                    .form-col-item1 {
+                        flex: 3;
+                        min-width: 0; /* Importante para que no desborde */
+                        display: flex;
+                        flex-direction: column;
+                    }
+                        
+                    .form-col-item2 {
+                        flex: 2;
+                        min-width: 0; /* Importante para que no desborde */
+                        display: flex;
+                        flex-direction: column;
                     }
 
-                    .form-group input,
-                    .form-group select {
-                    padding: 0.6rem;
-                    border-radius: 6px;
-                    border: 1px solid #ccc;
-                    font-size: 1rem;
-                    color: white;
-                    background-color: #272626ff;
-                    transition: border-color 0.2s ease-in-out;
+                    .form-col-precioVenta {
+                        flex: 2;
+                        min-width: 0;
+                        display: flex;
+                        flex-direction: column;
                     }
 
-                    .form-group input:focus,
-                    .form-group select:focus {
-                    border-color: rgb(115, 8, 8);
-                    outline: none;
+
+                    label {
+                        font-weight: 500;
+                        margin-bottom: 0.5rem;
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
                     }
 
-                    .checkbox-group {
-                    display: flex;
-                    align-items: center;
-                    margin-top: 1.5rem;
+                    .precio-venta {
+                        max-width: 100px;
                     }
 
-                    .checkbox-group label {
-                    color: #eee;
-                    font-weight: 500;
+                    input:focus {
+                        border-color: #571212ff;
                     }
 
-                    .form-footer {
-                    margin-top: 2rem;
-                    text-align: center;
+                    .precio-venta {
+                        flex-direction: column;
+                        align-items: flex-end;
+                        justify-content: flex-start;
+                        flex: 1;
+                    }
+
+                        .btn-plus {
+                        background-color: transparent;
+                        color: #651616ff;
+                        border: none;
+                        font-size: 1.2rem;
+                        cursor: pointer;
+                    }
+
+                    .btn-plus:hover {
+                        color: #571212ff;
+                        transform: translateY(-3px);
+                    }
+
+                    .form-group-presupuesto {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 1rem;
+                        height: 160px;
+                        overflow-y: auto;
+                        padding-right: 8px;
+                    }
+
+                    .presupuesto-item {
+                        display: flex;
+                        align-items: center;
+                        gap: 1rem;
+                        flex-wrap: wrap;
+                    }
+
+                    .presupuesto-item input[type="number"] {
+                        width: 80px;
+                    }
+
+                    .btn-remove {
+                        background-color: #651616ff;
+                        color: white;
+                        border: none;
+                        padding: 0.4rem 0.8rem;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        transition: background-color 0.2s ease-in-out;
+                    }
+
+                    .btn-add-producto {
+                        background-color: #651616ff;
+                        color: white;
+                        border: none;
+                        padding: 0.5rem 1rem;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        align-self: flex-start;
+                        transition: background-color 0.2s ease-in-out;
+                    }
+
+                    .btn-add-producto:hover {
+                        background-color: #571212ff;
+                        transform: translateY(-3px);
+                    }
+
+                    .form-submit {
+                        justify-content: center;
+                        text-align: center;
+                        margin-top: 1rem;
+                    }
+
+                    .submit-btn {
+                        background-color: #651616ff;
+                        color: white;
+                        border: none;
+                        padding: 0.8rem 1.5rem;
+                        font-size: 1rem;
+                        border-radius: 10px;
+                        cursor: pointer;
+                        transition: background-color 0.2s ease-in-out;
+                    }
+
+                    .submit-btn:hover {
+                        background-color: #571212ff;
+                        transform: translateY(-3px);
                     }
 
                     button.submit-btn {
-                    padding: 0.75rem 2rem;
-                    background-color: #8B0000;
-                    color: white;
-                    border: none;
-                    border-radius: 8px;
-                    font-size: 1.1rem;
-                    font-weight: bold;
-                    cursor: pointer;
-                    transition: background-color 0.3s ease;
+                        padding: 0.75rem 1rem;
+                        background-color: #8B0000;
+                        color: #fff;
+                        border: none;
+                        border-radius: 8px;
+                        font-size: 1rem;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: background-color 0.3s ease;
                     }
 
                     button.submit-btn:hover {
-                    background-color: rgb(115, 8, 8);
+                        background-color: rgb(115, 8, 8);
+                        transform: translateY(-3px);
+                    }
+                    
+                    .titulo-pagina {
+                        font-size: 2rem;
+                        width: 100%;
+                        color: white;
+                        text-align: center;
+                        margin-top: 2px;
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
                     }
 
-                    @media (max-width: 768px) {
-                    .grid-container {
-                        grid-template-columns: 1fr;
+                    
+                    input[type="text"],
+                    input[type="number"] {
+                        background-color: #2c2c2c;
+                        color: white;
+                        border: 1px solid #444;
+                        border-radius: 8px;
+                        padding: 0.6rem;
+                        font-size: 1rem;
+                        outline: none;
+                        transition: border-color 0.2s ease-in-out;
                     }
-
                 `}
             </style>
-        </>
+    </>
     )
 }
 

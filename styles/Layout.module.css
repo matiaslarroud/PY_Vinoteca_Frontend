@@ -1,0 +1,60 @@
+.container {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+  width: 100%;
+}
+
+.mainWrapper {
+  flex: 1;
+}
+
+.content {
+  width: 100%;
+}
+
+.sidebarWrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 260px;
+  height: 100%;
+  background-color: #222;
+  color: #fff;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  margin-bottom: 1rem;
+}
+
+.openButton {
+  
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1001;
+  background: #222;
+  color: #fff;
+  border: none;
+  font-size: 1.5rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+/* Mostrar botón de abrir en móvil */
+@media (max-width: 800px) {
+  .openButton {
+    display: block;
+  }
+
+  .mainWrapper {
+    padding: 1rem;
+  }
+}
