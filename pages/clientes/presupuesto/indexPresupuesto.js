@@ -69,28 +69,41 @@ const indexPresupuesto = () => {
         fetchData();
     }, [] )
 
-    const deletePresupuesto = async(presupuestoID) => {
-        if(!presupuestoID) {
-            console.log("Error con el ID del presupuesto al querer eliminarlo.")
-            return
+    
+
+    const deletePresupuesto = async (presupuestoID) => {
+        if (!presupuestoID) {
+            console.error("Error con el ID del presupuesto al querer eliminarlo.");
+            return;
         }
-        const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto/${presupuestoID}`,
-            {
-                method:'DELETE',
-                headers: {
-                    'Content-Type':'application/json',
-                }
+
+        const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?");
+        if (!confirmar) return;
+
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto/${presupuestoID}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.ok) {
+                alert(data.message || "No se pudo eliminar el presupuesto.");
+                console.warn("Error al eliminar presupuesto:", data);
+                return;
             }
-        ).then((a)=>{return a.json()})
-            .then((res)=>{
-                fetchData();
-                console.log(res.message);
-            })
-            .catch((err)=>{
-                console.log("Error al enviar presupuesto para su eliminación. \n Error: ",err);
-            })
-    }
+
+            alert(data.message || "Presupuesto eliminado correctamente.");
+            fetchData();
+            console.log(data.message);
+
+        } catch (err) {
+            console.error("Error al enviar presupuesto para su eliminación:", err);
+            alert("Ocurrió un error al intentar eliminar el presupuesto.");
+        }
+    };
+
 
     const imprimirPresupuesto = async (presupuestoID) => {
         if (!presupuestoID) {

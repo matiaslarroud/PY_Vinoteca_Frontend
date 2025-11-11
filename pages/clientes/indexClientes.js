@@ -17,7 +17,7 @@ export default function indexClientes() {
   const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
   const [mostrarPresupuestoCreate, setmostrarPresupuestoCreate] = useState(null);
   const [mostrarModalBuscar, setMostrarModalBuscar] = useState(null);
-const [orden, setOrden] = useState({ campo: '', asc: true });
+  const [orden, setOrden] = useState({ campo: '', asc: true });
 
 const initialState = {
     name:'', lastname:'', fechaNacimiento:'', telefono:'', email:'', cuit:'',
@@ -86,28 +86,39 @@ useEffect(() => {
     fetchData_Localidades();
 }, [] )
 
-const deleteCliente = async(clienteID) => {
-    if(!clienteID) {
-        console.log("Error con el ID del cliente al querer eliminarlo.")
-        return
+const deleteCliente = async (clienteID) => {
+  if (!clienteID) {
+    console.error("Error con el ID del cliente al querer eliminarlo.");
+    return;
+  }
+
+  const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?");
+  if (!confirmar) return;
+
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente/${clienteID}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.ok) {
+      alert(data.message || "No se pudo eliminar el cliente.");
+      console.warn("Error al eliminar cliente:", data);
+      return;
     }
-    const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
-    await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente/${clienteID}`,
-        {
-            method:'DELETE',
-            headers: {
-                'Content-Type':'application/json',
-            }
-        }
-    ).then((a)=>{return a.json()})
-        .then((res)=>{
-            fetchData();
-            console.log(res.message);
-        })
-        .catch((err)=>{
-            console.log("Error al enviar cliente para su eliminación. \n Error: ",err);
-        })
-}
+
+    alert(data.message || "Cliente eliminado correctamente.");
+    fetchData(); // recarga la lista
+    console.log(data.message);
+
+  } catch (err) {
+    console.error("Error al enviar cliente para su eliminación:", err);
+    alert("Ocurrió un error al intentar eliminar el cliente.");
+  }
+};
+
 
 
   return (
@@ -242,7 +253,7 @@ const deleteCliente = async(clienteID) => {
                 <FaHome />
             </Link>
         </button>
-        <button className="btn-icon" onClick={() => setMostrarModalCreate(true)} title="Agregar Presupuesto">
+        <button className="btn-icon" onClick={() => setMostrarModalCreate(true)} title="Agregar Cliente">
              <FaPlus />
         </button>    
         <button onClick={() => 

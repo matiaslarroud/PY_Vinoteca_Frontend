@@ -8,7 +8,7 @@ import FormularioMedioPagoCreate from '../../gestion/tablasVarias/medioPago/crea
 const { default: Link } = require("next/link")
 
 const initialStateNotaPedido = {
-        total:'', fecha:'', fechaEntrega:'', cliente:'', empleado:'',
+        total:'', fecha:'', fechaEntrega:'', cliente:'', empleado:'', descuento: 0, descuentoBandera:false,
         envio:false , presupuesto:'', medioPago:'',
         provincia:0 , localidad:0 , barrio:0, calle:0,altura:0,deptoNumero:0,deptoLetra:0
     }
@@ -26,7 +26,8 @@ const newNotaPedido = ({exito}) => {
     const [detalles,setDetalles] = useState([initialDetalle])
     const [productos,setProductos] = useState([]);
     const [tipoProductos,setTipoProductos] = useState([]);
-    const [habilitado, setHabilitado] = useState(false);
+    const [habilitadoEnvio, setHabilitadoEnvio] = useState(false);
+    const [habilitadoDescuento, setHabilitadoDescuento] = useState(false);
     const [provincias,setProvincias] = useState([])
     const [localidades,setLocalidades] = useState([])
     const [barrios,setBarrios] = useState([])
@@ -181,12 +182,20 @@ const newNotaPedido = ({exito}) => {
         }
     }, [productos, detalles]);
 
-    const handleCheckboxChange = (e) => {
-        setHabilitado(e.target.checked);
+    const handleCheckboxChangeEnvio = (e) => {
+        setHabilitadoEnvio(e.target.checked);
 
         setNotaPedido({
             ...notaPedido,
             envio: e.target.checked,
+        });
+    };
+
+    const handleCheckboxChangeDescuento = (e) => {
+        setHabilitadoDescuento(e.target.checked);
+        setNotaPedido({
+            ...notaPedido,
+            descuentoBandera: e.target.checked,
         });
     };
 
@@ -199,7 +208,8 @@ const newNotaPedido = ({exito}) => {
             empleado: notaPedido.empleado,
             medioPago: notaPedido.medioPago,
             fechaEntrega: notaPedido.fechaEntrega,
-            envio: notaPedido.envio
+            envio: notaPedido.envio,
+            descuento: notaPedido.descuento,
         };
 
         if (notaPedido.presupuesto) {
@@ -808,14 +818,14 @@ const newNotaPedido = ({exito}) => {
                             <label className="label-box">
                                 <input
                                 type="checkbox"
-                                checked={habilitado}
-                                onChange={handleCheckboxChange}
+                                checked={habilitadoEnvio}
+                                onChange={handleCheckboxChangeEnvio}
                                 className="checkbox-envio"
                                 />
                                 ¿Envío?
                             </label>
 
-                            {habilitado && (
+                            {habilitadoEnvio && (
                                 <>
                                 <div className="form-col">
                                     <label>Provincia:</label>
@@ -1060,6 +1070,26 @@ const newNotaPedido = ({exito}) => {
                             )}
                             </div>
                             <div className="form-secondary">
+                                    <label className="label-box">
+                                        <input
+                                        type="checkbox"
+                                        checked={notaPedido.descuentoBandera}
+                                        onChange={handleCheckboxChangeDescuento}
+                                        className="checkbox-envio"
+                                        />
+                                        ¿Descuento?
+                                    </label>
+
+                                    {notaPedido.descuentoBandera && (
+                                        <input
+                                        type="number"
+                                        onChange={inputChange}
+                                        name='descuento'
+                                        value={notaPedido.descuento}
+                                        placeholder="Escriba aquí el descuento ..."
+                                        className="input-secondary"
+                                        />
+                                    )}
                                 <label htmlFor="precioVenta" className="label-box">
                                     Total:
                                 </label>

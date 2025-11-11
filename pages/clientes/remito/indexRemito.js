@@ -286,9 +286,9 @@ const indexRemitoCliente = () => {
                                                 <button onClick={() => imprimirRemito(_id)}  className="btn-icon" title="Imprimir">
                                                     <FaPrint />
                                                 </button>
-                                                <button onClick={() => deleteRemito(_id)}  className="btn-icon" title="Eliminar">
+                                                {/* <button onClick={() => deleteRemito(_id)}  className="btn-icon" title="Eliminar">
                                                     <FaTrash />
-                                                </button>
+                                                </button> */}
                                             </div>
                                         </td>
                                     </tr>

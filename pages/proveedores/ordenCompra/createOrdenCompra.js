@@ -1,67 +1,44 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';          
 import { FaTrash} from "react-icons/fa";
-import FormularioEmpleadoCreate from '../../gestion/empleado/createEmpleado'
-import FormularioClienteCreate from '../../clientes/createCliente'
-import FormularioMedioPagoCreate from '../../gestion/tablasVarias/medioPago/createMedioPago'
+// import FormularioEmpleadoCreate from '../../gestion/general/empleado/createEmpleado'
+// import FormularioClienteCreate from '../createCliente'
+// import FormularioMedioPagoCreate from '../../gestion/general/medioPago/createMedioPago'
 
 const { default: Link } = require("next/link")
 
-const initialStateNotaPedido = {
-        total:'', fecha:'', fechaEntrega:'', cliente:'', empleado:'',
-        envio:false , presupuesto:'', medioPago:'',
-        provincia:0 , localidad:0 , barrio:0, calle:0,altura:0,deptoNumero:0,deptoLetra:0
+const initialStateOrdenCompra = {
+        total:'', fecha:'', fechaEntrega:'', proveedor:'', empleado:'',
+        presupuesto:'', medioPago:'',
     }
 const initialDetalle = { 
-         tipoProducto: "", producto: "", cantidad: 0, precio: 0, subtotal: 0, notaPedido:'' 
+         tipoProducto: "", producto: "", cantidad: 0, precio: 0, importe: 0, ordenCompra:'' 
     };
 
-const createNotaPedido = ({exito , param , tipo}) => {
-    const [notaPedido, setNotaPedido] = useState(() => {
-        if (tipo === "cliente") {
+const newOrdenCompra = ({exito , tipo , param}) => {
+    const [ordenCompra , setOrdenCompra] = useState(() => {
+        if(tipo === 'presupuesto'){
             return {
-                ...initialStateNotaPedido,
-                cliente: param
-            }
+                ...initialStateOrdenCompra,
+                    presupuesto: param
         }
-        if (tipo === "presupuesto") {
-            fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto/${param}`)
-                .then((a)=>{
-                    return a.json();
-                })
-                    .then((s)=>{
-                        if(s.ok){
-                            setNotaPedido({
-                                ...initialStateNotaPedido,
-                                presupuesto: param,
-                                empleado: s.data.empleado,
-                                cliente: s.data.cliente,
-                            });
-                            agregarDetallePresupuesto(param);
-                        }
-                    })            
         }
-        return initialStateNotaPedido
+        return initialStateOrdenCompra
     });
     
-    const [clientes,setClientes] = useState([])
+    const [proveedores,setProveedores] = useState([])
     const [presupuestos,setPresupuestos] = useState([])
     const [empleados,setEmpleados] = useState([])
     const [mediosPago,setMediosPago] = useState([])
     const [detalles,setDetalles] = useState([initialDetalle])
     const [productos,setProductos] = useState([]);
     const [tipoProductos,setTipoProductos] = useState([]);
-    const [habilitado, setHabilitado] = useState(false);
-    const [provincias,setProvincias] = useState([])
-    const [localidades,setLocalidades] = useState([])
-    const [barrios,setBarrios] = useState([])
-    const [calles,setCalles] = useState([])
     
     const detallesValidos = detalles.filter(d => d.producto && d.cantidad > 0);
     const puedeGuardar = detallesValidos.length > 0;
 
     const fetchData_Presupuestos = () => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto`)
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuesto`)
         .then((a)=>{
             return a.json();
         })
@@ -70,7 +47,7 @@ const createNotaPedido = ({exito , param , tipo}) => {
                     setPresupuestos(s.data)
                 }
             })
-        .catch((err)=>{console.log("Error al cargar vinos.\nError: ",err)})
+        .catch((err)=>{console.log("Error al cargar presupuestos.\nError: ",err)})
     }
     
     const fetchData_TipoProductos = () => {
@@ -99,64 +76,11 @@ const createNotaPedido = ({exito , param , tipo}) => {
         .catch((err)=>{console.log("Error al cargar productos.\nError: ",err)})
     }
     
-    const fetchData_Provincias = () => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/provincia`)
-        .then((a)=>{
-            return a.json();
-        })
-            .then((s)=>{
-                if(s.ok){
-                    setProvincias(s.data);
-                }
-            })
-        .catch((err)=>{console.log("Error al cargar provincias.\nError: ",err)})
-    }
-    
-    const fetchData_Localidades = () => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/localidad`)
-        .then((a)=>{
-            return a.json();
-        })
-            .then((s)=>{
-                if(s.ok){
-                    setLocalidades(s.data);
-                }
-            })
-        .catch((err)=>{console.log("Error al cargar localidades.\nError: ",err)})
-    }
-    
-    const fetchData_Barrios = () => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/barrio`)
-        .then((a)=>{
-            return a.json();
-        })
-            .then((s)=>{
-                if(s.ok){
-                    setBarrios(s.data);
-                }
-            })
-        .catch((err)=>{console.log("Error al cargar barrios.\nError: ",err)})
-    }
-    
-    const fetchData_Calles = () => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/calle`)
-        .then((a)=>{
-            return a.json();
-        })
-            .then((s)=>{
-                if(s.ok){
-                    setCalles(s.data);
-                }
-            })
-        .catch((err)=>{console.log("Error al cargar calles.\nError: ",err)})
-    }
-    
-    const fetchData_Clientes = () => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente`)
+    const fetchData_Proveedores = () => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/proveedor`)
             .then((a)=>{return a.json()})
                 .then((s)=>{
-
-                    setClientes(s.data)
+                    setProveedores(s.data)
                 })
     }
 
@@ -175,19 +99,16 @@ const createNotaPedido = ({exito , param , tipo}) => {
                     setMediosPago(s.data)
                 })
     }
+    
 
     useEffect(()=>{
         setDetalles([]);
-        fetchData_Clientes();
+        fetchData_Proveedores();
         fetchData_Empleados();
         fetchData_Presupuestos();
         fetchData_MediosPago();
         fetchData_Productos();
         fetchData_TipoProductos();
-        fetchData_Provincias();
-        fetchData_Localidades();
-        fetchData_Barrios();
-        fetchData_Calles();
     }, [])
 
     useEffect(() => {
@@ -212,7 +133,7 @@ const createNotaPedido = ({exito , param , tipo}) => {
         setHabilitado(e.target.checked);
 
         setNotaPedido({
-            ...notaPedido,
+            ...ordenCompra,
             envio: e.target.checked,
         });
     };
@@ -221,71 +142,48 @@ const createNotaPedido = ({exito , param , tipo}) => {
     const clickChange = async(e) => {
         e.preventDefault();
         const bodyData = {
-            total: notaPedido.total,
-            cliente: notaPedido.cliente,
-            empleado: notaPedido.empleado,
-            medioPago: notaPedido.medioPago,
-            fechaEntrega: notaPedido.fechaEntrega,
-            envio: notaPedido.envio
+            total: ordenCompra.total,
+            proveedor: ordenCompra.proveedor,
+            empleado: ordenCompra.empleado,
+            medioPago: ordenCompra.medioPago,
+            fechaEntrega: ordenCompra.fechaEntrega
         };
 
-        if (notaPedido.presupuesto) {
-            bodyData.presupuesto = notaPedido.presupuesto;
-        }
-        
-        if(notaPedido.envio){
-            bodyData.provincia = notaPedido.provincia;
-            bodyData.localidad = notaPedido.localidad;
-            bodyData.barrio = notaPedido.barrio;
-            bodyData.calle = notaPedido.calle;
-            bodyData.altura = notaPedido.altura;
-            bodyData.deptoNumero = notaPedido.deptoNumero;
-            bodyData.deptoLetra = notaPedido.deptoLetra;
+        if (ordenCompra.presupuesto) {
+            bodyData.presupuesto = ordenCompra.presupuesto;
         }
 
-        const resNotaPedido = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido`, {
+        const resOrdenCompra = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/ordenCompra`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(bodyData)
         })
 
-        const notaPedidoCreado = await resNotaPedido.json();
-        const notaPedidoID = notaPedidoCreado.data._id;
+        const ordenCompraCreado = await resOrdenCompra.json();
+        const ordenID = ordenCompraCreado.data._id;
 
         // GUARDAMOS DETALLES
         for (const detalle of detalles) {
-            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedidoDetalle`, {
+            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/ordenCompraDetalle`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     producto: detalle.producto,
                     precio: detalle.precio,
                     cantidad: detalle.cantidad,
-                    subtotal: detalle.subtotal,
-                    notaPedido: notaPedidoID
+                    importe: detalle.importe,
+                    ordenCompra: ordenID
             })
             
             
             });
             if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
-        
-            const resStock = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/stock/${detalle.producto}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        cantidadVendida: detalle.cantidad 
-                })
-            });
-
-            if (!resStock.ok) throw new Error("Error al actualizar stock del producto");
             
             setDetalles([initialDetalle]);
-            setNotaPedido(initialStateNotaPedido);
+            setOrdenCompra(initialStateOrdenCompra);
             exito();
         }
     }
-  
-
 
     const handleDetalleChange = (index, field, value) => {
         const nuevosDetalles = [...detalles];
@@ -294,23 +192,14 @@ const createNotaPedido = ({exito , param , tipo}) => {
         const prod = productos.find(p => p._id === nuevosDetalles[index].producto);
 
         if (prod) {
-            if(prod.precioCosto){
-                const ganancia = prod.ganancia;
-                const precio = prod.precioCosto + ((prod.precioCosto * ganancia) / 100);
+            const precio = presupuestos.find(p => p.producto === nuevosDetalles[index].producto).precio;
 
-                nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].subtotal = precio * nuevosDetalles[index].cantidad;
-            }
-            if(!prod.precioCosto && prod.precioVenta){
-                const precio = prod.precioVenta;
-
-                nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].subtotal = precio * nuevosDetalles[index].cantidad;
-            }
+            nuevosDetalles[index].precio = precio;
+            nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
 
         } else {
             nuevosDetalles[index].precio = 0;
-            nuevosDetalles[index].subtotal = 0;
+            nuevosDetalles[index].importe = 0;
         }
 
         setDetalles(nuevosDetalles);
@@ -321,8 +210,8 @@ const createNotaPedido = ({exito , param , tipo}) => {
         const name = actionMeta.name;
         const value = selectedOption ? selectedOption.value : "";
 
-        setNotaPedido({
-            ...notaPedido,
+        setOrdenCompra({
+            ...ordenCompra,
             [name]: value,
         });
 
@@ -335,19 +224,19 @@ const createNotaPedido = ({exito , param , tipo}) => {
         const value = e.target.value;
         const name = e.target.name;
         
-        setNotaPedido({
-            ...notaPedido , 
+        setOrdenCompra({
+            ...ordenCompra , 
                 [name]:value
         })   
     }
 
     const agregarDetalle = () => {
-        setDetalles([...detalles, { ...{tipoProducto:"" , producto: "", cantidad: 0, precio: 0, subtotal: 0 } }]);
+        setDetalles([...detalles, { ...{tipoProducto:"" , producto: "", cantidad: 0, precio: 0, importe: 0 } }]);
     };
     
     const agregarDetallePresupuesto = async (presupuestoID) => {
     try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuestoDetalle/presupuesto/${presupuestoID}`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuestoDetalle/presupuesto/${presupuestoID}`);
         const s = await res.json();
 
         if (s.ok) {
@@ -387,29 +276,18 @@ const createNotaPedido = ({exito , param , tipo}) => {
             tipoProducto: v.tipoProducto
         }));
     const opciones_empleados = empleados.map(v => ({ value: v._id,label: v.name }));
-    const opciones_clientes = clientes.map(v => ({ value: v._id,label: v.name }));
+    const opciones_proveedores = proveedores.map(v => ({ value: v._id,label: v.name }));
     const opciones_mediosPago = mediosPago.map(v => ({ value: v._id,label: v.name }));
-    const opciones_presupuestos = presupuestos.filter((s)=>{return s.cliente === notaPedido.cliente })
+    const opciones_presupuestos = presupuestos.filter((s)=>{return s.proveedor === ordenCompra.proveedor })
         .map(v => {
-            const cliente = clientes.find(c => c._id === v.cliente);
             return {
                 value: v._id,
                 label: `${v._id} - ${v.fecha.split("T")[0]} - $${v.total}`,
-                cliente: v.cliente,
+                proveedor: v.proveedor,
                 total: v.total
             };
         }
     );
-    const opciones_provincias = provincias.map(v => ({ value: v._id,label: v.name }));
-    const opciones_localidades = localidades
-        .filter((s)=>{return s.provincia === Number(notaPedido.provincia)})
-        .map(v => ({ value: v._id,label: v.name }));
-    const opciones_barrios = barrios
-        .filter((s)=>{return s.localidad === Number(notaPedido.localidad)})
-        .map(v => ({ value: v._id,label: v.name }));
-    const opciones_calles = calles
-        .filter((s)=>{return s.barrio === Number(notaPedido.barrio)})
-        .map(v => ({ value: v._id,label: v.name }));
 
     return(
         <>
@@ -458,7 +336,7 @@ const createNotaPedido = ({exito , param , tipo}) => {
             <div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
-                        <h1 className="titulo-pagina">Cargar Nota Pedido</h1>
+                        <h1 className="titulo-pagina">Cargar Orden de Compra</h1>
                     </div>
                 </div>
 
@@ -466,17 +344,17 @@ const createNotaPedido = ({exito , param , tipo}) => {
                     <div className="form-row">
                         <div className="form-col1">
                             <label>
-                                Cliente:
+                                Proveedor:
                                 <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
                                 classNamePrefix="rs"
-                                options={opciones_clientes}
-                                value={opciones_clientes.find(op => op.value === notaPedido.cliente) || null}
+                                options={opciones_proveedores}
+                                value={opciones_proveedores.find(op => op.value === ordenCompra.proveedor) || null}
                                 onChange={selectChange}
-                                name='cliente'
-                                placeholder="Cliente..."
+                                name='proveedor'
+                                placeholder="Proveedor..."
                                 isClearable
                                 styles={{
                                     container: (base) => ({
@@ -526,7 +404,7 @@ const createNotaPedido = ({exito , param , tipo}) => {
                                 className="form-select-react"
                                 classNamePrefix="rs"
                                 options={opciones_empleados}
-                                value={opciones_empleados.find(op => op.value === notaPedido.empleado) || null}
+                                value={opciones_empleados.find(op => op.value === ordenCompra.empleado) || null}
                                 onChange={selectChange}
                                 name='empleado'
                                 placeholder="Empleado..."
@@ -578,7 +456,7 @@ const createNotaPedido = ({exito , param , tipo}) => {
                                 className="form-select-react"
                                 classNamePrefix="rs"
                                 options={opciones_presupuestos}
-                                value={opciones_presupuestos.find(op => op.value === notaPedido.presupuesto) || null}
+                                value={opciones_presupuestos.find(op => op.value === ordenCompra.presupuesto) || null}
                                 onChange={selectChange}
                                 name='presupuesto'
                                 placeholder="Presupuesto..."
@@ -631,7 +509,7 @@ const createNotaPedido = ({exito , param , tipo}) => {
                                 className="form-select-react"
                                 classNamePrefix="rs"
                                 options={opciones_mediosPago}
-                                value={opciones_mediosPago.find(op => op.value === notaPedido.medioPago) || null}
+                                value={opciones_mediosPago.find(op => op.value === ordenCompra.medioPago) || null}
                                 onChange={selectChange}
                                 name='medioPago'
                                 placeholder="Medio de Pago..."
@@ -792,7 +670,6 @@ const createNotaPedido = ({exito , param , tipo}) => {
                                             type="number"
                                             placeholder="Cantidad"
                                             min={1}
-                                            max={opciones_productos.find((p) => p.value === d.producto)?.stock || 0}
                                             value={d.cantidad}
                                             onChange={(e) => handleDetalleChange(i, "cantidad", e.target.value)}
                                             required
@@ -800,7 +677,7 @@ const createNotaPedido = ({exito , param , tipo}) => {
                                     </div>
 
                                     <div className='form-col-item2'>
-                                        <span>Subtotal: ${d.subtotal.toFixed(2)}</span>
+                                        <span>Importe: ${d.importe.toFixed(2)}</span>
                                     </div>
 
                                     <div className='form-col-item2'>
@@ -827,264 +704,7 @@ const createNotaPedido = ({exito , param , tipo}) => {
                                 <label>
                                     Fecha de Entrega:
                                 </label>
-                                <input type="date" onChange={inputChange} value={notaPedido.fechaEntrega} name="fechaEntrega" required />
-                            </div>
-                            
-                            <div className="form-secondary">
-                                
-                            <label className="label-box">
-                                <input
-                                type="checkbox"
-                                checked={habilitado}
-                                onChange={handleCheckboxChange}
-                                className="checkbox-envio"
-                                />
-                                ¿Envío?
-                            </label>
-
-                            {habilitado && (
-                                <>
-                                <div className="form-col">
-                                    <label>Provincia:</label>
-                                    <Select
-                                    className="form-select-react"
-                                    classNamePrefix="rs"
-                                    options={opciones_provincias}
-                                    value={
-                                        opciones_provincias.find(op => op.value === notaPedido.provincia) ||
-                                        null
-                                    }
-                                    onChange={selectChange}
-                                    name="provincia"
-                                    placeholder="Provincia..."
-                                    isClearable
-                                    styles={{
-                                        container: base => ({
-                                        ...base,
-                                        width: "100%", // ⬅️ ocupa todo el ancho
-                                        }),
-                                        control: base => ({
-                                        ...base,
-                                        width: "100%",
-                                        backgroundColor: "#2c2c2c",
-                                        color: "white",
-                                        border: "1px solid #444",
-                                        borderRadius: 8,
-                                        }),
-                                        singleValue: base => ({
-                                        ...base,
-                                        color: "white",
-                                        whiteSpace: "nowrap",
-                                        overflow: "hidden",
-                                        textOverflow: "ellipsis",
-                                        }),
-                                        menu: base => ({
-                                        ...base,
-                                        backgroundColor: "#2c2c2c",
-                                        color: "white",
-                                        }),
-                                        option: (base, { isFocused }) => ({
-                                        ...base,
-                                        backgroundColor: isFocused ? "#444" : "#2c2c2c",
-                                        color: "white",
-                                        }),
-                                        input: base => ({
-                                        ...base,
-                                        color: "white",
-                                        }),
-                                    }}
-                                    />
-                                </div>
-
-                                <div className="form-col">
-                                    <label>Localidad:</label>
-                                    <Select
-                                    className="form-select-react"
-                                    classNamePrefix="rs"
-                                    options={opciones_localidades}
-                                    value={
-                                        opciones_localidades.find(op => op.value === notaPedido.localidad) ||
-                                        null
-                                    }
-                                    onChange={selectChange}
-                                    name="localidad"
-                                    placeholder="Localidad..."
-                                    isClearable
-                                    styles={{
-                                        container: base => ({
-                                        ...base,
-                                        width: "100%",
-                                        }),
-                                        control: base => ({
-                                        ...base,
-                                        width: "100%",
-                                        backgroundColor: "#2c2c2c",
-                                        color: "white",
-                                        border: "1px solid #444",
-                                        borderRadius: 8,
-                                        }),
-                                        singleValue: base => ({
-                                        ...base,
-                                        color: "white",
-                                        whiteSpace: "nowrap",
-                                        overflow: "hidden",
-                                        textOverflow: "ellipsis",
-                                        }),
-                                        menu: base => ({
-                                        ...base,
-                                        backgroundColor: "#2c2c2c",
-                                        color: "white",
-                                        }),
-                                        option: (base, { isFocused }) => ({
-                                        ...base,
-                                        backgroundColor: isFocused ? "#444" : "#2c2c2c",
-                                        color: "white",
-                                        }),
-                                        input: base => ({
-                                        ...base,
-                                        color: "white",
-                                        }),
-                                    }}
-                                    />
-                                </div>
-
-                                <div className="form-col">
-                                    <label>Barrio:</label>
-                                    <Select
-                                    className="form-select-react"
-                                    classNamePrefix="rs"
-                                    options={opciones_barrios}
-                                    value={
-                                        opciones_barrios.find(op => op.value === notaPedido.barrio) || null
-                                    }
-                                    onChange={selectChange}
-                                    name="barrio"
-                                    placeholder="Barrio..."
-                                    isClearable
-                                    styles={{
-                                        container: base => ({
-                                        ...base,
-                                        width: "100%",
-                                        }),
-                                        control: base => ({
-                                        ...base,
-                                        width: "100%",
-                                        backgroundColor: "#2c2c2c",
-                                        color: "white",
-                                        border: "1px solid #444",
-                                        borderRadius: 8,
-                                        }),
-                                        singleValue: base => ({
-                                        ...base,
-                                        color: "white",
-                                        whiteSpace: "nowrap",
-                                        overflow: "hidden",
-                                        textOverflow: "ellipsis",
-                                        }),
-                                        menu: base => ({
-                                        ...base,
-                                        backgroundColor: "#2c2c2c",
-                                        color: "white",
-                                        }),
-                                        option: (base, { isFocused }) => ({
-                                        ...base,
-                                        backgroundColor: isFocused ? "#444" : "#2c2c2c",
-                                        color: "white",
-                                        }),
-                                        input: base => ({
-                                        ...base,
-                                        color: "white",
-                                        }),
-                                    }}
-                                    />
-                                </div>
-
-                                <div className="form-col">
-                                    <label>Calle:</label>
-                                    <Select
-                                    className="form-select-react"
-                                    classNamePrefix="rs"
-                                    options={opciones_calles}
-                                    value={
-                                        opciones_calles.find(op => op.value === notaPedido.calle) || null
-                                    }
-                                    onChange={selectChange}
-                                    name="calle"
-                                    placeholder="Calle..."
-                                    isClearable
-                                    styles={{
-                                        container: base => ({
-                                        ...base,
-                                        width: "100%",
-                                        }),
-                                        control: base => ({
-                                        ...base,
-                                        width: "100%",
-                                        backgroundColor: "#2c2c2c",
-                                        color: "white",
-                                        border: "1px solid #444",
-                                        borderRadius: 8,
-                                        }),
-                                        singleValue: base => ({
-                                        ...base,
-                                        color: "white",
-                                        whiteSpace: "nowrap",
-                                        overflow: "hidden",
-                                        textOverflow: "ellipsis",
-                                        }),
-                                        menu: base => ({
-                                        ...base,
-                                        backgroundColor: "#2c2c2c",
-                                        color: "white",
-                                        }),
-                                        option: (base, { isFocused }) => ({
-                                        ...base,
-                                        backgroundColor: isFocused ? "#444" : "#2c2c2c",
-                                        color: "white",
-                                        }),
-                                        input: base => ({
-                                        ...base,
-                                        color: "white",
-                                        }),
-                                    }}
-                                    />
-                                </div>
-
-                                <div className="form-group">
-                                    <label>Altura:</label>
-                                    <input
-                                    type="number"
-                                    onChange={inputChange}
-                                    value={notaPedido.altura}
-                                    name="altura"
-                                    placeholder="Altura"
-                                    required
-                                    />
-                                </div>
-
-                                <div className="form-group">
-                                    <label>Depto. N°:</label>
-                                    <input
-                                    type="number"
-                                    onChange={inputChange}
-                                    value={notaPedido.deptoNumero}
-                                    name="deptoNumero"
-                                    placeholder="Depto. N°"
-                                    />
-                                </div>
-
-                                <div className="form-group">
-                                    <label>Depto. Letra:</label>
-                                    <input
-                                    type="text"
-                                    onChange={inputChange}
-                                    value={notaPedido.deptoLetra}
-                                    name="deptoLetra"
-                                    placeholder="Depto. Letra"
-                                    />
-                                </div>
-                                </>
-                            )}
+                                <input type="date" onChange={inputChange} value={ordenCompra.fechaEntrega} name="fechaEntrega" required />
                             </div>
                             <div className="form-secondary">
                                 <label htmlFor="precioVenta" className="label-box">
@@ -1093,7 +713,7 @@ const createNotaPedido = ({exito , param , tipo}) => {
                                 <input
                                     type="number"
                                     className="input-secondary"
-                                    value={notaPedido.total}
+                                    value={ordenCompra.total}
                                     name="total"
                                     disabled
                                     />
@@ -1111,7 +731,7 @@ const createNotaPedido = ({exito , param , tipo}) => {
                                         clickChange(e);
                                     }}
                                     >
-                                    Cargar Pedido
+                                    Cargar
                                     </button>
                                 </div>
                             </div>
@@ -1499,4 +1119,4 @@ const createNotaPedido = ({exito , param , tipo}) => {
     )
 }
 
-export default createNotaPedido;
+export default newOrdenCompra;

@@ -1,13 +1,13 @@
 const { useState, useEffect } = require("react")
-import Select from 'react-select';      
+import Select from 'react-select';          
 import { FaTrash} from "react-icons/fa";
 
 const { default: Link } = require("next/link")
 
-const initialStatePresupuesto = {proveedor:'', empleado:''}
-const initialDetalle = { tipoProducto: "",producto: "", cantidad: 0, solicitudPresupuesto:'', importe:0 };
+const initialStatePresupuesto = {solicitudID:'',proveedor:'', empleado:''}
+const initialDetalle = { tipoProducto: "",importe:0 , producto: "", cantidad: 0, solicitudPresupuesto:'' };
 
-const updatePresupuesto = ({exito,solicitudID}) => {
+const busquedaSolicitud = ({ exito, filtro, onChangeFiltro , filtroDetalle , onChangeFiltroDetalle }) => {
     const [presupuesto , setPresupuesto] = useState(initialStatePresupuesto);
     
     const [proveedores,setProveedores] = useState([])
@@ -15,37 +15,24 @@ const updatePresupuesto = ({exito,solicitudID}) => {
     const [detalles,setDetalles] = useState([initialDetalle])
     const [productos,setProductos] = useState([]);
     const [tipoProductos,setTipoProductos] = useState([]);
+            
+    const [filtros, setFiltros] = useState(filtro);
+    
+    // Sincroniza con los cambios del padre
+    useEffect(() => {
+            setFiltros(filtro);
+            setDetalles(filtroDetalle)
+    }, [filtro,filtroDetalle]);
+    
+    const borrarFiltros = () => {
+            setFiltros(initialStatePresupuesto);
+            onChangeFiltro(initialStatePresupuesto);
+            setDetalles([])
+            onChangeFiltroDetalle([]);
+    };
     
     const detallesValidos = detalles.filter(d => d.producto && d.cantidad > 0);
     const puedeGuardar = detallesValidos.length > 0;
-
-    
-    const fetchData_SolicitudPresupuesto = (param) => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuesto/${param}`)
-        .then((a)=>{
-            return a.json();
-        })
-            .then((s)=>{
-                if(s.ok){
-                    setPresupuesto(s.data)
-                }
-            })
-        .catch((err)=>{console.log("Error al cargar solicitud de presupuesto.\nError: ",err)})
-    }
-
-    
-    
-    const fetchData_SolicitudPresupuestoDetalle = async (presupuestoID) => {
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuestoDetalle/solicitudPresupuesto/${presupuestoID}`);
-            const s = await res.json();
-            if (s.ok) {
-                setDetalles(s.data); // guardamos directo
-            }
-        } catch (err) {
-            console.log("Error al cargar detalles.\nError: ", err);
-        }
-    };
 
     const fetchData_Productos = () => {
     fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products`)
@@ -90,13 +77,11 @@ const updatePresupuesto = ({exito,solicitudID}) => {
     }
     useEffect(()=>{
         setDetalles([]);
-        fetchData_SolicitudPresupuesto(solicitudID);
-        fetchData_SolicitudPresupuestoDetalle(solicitudID);
         fetchData_Proveedores();
         fetchData_Empleados();
         fetchData_Productos();
         fetchData_TipoProductos();
-    }, [solicitudID])
+    }, [])
     
     const calcularTotal = (detalles) => {
         const totalPresupuesto = Array.isArray(detalles) && detalles.length > 0
@@ -105,24 +90,6 @@ const updatePresupuesto = ({exito,solicitudID}) => {
         setPresupuesto((prev) => ({ ...prev, total:totalPresupuesto }));
     };
 
-    useEffect(() => {
-        if (!productos.length || !detalles.length) return;
-
-        const detallesConTipo = detalles.map((d) => {
-            const prod = productos.find((p) => p._id === d.producto);
-
-            return {
-                ...d,
-                tipoProducto: d.tipoProducto || (prod ? prod.tipoProducto : ""),
-            };
-        });
-        
-        const isDifferent = JSON.stringify(detalles) !== JSON.stringify(detallesConTipo);
-        if (isDifferent) {
-            setDetalles(detallesConTipo);
-        }
-    }, [productos, detalles]);
-    
     const handleDetalleChange = (index, field, value) => {
         const nuevosDetalles = [...detalles];
         nuevosDetalles[index][field] = field === "cantidad" ? parseFloat(value) : value;
@@ -153,72 +120,53 @@ const updatePresupuesto = ({exito,solicitudID}) => {
         calcularTotal(nuevosDetalles);
     };
     
+    const handleBuscar = async (e) => {
+        e.preventDefault();
 
-    const clickChange = async(e) => {
-         e.preventDefault();
-         const resPresupuesto = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuesto/${solicitudID}`,
-            {
-                method: 'PUT',
-                headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({
-                    proveedor: presupuesto.proveedor,
-                    empleado: presupuesto.empleado,
-                })
-            }
-        )
+        // Armamos el cuerpo a enviar
+        const body = {
+            ...filtros,
+            detalles: detalles.map(d => ({
+                tipoProducto: d.tipoProducto,
+                producto: d.producto
+            }))
+        };
 
-        const solicitudCreada = await resPresupuesto.json();
-        const identificador = solicitudCreada.data._id;
-
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuestoDetalle/${identificador}`,
-            {
-                method:'DELETE',
-                headers: {
-                    'Content-Type':'application/json',
-                }
-            }
-        ).then((a)=>{return a.json()})
-            .then((res)=>{
-                console.log(res.message);
-            })
-            .catch((err)=>{
-                console.log("Error al envia detalle de solicitud para su eliminación. \n Error: ",err);
-            })
-
-
-        // GUARDAMOS DETALLES
-        for (const detalle of detalles) {
-            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuestoDetalle`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    producto: detalle.producto,
-                    cantidad: detalle.cantidad,
-                    importe: detalle.importe,
-                    solicitudPresupuesto: identificador
-            })
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuestoSolicitud/buscar`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
         });
-            
-            if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
+
+        const data = await res.json();
+        if (data.ok){
+            exito(data.data);
+        } else {
+            exito({})
         }
-        setDetalles([initialDetalle]);
-        setPresupuesto(initialStatePresupuesto);
-        exito();
-    }
+    };
     
     const selectChange = (selectedOption, actionMeta) => {
         const name = actionMeta.name;
         const value = selectedOption ? selectedOption.value : "";
+        
+        const nuevosFiltros = { ...filtros, [name]: value };
 
-        setPresupuesto({
-            ...presupuesto,
-            [name]: value,
-        });
+        setFiltros(nuevosFiltros);
+        onChangeFiltro(nuevosFiltros); 
+    }
+
+    const inputChange = (e) => {
+        const { name, value } = e.target;
+        const nuevosFiltros = { ...filtros, [name]: value };
+        setFiltros(nuevosFiltros);
+        onChangeFiltro(nuevosFiltros); 
     };
 
     const agregarDetalle = () => {
-        setDetalles([...detalles, { ...{tipoProducto:"",producto: "", cantidad: 0 , importe:0 } }]);
+        setDetalles([...detalles, { ...{tipoProducto:"",producto: "", cantidad: 0 , importe:0} }]);
     };
+    
 
     const opciones_tipoProductos = tipoProductos.map(v => ({
         value: v,
@@ -241,24 +189,31 @@ const updatePresupuesto = ({exito,solicitudID}) => {
 
 
             <div className="form-container">
-                <div className="form-row">
-                    <div className="form-col">
-                        <h1 className="titulo-pagina">Modificar Presupuesto</h1>
-                    </div>
-                </div>
+                <h1 className="titulo-pagina">Busqueda Avanzada de Solicitud de Presupuesto</h1>
 
                 <form id="formProducto" className="formulario-presupuesto">
                     <div className="form-row">
                         <div className="form-col">
                             <label>
+                                Solicitud N° :
+                            </label>
+                            <input
+                                type="number"
+                                className="input-secondary"
+                                value={filtros.solicitudID}
+                                name="solicitudID"
+                                onChange={inputChange}
+                                />
+                        </div>
+                        <div className="form-col">
+                            <label>
                                 Proveedor:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
                                 classNamePrefix="rs"
                                 options={opciones_proveedores}
-                                value={opciones_proveedores.find(op => op.value === presupuesto.proveedor) || null}
+                                value={opciones_proveedores.find(op => op.value === filtros.proveedor) || null}
                                 onChange={selectChange}
                                 name='proveedor'
                                 placeholder="Proveedor..."
@@ -305,13 +260,12 @@ const updatePresupuesto = ({exito,solicitudID}) => {
                         <div className="form-col">
                             <label>
                                 Empleado:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate2(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
                                 classNamePrefix="rs"
                                 options={opciones_empleados}
-                                value={opciones_empleados.find(op => op.value === presupuesto.empleado) || null}
+                                value={opciones_empleados.find(op => op.value === filtros.empleado) || null}
                                 onChange={selectChange}
                                 name='empleado'
                                 placeholder="Empleado..."
@@ -499,51 +453,26 @@ const updatePresupuesto = ({exito,solicitudID}) => {
                                 </div>
                                 })}
                             </div>
-                        </div> 
-                        <div className="form-col-precioVenta">
-                            <div className="box-cargar" >
-                                <div className="form-submit">
-                                    <button
-                                    type="submit"
-                                    className="submit-btn"
-                                    onClick={(e) => {
-                                        if (!puedeGuardar) {
-                                        alert("No se puede guardar una solicitud presupuesto sin al menos un producto con cantidad.");
-                                        e.preventDefault();
-                                        return;
-                                        }
-                                        clickChange(e);
-                                    }}
-                                    >
-                                    Guardar
-                                    </button>
-                                </div>
-                            </div>
                         </div>
+                    </div>
+                    
+                        
+                    <div className="form-submit">
+                        <button type="submit" className="submit-btn" onClick={handleBuscar}>Buscar</button>
+                        <button
+                            type="button"
+                            className="submit-btn"
+                            style={{ backgroundColor: "#444", marginLeft: "1rem" }}
+                            onClick={borrarFiltros}
+                            >
+                            Borrar filtros
+                        </button>
                     </div>
                 </form>
             </div>
             <style jsx>
                 {`
                     
-
-                    button.submit-btn {
-                        padding: 0.75rem 1rem;
-                        background-color: #8B0000;
-                        color: #fff;
-                        border: none;
-                        border-radius: 8px;
-                        font-size: 1rem;
-                        font-weight: 600;
-                        cursor: pointer;
-                        transition: background-color 0.3s ease;
-                    }
-
-                    button.submit-btn:hover {
-                        background-color: rgb(115, 8, 8);
-                        transform: translateY(-3px);
-                    }
-                        
                     .btn-icon {
                         background-color: #8b0000;
                         color: white;
@@ -597,6 +526,7 @@ const updatePresupuesto = ({exito,solicitudID}) => {
                     .form-col {
                         flex: 1;
                         min-width: 250px;
+                        max-width: 300px;
                         display: flex;
                         flex-direction: column;
                     }
@@ -715,6 +645,7 @@ const updatePresupuesto = ({exito,solicitudID}) => {
                     .form-submit {
                         justify-content: center;
                         margin-top: 1rem;
+                        text-align: center;
                     }
 
                     
@@ -729,10 +660,27 @@ const updatePresupuesto = ({exito,solicitudID}) => {
                         outline: none;
                         transition: border-color 0.2s ease-in-out;
                     }
+
+                    button.submit-btn {
+                        padding: 0.75rem 1rem;
+                        background-color: #8B0000;
+                        color: #fff;
+                        border: none;
+                        border-radius: 8px;
+                        font-size: 1rem;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: background-color 0.3s ease;
+                    }
+
+                    button.submit-btn:hover {
+                        background-color: rgb(115, 8, 8);
+                        transform: translateY(-3px);
+                    }
                 `}
             </style>
         </>
     )
 }
 
-export default updatePresupuesto;
+export default busquedaSolicitud;

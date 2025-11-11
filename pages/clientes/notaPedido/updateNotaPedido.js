@@ -9,7 +9,7 @@ const { default: Link } = require("next/link")
 
 const initialStateNotaPedido = {
         total:0, fecha:'', fechaEntrega:'', cliente:'', empleado:'',
-        envio:false, presupuesto:'', medioPago:'',
+        envio:false, presupuesto:'', medioPago:'', descuento:0 , descuentoBandera:false,
         provincia:0 , localidad:0 , barrio:0, calle:0,altura:0,deptoNumero:0,deptoLetra:0
     }
 const initialDetalle = { 
@@ -32,6 +32,7 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
     const [localidades,setLocalidades] = useState([])
     const [barrios,setBarrios] = useState([])
     const [calles,setCalles] = useState([])
+    const [habilitadoDescuento, setHabilitadoDescuento] = useState(false);
 
     const detallesValidos = detalles.filter(d => d.producto && d.cantidad > 0);
     const puedeGuardar = detallesValidos.length > 0;
@@ -148,35 +149,68 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
 };
 
     const fetchData_NotaPedido = async (notaPedidoID) => {
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido/${notaPedidoID}`)
-            .then((a)=>{
-                return a.json();
-            })
-                .then((s)=>{
-                    const total = s.data.total;
-                    const cliente = Number(s.data.cliente);
-                    const fechaEntrega = s.data.fechaEntrega.split("T")[0];
-                    const empleado = Number(s.data.empleado);
-                    const envio = s.data.envio;
-                    const presupuesto = Number(s.data.presupuesto);
-                    const medioPago = Number(s.data.medioPago);
-                    const provincia = Number(s.data.provincia);
-                    const localidad = Number(s.data.localidad);
-                    const barrio = Number(s.data.barrio);
-                    const calle = Number(s.data.calle);
-                    const altura = Number(s.data.altura);
-                    const deptoNumero = s.data.deptoNumero;
-                    const deptoLetra = s.data.deptoLetra;
+    try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido/${notaPedidoID}`);
+        const s = await res.json();
 
-                    setNotaPedido({
-                        total: total , cliente: cliente , empleado: empleado , envio: envio , 
-                        presupuesto: presupuesto , medioPago: medioPago , fechaEntrega: fechaEntrega , provincia: provincia , localidad: localidad , 
-                        barrio: barrio , calle: calle , altura: altura , deptoNumero: deptoNumero , deptoLetra: deptoLetra
-                    })
-                    setHabilitado(s.data.envio ?? false);
-                })
-            .catch((err)=>{console.log("Error al cargar nota de pedido.\nError: ",err)})
+        if (!s.ok || !s.data) {
+            console.warn("No se pudo cargar la nota de pedido o los datos son inválidos");
+            return;
+        }
+
+        const {
+            total,
+            cliente,
+            fechaEntrega,
+            empleado,
+            envio,
+            presupuesto,
+            medioPago,
+            provincia,
+            localidad,
+            barrio,
+            calle,
+            altura,
+            deptoNumero,
+            deptoLetra,
+            descuento
+        } = s.data;
+
+        // Marca la bandera si hay descuento
+        if (descuento > 0) {
+            setNotaPedido((prev) => ({
+                ...prev,
+                descuentoBandera: true
+            }));
+        }
+
+        // Actualiza todo el estado de notaPedido
+        setNotaPedido((prev) => ({
+            ...prev,
+            total: total ?? 0,
+            cliente: Number(cliente) || "",
+            empleado: Number(empleado) || "",
+            envio: envio ?? false,
+            presupuesto: Number(presupuesto) || "",
+            medioPago: Number(medioPago) || "",
+            fechaEntrega: fechaEntrega ? fechaEntrega.split("T")[0] : "",
+            provincia: Number(provincia) || "",
+            localidad: Number(localidad) || "",
+            barrio: Number(barrio) || "",
+            calle: Number(calle) || "",
+            altura: Number(altura) || "",
+            deptoNumero: deptoNumero ?? "",
+            deptoLetra: deptoLetra ?? "",
+            descuento: descuento ?? 0
+        }));
+
+        // Habilita según el campo "envio"
+        setHabilitado(envio ?? false);
+    } catch (err) {
+        console.error("Error al cargar nota de pedido.\nError:", err);
     }
+};
+
 
 
     const fetchData_Presupuestos = async () => {
@@ -275,7 +309,7 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
             empleado: notaPedido.empleado,
             medioPago: notaPedido.medioPago,
             fechaEntrega: notaPedido.fechaEntrega.split("T")[0],
-            envio: notaPedido.envio
+            envio: notaPedido.envio,
         };
         
         if(notaPedido.envio){
@@ -290,6 +324,10 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
 
         if (notaPedido.presupuesto) {
             bodyData.presupuesto = notaPedido.presupuesto;
+        }
+
+        if (notaPedido.descuento) {
+            bodyData.descuento = notaPedido.descuento;
         }
 
 
@@ -360,6 +398,14 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                 [name]:value
         })   
     }
+
+    const handleCheckboxChangeDescuento = (e) => {
+        setHabilitadoDescuento(e.target.checked);
+        setNotaPedido({
+            ...notaPedido,
+            descuentoBandera: e.target.checked,
+        });
+    };
 
 
     const handleDetalleChange = (index, field, value) => {
@@ -1132,6 +1178,26 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                             )}
                             </div>
                             <div className="form-secondary">
+                                    <label className="label-box">
+                                        <input
+                                        type="checkbox"
+                                        checked={notaPedido.descuentoBandera}
+                                        onChange={handleCheckboxChangeDescuento}
+                                        className="checkbox-envio"
+                                        />
+                                        ¿Descuento?
+                                    </label>
+
+                                    {notaPedido.descuentoBandera && (
+                                        <input
+                                        type="number"
+                                        onChange={inputChange}
+                                        name='descuento'
+                                        value={notaPedido.descuento}
+                                        placeholder="Escriba aquí el descuento ..."
+                                        className="input-secondary"
+                                        />
+                                    )}
                                 <label htmlFor="precioVenta" className="label-box">
                                     Total:
                                 </label>

@@ -1,13 +1,13 @@
 const { useState, useEffect } = require("react")
-import Select from 'react-select';      
+import Select from 'react-select';          
 import { FaTrash} from "react-icons/fa";
 
 const { default: Link } = require("next/link")
 
 const initialStatePresupuesto = {proveedor:'', empleado:''}
-const initialDetalle = { tipoProducto: "",producto: "", cantidad: 0, solicitudPresupuesto:'', importe:0 };
+const initialDetalle = { tipoProducto: "",importe:0 , producto: "", cantidad: 0, solicitudPresupuesto:'' };
 
-const updatePresupuesto = ({exito,solicitudID}) => {
+const createPresupuesto = ({exito}) => {
     const [presupuesto , setPresupuesto] = useState(initialStatePresupuesto);
     
     const [proveedores,setProveedores] = useState([])
@@ -18,34 +18,6 @@ const updatePresupuesto = ({exito,solicitudID}) => {
     
     const detallesValidos = detalles.filter(d => d.producto && d.cantidad > 0);
     const puedeGuardar = detallesValidos.length > 0;
-
-    
-    const fetchData_SolicitudPresupuesto = (param) => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuesto/${param}`)
-        .then((a)=>{
-            return a.json();
-        })
-            .then((s)=>{
-                if(s.ok){
-                    setPresupuesto(s.data)
-                }
-            })
-        .catch((err)=>{console.log("Error al cargar solicitud de presupuesto.\nError: ",err)})
-    }
-
-    
-    
-    const fetchData_SolicitudPresupuestoDetalle = async (presupuestoID) => {
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuestoDetalle/solicitudPresupuesto/${presupuestoID}`);
-            const s = await res.json();
-            if (s.ok) {
-                setDetalles(s.data); // guardamos directo
-            }
-        } catch (err) {
-            console.log("Error al cargar detalles.\nError: ", err);
-        }
-    };
 
     const fetchData_Productos = () => {
     fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products`)
@@ -90,13 +62,11 @@ const updatePresupuesto = ({exito,solicitudID}) => {
     }
     useEffect(()=>{
         setDetalles([]);
-        fetchData_SolicitudPresupuesto(solicitudID);
-        fetchData_SolicitudPresupuestoDetalle(solicitudID);
         fetchData_Proveedores();
         fetchData_Empleados();
         fetchData_Productos();
         fetchData_TipoProductos();
-    }, [solicitudID])
+    }, [])
     
     const calcularTotal = (detalles) => {
         const totalPresupuesto = Array.isArray(detalles) && detalles.length > 0
@@ -105,24 +75,6 @@ const updatePresupuesto = ({exito,solicitudID}) => {
         setPresupuesto((prev) => ({ ...prev, total:totalPresupuesto }));
     };
 
-    useEffect(() => {
-        if (!productos.length || !detalles.length) return;
-
-        const detallesConTipo = detalles.map((d) => {
-            const prod = productos.find((p) => p._id === d.producto);
-
-            return {
-                ...d,
-                tipoProducto: d.tipoProducto || (prod ? prod.tipoProducto : ""),
-            };
-        });
-        
-        const isDifferent = JSON.stringify(detalles) !== JSON.stringify(detallesConTipo);
-        if (isDifferent) {
-            setDetalles(detallesConTipo);
-        }
-    }, [productos, detalles]);
-    
     const handleDetalleChange = (index, field, value) => {
         const nuevosDetalles = [...detalles];
         nuevosDetalles[index][field] = field === "cantidad" ? parseFloat(value) : value;
@@ -156,9 +108,9 @@ const updatePresupuesto = ({exito,solicitudID}) => {
 
     const clickChange = async(e) => {
          e.preventDefault();
-         const resPresupuesto = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuesto/${solicitudID}`,
+         const resPresupuesto = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuesto`,
             {
-                method: 'PUT',
+                method: 'POST',
                 headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({
                     proveedor: presupuesto.proveedor,
@@ -169,22 +121,6 @@ const updatePresupuesto = ({exito,solicitudID}) => {
 
         const solicitudCreada = await resPresupuesto.json();
         const identificador = solicitudCreada.data._id;
-
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuestoDetalle/${identificador}`,
-            {
-                method:'DELETE',
-                headers: {
-                    'Content-Type':'application/json',
-                }
-            }
-        ).then((a)=>{return a.json()})
-            .then((res)=>{
-                console.log(res.message);
-            })
-            .catch((err)=>{
-                console.log("Error al envia detalle de solicitud para su eliminación. \n Error: ",err);
-            })
-
 
         // GUARDAMOS DETALLES
         for (const detalle of detalles) {
@@ -199,8 +135,9 @@ const updatePresupuesto = ({exito,solicitudID}) => {
             })
         });
             
-            if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
+        if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
         }
+
         setDetalles([initialDetalle]);
         setPresupuesto(initialStatePresupuesto);
         exito();
@@ -217,8 +154,9 @@ const updatePresupuesto = ({exito,solicitudID}) => {
     };
 
     const agregarDetalle = () => {
-        setDetalles([...detalles, { ...{tipoProducto:"",producto: "", cantidad: 0 , importe:0 } }]);
+        setDetalles([...detalles, { ...{tipoProducto:"",producto: "", cantidad: 0 , importe:0} }]);
     };
+    
 
     const opciones_tipoProductos = tipoProductos.map(v => ({
         value: v,
@@ -243,7 +181,7 @@ const updatePresupuesto = ({exito,solicitudID}) => {
             <div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
-                        <h1 className="titulo-pagina">Modificar Presupuesto</h1>
+                        <h1 className="titulo-pagina">Cargar Presupuesto</h1>
                     </div>
                 </div>
 
@@ -515,7 +453,7 @@ const updatePresupuesto = ({exito,solicitudID}) => {
                                         clickChange(e);
                                     }}
                                     >
-                                    Guardar
+                                    Cargar
                                     </button>
                                 </div>
                             </div>
@@ -526,24 +464,6 @@ const updatePresupuesto = ({exito,solicitudID}) => {
             <style jsx>
                 {`
                     
-
-                    button.submit-btn {
-                        padding: 0.75rem 1rem;
-                        background-color: #8B0000;
-                        color: #fff;
-                        border: none;
-                        border-radius: 8px;
-                        font-size: 1rem;
-                        font-weight: 600;
-                        cursor: pointer;
-                        transition: background-color 0.3s ease;
-                    }
-
-                    button.submit-btn:hover {
-                        background-color: rgb(115, 8, 8);
-                        transform: translateY(-3px);
-                    }
-                        
                     .btn-icon {
                         background-color: #8b0000;
                         color: white;
@@ -729,10 +649,27 @@ const updatePresupuesto = ({exito,solicitudID}) => {
                         outline: none;
                         transition: border-color 0.2s ease-in-out;
                     }
+
+                    button.submit-btn {
+                        padding: 0.75rem 1rem;
+                        background-color: #8B0000;
+                        color: #fff;
+                        border: none;
+                        border-radius: 8px;
+                        font-size: 1rem;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: background-color 0.3s ease;
+                    }
+
+                    button.submit-btn:hover {
+                        background-color: rgb(115, 8, 8);
+                        transform: translateY(-3px);
+                    }
                 `}
             </style>
         </>
     )
 }
 
-export default updatePresupuesto;
+export default createPresupuesto;

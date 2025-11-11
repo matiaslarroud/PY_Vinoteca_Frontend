@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit , FaFileAlt , FaFileInvoice , FaShoppingCart , FaSearch , FaFileInvoiceDollar , FaReceipt  } from "react-icons/fa";
+import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit , FaCartArrowDown , FaShoppingCart , FaSearch , FaRegFileAlt  } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import Link from "next/link";
 import FormularioProveedorUpdate from './updateProveedor'
 import FormularioProveedorCreate from './createProveedor'
 import BusquedaAvanzadaProveeedores from "./busquedaProveedor";
+import FormularioSolicitudPresupuesto from "./presupuestoSolicitud/createSolicitud";
+import FormularioPresupuesto from "./presupuesto/createPresupuesto";
 
 export default function indexProveedor() {
 const router = useRouter();
@@ -13,6 +15,8 @@ const [localidades, setlocalidades] = useState([]);
 const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
 const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
 const [mostrarModalBuscar, setMostrarModalBuscar] = useState(null);
+const [mostrarModalSolicitudPresupuesto, setMostrarModalSolicitudPresupuesto] = useState(null);
+const [mostrarModalPresupuesto, setMostrarModalPresupuesto] = useState(null);
 
 const initialState = {
     name:'', telefono:'', email:'', cuit:'',
@@ -178,6 +182,53 @@ const deleteProveedor = async(proveedorID) => {
   </div>
 )}
 
+  {mostrarModalSolicitudPresupuesto && (
+    <div className="modal">
+      <div className="modal-content">
+        <button className="close" onClick={() => 
+            {
+                setMostrarModalSolicitudPresupuesto(null)
+                fetchData()
+            }
+        }>
+            &times;
+        </button>
+        <FormularioSolicitudPresupuesto 
+            param={mostrarModalSolicitudPresupuesto} 
+            tipo='proveedor'
+            exito={() => 
+                {
+                    setMostrarModalSolicitudPresupuesto(false)
+                    fetchData()
+                }}
+        />
+      </div>
+    </div>
+  )}
+
+  {mostrarModalPresupuesto && (
+    <div className="modal">
+      <div className="modal-content">
+        <button className="close" onClick={() => 
+            {
+                setMostrarModalPresupuesto(null)
+                fetchData()
+            }
+        }>
+            &times;
+        </button>
+        <FormularioPresupuesto 
+            param={mostrarModalPresupuesto} 
+            tipo='proveedor'
+            exito={() => 
+                {
+                    setMostrarModalPresupuesto(false)
+                    fetchData()
+                }}
+        />
+      </div>
+    </div>
+  )}
 
   <h1 className="titulo-pagina">Proveedores</h1>
   <div className="botonera">
@@ -191,55 +242,16 @@ const deleteProveedor = async(proveedorID) => {
         </button>
         <button className="btn-icon" onClick={() => setMostrarModalCreate(true)} title="Agregar Presupuesto">
              <FaPlus />
-        </button>               
+        </button>     
+        <button onClick={() => 
+              setMostrarModalBuscar(true)
+            }            
+            className="btn-icon" title="Busqueda avanzada de proveedor">
+             <FaSearch />
+        </button>           
   </div>
   
-  <div className="contenedor-tabla">
-        <div className="filtros">
-                  <button onClick={() => 
-                      setMostrarModalBuscar(true)
-                    }            
-                    className="btn-icon" title="Busqueda avanzada de proveedor">
-                     <FaSearch />
-                </button>  
-            <button className="submit-btn" title="Solicitudes de Presupuestos">
-                <Link href='./presupuestoSolicitud/indexSolicitud'>
-                  <FaFileAlt /><br/>
-                  <h6>Solicitudes de Presupuesto</h6>
-                </Link>                
-            </button>
-            <button className="submit-btn" title="Presupuestos">
-                <Link href='./presupuesto/indexPresupuesto'>
-                  <FaFileInvoice /><br/>
-                  <h6>Presupuestos</h6>
-                </Link>
-            </button>
-            <button className="submit-btn" title="Ordenes de Compra">
-                <Link href='./ordenCompra/indexOrdenCompra'>
-                  <FaShoppingCart /> <br/>
-                  <h6>Ordenes de Compra</h6>
-                </Link>
-            </button>
-            <button className="submit-btn" title="Comprobantes de Compra">
-                <Link href='./comprobanteCompra/indexComprobanteCompra'>
-                  <FaFileInvoiceDollar /><br/>
-                  <h6>Comprobantes de Compra</h6>
-                </Link>
-            </button>
-            <button className="submit-btn" title="Comprobantes de Pago">
-                <Link href='./comprobantePago/indexComprobantePago'>
-                  <FaReceipt /><br/>
-                  <h6>Comprobantes de Pago</h6>
-                </Link>
-            </button>
-            <button className="submit-btn" title="Remitos">
-                <Link href='./remito/indexRemito'>
-                  <FaFileInvoice /><br/>
-                  <h6>Remitos</h6>
-                </Link>
-            </button>
-        </div>
-    
+  <div className="contenedor-tabla">    
     <div className="tabla-scroll">
         <table id="tablaVinos">
             <thead>
@@ -260,7 +272,13 @@ const deleteProveedor = async(proveedorID) => {
                       <td className="columna">{name}</td>
                       <td className="columna">{localidadEncontrada?.name}</td>
                       <td className="columna">
-                          <div className="acciones">
+                          <div className="acciones">                                 
+                              <button onClick={() => setMostrarModalSolicitudPresupuesto(_id)} className="btn-icon" title="Generar Solicitud Presupuesto">
+                                  <FaRegFileAlt />
+                              </button>                     
+                              <button onClick={() => setMostrarModalPresupuesto(_id)} className="btn-icon" title="Generar Presupuesto">
+                                  <FaCartArrowDown />
+                              </button>  
                               <button onClick={() => setMostrarModalUpdate(_id)} className="btn-icon">
                                   <FaEdit />
                               </button>

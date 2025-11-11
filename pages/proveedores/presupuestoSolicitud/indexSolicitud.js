@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaShoppingCart , FaHome, FaArrowLeft, FaTrash, FaEdit , FaPrint } from "react-icons/fa";
+import { FaPlus, FaCartArrowDown , FaHome, FaArrowLeft, FaTrash, FaEdit , FaPrint , FaSearch } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import FormularioPresupuestoUpdate from './updateSolicitud'
-import FormularioPresupuestoCreate from './createSolicitud'
-import CreateNotaPedido from "../ordenCompra/createOrdenCompra";
+import FormularioPresupuestoCreate from './newSolicitud'
+import FormularioPresupuesto from "../presupuesto/createPresupuesto";
+import BusquedaAvanzadaSolicitudes from "./busquedaSolicitud";
 
 const { default: Link } = require("next/link")
 
@@ -13,10 +14,14 @@ const indexPresupuesto = () => {
     const [proveedores,setProveedores] = useState([]);  
     const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
     const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
-    const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
+    const [mostrarPresupuesto, setMostrarPresupuesto] = useState(null);
+    const [mostrarModalBuscar, setMostrarModalBuscar] = useState(null);
     
-    const [filtroNombre, setFiltroNombre] = useState('');
-    const [filtroPrecio, setFiltroPrecio] = useState('');   
+    const initialStatePresupuesto = {proveedor:'', empleado:''}
+    
+    const [filtro , setFiltro] = useState(initialStatePresupuesto);
+    const [filtroDetalle , setFiltroDetalle] = useState([]); 
+
     const [orden, setOrden] = useState({ campo: '', asc: true });
 
     const toggleOrden = (campo) => {
@@ -27,13 +32,6 @@ const indexPresupuesto = () => {
     };                
 
   const presupuestosFiltrados = presupuestos
-    .filter(p => {
-      const proveedorNombre = proveedores.find(d => d._id === p.proveedor)?.name || '';
-      return (
-        proveedorNombre.toLowerCase().includes(filtroNombre.toLowerCase()) &&
-        (filtroPrecio === '' || p.total.toString().includes(filtroPrecio))
-      );
-    })
     .sort((a, b) => {
       const campo = orden.campo;
       if (!campo) return 0;
@@ -150,6 +148,55 @@ const indexPresupuesto = () => {
                         />
                     </div>
                 </div>
+            )} 
+            
+  
+            {mostrarModalBuscar && (
+            <div className="modal">
+                <div className="modal-content">
+                <button
+                    className="close"
+                    onClick={() => {
+                    setMostrarModalBuscar(null);
+                    }}
+                >
+                    &times;
+                </button>
+
+                <BusquedaAvanzadaSolicitudes
+                    filtro={filtro} // ✅ le pasamos el estado actual
+                    filtroDetalle={filtroDetalle}
+                    exito={(resultados) => {
+                    if (resultados.length > 0) {
+                        setPresupuestos(resultados);
+                        setMostrarModalBuscar(false);
+                    } else {
+                        alert("No se encontraron resultados");
+                    }
+                    }}
+                    onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)} // ✅ manejamos los cambios desde el hijo
+                    onChangeFiltroDetalle={(nuevoFiltroDetalle) => setFiltroDetalle(nuevoFiltroDetalle)}
+                />
+                </div>
+            </div>
+            )}
+
+            {mostrarPresupuesto && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="close" onClick={() => setMostrarPresupuesto(false)}>
+                            &times;
+                        </button>
+                        <FormularioPresupuesto 
+                            tipo='solicitudPresupuesto'
+                            param={mostrarPresupuesto}
+                            exito={()=>{
+                                setMostrarPresupuesto(false);
+                                fetchData();
+                            }}
+                        />
+                    </div>
+                </div>
             )}
 
             {mostrarModalUpdate && (
@@ -169,30 +216,6 @@ const indexPresupuesto = () => {
                 </div>
             )}
 
-            {mostrarPedidoCreate && (
-                <div className="modal">
-                <div className="modal-content">
-                    <button className="close" onClick={() => 
-                        {
-                            setmostrarPedidoCreate(null)
-                            fetchData()
-                        }
-                    }>
-                        &times;
-                    </button>
-                    <CreateNotaPedido 
-                        param={mostrarPedidoCreate}
-                        tipo="presupuesto"
-                        exito={() => 
-                            {
-                                setmostrarPedidoCreate(false)
-                                fetchData()
-                            }}
-                    />
-                </div>
-                </div>
-            )}
-
             <h1 className="titulo-pagina">Solicitud de Presupuesto</h1>
             
             <div className="botonera">
@@ -206,17 +229,15 @@ const indexPresupuesto = () => {
                 </button>
                 <button className="btn-icon" onClick={() => setMostrarModalCreate(true)} title="Agregar Solicitud de Presupuesto">
                      <FaPlus />
+                </button>           
+                <button onClick={() => 
+                    setMostrarModalBuscar(true)
+                    }            
+                    className="btn-icon" title="Busqueda avanzada de solicitudes de presupuesto">
+                    <FaSearch />
                 </button>               
             </div>
             <div className="contenedor-tabla">
-                <div className="filtros">
-                    <input
-                        type="text"
-                        placeholder="Filtrar por proveedor..."
-                        value={filtroNombre}
-                        onChange={(e) => setFiltroNombre(e.target.value)}
-                    />
-                </div>
 
                 <div className="tabla-scroll">
                     <table id="tablaVinos">
@@ -239,8 +260,8 @@ const indexPresupuesto = () => {
                                         <td className="columna">{fecha.split("T")[0]}</td>
                                         <td className="columna">
                                             <div className="acciones">
-                                                <button onClick={() => setmostrarPedidoCreate(_id)} className="btn-icon" title="Generar Orden de Compra">
-                                                    <FaShoppingCart />
+                                                <button onClick={() => setMostrarPresupuesto(_id)} className="btn-icon" title="Generar Presupuesto">
+                                                    <FaCartArrowDown />
                                                 </button>
                                                 <button onClick={() => setMostrarModalUpdate(_id)} className="btn-icon" title="Modificar">
                                                     <FaEdit />

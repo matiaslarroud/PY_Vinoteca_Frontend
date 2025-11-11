@@ -300,7 +300,7 @@ const createpresupuesto = ({exito , param , tipo}) => {
             <div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
-                        <h1 className="titulo-pagina">Cargar Nota Pedido</h1>
+                        <h1 className="titulo-pagina">Cargar Presupuesto</h1>
                     </div>
                 </div>
 

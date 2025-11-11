@@ -284,9 +284,9 @@ const indexPedido = () => {
                                                 <button onClick={() => imprimirRecibo(_id)}  className="btn-icon" title="Imprimir">
                                                     <FaPrint />
                                                 </button>
-                                                <button onClick={() => deleteRecibo(_id)}  className="btn-icon" title="Eliminar">
+                                                {/* <button onClick={() => deleteRecibo(_id)}  className="btn-icon" title="Eliminar">
                                                     <FaTrash />
-                                                </button>
+                                                </button> */}
                                             </div>
                                         </td>
                                     </tr>

@@ -4,7 +4,7 @@ import FormularioClienteCreate from '../createCliente'
 const { default: Link } = require("next/link")
 
 const initialStateComprobanteVenta = {
-    tipoComprobante:'', fecha:'' , descuentoBandera:false , descuento:0 ,total:0, notaPedido:'', cliente:''
+    tipoComprobante:'', fecha:'' ,total:0, notaPedido:'', cliente:'' , descuento:0 , descuentoBandera:false
 }
 const initialDetalle = { 
     tipoProducto:"",producto: "", cantidad: 0, precio: 0, importe: 0, notaPedido:'' 
@@ -76,6 +76,7 @@ const createComprobanteVenta = ({exito}) => {
         if (name === 'notaPedido' && value) {
             setPuedeGuardar(true);
             fetchData_NotaPedidoDetalle(value)
+            fetchData_NotaPedidoID(value)
         };
     }
 
@@ -176,6 +177,31 @@ const createComprobanteVenta = ({exito}) => {
         .catch((err)=>{console.log("Error al cargar pedidos.\nError: ",err)})
     }
 
+    const fetchData_NotaPedidoID = (id) => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido/${id}`)
+        .then((res) => res.json())
+        .then((data) => {
+            if (data.ok) {
+                const { descuento , total } = data.data; // suponiendo que el descuento viene en data.data.descuento
+                setComprobanteVenta((prev) => ({
+                    ...prev,
+                    descuento: descuento,
+                    total : total
+                }));
+                if(descuento >0){
+                    setComprobanteVenta((prev) => ({
+                    ...prev,
+                    descuentoBandera: true
+                }));
+                }
+            }
+        })
+        .catch((err) => {
+            console.log("Error al cargar el pedido.\nError:", err);
+        });
+};
+
+
     const handleCheckboxChange = (e) => {
         setComprobanteVenta({
             ...comprobanteVenta,
@@ -187,7 +213,6 @@ const createComprobanteVenta = ({exito}) => {
         e.preventDefault();
         const bodyData = {
             tipoComprobante: comprobanteVenta.tipoComprobante,
-            descuento: comprobanteVenta.descuento,
             total: comprobanteVenta.total,  
         };
 
@@ -633,6 +658,7 @@ const createComprobanteVenta = ({exito}) => {
                                     checked={comprobanteVenta.descuentoBandera}
                                     onChange={handleCheckboxChange}
                                     className="checkbox-envio"
+                                    disabled
                                     />
                                     ¿Descuento?
                                 </label>
@@ -645,6 +671,7 @@ const createComprobanteVenta = ({exito}) => {
                                     value={comprobanteVenta.descuento}
                                     placeholder="Escriba aquí el descuento ..."
                                     className="input-secondary"
+                                    disabled
                                     />
                                 )}
                             </div>

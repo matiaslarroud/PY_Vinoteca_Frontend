@@ -8,7 +8,7 @@ import FormularioMedioPagoCreate from '../../gestion/tablasVarias/medioPago/crea
 const { default: Link } = require("next/link")
 
 const initialStateNotaPedido = {
-        total:'', fecha:'', fechaEntrega:'', cliente:'', empleado:'',
+        total:'', fecha:'', fechaEntrega:'', cliente:'', empleado:'', descuento: 0, descuentoBandera:false,
         envio:false , presupuesto:'', medioPago:'',
         provincia:0 , localidad:0 , barrio:0, calle:0,altura:0,deptoNumero:0,deptoLetra:0
     }
@@ -56,6 +56,7 @@ const createNotaPedido = ({exito , param , tipo}) => {
     const [localidades,setLocalidades] = useState([])
     const [barrios,setBarrios] = useState([])
     const [calles,setCalles] = useState([])
+    const [habilitadoDescuento, setHabilitadoDescuento] = useState(false);
     
     const detallesValidos = detalles.filter(d => d.producto && d.cantidad > 0);
     const puedeGuardar = detallesValidos.length > 0;
@@ -226,7 +227,8 @@ const createNotaPedido = ({exito , param , tipo}) => {
             empleado: notaPedido.empleado,
             medioPago: notaPedido.medioPago,
             fechaEntrega: notaPedido.fechaEntrega,
-            envio: notaPedido.envio
+            envio: notaPedido.envio,
+            descuento: notaPedido.descuento,
         };
 
         if (notaPedido.presupuesto) {
@@ -360,6 +362,14 @@ const createNotaPedido = ({exito , param , tipo}) => {
     }
 };
 
+
+    const handleCheckboxChangeDescuento = (e) => {
+        setHabilitadoDescuento(e.target.checked);
+        setNotaPedido({
+            ...notaPedido,
+            descuentoBandera: e.target.checked,
+        });
+    };
     
     const calcularTotal = (detalles) => {
         const totalPedido = Array.isArray(detalles) && detalles.length > 0
@@ -1086,6 +1096,26 @@ const createNotaPedido = ({exito , param , tipo}) => {
                             )}
                             </div>
                             <div className="form-secondary">
+                                    <label className="label-box">
+                                        <input
+                                        type="checkbox"
+                                        checked={notaPedido.descuentoBandera}
+                                        onChange={handleCheckboxChangeDescuento}
+                                        className="checkbox-envio"
+                                        />
+                                        ¿Descuento?
+                                    </label>
+
+                                    {notaPedido.descuentoBandera && (
+                                        <input
+                                        type="number"
+                                        onChange={inputChange}
+                                        name='descuento'
+                                        value={notaPedido.descuento}
+                                        placeholder="Escriba aquí el descuento ..."
+                                        className="input-secondary"
+                                        />
+                                    )}
                                 <label htmlFor="precioVenta" className="label-box">
                                     Total:
                                 </label>

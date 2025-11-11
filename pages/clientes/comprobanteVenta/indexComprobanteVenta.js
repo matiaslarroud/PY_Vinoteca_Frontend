@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaHome , FaSearch , FaArrowLeft, FaTrash , FaPrint , FaFileInvoice  } from "react-icons/fa";
+import { FaPlus, FaHome , FaEye , FaSearch , FaArrowLeft, FaTrash , FaPrint , FaFileInvoice  } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import FormularioComprobanteVentaCreate from './new_ComprobanteVenta'
 import FormularioCreateRemitoCliente from '../remito/create_RemitoCliente'
 import BusquedaAvanzada from "../comprobanteVenta/busquedaComprobanteVenta";
+import ViewComprobante from './viewComprobanteVenta'
 
 
 const { default: Link } = require("next/link")
@@ -20,6 +21,7 @@ const indexComprobantesVenta = () => {
     const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
     const [mostrarModalRemito, setMostrarModalRemito] = useState(null);
     const [mostrarBusqueda, setmostrarBusqueda] = useState(null);
+    const [mostrarComprobante, setMostrarComprobante] = useState(null);
     
     const [filtro , setFiltro] = useState(initialStateComprobanteVenta); 
     const [filtroDetalle , setFiltroDetalle] = useState([]);  
@@ -198,6 +200,19 @@ const indexComprobantesVenta = () => {
                 </div>
             )}
 
+            {mostrarComprobante && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="close" onClick={() => setMostrarComprobante(false)}>
+                            &times;
+                        </button>
+                        <ViewComprobante
+                            comprobanteVentaID={mostrarComprobante}
+                        />
+                    </div>
+                </div>
+            )}
+
             {mostrarModalRemito && (
                 <div className="modal">
                     <div className="modal-content">
@@ -292,6 +307,14 @@ const indexComprobantesVenta = () => {
                                         <td className="columna">${total}</td>
                                         <td className="columna">
                                             <div className="acciones">
+                                                <button className="btn-icon" title={"Visualizar"}
+                                                    onClick={() => {
+                                                        
+                                                        setMostrarComprobante(_id);
+                                                    }} 
+                                                >
+                                                    <FaEye />
+                                                </button>
                                                 <button className="btn-icon" 
                                                     title={remitoCreado ? "El remito ya fue creado" : "Generar Remito"}
                                                     onClick={() => {
@@ -307,9 +330,9 @@ const indexComprobantesVenta = () => {
                                                     <button onClick={() => imprimirComprobanteVenta(_id)}  className="btn-icon" title="Imprimir">
                                                         <FaPrint />
                                                     </button>
-                                                <button onClick={() => deleteComprobanteVenta(_id)}  className="btn-icon" title="Eliminar">
+                                                {/* <button onClick={() => deleteComprobanteVenta(_id)}  className="btn-icon" title="Eliminar">
                                                     <FaTrash />
-                                                </button>
+                                                </button> */}
                                             </div>
                                         </td>
                                     </tr>

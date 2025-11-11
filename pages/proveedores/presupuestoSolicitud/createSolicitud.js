@@ -5,10 +5,19 @@ import { FaTrash} from "react-icons/fa";
 const { default: Link } = require("next/link")
 
 const initialStatePresupuesto = {proveedor:'', empleado:''}
-const initialDetalle = { tipoProducto: "",producto: "", cantidad: 0, solicitudPresupuesto:'' };
+const initialDetalle = { tipoProducto: "",producto: "", importe:0, cantidad: 0, solicitudPresupuesto:'' };
 
-const createPresupuesto = ({exito}) => {
-    const [presupuesto , setPresupuesto] = useState(initialStatePresupuesto);
+const createPresupuesto = ({exito , tipo , param}) => {
+    const [presupuesto , setPresupuesto] = useState(() => {
+            if (tipo === 'proveedor'){
+                return {
+                    ...initialStatePresupuesto,
+                        proveedor: param
+                }
+            }
+        
+            return initialStatePresupuesto
+        });
     
     const [proveedores,setProveedores] = useState([])
     const [empleados,setEmpleados] = useState([])
@@ -66,12 +75,42 @@ const createPresupuesto = ({exito}) => {
         fetchData_Empleados();
         fetchData_Productos();
         fetchData_TipoProductos();
-    }, [])
+    }, [])    
+    
+    const calcularTotal = (detalles) => {
+        const totalPresupuesto = Array.isArray(detalles) && detalles.length > 0
+            ? detalles.reduce((acc, d) => acc + (d.importe || 0), 0)
+                : 0;
+        setPresupuesto((prev) => ({ ...prev, total:totalPresupuesto }));
+    };
     const handleDetalleChange = (index, field, value) => {
         const nuevosDetalles = [...detalles];
         nuevosDetalles[index][field] = field === "cantidad" ? parseFloat(value) : value;
+        
+        const prod = productos.find(p => p._id === nuevosDetalles[index].producto);
+       
+        if (prod) {
+            if(prod.precioCosto){
+                const ganancia = prod.ganancia;
+                const precio = prod.precioCosto + ((prod.precioCosto * ganancia) / 100);
+                
+                nuevosDetalles[index].precio = precio;
+                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
+            }
+            if(!prod.precioCosto && prod.precioVenta){
+                const precio = prod.precioVenta;
+
+                nuevosDetalles[index].precio = precio;
+                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
+            }
+
+        } else {
+            nuevosDetalles[index].precio = 0;
+            nuevosDetalles[index].importe = 0;
+        }
 
         setDetalles(nuevosDetalles);
+        calcularTotal(nuevosDetalles);
     };
     
 
@@ -99,6 +138,7 @@ const createPresupuesto = ({exito}) => {
                 body: JSON.stringify({
                     producto: detalle.producto,
                     cantidad: detalle.cantidad,
+                    importe: detalle.importe,
                     solicitudPresupuesto: identificador
             })
         });
@@ -122,7 +162,7 @@ const createPresupuesto = ({exito}) => {
     };
 
     const agregarDetalle = () => {
-        setDetalles([...detalles, { ...{tipoProducto:"",producto: "", cantidad: 0 } }]);
+        setDetalles([...detalles, { ...{tipoProducto:"",producto: "", cantidad: 0 , importe:0} }]);
     };
     
 
@@ -338,12 +378,12 @@ const createPresupuesto = ({exito}) => {
                                             styles={{
                                                 container: (base) => ({
                                                 ...base,
-                                                width: 200, // ⬅️ ancho fijo total
+                                                width: 150, // ⬅️ ancho fijo total
                                                 }),
                                                 control: (base) => ({
                                                 ...base,
-                                                minWidth: 200,
-                                                maxWidth: 300,
+                                                minWidth: 150,
+                                                maxWidth: 150,
                                                 backgroundColor: '#2c2c2c',
                                                 color: 'white',
                                                 border: '1px solid #444',
@@ -379,11 +419,14 @@ const createPresupuesto = ({exito}) => {
                                             type="number"
                                             placeholder="Cantidad"
                                             min={1}
-                                            max={opciones_productos.find((p) => p.value === d.producto)?.stock || 0}
                                             value={d.cantidad}
                                             onChange={(e) => handleDetalleChange(i, "cantidad", e.target.value)}
                                             required
                                         />
+                                    </div>
+
+                                    <div className='form-col-item2'>
+                                        <span>Importe: ${d.importe.toFixed(2)}</span>
                                     </div>
 
                                     <div className='form-col-item2'>
@@ -393,6 +436,7 @@ const createPresupuesto = ({exito}) => {
                                             onClick={() => {
                                                 const productos = detalles.filter((_, index) => index !== i);
                                                 setDetalles(productos);
+                                                calcularTotal(productos);
                                             }}
                                             >                                    
                                             <FaTrash />
@@ -407,7 +451,7 @@ const createPresupuesto = ({exito}) => {
                                 <div className="form-submit">
                                     <button
                                     type="submit"
-                                    className="submit-btn2"
+                                    className="submit-btn"
                                     onClick={(e) => {
                                         if (!puedeGuardar) {
                                         alert("No se puede guardar una solicitud presupuesto sin al menos un producto con cantidad.");
@@ -417,7 +461,7 @@ const createPresupuesto = ({exito}) => {
                                         clickChange(e);
                                     }}
                                     >
-                                    Cargar Solicitud
+                                    Cargar
                                     </button>
                                 </div>
                             </div>
@@ -614,19 +658,20 @@ const createPresupuesto = ({exito}) => {
                         transition: border-color 0.2s ease-in-out;
                     }
 
-                    .submit-btn2 {
-                        background-color: #651616ff;
-                        color: white;
+                    button.submit-btn {
+                        padding: 0.75rem 1rem;
+                        background-color: #8B0000;
+                        color: #fff;
                         border: none;
-                        padding: 0.8rem 1.5rem;
+                        border-radius: 8px;
                         font-size: 1rem;
-                        border-radius: 10px;
+                        font-weight: 600;
                         cursor: pointer;
-                        transition: background-color 0.2s ease-in-out;
+                        transition: background-color 0.3s ease;
                     }
 
-                    .submit-btn2:hover {
-                        background-color: #571212ff;
+                    button.submit-btn:hover {
+                        background-color: rgb(115, 8, 8);
                         transform: translateY(-3px);
                     }
                 `}

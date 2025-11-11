@@ -723,7 +723,7 @@ const newOrdenCompra = ({exito}) => {
                                         clickChange(e);
                                     }}
                                     >
-                                    Cargar Pedido
+                                    Cargar
                                     </button>
                                 </div>
                             </div>

@@ -9,8 +9,35 @@ const { default: Link } = require("next/link")
 const initialStatePresupuesto = {total:'', proveedor:'', solicitudPresupuesto:'', empleado:'', medioPago:''}
 const initialDetalle = { tipoProducto: "",producto: "", cantidad: 0, precio: 0, importe: 0, presupuesto:'' };
 
-const createPresupuesto = ({exito}) => {
-    const [presupuesto , setPresupuesto] = useState(initialStatePresupuesto);
+const createPresupuesto = ({exito , tipo , param}) => {
+    const [presupuesto , setPresupuesto] = useState(() => {
+        if (tipo === 'proveedor'){
+            return {
+                ...initialStatePresupuesto,
+                proveedor: param
+            }
+        }
+        
+        if (tipo === "solicitudPresupuesto") {
+            fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuesto/${param}`)
+                .then((a)=>{
+                    return a.json();
+                })
+                    .then((s)=>{
+                        if(s.ok){
+                            console.log(s.data)
+                            setPresupuesto({
+                                ...initialStatePresupuesto,
+                                solicitudPresupuesto: param,
+                                empleado: s.data.empleado,
+                                proveedor: s.data.proveedor,
+                            });
+                            agregarDetallePresupuesto(param);
+                        }
+                    })            
+        }
+        return initialStatePresupuesto
+    });
     
     const [proveedores,setProveedores] = useState([])
     const [empleados,setEmpleados] = useState([])
@@ -173,67 +200,22 @@ const createPresupuesto = ({exito}) => {
                 [name]:value
         })   
     }
-    
-const agregarDetallePresupuesto = async (solicitudID) => {
-  try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuestoDetalle/solicitudPresupuesto/${solicitudID}`
-    );
-    const s = await res.json();
-
-    if (!s.ok) {
-      console.error("Error al cargar detalles de la solicitud:", s.message);
-      return;
-    }
-
-    // s.data es un array de detalles [{producto, cantidad}, ...]
-    const nuevosDetalles = await Promise.all(
-      s.data.map(async (detalle) => {
-        let precio = 0;
-        let importe = 0;
-        // Buscamos los datos del producto
-        const prodRes = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/${detalle.producto}`
-        );
-        const prodData = await prodRes.json();
-
-        if (!prodData.ok) return null;
-
-
-        if(prodData.data.precioCosto){
-            ganancia = ( prodData.data.ganancia ) / 100;
-            precio = prodData.data.precioCosto + ( prodData.data.precioCosto * ganancia )
-            importe = precio * detalle.cantidad;
+        
+    const agregarDetallePresupuesto = async (presupuestoID) => {
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuestoDetalle/SolicitudPresupuesto/${presupuestoID}`);
+            const s = await res.json();
+            if (s.ok) {
+                setDetalles(s.data);
+                calcularTotal(s.data);
+                console.log(s.data)
+            } else {
+                console.error('Error al cargar detalles de la solicitud de presupuesto:', s.message);
+            }
+        } catch (error) {
+            console.error('Error de red al cargar detalles de la solicitud de presupuesto:', error);
         }
-
-        if(prodData.data.precioVenta){
-            precio = prodData.data.precioVenta
-            importe = ( prodData.data.precioVenta)* detalle.cantidad ;
-        }
-
-        return {
-          tipoProducto: prodData.data.tipo || "",
-          producto: detalle.producto,
-          cantidad: detalle.cantidad,
-          precio,
-          importe
-        };
-      })
-    );
-
-    // Filtramos por si alguno vino como null
-    const filtrados = nuevosDetalles.filter((d) => d !== null);
-
-    // Actualizamos el estado con todos los detalles nuevos
-    setDetalles((prev) => [...prev, ...filtrados]);
-
-    // Si tenés una función que recalcula el total:
-    calcularTotal(filtrados);
-
-  } catch (error) {
-    console.error("Error de red al cargar detalles del presupuesto:", error);
-  }
-};
+    };
 
 
     const handleDetalleChange = (index, field, value) => {
@@ -690,7 +672,6 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                                             type="number"
                                             placeholder="Cantidad"
                                             min={1}
-                                            max={opciones_productos.find((p) => p.value === d.producto)?.stock || 0}
                                             value={d.cantidad}
                                             onChange={(e) => handleDetalleChange(i, "cantidad", e.target.value)}
                                             required
@@ -743,7 +724,7 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                                         clickChange(e);
                                     }}
                                     >
-                                    Cargar Presupuesto
+                                    Cargar
                                     </button>
                                 </div>
                             </div>

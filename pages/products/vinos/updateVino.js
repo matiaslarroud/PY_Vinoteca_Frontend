@@ -178,9 +178,9 @@ const updateProducto = ({exito,vinoID}) => {
         })
 
         const vinoCreado = await resVino.json();
-        const ID = vinoCreado.data?._id;
+        const id = vinoCreado.data?._id;
 
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productVinoDetalle/${ID}`,
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productVinoDetalle/${id}`,
             {
                 method:'DELETE',
                 headers: {
@@ -202,7 +202,7 @@ const updateProducto = ({exito,vinoID}) => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     uva: detalle.uva,
-                    vino: ID
+                    vino: id
             })
             
             
@@ -231,7 +231,7 @@ const updateProducto = ({exito,vinoID}) => {
             <div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
-                        <h1 className="titulo-pagina">Cargar Vino</h1>
+                        <h1 className="titulo-pagina">Modificar Vino</h1>
                     </div>
                 </div>
 

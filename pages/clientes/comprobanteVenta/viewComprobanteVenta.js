@@ -1,18 +1,35 @@
-const { useState, useEffect, use } = require("react")
-import Select from 'react-select';     
-
+const { useState , useEffect } = require("react")
+import Select from 'react-select';        
+import FormularioClienteCreate from '../createCliente'
 const { default: Link } = require("next/link")
 
-const initialState = {cliente:'',totalPrecio:0, totalBultos:0, fecha:'', comprobanteVenta:'', transporteID:'', entregado:false}
-const initialDetalle = { remitoID:'', tipoProducto:"", producto:'' ,  cantidad: 0 };
+const initialStateComprobanteVenta = {
+    tipoComprobante:'', fecha:'' , descuentoBandera:false , descuento:0 ,total:0, notaPedido:'', cliente:''
+}
+const initialDetalle = { 
+    tipoProducto:"",producto: "", cantidad: 0, precio: 0, importe: 0, notaPedido:'' 
+};
 
-const createRemitoCliente = ({exito , comprobanteVentaID}) => {
-    const [remito , setRemito] = useState(initialState);
+
+const viewComprobante = ({comprobanteVentaID}) => {
+    const [comprobanteVenta , setComprobanteVenta] = useState(initialStateComprobanteVenta);
+    const [detalles , setDetalles] = useState([initialDetalle]);
+    const [notaPedidos , setNotaPedidos] = useState([]);
+    const [clientes, setClientes] = useState([]);
     const [puedeGuardar, setPuedeGuardar] = useState(false);
     const [productos, setProductos] = useState([]);
-    const [transporte , setTransporte] = useState([])
-    const [detalles, setDetalles] = useState([]);
+    const [tiposComprobante, setTiposComprobante] = useState([]);
     const [tipoProductos,setTipoProductos] = useState([]);
+    
+    const inputChange = (e) => {
+        const value = e.target.value;
+        const name = e.target.name;
+        
+        setComprobanteVenta({
+            ...comprobanteVenta , 
+                [name]:value
+        })   
+    }
 
     const handleDetalleChange = (index, field, value) => {
         const nuevosDetalles = [...detalles];
@@ -21,17 +38,20 @@ const createRemitoCliente = ({exito , comprobanteVentaID}) => {
         const prod = productos.find(p => p._id === nuevosDetalles[index].producto);
 
         if (prod) {
-            if (prod.precioCosto) {
+            if(prod.precioCosto){
                 const ganancia = prod.ganancia;
                 const precio = prod.precioCosto + ((prod.precioCosto * ganancia) / 100);
 
                 nuevosDetalles[index].precio = precio;
                 nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
-            } else if (prod.precioVenta) {
+            }
+            if(!prod.precioCosto && prod.precioVenta){
                 const precio = prod.precioVenta;
+
                 nuevosDetalles[index].precio = precio;
                 nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
             }
+
         } else {
             nuevosDetalles[index].precio = 0;
             nuevosDetalles[index].importe = 0;
@@ -39,84 +59,78 @@ const createRemitoCliente = ({exito , comprobanteVentaID}) => {
 
         setDetalles(nuevosDetalles);
         calcularTotal(nuevosDetalles);
-        calcularTotalBultos(nuevosDetalles);
-    };
-
-    const calcularTotalPrecio = (detalles) => {
-        const totalPedido = Array.isArray(detalles) && detalles.length > 0
-            ? detalles.reduce((acc, d) => acc + (d.importe || 0), 0)
-            : 0;
-        setRemito((prev) => ({ ...prev, totalPrecio: totalPedido }));
     };
     
-    const calcularTotalBultos = (detalles) => {
+    const selectChange = (selectedOption, actionMeta) => {
+        const name = actionMeta.name;
+        const value = selectedOption ? selectedOption.value : "";
+
+        setComprobanteVenta({
+            ...comprobanteVenta,
+            [name]: value,
+        });
+
+        if (name === 'presupuesto' && value) {
+            agregarDetalleNotaPedido(value);
+        }
+        if (name === 'notaPedido' && value) {
+            setPuedeGuardar(true);
+            fetchData_NotaPedidoDetalle(value)
+        };
+    }
+
+    const agregarDetalleNotaPedido = async (comprobanteID) => {
+    try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/comprobanteVentaDetalle/ComprobanteVenta/${comprobanteID}`);
+        const s = await res.json();
+
+        if (s.ok) {
+            setDetalles(s.data);
+            calcularTotal(s.data);
+        } else {
+            console.error('Error al cargar detalles del comprobante de venta:', s.message);
+        }
+            } catch (error) {
+                console.error('Error de red al cargar detalles del comprobante de venta:', error);
+            }
+    };
+
+    
+    const calcularTotal = (detalles) => {
         const totalPedido = Array.isArray(detalles) && detalles.length > 0
-            ? detalles.reduce((acc, d) => acc + (d.cantidad || 0), 0)
-            : 0;
-        setRemito((prev) => ({ ...prev, totalBultos: totalPedido }));
+            ? detalles.reduce((acc, d) => acc + (d.importe || 0), 0)
+                : 0;
+        setComprobanteVenta((prev) => ({ ...prev, total:totalPedido }));
     };
 
-    const fetchData_ComprobanteVentaDetalle = async (comprobanteID) => {
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/comprobanteVentaDetalle/ComprobanteVenta/${comprobanteID}`);
-            const s = await res.json();
-            if (s.ok) {
-                setDetalles(                    
-                    s.data.map(d => ({ ...initialDetalle, ...d }))
-                );
-                //calcularTotalPrecio(s.data);
-                calcularTotalBultos(s.data);
-            }
-        } catch (err) {
-            console.log("Error al cargar vinos.\nError: ", err);
-        }
-    };
+    const fetchData_Clientes = () => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente`)
+            .then((a)=>{return a.json()})
+                .then((s)=>{
+                    setClientes(s.data)
+                })
+    }
 
-    const fetchData_ComprobantesVenta = async (id) => {
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/comprobanteVenta/${id}`);
-            const s = await res.json();
-            if (s.ok) {
-                let pedidoData = [];
-                let clienteData = '';
-                const pedido = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido/${s.data.notaPedido}`);
-                const pedidoJSON = await pedido.json();
-                if(pedidoJSON.ok){
-                    pedidoData = pedidoJSON.data;
+    const fetchData_TipoComprobante = () => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/tipoComprobante`)
+            .then((a)=>{return a.json()})
+                .then((s)=>{
+                    setTiposComprobante(s.data)
+                })
+    }
+
+    const fetchData_Productos = () => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if(s.ok){
+                    setProductos(s.data)
                 }
-                
-                const clienteID = pedidoData.cliente;
-                
-                const resCliente = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente/${clienteID}`);
-                const clienteJson = await resCliente.json();
-                if (clienteJson.ok) {
-                    clienteData = clienteJson.data;
-                }
-                
-                setRemito(prev => ({
-                ...prev,
-                totalPrecio:s.data.total,
-                cliente: { value: clienteData._id, label: clienteData.name },
-                comprobanteVenta: { value: comprobanteVentaID, label: comprobanteVentaID },
-                // comprobanteVenta: comprobanteVentaID,
-            }));
-
-            }
-        } catch (err) {
-            console.log("Error al cargar comprobante de venta.\nError: ", err);
-        }
-    };
-
-    const fetchData_Productos = async () => {
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products`);
-            const s = await res.json();
-            if (s.ok) setProductos(s.data || []);
-        } catch (err) {
-            console.log("Error al cargar productos.\nError: ", err);
-            setProductos([]);
-        }
-    };
+            })
+        .catch((err)=>{console.log("Error al cargar productos.\nError: ",err)})
+    }
     
     const fetchData_TipoProductos = () => {
     fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/tipos`)
@@ -131,79 +145,108 @@ const createRemitoCliente = ({exito , comprobanteVentaID}) => {
         .catch((err)=>{console.log("Error al cargar tipos de productos.\nError: ",err)})
     }
 
-    const fetchData_Transporte = async () => {
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/transporte`);
-            const s = await res.json();
-            if (s.ok) setTransporte(s.data || []);
-        } catch (err) {
-            console.log("Error al cargar transportes.\nError: ", err);
-            setTransporte([]);
-        }
+    const fetchData_NotaPedido = () => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if(s.ok){
+                    setNotaPedidos(s.data);
+                }
+            })
+        .catch((err)=>{console.log("Error al cargar pedidos.\nError: ",err)})
+    }
+
+    const fetchData_ComprobanteVenta = () => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/comprobanteVenta/${comprobanteVentaID}`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if(s.ok){
+                    setComprobanteVenta((prev) => ({
+                        ...prev,
+                        cliente: s.data.cliente?._id || "",
+                        notaPedido: s.data.notaPedido || "",
+                        tipoComprobante: (s.data.tipoComprobante) || "",
+                        descuentoBandera: s.data.descuentoBandera || false,
+                        descuento: s.data.descuento || 0,
+                        total: s.data.total || 0,
+                    }));
+                }
+            })
+        .catch((err)=>{console.log("Error al cargar pedidos.\nError: ",err)})
+    }
+
+    const fetchData_ComprobanteVentaDetalle = () => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/comprobanteVentaDetalle/ComprobanteVenta/${comprobanteVentaID}`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if(s.ok){
+                    setDetalles(s.data)
+                }
+            })
+        .catch((err)=>{console.log("Error al cargar pedidos.\nError: ",err)})
+    }
+
+    const handleCheckboxChange = (e) => {
+        setComprobanteVenta({
+            ...comprobanteVenta,
+            descuentoBandera: e.target.checked,
+        });
     };
 
-    const clickChange = async (e) => {
-        e.preventDefault();
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/remito`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    totalPrecio: remito.totalPrecio,
-                    totalBultos: remito.totalBultos,
-                    comprobanteVentaID: remito.comprobanteVenta.value,
-                    transporteID: remito.transporteID,
-                    entregado: remito.entregado
-                })
-            });
-            
-            const remitoCreado = await res.json();
-            const remitoID = remitoCreado.data._id;
+    
 
-            // GUARDAMOS DETALLES
-            for (const detalle of detalles) {
-                const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/remitoDetalle`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        producto: detalle.producto,
-                        cantidad: detalle.cantidad,
-                        remitoID: remitoID
-                })
-                
-                
-                });
-                if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
-            
-                setDetalles(initialDetalle);
-                setRemito(initialState);
-                exito();
-            }
-        } 
-        catch (err) {
-            console.log('Error al enviar datos. \n Error: ', err);
+     const opciones_tipoProductos = tipoProductos.map(v => ({
+        value: v,
+        label: v === "ProductoVino" ? "Vino" :
+                v === "ProductoPicada" ? "Picada" :
+                v === "ProductoInsumo" ? "Insumo" : v
+    }));
+    const opciones_productos = productos
+        .map(v => ({
+            value: v._id,
+            label: v.name,
+            stock: v.stock,
+            tipoProducto: v.tipoProducto
+        }));
+    const opciones_clientes = clientes.map(v => ({ value: v._id,label: v.name }));
+    const opciones_notasPedido = notaPedidos.filter((s)=>{return s.cliente === comprobanteVenta.cliente })
+        .map(v => {
+            return {
+                value: v._id,
+                label: `${v._id} - ${v.fecha.split("T")[0]} - $${v.total}`,
+                total: v.total
+            };
         }
-    };
+    );
+    const opciones_tiposComprobante = tiposComprobante
+    .filter(tc => {
+        const cliente = clientes.find(c => c._id === comprobanteVenta.cliente);
+        if (!cliente) return false; // Si no existe cliente, no mostrar ningún comprobante
 
-    const selectChange = (selectedOption, actionMeta) => {
-        const name = actionMeta.name;
-        const value = selectedOption ? selectedOption.value : "";
+        return tc.condicionIva === cliente.condicionIva;
+    })
+    .map(tc => ({
+        value: tc._id,
+        label: tc.name
+    }));
 
-        setRemito({ ...remito, [name]: value });
 
-        if (name === 'transporteID' && value) {
-            setPuedeGuardar(true);
-        }
-    };
-
-    useEffect(() => {
+    useEffect(()=>{
         setDetalles([]);
-        fetchData_ComprobantesVenta(comprobanteVentaID);
-        fetchData_ComprobanteVentaDetalle(comprobanteVentaID);
         fetchData_Productos();
         fetchData_TipoProductos();
-        fetchData_Transporte();
-    }, [comprobanteVentaID]);
+        fetchData_ComprobanteVenta(comprobanteVentaID)
+        fetchData_ComprobanteVentaDetalle(comprobanteVentaID)
+        fetchData_Clientes();
+        fetchData_NotaPedido();
+        fetchData_TipoComprobante();
+    }, [comprobanteVentaID])
     
     useEffect(() => {
         if (!productos.length || !detalles.length) return;
@@ -223,40 +266,28 @@ const createRemitoCliente = ({exito , comprobanteVentaID}) => {
         }
     }, [productos, detalles]);
 
-     const opciones_tipoProductos = tipoProductos.map(v => ({
-        value: v,
-        label: v === "ProductoVino" ? "Vino" :
-                v === "ProductoPicada" ? "Picada" :
-                v === "ProductoInsumo" ? "Insumo" : v
-    }));
-    const opciones_productos = productos
-        .map(v => ({
-            value: v._id,
-            label: v.name,
-            stock: v.stock,
-            tipoProducto: v.tipoProducto
-        }));
-
-    const opciones_transporte = transporte.map(v => ({
-        value: v._id, label: v.name
-    }));
-   
-
+    console.log(comprobanteVenta.tipoComprobante)
+        
     return(
         <>
             <div className="form-container">
-                <h1 className="titulo-pagina">Cargar Remito</h1>
+                <div className="form-row">
+                    <div className="form-col">
+                        <h1 className="titulo-pagina">Visualizacion de Comprobante de Venta</h1>
+                    </div>
+                </div>
+
                 <form id="formProducto" className="formulario-presupuesto">
                     <div className="form-row">
                         <div className="form-col">
                             <label>
                                 Cliente:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
                                 classNamePrefix="rs"
-                                value={remito.cliente}
+                                options={opciones_clientes}
+                                value={opciones_clientes.find(op => op.value === comprobanteVenta.cliente) || null}
                                 onChange={selectChange}
                                 name='cliente'
                                 placeholder="Cliente..."
@@ -303,15 +334,16 @@ const createRemitoCliente = ({exito , comprobanteVentaID}) => {
 
                         <div className="form-col">
                             <label>
-                                Comprobante de Venta:
+                                Nota de Pedido:
                             </label>
                             <Select
                                 className="form-select-react"
                                 classNamePrefix="rs"
-                                value={remito.comprobanteVenta}
+                                options={opciones_notasPedido}
+                                value={opciones_notasPedido.find(op => op.value === comprobanteVenta.notaPedido) || null}
                                 onChange={selectChange}
-                                name='comprobanteVentaID'
-                                placeholder="Comprobante de venta..."
+                                name='notaPedido'
+                                placeholder="Nota de Pedido..."
                                 isClearable
                                 isDisabled={true}
                                 styles={{
@@ -352,20 +384,20 @@ const createRemitoCliente = ({exito , comprobanteVentaID}) => {
                                 }}
                             />
                         </div>
-
                         <div className="form-col">
                             <label>
-                                Transporte:
+                                Tipo de Comprobante:
                             </label>
                             <Select
                                 className="form-select-react"
                                 classNamePrefix="rs"
-                                options={opciones_transporte}
-                                value={opciones_transporte.find(op => op.value === remito.transporteID) || null}
+                                options={opciones_tiposComprobante}
+                                value={opciones_tiposComprobante.find(op => op.value === comprobanteVenta.tipoComprobante) || null}
                                 onChange={selectChange}
-                                name='transporteID'
-                                placeholder="Transporte..."
+                                name='tipoComprobante'
+                                placeholder="Tipo de comprobante..."
                                 isClearable
+                                isDisabled={true}
                                 styles={{
                                     container: (base) => ({
                                     ...base,
@@ -410,7 +442,7 @@ const createRemitoCliente = ({exito , comprobanteVentaID}) => {
                     <div className="form-row">
                         <div className="form-col-productos">
                             <label>
-                                Productos:
+                                    Productos:
                             </label>
                             <div className="form-group-presupuesto">
                                 
@@ -529,6 +561,10 @@ const createRemitoCliente = ({exito , comprobanteVentaID}) => {
                                             required
                                         />
                                     </div>
+
+                                    <div className='form-col-item2'>
+                                        <span>Importe: ${d.importe.toFixed(2)}</span>
+                                    </div>
                                 </div>
                                 ))}
                             </div>
@@ -536,44 +572,43 @@ const createRemitoCliente = ({exito , comprobanteVentaID}) => {
 
 
                         <div className="form-col-precioVenta">
+                            
+                            
+                            <div className="form-secondary">
+                                <label className="label-box">
+                                    <input
+                                    type="checkbox"
+                                    checked={comprobanteVenta.descuentoBandera}
+                                    onChange={handleCheckboxChange}
+                                    className="checkbox-envio"
+                                    disabled
+                                    />
+                                    ¿Descuento?
+                                </label>
+
+                                {comprobanteVenta.descuentoBandera && (
+                                    <input
+                                    type="number"
+                                    onChange={inputChange}
+                                    name='descuento'
+                                    value={comprobanteVenta.descuento}
+                                    placeholder="Escriba aquí el descuento ..."
+                                    className="input-secondary"
+                                    disabled
+                                    />
+                                )}
+                            </div>
                             <div className="form-secondary">
                                 <label htmlFor="precioVenta" className="label-box">
-                                    Total Bultos:
+                                    Total:
                                 </label>
                                 <input
                                     type="number"
                                     className="input-secondary"
-                                    value={remito.totalBultos}
-                                    name="totalBultos"
+                                    value={comprobanteVenta.total}
+                                    name="total"
                                     disabled
-                                />
-                                <label htmlFor="precioVenta" className="label-box">
-                                    Total Precio:
-                                </label>
-                                <input
-                                    type="number"
-                                    className="input-secondary"
-                                    value={remito.totalPrecio}
-                                    name="totalPrecio"
-                                    disabled
-                                />
-
-                                <div className="form-submit">
-                                    <button
-                                    type="submit"
-                                    className="submit-btn"
-                                    onClick={(e) => {
-                                        if (!puedeGuardar) {
-                                        alert("No se puede guardar un remito sin un comprobante de venta asociado.");
-                                        e.preventDefault();
-                                        return;
-                                        }
-                                        clickChange(e);
-                                    }}
-                                    >
-                                    Cargar Remito
-                                    </button>
-                                </div>
+                                    />
                             </div>
                         </div>
                     </div>
@@ -695,6 +730,7 @@ const createRemitoCliente = ({exito , comprobanteVentaID}) => {
                             flex: 2;
                             min-width: 0; /* Importante para que no desborde */
                             display: flex;
+                            font-size: 12px;
                             flex-direction: column;
                         }
 
@@ -921,4 +957,4 @@ const createRemitoCliente = ({exito , comprobanteVentaID}) => {
     )
 }
 
-export default createRemitoCliente;
+export default viewComprobante;

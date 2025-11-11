@@ -61,6 +61,30 @@ const createComprobanteVenta = ({exito , pedidoID}) => {
         calcularTotal(nuevosDetalles);
     };
 
+    const fetchData_NotaPedidoID = (id) => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido/${id}`)
+        .then((res) => res.json())
+        .then((data) => {
+            if (data.ok) {
+                const { descuento , total } = data.data; // suponiendo que el descuento viene en data.data.descuento
+                setComprobanteVenta((prev) => ({
+                    ...prev,
+                    descuento: descuento,
+                    total : total
+                }));
+                if(descuento >0){
+                    setComprobanteVenta((prev) => ({
+                    ...prev,
+                    descuentoBandera: true
+                }));
+                }
+            }
+        })
+        .catch((err) => {
+            console.log("Error al cargar el pedido.\nError:", err);
+        });
+};
+
     
     const calcularTotal = (detalles) => {
         const totalPedido = Array.isArray(detalles) && detalles.length > 0
@@ -233,6 +257,7 @@ const createComprobanteVenta = ({exito , pedidoID}) => {
         fetchData_TipoProductos();
         fetchData_NotaPedido(pedidoID);
         fetchData_NotaPedidoDetalle(pedidoID);
+        fetchData_NotaPedidoID(pedidoID)
     }, [pedidoID])
     
     useEffect(() => {
@@ -597,6 +622,7 @@ const createComprobanteVenta = ({exito , pedidoID}) => {
                                     checked={comprobanteVenta.descuentoBandera}
                                     onChange={handleCheckboxChange}
                                     className="checkbox-envio"
+                                    disabled
                                     />
                                     ¿Descuento?
                                 </label>
@@ -609,6 +635,7 @@ const createComprobanteVenta = ({exito , pedidoID}) => {
                                     value={comprobanteVenta.descuento}
                                     placeholder="Escriba aquí el descuento ..."
                                     className="input-secondary"
+                                    disabled
                                     />
                                 )}
                             </div>

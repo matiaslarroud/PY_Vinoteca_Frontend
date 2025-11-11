@@ -733,7 +733,6 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                                             type="number"
                                             placeholder="Cantidad"
                                             min={1}
-                                            max={opciones_productos.find((p) => p.value === d.producto)?.stock || 0}
                                             value={d.cantidad}
                                             onChange={(e) => handleDetalleChange(i, "cantidad", e.target.value)}
                                             required
@@ -786,7 +785,7 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                                         clickChange(e);
                                     }}
                                     >
-                                    Cargar Presupuesto
+                                    Cargar
                                     </button>
                                 </div>
                             </div>

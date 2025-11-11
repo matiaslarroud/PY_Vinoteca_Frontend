@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { FaPlus, FaShoppingCart , FaHome, FaArrowLeft, FaTrash, FaEdit , FaPrint } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import FormularioPresupuestoUpdate from './updatePresupuesto'
-import FormularioPresupuestoCreate from './createPresupuesto'
+import FormularioPresupuestoCreate from './newPresupuesto'
 import CreateNotaPedido from "../ordenCompra/createOrdenCompra";
 
 const { default: Link } = require("next/link")
