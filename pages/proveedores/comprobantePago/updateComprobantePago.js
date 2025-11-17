@@ -8,7 +8,7 @@ import FormularioMedioPagoCreate from '../../gestion/tablasVarias/medioPago/crea
 const { default: Link } = require("next/link")
 
 const initialStateComprobante = {
-        total:0, fecha:'', proveedor:'', medioPago:'' , comprobantesCompra:''
+        total:0, fecha:'', proveedor:'', medioPago:'' , comprobanteCompra:''
     }
 
 const updateComprobantePago = ({exito , comprobantePagoID}) => {
@@ -23,7 +23,15 @@ const updateComprobantePago = ({exito , comprobantePagoID}) => {
         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobantePago/${comprobantePagoID}`)
             .then((a)=>{return a.json()})
                 .then((s)=>{
-                    setComprobantePago(s.data)
+                    console.log(s.data)
+                    setComprobantePago((prev) => ({
+                        ...prev ,
+                         proveedor: s.data.proveedor,
+                         comprobanteCompra: s.data.comprobanteCompra,
+                         total: s.data.total,
+                         medioPago: s.data.medioPago
+                    }) )
+                    console.log(s.data)
                 })
     }
 
@@ -71,9 +79,9 @@ const updateComprobantePago = ({exito , comprobantePagoID}) => {
     const clickChange = async(e) => {
         e.preventDefault();
         const bodyData = {
-            total: comprobantePago.total,
-            comprobantesCompra: comprobantePago.comprobantesCompra,
-            mediosPago : comprobantePago.medioPago
+            total: comprobantePago.total,         
+            comprobanteCompra: comprobantePago.comprobanteCompra,
+            medioPago : comprobantePago.medioPago
         };
 
         const resComprobante = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobantePago/${comprobantePagoID}`, {
@@ -88,8 +96,6 @@ const updateComprobantePago = ({exito , comprobantePagoID}) => {
             console.log("Error con el envio de datos.")
             return
         }
-
-        setRecibo(initialStateComprobante);
         exito();
     }
   
@@ -120,14 +126,9 @@ const updateComprobantePago = ({exito , comprobantePagoID}) => {
 
     const opciones_proveedores = proveedores.map(v => ({ value: v._id,label: v.name }));
     const opciones_mediosPago = mediosPago.map(v => ({ value: v._id,label: v.name }));
-
-    const ordenes = ordenesCompra.filter(o => o.proveedor === comprobantePago.proveedor)
-    const ordenIds = ordenes.map(o => o._id);
     const opciones_comprobantesCompra = comprobantesCompra
-        .map(v => ({ value: v._id,label: v.name }))
-        .filter(c => ordenIds.includes(c.ordenCompra))
+        .map(v => ({ value: v._id,label: v._id }))
         
-
     return(
         <>
             {mostrarModalCreate1 && (
@@ -225,7 +226,7 @@ const updateComprobantePago = ({exito , comprobantePagoID}) => {
                                 className="form-select-react"
                                 classNamePrefix="rs"
                                 options={opciones_comprobantesCompra}
-                                value={opciones_comprobantesCompra.find(op => op.value === comprobantePago.comprobantesCompra) || null}
+                                value={opciones_comprobantesCompra.find(op => op.value === comprobantePago.comprobanteCompra) || null}
                                 onChange={selectChange}
                                 name='comprobanteCompra'
                                 placeholder="Comprobante de compra..."
@@ -334,6 +335,7 @@ const updateComprobantePago = ({exito , comprobantePagoID}) => {
                                 name="total"
                                 />
                         </div>
+                        
                         <div className="form-submit">
                             <button
                             type="submit"

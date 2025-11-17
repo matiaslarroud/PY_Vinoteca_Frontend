@@ -1,23 +1,31 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit , FaPrint , FaFileInvoiceDollar } from "react-icons/fa";
+import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit , FaPrint , FaSearch ,  FaFileInvoiceDollar  } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import FormularioOrdenCompraUpdate from './updateOrdenCompra'
 import FormularioOrdenCompraCreate from './newOrdenCompra'
-// import FormularioComprobanteVentaByNotaPedido from '../comprobanteVenta/create_ComprobanteVenta'
+import BusquedaAvanzadaOrdenCompra from "./busquedaOrdenCompra";
+import FormularioComprobanteCompraByCompra from '../comprobanteCompra/createComprobanteCompra'
 
 const { default: Link } = require("next/link")
 
 const indexOrdenCompra = () => {
+    const initialStateOrdenCompra = {
+        total:'', fecha:'', fechaEntrega:'', proveedor:'', empleado:'',
+        presupuesto:'', medioPago:'', ordenCompraID:''
+    }
     const router = useRouter();
     const [presupuestos,setPresupuestos] = useState([]);   
     const [ordenes,setOrdenes] = useState([]);
     const [proveedores,setProveedores] = useState([]);  
     const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
     const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
-    // const [mostrarModalComprobanteVenta, setMostrarModalComprobanteVenta] = useState(null);
+    const [mostrarModalBuscar, setMostrarModalBuscar] = useState(null);
+    const [mostrarModalComprobanteCompra, setMostrarModalComprobanteCompra] = useState(null);
     
-    const [filtroNombre, setFiltroNombre] = useState('');
-    const [filtroPresupuesto , setFiltroPresupuesto] = useState('');  
+    const [filtro , setFiltro] = useState(initialStateOrdenCompra);
+    const [filtroDetalle , setFiltroDetalle] = useState([]); 
+
+    
     const [orden, setOrden] = useState({ campo: '', asc: true });
 
     const toggleOrden = (campo) => {
@@ -28,16 +36,6 @@ const indexOrdenCompra = () => {
     };                
 
   const ordenesFiltrados = ordenes
-    .filter(p => {
-      const proveedorNombre = proveedores.find(d => d._id === p.proveedor)?.name || '';
-      const coincideNombre = proveedorNombre.toLowerCase().includes(filtroNombre.toLowerCase())
-      
-      const presupuestoID = presupuestos.find(d => d._id === p.presupuesto)?._id || '';
-      const coincidePresupuesto = presupuestoID.toString().includes(filtroPresupuesto);
-
-      
-      return coincideNombre && coincidePresupuesto;
-    })
     .sort((a, b) => {
       const campo = orden.campo;
       if (!campo) return 0;
@@ -161,6 +159,37 @@ const indexOrdenCompra = () => {
 
     return(
         <>
+            
+  
+            {mostrarModalBuscar && (
+            <div className="modal">
+                <div className="modal-content">
+                <button
+                    className="close"
+                    onClick={() => {
+                    setMostrarModalBuscar(null);
+                    }}
+                >
+                    &times;
+                </button>
+
+                <BusquedaAvanzadaOrdenCompra
+                    filtro={filtro} // ✅ le pasamos el estado actual
+                    filtroDetalle={filtroDetalle}
+                    exito={(resultados) => {
+                    if (resultados.length > 0) {
+                        setOrdenes(resultados);
+                        setMostrarModalBuscar(false);
+                    } else {
+                        alert("No se encontraron resultados");
+                    }
+                    }}
+                    onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)} // ✅ manejamos los cambios desde el hijo
+                    onChangeFiltroDetalle={(nuevoFiltroDetalle) => setFiltroDetalle(nuevoFiltroDetalle)}
+                />
+                </div>
+            </div>
+            )}
             {mostrarModalCreate && (
                 <div className="modal">
                     <div className="modal-content">
@@ -172,6 +201,23 @@ const indexOrdenCompra = () => {
                                 setMostrarModalCreate(false);
                                 fetchData();
                             }}
+                        />
+                    </div>
+                </div>
+            )}
+
+            {mostrarModalComprobanteCompra && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="close" onClick={() => setMostrarModalComprobanteCompra(null)}>
+                            &times;
+                        </button>
+                        <FormularioComprobanteCompraByCompra 
+                            ordenID={mostrarModalComprobanteCompra} 
+                            exito={()=>{
+                                setMostrarModalComprobanteCompra(null);
+                                fetchData();
+                            }}    
                         />
                     </div>
                 </div>
@@ -207,24 +253,15 @@ const indexOrdenCompra = () => {
                 </button>
                 <button className="btn-icon" onClick={() => setMostrarModalCreate(true)} title="Agregar Orden de Compra">
                      <FaPlus />
+                </button>           
+                <button onClick={() => 
+                    setMostrarModalBuscar(true)
+                    }            
+                    className="btn-icon" title="Busqueda avanzada de ordenes de compra">
+                    <FaSearch />
                 </button>               
             </div>
             <div className="contenedor-tabla">
-                <div className="filtros">
-                    <input
-                        type="text"
-                        placeholder="Filtrar por proveedor..."
-                        value={filtroNombre}
-                        onChange={(e) => setFiltroNombre(e.target.value)}
-                    />
-                    <input
-                        type="text"
-                        placeholder="Filtrar por presupuesto..."
-                        value={filtroPresupuesto}
-                        onChange={(e) => setFiltroPresupuesto(e.target.value)}
-                    />
-                </div>
-
                 <div className="tabla-scroll">
                     <table id="tablaVinos">
                         <thead>
@@ -250,6 +287,9 @@ const indexOrdenCompra = () => {
                                         <td className="columna">${total}</td>
                                         <td className="columna">
                                             <div className="acciones">
+                                                <button onClick={() => setMostrarModalComprobanteCompra(_id)} className="btn-icon" title="Generar Comprobante de Compra">
+                                                    <FaFileInvoiceDollar />
+                                                </button>
                                                 <button className="btn-icon"
                                                     onClick={() => {
                                                         setMostrarModalUpdate(_id);
@@ -260,18 +300,9 @@ const indexOrdenCompra = () => {
                                                 <button onClick={() => imprimirOrden(_id)}  className="btn-icon" title="Imprimir">
                                                     <FaPrint />
                                                 </button>
-                                                {/* <button   className="btn-icon" title="Generar comprobante de compra">
-                                                    <FaFileInvoiceDollar onClick={() => {
-                                                        if (facturado) {
-                                                        alert("Este pedido ya fue facturado y no se puede modificar.");
-                                                        return;
-                                                        }
-                                                        setMostrarModalComprobanteVenta(_id);
-                                                    }} />
-                                                </button> */}
-                                                <button onClick={() => deleteOrden(_id)}  className="btn-icon" title="Eliminar">
+                                                {/* <button onClick={() => deleteOrden(_id)}  className="btn-icon" title="Eliminar">
                                                     <FaTrash />
-                                                </button>
+                                                </button> */}
                                             </div>
                                         </td>
                                     </tr>

@@ -8,7 +8,7 @@ import { FaTrash} from "react-icons/fa";
 const { default: Link } = require("next/link")
 
 const initialStateOrdenCompra = {
-        total:'', fecha:'', fechaEntrega:'', proveedor:'', empleado:'',
+        total:0, fecha:'', fechaEntrega:'', proveedor:'', empleado:'',
         presupuesto:'', medioPago:'',
     }
 const initialDetalle = { 
@@ -121,15 +121,6 @@ const newOrdenCompra = ({exito}) => {
         }
     }, [productos, detalles]);
 
-    const handleCheckboxChange = (e) => {
-        setHabilitado(e.target.checked);
-
-        setNotaPedido({
-            ...ordenCompra,
-            envio: e.target.checked,
-        });
-    };
-
 
     const clickChange = async(e) => {
         e.preventDefault();
@@ -182,12 +173,21 @@ const newOrdenCompra = ({exito}) => {
         nuevosDetalles[index][field] = field === "cantidad" ? parseFloat(value) : value;
         
         const prod = productos.find(p => p._id === nuevosDetalles[index].producto);
-
+       
         if (prod) {
-            const precio = presupuestos.find(p => p.producto === nuevosDetalles[index].producto).precio;
+            if(prod.precioCosto){
+                const ganancia = prod.ganancia;
+                const precio = prod.precioCosto + ((prod.precioCosto * ganancia) / 100);
+                
+                nuevosDetalles[index].precio = precio;
+                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
+            }
+            if(!prod.precioCosto && prod.precioVenta){
+                const precio = prod.precioVenta;
 
-            nuevosDetalles[index].precio = precio;
-            nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
+                nuevosDetalles[index].precio = precio;
+                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
+            }
 
         } else {
             nuevosDetalles[index].precio = 0;
@@ -245,9 +245,9 @@ const newOrdenCompra = ({exito}) => {
     
     const calcularTotal = (detalles) => {
         const totalPedido = Array.isArray(detalles) && detalles.length > 0
-            ? detalles.reduce((acc, d) => acc + (d.subtotal || 0), 0)
+            ? detalles.reduce((acc, d) => acc + (d.importe || 0), 0)
                 : 0;
-        setNotaPedido((prev) => ({ ...prev, total:totalPedido }));
+        setOrdenCompra((prev) => ({ ...prev, total:totalPedido }));
     };
 
     const [mostrarModalCreate1, setMostrarModalCreate1] = useState(false);

@@ -76,48 +76,18 @@ const busquedaSolicitud = ({ exito, filtro, onChangeFiltro , filtroDetalle , onC
                 })
     }
     useEffect(()=>{
-        setDetalles([]);
         fetchData_Proveedores();
         fetchData_Empleados();
         fetchData_Productos();
         fetchData_TipoProductos();
     }, [])
-    
-    const calcularTotal = (detalles) => {
-        const totalPresupuesto = Array.isArray(detalles) && detalles.length > 0
-            ? detalles.reduce((acc, d) => acc + (d.importe || 0), 0)
-                : 0;
-        setPresupuesto((prev) => ({ ...prev, total:totalPresupuesto }));
-    };
 
     const handleDetalleChange = (index, field, value) => {
         const nuevosDetalles = [...detalles];
-        nuevosDetalles[index][field] = field === "cantidad" ? parseFloat(value) : value;
-        
-        const prod = productos.find(p => p._id === nuevosDetalles[index].producto);
-       
-        if (prod) {
-            if(prod.precioCosto){
-                const ganancia = prod.ganancia;
-                const precio = prod.precioCosto + ((prod.precioCosto * ganancia) / 100);
-                
-                nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
-            }
-            if(!prod.precioCosto && prod.precioVenta){
-                const precio = prod.precioVenta;
-
-                nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
-            }
-
-        } else {
-            nuevosDetalles[index].precio = 0;
-            nuevosDetalles[index].importe = 0;
-        }
+        nuevosDetalles[index][field] = value;
 
         setDetalles(nuevosDetalles);
-        calcularTotal(nuevosDetalles);
+        onChangeFiltroDetalle(nuevosDetalles)
     };
     
     const handleBuscar = async (e) => {
@@ -132,7 +102,7 @@ const busquedaSolicitud = ({ exito, filtro, onChangeFiltro , filtroDetalle , onC
             }))
         };
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuestoSolicitud/buscar`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuesto/buscar`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body),
@@ -421,21 +391,6 @@ const busquedaSolicitud = ({ exito, filtro, onChangeFiltro , filtroDetalle , onC
                                             }}
                                         />
                                     </div>
-                                    
-                                    <div className='form-col-item1'>
-                                        <input
-                                            type="number"
-                                            placeholder="Cantidad"
-                                            min={1}
-                                            value={d.cantidad}
-                                            onChange={(e) => handleDetalleChange(i, "cantidad", e.target.value)}
-                                            required
-                                        />
-                                    </div>
-
-                                    <div className='form-col-item2'>
-                                        <span>Importe: ${d.importe.toFixed(2)}</span>
-                                    </div>
 
                                     <div className='form-col-item2'>
                                         <button
@@ -444,7 +399,6 @@ const busquedaSolicitud = ({ exito, filtro, onChangeFiltro , filtroDetalle , onC
                                             onClick={() => {
                                                 const productos = detalles.filter((_, index) => index !== i);
                                                 setDetalles(productos);
-                                                calcularTotal(productos);
                                             }}
                                             >                                    
                                             <FaTrash />

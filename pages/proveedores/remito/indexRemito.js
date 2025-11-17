@@ -1,21 +1,28 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaHome, FaArrowLeft, FaTrash ,FaPrint  } from "react-icons/fa";
+import { FaPlus, FaHome, FaArrowLeft, FaTrash , FaEye , FaSearch } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import FormularioRemitoCreate from './new_RemitoProveedor'
-import FormularioRemitoUpdate from './update_RemitoProveedor'
+import FormularioRemitoView from './view_RemitoProveedor'
+import FormularioRemitoBusqueda from './busqueda_RemitoProveedor'
 
 
 const { default: Link } = require("next/link")
 
 const indexRemito = () => {
+    
+    const initialState = {remitoID:'',proveedor:'',totalPrecio:0, totalBultos:0 , comprobanteCompra:'', transporte:''}
     const router = useRouter();
     const [remitos,setRemitos] = useState([]);   
     const [comprobantesCompra,setComprobantesCompra] = useState([]);
     
     const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
     const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
+    const [mostrarModalView, setMostrarModalView] = useState(null);
+    const [mostrarModalBusqueda, setMostrarModalBusqueda] = useState(null);
     
-    const [filtroComprobanteCompra , setFiltroComprobanteCompra] = useState('');  
+    const [filtro , setFiltro] = useState(initialState);
+    const [filtroDetalle , setFiltroDetalle] = useState([]);  
+    
     const [orden, setOrden] = useState({ campo: '', asc: true });
 
     const toggleOrden = (campo) => {
@@ -26,12 +33,6 @@ const indexRemito = () => {
     };
 
   const remitosFiltrados = remitos
-    .filter(p => {
-      
-      const comprobanteCompraID = comprobantesCompra.find(d => d._id === p.comprobanteCompra)?._id || '';
-      const coincideComprobanteCompra = comprobanteCompraID.toString().includes(filtroComprobanteCompra);
-      return coincideComprobanteCompra;
-    })
     .sort((a, b) => {
       const campo = orden.campo;
       if (!campo) return 0;
@@ -125,6 +126,23 @@ const indexRemito = () => {
                     </div>
                 </div>
             )}
+        
+            {mostrarModalView && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="close" onClick={() => setMostrarModalView(false)}>
+                            &times;
+                        </button>
+                        <FormularioRemitoView 
+                            remitoID={mostrarModalView}
+                            exito={()=>{
+                                setMostrarModalView(false);
+                                fetchData();
+                            }}
+                        />
+                    </div>
+                </div>
+            )}
 
             {mostrarModalUpdate && (
                 <div className="modal">
@@ -142,6 +160,37 @@ const indexRemito = () => {
                     </div>
                 </div>
             )}
+
+            {mostrarModalBusqueda && (
+                <div className="modal">
+                    <div className="modal-content">
+                    <button
+                        className="close"
+                        onClick={() => {
+                        setMostrarModalBusqueda(null);
+                        }}
+                    >
+                        &times;
+                    </button>
+
+                    <FormularioRemitoBusqueda
+                        filtro={filtro} // ✅ le pasamos el estado actual
+                        filtroDetalle={filtroDetalle}
+                        exito={(resultados) => {
+                        if (resultados.length > 0) {
+                            setRemitos(resultados);
+                            setMostrarModalBusqueda(false);
+                        } else {
+                            alert("No se encontraron resultados");
+                        }
+                        }}
+                        onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)} // ✅ manejamos los cambios desde el hijo
+                        onChangeFiltroDetalle={(nuevoFiltroDetalle) => setFiltroDetalle(nuevoFiltroDetalle)}
+                    />
+                    </div>
+                </div>
+            )}
+
             <h1 className="titulo-pagina">Remito</h1>
             
             <div className="botonera">
@@ -156,17 +205,14 @@ const indexRemito = () => {
                 <button className="btn-icon" onClick={() => setMostrarModalCreate(true)} title="Agregar Remito">
                      <FaPlus />
                 </button>               
+                <button onClick={() => 
+                    setMostrarModalBusqueda(true)
+                    }            
+                        className="btn-icon" title="Busqueda avanzada de remitos">
+                    <FaSearch />
+                </button>              
             </div>
             <div className="contenedor-tabla">
-                <div className="filtros">
-                    <input
-                        type="text"
-                        placeholder="Filtrar por comprobante de compra..."
-                        value={filtroComprobanteCompra}
-                        onChange={(e) => setFiltroComprobanteCompra(e.target.value)}
-                    />
-                </div>
-
                 <div className="tabla-scroll">
                     <table id="tablaVinos">
                         <thead>
@@ -191,6 +237,9 @@ const indexRemito = () => {
                                         <td className="columna">{totalBultos}</td>
                                         <td className="columna">
                                             <div className="acciones">
+                                                <button onClick={() => setMostrarModalView(_id)}  className="btn-icon" title="Visualizar">
+                                                    <FaEye />
+                                                </button>
                                                 <button onClick={() => deleteRemito(_id)}  className="btn-icon" title="Eliminar">
                                                     <FaTrash />
                                                 </button>

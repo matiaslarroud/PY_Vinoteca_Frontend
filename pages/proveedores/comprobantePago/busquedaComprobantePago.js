@@ -8,15 +8,28 @@ import FormularioMedioPagoCreate from '../../gestion/tablasVarias/medioPago/crea
 const { default: Link } = require("next/link")
 
 const initialStateComprobante = {
-        total:0, fecha:'', proveedor:'', medioPago:'' , comprobanteCompra:''
+        total:0, fecha:'', proveedor:'', medioPago:'' , comprobanteCompra:'', comprobanteID:''
     }
 
-const createComprobante = ({exito , comprobanteCompraID}) => {
+const busquedaComprobantepago = ({ exito, filtro, onChangeFiltro }) => {
     const [comprobantePago , setComprobantePago] = useState(initialStateComprobante);
+    
     const [comprobantesCompra , setComprobantesCompra] = useState([])
     const [ordenesCompra , setOrdenesCompra] = useState([])
     const [proveedores,setProveedores] = useState([])
     const [mediosPago,setMediosPago] = useState([])
+                        
+    const [filtros, setFiltros] = useState(filtro);
+    
+    // Sincroniza con los cambios del padre
+    useEffect(() => {
+            setFiltros(filtro);
+    }, [filtro]);
+    
+    const borrarFiltros = () => {
+            setFiltros(initialStateComprobante);
+            onChangeFiltro(initialStateComprobante);
+    };
 
     const fetchData_Proveedores = () => {
         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/proveedor`)
@@ -31,20 +44,6 @@ const createComprobante = ({exito , comprobanteCompraID}) => {
             .then((a)=>{return a.json()})
                 .then((s)=>{
                     setMediosPago(s.data)
-                })
-    }
-
-    const fetchData_ComprobantesCompraID = (param) => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompra/${param}`)
-            .then((a)=>{return a.json()})
-                .then((s)=>{
-                    console.log(s.data)
-                    setComprobantePago((prev) => ({
-                        ...prev,
-                        proveedor: s.data.proveedor._id || "",
-                        comprobanteCompra: s.data._id || "",
-                        medioPago: s.data.medioPago || ""
-                    }));
                 })
     }
 
@@ -70,10 +69,6 @@ const createComprobante = ({exito , comprobanteCompraID}) => {
         fetchData_ComprobantesCompra();
     }, [])
 
-    useEffect(()=>{
-        fetchData_ComprobantesCompraID(comprobanteCompraID);
-    }, [comprobanteCompraID])
-
 
     const clickChange = async(e) => {
         e.preventDefault();
@@ -96,29 +91,48 @@ const createComprobante = ({exito , comprobanteCompraID}) => {
             return
         }
 
-        setComprobantePago(initialStateComprobante);
         exito();
-    }
-  
+    }  
 
+    const handleBuscar = async (e) => {
+        e.preventDefault();
+
+        // Armamos el cuerpo a enviar
+        const body = {
+            ...filtros
+        };
+
+        console.log(filtros)
+
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobantePago/buscar`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+        });
+
+        const data = await res.json();
+        if (data.ok){
+            exito(data.data);
+        } else {
+            exito({})
+        }
+    };
     
     const selectChange = (selectedOption, actionMeta) => {
         const name = actionMeta.name;
         const value = selectedOption ? selectedOption.value : "";
+        
+        const nuevosFiltros = { ...filtros, [name]: value };
 
-        setComprobantePago({
-            ...comprobantePago,
-            [name]: value,
-        });
-    };
+        setFiltros(nuevosFiltros);
+        onChangeFiltro(nuevosFiltros); 
+    }
 
     const inputChange = (e) => {
         const { name, value } = e.target;
-
-        setComprobantePago({
-            ...comprobantePago,
-            [name]: name === "total" ? Number(value) : value,
-        });
+        const nuevosFiltros = { ...filtros, [name]: value };
+        setFiltros(nuevosFiltros);
+        onChangeFiltro(nuevosFiltros); 
     };
 
 
@@ -128,15 +142,15 @@ const createComprobante = ({exito , comprobanteCompraID}) => {
     const opciones_proveedores = proveedores.map(v => ({ value: v._id,label: v.name }));
     const opciones_mediosPago = mediosPago.map(v => ({ value: v._id,label: v.name }));
 
-    const ordenes = ordenesCompra.filter(o => o.proveedor === comprobantePago.proveedor)
-    const ordenIds = ordenes.map(o => o._id);
     const opciones_comprobantesCompra = comprobantesCompra
     .map(v => ({
         value: v._id,
         label: v._id,
         ordenCompra: v.ordenCompra
     }))
-    .filter(c => ordenIds.includes(c.ordenCompra));
+
+
+
 
     return(
         <>
@@ -170,20 +184,31 @@ const createComprobante = ({exito , comprobanteCompraID}) => {
 
             <div className="form-container">
                 
-                <h1 className="titulo-pagina">Cargar Comprobante de Pago</h1>
+                <h1 className="titulo-pagina">Busqueda Avanzada de Comprobante de Pago</h1>
                 <br/>
                 <form id="formProducto" className="formulario-presupuesto">
                     <div className="form-row">
                         <div className="form-col1">
                             <label>
+                                Comprobante de Pago N° :
+                            </label>
+                            <input
+                                type="number"
+                                className="input-secondary"
+                                value={filtros.comprobanteID}
+                                name="comprobanteID"
+                                onChange={inputChange}
+                                />
+                        </div>
+                        <div className="form-col1">
+                            <label>
                                 Proveedor:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
                                 classNamePrefix="rs"
                                 options={opciones_proveedores}
-                                value={opciones_proveedores.find(op => op.value === comprobantePago.proveedor) || null}
+                                value={opciones_proveedores.find(op => op.value === filtros.proveedor) || null}
                                 onChange={selectChange}
                                 name='proveedor'
                                 placeholder="Proveedor..."
@@ -235,7 +260,7 @@ const createComprobante = ({exito , comprobanteCompraID}) => {
                                 className="form-select-react"
                                 classNamePrefix="rs"
                                 options={opciones_comprobantesCompra}
-                                value={opciones_comprobantesCompra.find(op => op.value === comprobantePago.comprobanteCompra) || null}
+                                value={opciones_comprobantesCompra.find(op => op.value === filtros.comprobanteCompra) || null}
                                 onChange={selectChange}
                                 name='comprobanteCompra'
                                 placeholder="Comprobante de compra..."
@@ -282,13 +307,12 @@ const createComprobante = ({exito , comprobanteCompraID}) => {
                         <div className="form-col1">
                             <label>
                                 Medio de Pago:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate1(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
                                 classNamePrefix="rs"
                                 options={opciones_mediosPago}
-                                value={opciones_mediosPago.find(op => op.value === comprobantePago.medioPago) || null}
+                                value={opciones_mediosPago.find(op => op.value === filtros.medioPago) || null}
                                 onChange={selectChange}
                                 name='medioPago'
                                 placeholder="Medio de Pago..."
@@ -340,21 +364,22 @@ const createComprobante = ({exito , comprobanteCompraID}) => {
                                 type="number"
                                 className="input-secondary"
                                 onChange={inputChange}
-                                value={comprobantePago.total}
+                                value={filtros.total}
                                 name="total"
                                 />
                         </div>
-                        <div className="form-submit">
-                            <button
-                            type="submit"
+                    </div>                 
+                        
+                    <div className="form-submit">
+                        <button type="submit" className="submit-btn" onClick={handleBuscar}>Buscar</button>
+                        <button
+                            type="button"
                             className="submit-btn"
-                            onClick={(e) => {
-                                clickChange(e);
-                            }}
+                            style={{ backgroundColor: "#444", marginLeft: "1rem" }}
+                            onClick={borrarFiltros}
                             >
-                            Cargar
-                            </button>
-                        </div>
+                            Borrar filtros
+                        </button>
                     </div>
                 </form>
             </div>
@@ -491,4 +516,4 @@ const createComprobante = ({exito , comprobanteCompraID}) => {
     )
 }
 
-export default createComprobante;
+export default busquedaComprobantepago;

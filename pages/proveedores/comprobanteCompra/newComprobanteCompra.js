@@ -147,10 +147,19 @@ const newComprobanteCompra = ({exito}) => {
         const prod = productos.find(p => p._id === nuevosDetalles[index].producto);
 
         if (prod) {
-            const precio = presupuestos.find(p => p.producto === nuevosDetalles[index].producto).precio;
+            if(prod.precioCosto){
+                const ganancia = prod.ganancia;
+                const precio = prod.precioCosto + ((prod.precioCosto * ganancia) / 100);
 
-            nuevosDetalles[index].precio = precio;
-            nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
+                nuevosDetalles[index].precio = precio;
+                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
+            }
+            if(!prod.precioCosto && prod.precioVenta){
+                const precio = prod.precioVenta;
+
+                nuevosDetalles[index].precio = precio;
+                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
+            }
 
         } else {
             nuevosDetalles[index].precio = 0;
@@ -165,13 +174,13 @@ const newComprobanteCompra = ({exito}) => {
         const name = actionMeta.name;
         const value = selectedOption ? selectedOption.value : "";
 
-        setOrdenCompra({
-            ...ordenCompra,
+        setComprobanteCompra({
+            ...comprobanteCompra,
             [name]: value,
         });
 
-        if (name === 'presupuesto' && value) {
-            agregarDetallePresupuesto(value);
+        if (name === 'ordenCompra' && value) {
+            agregarDetalleOrden(value);
         }
     };
 
@@ -179,10 +188,10 @@ const newComprobanteCompra = ({exito}) => {
         const value = e.target.value;
         const name = e.target.name;
         
-        setOrdenCompra({
-            ...ordenCompra , 
-                [name]:value
-        })   
+        setComprobanteCompra({
+            ...comprobanteCompra,
+            [name]: value,
+        });  
     }
 
     const agregarDetalle = () => {
@@ -289,7 +298,7 @@ const newComprobanteCompra = ({exito}) => {
             <div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
-                        <h1 className="titulo-pagina">Cargar comprobantes de Compra</h1>
+                        <h1 className="titulo-pagina">Cargar Comprobante de Compra</h1>
                     </div>
                 </div>
 
@@ -572,7 +581,7 @@ const newComprobanteCompra = ({exito}) => {
                                         clickChange(e);
                                     }}
                                     >
-                                    Cargar Comprobante
+                                    Cargar
                                     </button>
                                 </div>
                             </div>

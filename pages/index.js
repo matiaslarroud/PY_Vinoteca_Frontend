@@ -17,12 +17,29 @@ export default function Home() {
     }
     setUsuario(JSON.parse(sesion));
 
-    // Cargar productos con stock bajo
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/lowStock`)
-      .then((res) => res.json())
-      .then((data) => setLowStockProducts(data.data))
-      .catch(console.error);
+    // // Cargar productos con stock bajo
+    // fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/lowStock`)
+    //   .then((res) => res.json())
+    //   .then((data) => setLowStockProducts(data.data))
+    //   .catch(console.error);
   }, []);
+
+  useEffect(() => {
+    if (!usuario) return;
+
+    if (usuario.rol === "vendedor") {
+      router.push("/clientes/indexClientes");
+      return;
+    }
+
+    // Si es administrador, cargar stock bajo
+    if (usuario.rol === "administrador") {
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/lowStock`)
+        .then((res) => res.json())
+        .then((data) => setLowStockProducts(data.data))
+        .catch(console.error);
+    }
+  }, [usuario]);
 
   if (!usuario) return null;
 

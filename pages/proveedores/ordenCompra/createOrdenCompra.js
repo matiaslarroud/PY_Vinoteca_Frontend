@@ -16,15 +16,8 @@ const initialDetalle = {
     };
 
 const newOrdenCompra = ({exito , tipo , param}) => {
-    const [ordenCompra , setOrdenCompra] = useState(() => {
-        if(tipo === 'presupuesto'){
-            return {
-                ...initialStateOrdenCompra,
-                    presupuesto: param
-        }
-        }
-        return initialStateOrdenCompra
-    });
+    const [ordenCompra, setOrdenCompra] = useState(initialStateOrdenCompra);
+
     
     const [proveedores,setProveedores] = useState([])
     const [presupuestos,setPresupuestos] = useState([])
@@ -49,6 +42,29 @@ const newOrdenCompra = ({exito , tipo , param}) => {
             })
         .catch((err)=>{console.log("Error al cargar presupuestos.\nError: ",err)})
     }
+    
+    const fetchData_PresupuestoID = (param) => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuesto/${param}`)
+            .then((a)=>{return a.json()})
+                .then((s)=>{
+                    setOrdenCompra((prev) => ({
+                        ...prev,
+                        proveedor: s.data.proveedor || "",
+                        empleado: s.data.empleado || "",
+                        presupuesto: s.data._id || "",
+                        total:s.data.total || 0
+                    }));
+                })
+        }
+    
+    const fetchData_PresupuestoDetalleID = (param) => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuestoDetalle/presupuesto/${param}`)
+            .then((a)=>{return a.json()})
+                .then((s)=>{
+                    setDetalles(s.data)
+                })
+        }
+        
     
     const fetchData_TipoProductos = () => {
     fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/tipos`)
@@ -102,7 +118,6 @@ const newOrdenCompra = ({exito , tipo , param}) => {
     
 
     useEffect(()=>{
-        setDetalles([]);
         fetchData_Proveedores();
         fetchData_Empleados();
         fetchData_Presupuestos();
@@ -110,6 +125,15 @@ const newOrdenCompra = ({exito , tipo , param}) => {
         fetchData_Productos();
         fetchData_TipoProductos();
     }, [])
+
+
+    useEffect(() => {
+        if (tipo === "presupuesto" && param) {
+            fetchData_PresupuestoID(param);
+            fetchData_PresupuestoDetalleID(param);
+        }
+    }, [tipo, param]);
+
 
     useEffect(() => {
         if (!productos.length || !detalles.length) return;
@@ -128,15 +152,6 @@ const newOrdenCompra = ({exito , tipo , param}) => {
             setDetalles(detallesConTipo);
         }
     }, [productos, detalles]);
-
-    const handleCheckboxChange = (e) => {
-        setHabilitado(e.target.checked);
-
-        setNotaPedido({
-            ...ordenCompra,
-            envio: e.target.checked,
-        });
-    };
 
 
     const clickChange = async(e) => {
@@ -190,12 +205,21 @@ const newOrdenCompra = ({exito , tipo , param}) => {
         nuevosDetalles[index][field] = field === "cantidad" ? parseFloat(value) : value;
         
         const prod = productos.find(p => p._id === nuevosDetalles[index].producto);
-
+       
         if (prod) {
-            const precio = presupuestos.find(p => p.producto === nuevosDetalles[index].producto).precio;
+            if(prod.precioCosto){
+                const ganancia = prod.ganancia;
+                const precio = prod.precioCosto + ((prod.precioCosto * ganancia) / 100);
+                
+                nuevosDetalles[index].precio = precio;
+                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
+            }
+            if(!prod.precioCosto && prod.precioVenta){
+                const precio = prod.precioVenta;
 
-            nuevosDetalles[index].precio = precio;
-            nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
+                nuevosDetalles[index].precio = precio;
+                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
+            }
 
         } else {
             nuevosDetalles[index].precio = 0;
@@ -253,9 +277,9 @@ const newOrdenCompra = ({exito , tipo , param}) => {
     
     const calcularTotal = (detalles) => {
         const totalPedido = Array.isArray(detalles) && detalles.length > 0
-            ? detalles.reduce((acc, d) => acc + (d.subtotal || 0), 0)
+            ? detalles.reduce((acc, d) => acc + (d.importe || 0), 0)
                 : 0;
-        setNotaPedido((prev) => ({ ...prev, total:totalPedido }));
+        setOrdenCompra((prev) => ({ ...prev, total:totalPedido }));
     };
 
     const [mostrarModalCreate1, setMostrarModalCreate1] = useState(false);

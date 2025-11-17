@@ -175,97 +175,94 @@ const createPresupuesto = ({exito}) => {
     }
     
 const agregarDetallePresupuesto = async (solicitudID) => {
-  try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuestoDetalle/solicitudPresupuesto/${solicitudID}`
-    );
-    const s = await res.json();
-
-    if (!s.ok) {
-      console.error("Error al cargar detalles de la solicitud:", s.message);
-      return;
-    }
-
-    // s.data es un array de detalles [{producto, cantidad}, ...]
-    const nuevosDetalles = await Promise.all(
-      s.data.map(async (detalle) => {
-        let precio = 0;
-        let importe = 0;
-        // Buscamos los datos del producto
-        const prodRes = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/${detalle.producto}`
+    try {
+        // 1. Traer los detalles de la solicitud
+        const res = await fetch(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuestoDetalle/solicitudPresupuesto/${solicitudID}`
         );
-        const prodData = await prodRes.json();
 
-        if (!prodData.ok) return null;
+        const data = await res.json();
 
-
-        if(prodData.data.precioCosto){
-            ganancia = ( prodData.data.ganancia ) / 100;
-            precio = prodData.data.precioCosto + ( prodData.data.precioCosto * ganancia )
-            importe = precio * detalle.cantidad;
+        if (!Array.isArray(data?.data) || data.data.length === 0) {
+            console.error("La solicitud no contiene ningún detalle.");
+            return;
         }
 
-        if(prodData.data.precioVenta){
-            precio = prodData.data.precioVenta
-            importe = ( prodData.data.precioVenta)* detalle.cantidad ;
+        const detallesSolicitud = data.data;
+
+        const nuevosDetalles = [...detalles];
+
+        // 2. Recorrer los detalles y obtener la info del producto
+        for (const det of detallesSolicitud) {
+            const productoID = det.producto;
+
+            // Obtener producto por ID
+            const resProducto = await fetch(
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/${productoID}`
+            );
+
+            const dataProducto = await resProducto.json();
+
+            if (!dataProducto?.data) {
+                console.error(`No se encontró el producto con ID ${productoID}`);
+                continue;
+            }
+
+            const prod = dataProducto.data;
+
+            // 3. Armar el nuevo detalle
+            const nuevoDetalle = {
+                tipoProducto: prod.tipoProducto || "",
+                producto: prod._id || "",
+                cantidad: Number(det.cantidad) || 0,
+
+                // Campos a completar por el usuario
+                precio: 0,
+                importe: 0,
+            };
+
+            // 4. Agregar al array final
+            nuevosDetalles.push(nuevoDetalle);
         }
 
-        return {
-          tipoProducto: prodData.data.tipo || "",
-          producto: detalle.producto,
-          cantidad: detalle.cantidad,
-          precio,
-          importe
-        };
-      })
-    );
+        // 5. Actualizar estado y recálculo
+        setDetalles(nuevosDetalles);
+        calcularTotal(nuevosDetalles);
 
-    // Filtramos por si alguno vino como null
-    const filtrados = nuevosDetalles.filter((d) => d !== null);
-
-    // Actualizamos el estado con todos los detalles nuevos
-    setDetalles((prev) => [...prev, ...filtrados]);
-
-    // Si tenés una función que recalcula el total:
-    calcularTotal(filtrados);
-
-  } catch (error) {
-    console.error("Error de red al cargar detalles del presupuesto:", error);
-  }
+    } catch (error) {
+        console.error("Error al cargar el detalle de la solicitud:", error);
+    }
 };
 
 
+
     const handleDetalleChange = (index, field, value) => {
-        const nuevosDetalles = [...detalles];
-        nuevosDetalles[index][field] = field === "cantidad" ? parseFloat(value) : value;
-        
-        const prod = productos.find(p => p._id === nuevosDetalles[index].producto);
-       
-        if (prod) {
-            if(prod.precioCosto){
-                const ganancia = prod.ganancia;
-                const precio = prod.precioCosto + ((prod.precioCosto * ganancia) / 100);
-                
-                nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
-            }
-            if(!prod.precioCosto && prod.precioVenta){
-                const precio = prod.precioVenta;
+    const nuevosDetalles = [...detalles];
 
-                nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
-            }
+    // Siempre convertir valor de entrada a número si corresponde
+    const numValue = parseFloat(value) || 0;
 
-        } else {
-            nuevosDetalles[index].precio = 0;
-            nuevosDetalles[index].importe = 0;
-        }
+    if (field === "cantidad") {
+        nuevosDetalles[index].cantidad = numValue;
+        nuevosDetalles[index].importe =
+            (nuevosDetalles[index].precio || 0) * numValue;
+    }
 
-        setDetalles(nuevosDetalles);
-        calcularTotal(nuevosDetalles);
-    };
-    
+    else if (field === "precio") {
+        nuevosDetalles[index].precio = numValue;
+        nuevosDetalles[index].importe =
+            numValue * (nuevosDetalles[index].cantidad || 0);
+    }
+
+    else {
+        // Para cualquier otro campo (ej: nombre, productoVino, etc.)
+        nuevosDetalles[index][field] = value;
+    }
+
+    setDetalles(nuevosDetalles);
+    calcularTotal(nuevosDetalles);
+};
+
     const selectChange = (selectedOption, actionMeta) => {
         const name = actionMeta.name;
         const value = selectedOption ? selectedOption.value : "";
@@ -604,7 +601,7 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                                                 }),
                                                 control: (base) => ({
                                                 ...base,
-                                                minWidth: 150,
+                                                minWidth: 120,
                                                 maxWidth: 150,
                                                 backgroundColor: '#2c2c2c',
                                                 color: 'white',
@@ -692,6 +689,17 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                                             min={1}
                                             value={d.cantidad}
                                             onChange={(e) => handleDetalleChange(i, "cantidad", e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                    
+                                    <div className='form-col-item1'>
+                                        <input
+                                            type="number"
+                                            placeholder="Precio Unitario"
+                                            min={0}
+                                            value={d.precio}
+                                            onChange={(e) => handleDetalleChange(i, "precio", e.target.value)}
                                             required
                                         />
                                     </div>
@@ -859,27 +867,6 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                         display: flex;
                         flex-direction: column;
                     }
-                        
-                    .form-col-item1 {
-                        flex: 3;
-                        min-width: 0; /* Importante para que no desborde */
-                        display: flex;
-                        flex-direction: column;
-                    }
-                        
-                    .form-col-item2 {
-                        flex: 2;
-                        min-width: 0; /* Importante para que no desborde */
-                        display: flex;
-                        flex-direction: column;
-                    }
-
-                    .form-col-precioVenta {
-                        flex: 2;
-                        min-width: 0;
-                        display: flex;
-                        flex-direction: column;
-                    }
 
 
                     label {
@@ -928,11 +915,43 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                     }
 
                     .presupuesto-item {
-                        display: flex;
+                        display: grid;
+                        grid-template-columns: 150px 170px 100px 100px 120px 60px;
+                        /*      Tipo      Producto   Cant.  Precio  Importe  Borrar */
+                        gap: 0.5rem;
                         align-items: center;
-                        gap: 1rem;
-                        flex-wrap: wrap;
+                        width: 100%;
                     }
+                        
+                    .form-col-item1 {
+                        flex: 0 0 auto;      /* ⬅️ evita que se estiren demasiado */
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                    }
+
+                        
+                    .form-col-item2 {
+                        flex: 2;
+                        min-width: 0; /* Importante para que no desborde */
+                        display: flex;
+                        flex-direction: column;
+                    }
+
+                    .form-col-precioVenta {
+                        flex: 2;
+                        min-width: 0;
+                        display: flex;
+                        flex-direction: column;
+                    }
+                    
+                    .form-col-item1,
+                    .form-col-item2 {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                    }
+
 
                     .presupuesto-item input[type="number"] {
                         width: 80px;

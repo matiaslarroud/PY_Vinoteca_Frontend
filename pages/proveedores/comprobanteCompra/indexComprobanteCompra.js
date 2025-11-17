@@ -1,23 +1,29 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit , FaPrint , FaFileInvoiceDollar } from "react-icons/fa";
+import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit , FaSearch , FaFileInvoice } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import FormularioComprobanteCompraUpdate from './updateComprobanteCompra'
 import FormularioComprobanteCompraCreate from './newComprobanteCompra'
-// import FormularioComprobanteVentaByNotaPedido from '../comprobanteVenta/create_ComprobanteVenta'
+import FormularioBusquedaComprobante from './busquedaComprobanteCompra'
+import FormularioComprobantePagoCreate from '../comprobantePago/createComprobantePago'
 
 const { default: Link } = require("next/link")
 
 const indexComprobanteCompra = () => {
+const initialStateComprobanteCompra = {
+        total:'', fecha:'', ordenCompra:'', proveedor: ''
+    }
     const router = useRouter();
     const [comprobantes,setComprobantes] = useState([]);   
     const [ordenes,setOrdenes] = useState([]);
     const [proveedores,setProveedores] = useState([]);  
     const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
     const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
-    // const [mostrarModalComprobanteVenta, setMostrarModalComprobanteVenta] = useState(null);
+    const [mostrarModalBusqueda, setMostrarModalBusqueda] = useState(null);
+    const [mostrarModalComprobantePago, setMostrarModalComprobantePago] = useState(null);
+        
+    const [filtro , setFiltro] = useState(initialStateComprobanteCompra);
+    const [filtroDetalle , setFiltroDetalle] = useState([]);  
     
-    const [filtroNombre, setFiltroNombre] = useState('');
-    const [filtroOrden , setFiltroOrden] = useState('');  
     const [orden, setOrden] = useState({ campo: '', asc: true });
 
     const toggleOrden = (campo) => {
@@ -28,16 +34,6 @@ const indexComprobanteCompra = () => {
     };                
 
   const comprobantesFiltrados = comprobantes
-    .filter(p => {
-      const proveedorNombre = proveedores.find(d => d._id === p.proveedor)?.name || '';
-      const coincideNombre = proveedorNombre.toLowerCase().includes(filtroNombre.toLowerCase())
-      
-      const ordenID = ordenes.find(d => d._id === p.ordenCompra)?._id || '';
-      const coincideOrden = ordenID.toString().includes(filtroOrden);
-
-      
-      return coincideNombre && coincideOrden;
-    })
     .sort((a, b) => {
       const campo = orden.campo;
       if (!campo) return 0;
@@ -167,6 +163,53 @@ const indexComprobanteCompra = () => {
                 </div>
             )}
 
+            {mostrarModalBusqueda && (
+                <div className="modal">
+                    <div className="modal-content">
+                    <button
+                        className="close"
+                        onClick={() => {
+                        setMostrarModalBusqueda(null);
+                        }}
+                    >
+                        &times;
+                    </button>
+
+                    <FormularioBusquedaComprobante
+                        filtro={filtro} // ✅ le pasamos el estado actual
+                        filtroDetalle={filtroDetalle}
+                        exito={(resultados) => {
+                        if (resultados.length > 0) {
+                            setComprobantes(resultados);
+                            setMostrarModalBusqueda(false);
+                        } else {
+                            alert("No se encontraron resultados");
+                        }
+                        }}
+                        onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)} // ✅ manejamos los cambios desde el hijo
+                        onChangeFiltroDetalle={(nuevoFiltroDetalle) => setFiltroDetalle(nuevoFiltroDetalle)}
+                    />
+                    </div>
+                </div>
+            )}
+
+            {mostrarModalComprobantePago && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="close" onClick={() => setMostrarModalComprobantePago(null)}>
+                            &times;
+                        </button>
+                        <FormularioComprobantePagoCreate 
+                            comprobanteCompraID={mostrarModalComprobantePago} 
+                            exito={()=>{
+                                setMostrarModalComprobantePago(null);
+                                fetchData();
+                            }}    
+                        />
+                    </div>
+                </div>
+            )}
+
             <h1 className="titulo-pagina">Comprobante de Compra</h1>
             
             <div className="botonera">
@@ -180,24 +223,15 @@ const indexComprobanteCompra = () => {
                 </button>
                 <button className="btn-icon" onClick={() => setMostrarModalCreate(true)} title="Agregar Orden de Compra">
                      <FaPlus />
-                </button>               
+                </button>                
+                <button onClick={() => 
+                    setMostrarModalBusqueda(true)
+                    }            
+                        className="btn-icon" title="Busqueda avanzada de comprobantes de compra">
+                    <FaSearch />
+                </button>           
             </div>
             <div className="contenedor-tabla">
-                <div className="filtros">
-                    <input
-                        type="text"
-                        placeholder="Filtrar por proveedor..."
-                        value={filtroNombre}
-                        onChange={(e) => setFiltroNombre(e.target.value)}
-                    />
-                    <input
-                        type="text"
-                        placeholder="Filtrar por orden de compra..."
-                        value={filtroOrden}
-                        onChange={(e) => setFiltroOrden(e.target.value)}
-                    />
-                </div>
-
                 <div className="tabla-scroll">
                     <table id="tablaVinos">
                         <thead>
@@ -205,6 +239,7 @@ const indexComprobanteCompra = () => {
                             <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
                             <th onClick={() => toggleOrden('cliente')}>Proveedor ⬍</th>
                             <th onClick={() => toggleOrden('presupuesto')}>Orden de Compra ⬍</th>
+                            <th onClick={() => toggleOrden('completo')}>Recepción ⬍</th>
                             <th onClick={() => toggleOrden('fecha')}>Fecha ⬍</th>
                             <th onClick={() => toggleOrden('total')}>Total ⬍</th>
                             <th>Acciones</th>
@@ -212,7 +247,7 @@ const indexComprobanteCompra = () => {
                         </thead>
                         <tbody>
                             {
-                                comprobantesFiltrados.map(({_id , fecha, total , ordenCompra}) => {
+                                comprobantesFiltrados.map(({_id , fecha, total , ordenCompra , completo}) => {
                                     const proveedor = ordenes.find((p)=>{return p._id === ordenCompra})?.proveedor;
                                     const proveedorEncontrado = proveedores.find((p)=>{return p._id === proveedor});
 
@@ -220,28 +255,24 @@ const indexComprobanteCompra = () => {
                                         <td className="columna">{_id}</td>
                                         <td className="columna">{proveedorEncontrado?.name}</td>
                                         <td className="columna">{ordenCompra}</td>
+                                        <td className="columna">{completo ? 'COMPLETA' : 'PARCIAL'}</td>
                                         <td className="columna">{fecha.split("T")[0]}</td>
                                         <td className="columna">${total}</td>
                                         <td className="columna">
                                             <div className="acciones">
-                                                <button className="btn-icon"
+                                                <button className="btn-icon" title="Generar comprobante de pago"
+                                                    onClick={() => {
+                                                        setMostrarModalComprobantePago(_id);
+                                                    }} 
+                                                >
+                                                    <FaFileInvoice />
+                                                </button>
+                                                <button className="btn-icon" title="Modificar"
                                                     onClick={() => {
                                                         setMostrarModalUpdate(_id);
                                                     }} 
                                                 >
                                                     <FaEdit />
-                                                </button>
-                                                {/* <button   className="btn-icon" title="Generar comprobante de compra">
-                                                    <FaFileInvoiceDollar onClick={() => {
-                                                        if (facturado) {
-                                                        alert("Este pedido ya fue facturado y no se puede modificar.");
-                                                        return;
-                                                        }
-                                                        setMostrarModalComprobanteVenta(_id);
-                                                    }} />
-                                                </button> */}
-                                                <button onClick={() => deleteComprobante(_id)}  className="btn-icon" title="Eliminar">
-                                                    <FaTrash />
                                                 </button>
                                             </div>
                                         </td>

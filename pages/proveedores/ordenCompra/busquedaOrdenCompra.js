@@ -1,42 +1,58 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';          
 import { FaTrash} from "react-icons/fa";
-import FormularioEmpleadoCreate from '../../gestion/empleado/createEmpleado'
-import FormularioClienteCreate from '../../clientes/createCliente'
-import FormularioMedioPagoCreate from '../../gestion/tablasVarias/medioPago/createMedioPago'
+// import FormularioEmpleadoCreate from '../../gestion/general/empleado/createEmpleado'
+// import FormularioClienteCreate from '../createCliente'
+// import FormularioMedioPagoCreate from '../../gestion/general/medioPago/createMedioPago'
 
 const { default: Link } = require("next/link")
 
-const initialStateComprobanteCompra = {
-        total:0, fecha:'', ordenCompra:'', proveedor: ''
+const initialStateOrdenCompra = {
+        total:'', fecha:'', fechaEntrega:'', proveedor:'', empleado:'',
+        presupuesto:'', medioPago:'', ordenCompraID:''
     }
 const initialDetalle = { 
-         tipoProducto: "", producto: "", cantidad: 0, precio: 0, importe: 0, comprobanteCompra:'' 
+         tipoProducto: "", producto: "", cantidad: 0, precio: 0, importe: 0, ordenCompra:'' 
     };
 
-const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
-    const [comprobanteCompra , setComprobanteCompra] = useState(initialStateComprobanteCompra);
-    
+const busquedaOrdenCompra = ({ exito, filtro, onChangeFiltro , filtroDetalle , onChangeFiltroDetalle }) => {
     const [proveedores,setProveedores] = useState([])
-    const [ordenes,setOrdenes] = useState([])
+    const [presupuestos,setPresupuestos] = useState([])
+    const [empleados,setEmpleados] = useState([])
+    const [mediosPago,setMediosPago] = useState([])
     const [detalles,setDetalles] = useState([initialDetalle])
     const [productos,setProductos] = useState([]);
     const [tipoProductos,setTipoProductos] = useState([]);
+                    
+        const [filtros, setFiltros] = useState(filtro);
+        
+        // Sincroniza con los cambios del padre
+        useEffect(() => {
+                setFiltros(filtro);
+                setDetalles(filtroDetalle)
+        }, [filtro,filtroDetalle]);
+        
+        const borrarFiltros = () => {
+                setFiltros(initialStateOrdenCompra);
+                onChangeFiltro(initialStateOrdenCompra);
+                setDetalles([])
+                onChangeFiltroDetalle([]);
+        };
     
     const detallesValidos = detalles.filter(d => d.producto && d.cantidad > 0);
     const puedeGuardar = detallesValidos.length > 0;
 
-    const fetchData_Ordenes = () => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/ordenCompra`)
+    const fetchData_Presupuestos = () => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuesto`)
         .then((a)=>{
             return a.json();
         })
             .then((s)=>{
                 if(s.ok){
-                    setOrdenes(s.data)
+                    setPresupuestos(s.data)
                 }
             })
-        .catch((err)=>{console.log("Error al cargar ordenes de compra.\nError: ",err)})
+        .catch((err)=>{console.log("Error al cargar presupuestos.\nError: ",err)})
     }
     
     const fetchData_TipoProductos = () => {
@@ -72,43 +88,32 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
                     setProveedores(s.data)
                 })
     }
-    
-    const fetchData = (param) => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompra/${param}`)
-        .then((a)=>{
-            return a.json();
-        })
-            .then((s)=>{
-                if(s.ok){
-                    console.log(s.data)
-                    setComprobanteCompra((prev) => ({
-                        ...prev,
-                        proveedor: s.data.proveedor?._id || "",
-                        ordenCompra: s.data.ordenCompra || "",
-                        total: s.data.total || 0,
-                    }));
-                }
-            })
-        .catch((err)=>{console.log("Error al cargar pedidos.\nError: ",err)})
-    }
-    
-    const fetch_DataDetalle = (param) => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompraDetalle/ComprobanteCompra/${param}`)
+
+    const fetchData_Empleados = () => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/empleado`)
             .then((a)=>{return a.json()})
                 .then((s)=>{
-                    setDetalles(s.data)
+                    setEmpleados(s.data)
+                })
+    }
+
+    const fetchData_MediosPago = () => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/mediopago`)
+            .then((a)=>{return a.json()})
+                .then((s)=>{
+                    setMediosPago(s.data)
                 })
     }
     
 
     useEffect(()=>{
-        fetchData(comprobanteCompraID);
-        fetch_DataDetalle(comprobanteCompraID);
         fetchData_Proveedores();
-        fetchData_Ordenes();
+        fetchData_Empleados();
+        fetchData_Presupuestos();
+        fetchData_MediosPago();
         fetchData_Productos();
         fetchData_TipoProductos();
-    }, [comprobanteCompraID])
+    }, [])
 
     useEffect(() => {
         if (!productos.length || !detalles.length) return;
@@ -129,145 +134,60 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
     }, [productos, detalles]);
 
 
-    const clickChange = async(e) => {
+    const handleBuscar = async (e) => {
         e.preventDefault();
-        const bodyData = {
-            total: comprobanteCompra.total,
-            ordenCompra: comprobanteCompra.ordenCompra,
+
+        // Armamos el cuerpo a enviar
+        const body = {
+            ...filtros,
+            detalles: detalles.map(d => ({
+                tipoProducto: d.tipoProducto,
+                producto: d.producto
+            }))
         };
 
-        const resComprobanteCompra = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompra/${comprobanteCompraID}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(bodyData)
-        })
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/ordenCompra/buscar`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+        });
 
-        const comprobanteCompraCreado = await resComprobanteCompra.json();
-        const comprobanteID = comprobanteCompraCreado.data._id;
-
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompraDetalle/${comprobanteID}`,
-            {
-                method:'DELETE',
-                headers: {
-                    'Content-Type':'application/json',
-                }
-            }
-        ).then((a)=>{return a.json()})
-            .then((res)=>{
-                console.log(res.message);
-            })
-            .catch((err)=>{
-                console.log("Error al enviar detalle de comprobante de compra para su eliminación. \n Error: ",err);
-            })
-
-        // GUARDAMOS DETALLES
-        for (const detalle of detalles) {
-            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompraDetalle`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    producto: detalle.producto,
-                    precio: detalle.precio,
-                    cantidad: detalle.cantidad,
-                    importe: detalle.importe,
-                    comprobanteCompra: comprobanteID
-            })
-            
-            
-            });
-            if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
-            
-            setDetalles([initialDetalle]);
-            setComprobanteCompra(initialStateComprobanteCompra);
-            exito();
+        const data = await res.json();
+        if (data.ok){
+            exito(data.data);
+        } else {
+            exito({})
         }
-    }
+    };
 
     const handleDetalleChange = (index, field, value) => {
         const nuevosDetalles = [...detalles];
-        nuevosDetalles[index][field] = field === "cantidad" ? parseFloat(value) : value;
-        
-        const prod = productos.find(p => p._id === nuevosDetalles[index].producto);
-
-        if (prod) {
-            if(prod.precioCosto){
-                const ganancia = prod.ganancia;
-                const precio = prod.precioCosto + ((prod.precioCosto * ganancia) / 100);
-
-                nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
-            }
-            if(!prod.precioCosto && prod.precioVenta){
-                const precio = prod.precioVenta;
-
-                nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
-            }
-
-        } else {
-            nuevosDetalles[index].precio = 0;
-            nuevosDetalles[index].importe = 0;
-        }
+        nuevosDetalles[index][field] = value;
 
         setDetalles(nuevosDetalles);
-        calcularTotal(nuevosDetalles);
+        onChangeFiltroDetalle(nuevosDetalles)
     };
     
     const selectChange = (selectedOption, actionMeta) => {
         const name = actionMeta.name;
         const value = selectedOption ? selectedOption.value : "";
+        
+        const nuevosFiltros = { ...filtros, [name]: value };
 
-        setComprobanteCompra({
-            ...comprobanteCompra,
-            [name]: value,
-        });
-
-        if (name === 'ordenCompra' && value) {
-            agregarDetalleOrden(value);
-        }
-    };
+        setFiltros(nuevosFiltros);
+        onChangeFiltro(nuevosFiltros); 
+    }
 
     const inputChange = (e) => {
-        const value = e.target.value;
-        const name = e.target.name;
-        
-        setOrdenCompra({
-            ...ordenCompra , 
-                [name]:value
-        })   
-    }
+        const { name, value } = e.target;
+        const nuevosFiltros = { ...filtros, [name]: value };
+        setFiltros(nuevosFiltros);
+        onChangeFiltro(nuevosFiltros); 
+    };
 
     const agregarDetalle = () => {
         setDetalles([...detalles, { ...{tipoProducto:"" , producto: "", cantidad: 0, precio: 0, importe: 0 } }]);
     };
-    
-    const agregarDetalleOrden = async (ordenID) => {
-    try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/ordenCompraDetalle/ordenCompra/${ordenID}`);
-        const s = await res.json();
-
-        if (s.ok) {
-            setDetalles(s.data);
-            calcularTotal(s.data);
-        } else {
-            console.error('Error al cargar detalles de la orden de compra. Error: \n', s.message);
-        }
-    } catch (error) {
-        console.error('Error de red al cargar detalles de la orden de compra. Error: \n', error);
-        }
-    };
-
-    
-    const calcularTotal = (detalles) => {
-        const totalPedido = Array.isArray(detalles) && detalles.length > 0
-            ? detalles.reduce((acc, d) => acc + (d.importe || 0), 0)
-                : 0;
-        setComprobanteCompra((prev) => ({ ...prev, total:totalPedido }));
-    };
-
-    const [mostrarModalCreate1, setMostrarModalCreate1] = useState(false);
-    const [mostrarModalCreate2, setMostrarModalCreate2] = useState(false);
-    const [mostrarModalCreate3, setMostrarModalCreate3] = useState(false);
 
     const opciones_tipoProductos = tipoProductos.map(v => ({
         value: v,
@@ -282,12 +202,14 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
             stock: v.stock,
             tipoProducto: v.tipoProducto
         }));
+    const opciones_empleados = empleados.map(v => ({ value: v._id,label: v.name }));
     const opciones_proveedores = proveedores.map(v => ({ value: v._id,label: v.name }));
-    const opciones_ordenes = ordenes.filter((s)=>{return s.proveedor === comprobanteCompra.proveedor })
+    const opciones_mediosPago = mediosPago.map(v => ({ value: v._id,label: v.name }));
+    const opciones_presupuestos = presupuestos
         .map(v => {
             return {
                 value: v._id,
-                label: `${v._id} - ${v.fecha.split("T")[0]} - $${v.total}`,
+                label: v._id,
                 proveedor: v.proveedor,
                 total: v.total
             };
@@ -295,53 +217,10 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
     );
 
     return(
-        <>
-            {mostrarModalCreate1 && (
-                <div className="modal">
-                <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate1(false)}>&times;</button>
-                    <FormularioMedioPagoCreate
-                    exito={() => {
-                        setMostrarModalCreate1(false);
-                        fetchData_MediosPago();
-                    }}
-                    />
-                </div>
-            </div>
-            )}
-            {mostrarModalCreate2 && (
-                <div className="modal">
-                <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate2(false)}>&times;</button>
-                    <FormularioEmpleadoCreate
-                    exito={() => {
-                        setMostrarModalCreate2(false);
-                        fetchData_Empleados();
-                    }}
-                    />
-                </div>
-                </div>
-            )}
-
-            {/* {mostrarModalCreate3 && (
-                <div className="modal">
-                <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate3(false)}>&times;</button>
-                    <FormularioClienteCreate
-                    exito={() => {
-                        setMostrarModalCreate3(false);
-                        fetchData_Clientes();
-                    }}
-                    />
-                </div>
-                </div>
-            )} */}
-
-
-            <div className="form-container">
+        <><div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
-                        <h1 className="titulo-pagina">Modificar comprobantes de Compra</h1>
+                        <h1 className="titulo-pagina">Busqueda Avanzada de Orden de Compra</h1>
                     </div>
                 </div>
 
@@ -349,14 +228,25 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
                     <div className="form-row">
                         <div className="form-col1">
                             <label>
+                                Orden de Compra N° :
+                            </label>
+                            <input
+                                type="number"
+                                className="input-secondary"
+                                value={filtros.ordenCompraID}
+                                name="ordenCompraID"
+                                onChange={inputChange}
+                                />
+                        </div>
+                        <div className="form-col1">
+                            <label>
                                 Proveedor:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
                                 classNamePrefix="rs"
                                 options={opciones_proveedores}
-                                value={opciones_proveedores.find(op => op.value === comprobanteCompra.proveedor) || null}
+                                value={opciones_proveedores.find(op => op.value === filtros.proveedor) || null}
                                 onChange={selectChange}
                                 name='proveedor'
                                 placeholder="Proveedor..."
@@ -402,16 +292,120 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
 
                         <div className="form-col1">
                             <label>
-                                Orden de Compra:
+                                Empleado:
                             </label>
                             <Select
                                 className="form-select-react"
                                 classNamePrefix="rs"
-                                options={opciones_ordenes}
-                                value={opciones_ordenes.find(op => op.value === comprobanteCompra.ordenCompra) || null}
+                                options={opciones_empleados}
+                                value={opciones_empleados.find(op => op.value === filtros.empleado) || null}
                                 onChange={selectChange}
-                                name='ordenCompra'
-                                placeholder="Orden de compra..."
+                                name='empleado'
+                                placeholder="Empleado..."
+                                isClearable
+                                styles={{
+                                    container: (base) => ({
+                                    ...base,
+                                    width: 220, // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 220,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }}
+                            />
+                        </div>
+
+                        <div className="form-col1">
+                            <label>
+                                Presupuesto:
+                            </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_presupuestos}
+                                value={opciones_presupuestos.find(op => op.value === filtros.presupuesto) || null}
+                                onChange={selectChange}
+                                name='presupuesto'
+                                placeholder="Presupuesto..."
+                                isClearable
+                                styles={{
+                                    container: (base) => ({
+                                    ...base,
+                                    width: 220, // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 220,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }}
+                            />
+                        </div>
+
+                        <div className="form-col1">
+                            <label>
+                                Medio de Pago:
+                            </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_mediosPago}
+                                value={opciones_mediosPago.find(op => op.value === filtros.medioPago) || null}
+                                onChange={selectChange}
+                                name='medioPago'
+                                placeholder="Medio de Pago..."
                                 isClearable
                                 styles={{
                                     container: (base) => ({
@@ -456,7 +450,6 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
                         <div className="form-col-productos">
                             <label>
                                     Productos:
-                                    {/* <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button> */}
                                     <button type="button" className="btn-add-producto" onClick={agregarDetalle}>
                                         + Agregar Producto
                                     </button>
@@ -563,21 +556,6 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
                                             }}
                                         />
                                     </div>
-                                    
-                                    <div className='form-col-item1'>
-                                        <input
-                                            type="number"
-                                            placeholder="Cantidad"
-                                            min={1}
-                                            value={d.cantidad}
-                                            onChange={(e) => handleDetalleChange(i, "cantidad", e.target.value)}
-                                            required
-                                        />
-                                    </div>
-
-                                    <div className='form-col-item2'>
-                                        <span>Importe: ${d.importe.toFixed(2)}</span>
-                                    </div>
 
                                     <div className='form-col-item2'>
                                         <button
@@ -586,7 +564,6 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
                                             onClick={() => {
                                                 const productos = detalles.filter((_, index) => index !== i);
                                                 setDetalles(productos);
-                                                calcularTotal(productos);
                                             }}
                                             >                                    
                                             <FaTrash />
@@ -600,41 +577,64 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
 
                         <div className="form-col-precioVenta">
                             <div className="form-secondary">
+                                <label>
+                                    Fecha de Entrega:
+                                </label>
+                                <input type="date" onChange={inputChange} value={filtros.fechaEntrega} name="fechaEntrega" required />
+                            </div>
+                            <div className="form-secondary">
                                 <label htmlFor="precioVenta" className="label-box">
                                     Total:
                                 </label>
                                 <input
                                     type="number"
                                     className="input-secondary"
-                                    value={comprobanteCompra.total}
+                                    value={filtros.total}
                                     name="total"
-                                    disabled
                                     />
-
-                                <div className="form-submit">
-                                    <button
-                                    type="submit"
-                                    className="submit-btn"
-                                    onClick={(e) => {
-                                        if (!puedeGuardar) {
-                                        alert("No se puede guardar un comprobante de compra sin al menos un producto con cantidad.");
-                                        e.preventDefault();
-                                        return;
-                                        }
-                                        clickChange(e);
-                                    }}
-                                    >
-                                    Guardar
-                                    </button>
-                                </div>
                             </div>
                         </div>
+                    </div>                   
+                        
+                    <div className="form-submit">
+                        <button type="submit" className="submit-btn" onClick={handleBuscar}>Buscar</button>
+                        <button
+                            type="button"
+                            className="submit-btn"
+                            style={{ backgroundColor: "#444", marginLeft: "1rem" }}
+                            onClick={borrarFiltros}
+                            >
+                            Borrar filtros
+                        </button>
                     </div>
                 </form>
             </div>
             <style jsx>
                 {`
+                        .modal {
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                            background-color: rgba(0,0,0,0.5); /* oscurece fondo */
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            z-index: 1000;
+                        }
                         
+
+
+                        .close {
+                            position: absolute;
+                            top: 1rem;
+                            right: 1.5rem;
+                            font-size: 1.5rem;
+                            background: transparent;
+                            border: none;
+                            cursor: pointer;
+                        }
                         .btn-icon {
                             background-color: #8b0000;
                             color: white;
@@ -678,6 +678,14 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
                             height: 100%;
                             margin: 0 auto;
                             box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
+                        }
+
+                        .titulo-pagina {
+                            text-align: center;
+                            font-size: 2rem;
+                            margin-bottom: 1.5rem;
+                            font-weight: bold;
+                            color: #f5f5f5;
                         }
 
                         .formulario-presupuesto {
@@ -851,6 +859,7 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
                         .form-submit {
                             justify-content: center;
                             margin-top: 1rem;
+                            text-align:center;
                         }
 
                         .submit-btn {
@@ -874,7 +883,6 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
                             background-color: #8B0000;
                             color: #fff;
                             border: none;
-                            width: 100%;
                             border-radius: 8px;
                             font-size: 1rem;
                             font-weight: 600;
@@ -982,4 +990,4 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
     )
 }
 
-export default updateComprobanteCompra;
+export default busquedaOrdenCompra;

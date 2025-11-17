@@ -14,13 +14,8 @@ const initialDetalle = {
          tipoProducto: "", producto: "", cantidad: 0, precio: 0, importe: 0, comprobanteCompra:'' 
     };
 
-const createComprobanteCompra = ({exito , proveedorID}) => {
-    const [comprobanteCompra , setComprobanteCompra] = uuseState(() => {
-                return {
-                    ...initialStateComprobanteCompra,
-                    proveedor: proveedorID
-                }
-            });
+const createComprobanteCompra = ({exito , ordenID}) => {
+    const [comprobanteCompra , setComprobanteCompra] = useState(initialStateComprobanteCompra)
     
     const [proveedores,setProveedores] = useState([])
     const [ordenes,setOrdenes] = useState([])
@@ -78,14 +73,31 @@ const createComprobanteCompra = ({exito , proveedorID}) => {
                 })
     }
     
+    const fetchDataByOrden = (param) => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/ordenCompra/${param}`)
+            .then((a)=>{return a.json()})
+                .then((s)=>{
+                    setComprobanteCompra((prev) => ({
+                        ...prev,
+                        proveedor: s.data.proveedor || "",
+                        ordenCompra: s.data._id || "",
+                        total:s.data.total || 0
+                    }));
+                    agregarDetalleOrden(param)
+                })
+    }
+    
 
     useEffect(()=>{
-        setDetalles([]);
         fetchData_Proveedores();
         fetchData_Ordenes();
         fetchData_Productos();
         fetchData_TipoProductos();
     }, [])
+
+    useEffect(()=>{
+        fetchDataByOrden(ordenID);
+    }, [ordenID])
 
     useEffect(() => {
         if (!productos.length || !detalles.length) return;
@@ -170,13 +182,13 @@ const createComprobanteCompra = ({exito , proveedorID}) => {
         const name = actionMeta.name;
         const value = selectedOption ? selectedOption.value : "";
 
-        setOrdenCompra({
-            ...ordenCompra,
+        setComprobanteCompra({
+            ...comprobanteCompra,
             [name]: value,
         });
 
-        if (name === 'presupuesto' && value) {
-            agregarDetallePresupuesto(value);
+        if (name === 'ordenCompra' && value) {
+            agregarDetalleOrden(value);
         }
     };
 
@@ -184,10 +196,10 @@ const createComprobanteCompra = ({exito , proveedorID}) => {
         const value = e.target.value;
         const name = e.target.name;
         
-        setOrdenCompra({
-            ...ordenCompra , 
-                [name]:value
-        })   
+        setComprobanteCompra({
+            ...comprobanteCompra,
+            [name]: value,
+        });  
     }
 
     const agregarDetalle = () => {
@@ -577,7 +589,7 @@ const createComprobanteCompra = ({exito , proveedorID}) => {
                                         clickChange(e);
                                     }}
                                     >
-                                    Cargar Comprobante
+                                    Cargar
                                     </button>
                                 </div>
                             </div>

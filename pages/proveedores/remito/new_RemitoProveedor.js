@@ -76,19 +76,6 @@ const newRemito = ({exito}) => {
         }
     };
 
-    const fetchData_ComprobantesCompra = async () => {
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompra`);
-            const s = await res.json();
-            if (s.ok) {
-                const comprobantesSinRemito = s.data.filter(c => c.remitoCreado === false);
-                set(comprobantesSinRemito || []);
-            }
-        } catch (err) {
-            console.log("Error al cargar comprobantes de compra.\nError: ", err);
-            setComprobantesCompra([]);
-        }
-    };
 
     const fetchData_Productos = async () => {
         try {
@@ -136,21 +123,22 @@ const newRemito = ({exito}) => {
         }
     };
 
-    const fetchData_OrdenesByProveedor = async (proveedor) => {
+    const fetchData_ComprobantesCompraByProveedor = async (proveedor) => {
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/ordenCompra/proveedor/${proveedor}`);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompra/proveedor/${proveedor}`);
             const s = await res.json();
-            setOrdenes(s.data || []); 
+            setComprobantesCompra(s.data || []); 
+            console.log(s.data)
         } catch (err) {
-            console.log("Error al cargar las ordenes de compra.\nError: ", err);
-            setOrdenes([]);
+            console.log("Error al cargar los comprobantes de compra.\nError: ", err);
+            setComprobantesCompra([]);
         }
     };
 
     const clickChange = async (e) => {
         e.preventDefault();
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/remito`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/remito`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -196,14 +184,17 @@ const newRemito = ({exito}) => {
         setRemito({ ...remito, [name]: value });
 
         if (name === 'comprobanteCompra' && value) {
+            fetchData_ComprobanteCompraDetalle(value);
             setPuedeGuardar(true);
-            fetchData_ComprobantesCompra(value);
+        }
+
+        if (name === 'proveedor' && value) {
+            fetchData_ComprobantesCompraByProveedor(value);
         }
     };
 
     useEffect(() => {
         setDetalles([]);
-        fetchData_ComprobantesCompra();
         fetchData_Productos();
         fetchData_TipoProductos();
         fetchData_Proveedores();
@@ -228,14 +219,6 @@ const newRemito = ({exito}) => {
         }
     }, [productos, detalles]);
 
-    useEffect(() => {
-        if (remito.cliente) {
-            fetchData_OrdenesByProveedor(remito.proveedor);
-        } else {
-            setOrdenes([]);
-        }
-    }, [remito.cliente]);
-
     const opciones_tipoProductos = tipoProductos.map(v => ({
         value: v,
         label: v === "ProductoVino" ? "Vino" :
@@ -254,15 +237,11 @@ const newRemito = ({exito}) => {
         value: v._id, label: v.name
     }));
 
-    const opciones_comprobantesCompra = comprobantesCompra && ordenes.length > 0
-        ? comprobantesCompra
-            .filter(v => ordenes.some(p => p._id === v.ordenCompra))
+    const opciones_comprobantesCompra = comprobantesCompra
             .map(v => ({
                 value: v._id,
-                label: `${v._id} - ${v.tipoComprobante} - ${v.fecha.split("T")[0]} - $${v.total}`,
-                total: v.total
+                label: v._id,
             }))
-        : []; 
 
     const opciones_transporte = transporte.map(v => ({
         value: v._id, label: v.name
@@ -591,7 +570,7 @@ const newRemito = ({exito}) => {
                                         clickChange(e);
                                     }}
                                     >
-                                    Cargar Remito
+                                    Cargar
                                     </button>
                                 </div>
                             </div>
@@ -835,6 +814,7 @@ const newRemito = ({exito}) => {
                             color: #fff;
                             border: none;
                             border-radius: 8px;
+                            width: 100%
                             font-size: 1rem;
                             font-weight: 600;
                             cursor: pointer;

@@ -8,12 +8,11 @@ import FormularioMedioPagoCreate from '../../gestion/tablasVarias/medioPago/crea
 const { default: Link } = require("next/link")
 
 const initialStateComprobante = {
-        total:0, fecha:'', proveedor:'', medioPago:'' , comprobantesCompra:''
+        total:0, fecha:'', proveedor:'', medioPago:'' , comprobanteCompra:''
     }
 
 const newComprobantepago = ({exito}) => {
     const [comprobantePago , setComprobantePago] = useState(initialStateComprobante);
-    
     const [comprobantesCompra , setComprobantesCompra] = useState([])
     const [ordenesCompra , setOrdenesCompra] = useState([])
     const [proveedores,setProveedores] = useState([])
@@ -57,13 +56,21 @@ const newComprobantepago = ({exito}) => {
         fetchData_ComprobantesCompra();
     }, [])
 
+    function convertirArchivoABase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    }
 
     const clickChange = async(e) => {
         e.preventDefault();
         const bodyData = {
             total: comprobantePago.total,
-            comprobantesCompra: comprobantePago.comprobantesCompra,
-            mediosPago : comprobantePago.medioPago
+            comprobanteCompra: comprobantePago.comprobanteCompra,
+            medioPago : comprobantePago.medioPago
         };
 
         const resComprobante = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobantePago`, {
@@ -79,7 +86,6 @@ const newComprobantepago = ({exito}) => {
             return
         }
 
-        setRecibo(initialStateComprobante);
         exito();
     }
   
@@ -114,9 +120,15 @@ const newComprobantepago = ({exito}) => {
     const ordenes = ordenesCompra.filter(o => o.proveedor === comprobantePago.proveedor)
     const ordenIds = ordenes.map(o => o._id);
     const opciones_comprobantesCompra = comprobantesCompra
-        .map(v => ({ value: v._id,label: v.name }))
-        .filter(c => ordenIds.includes(c.ordenCompra))
-        
+    .map(v => ({
+        value: v._id,
+        label: v._id,
+        ordenCompra: v.ordenCompra
+    }))
+    .filter(c => ordenIds.includes(c.ordenCompra));
+
+
+
 
     return(
         <>
@@ -215,7 +227,7 @@ const newComprobantepago = ({exito}) => {
                                 className="form-select-react"
                                 classNamePrefix="rs"
                                 options={opciones_comprobantesCompra}
-                                value={opciones_comprobantesCompra.find(op => op.value === comprobantePago.comprobantesCompra) || null}
+                                value={opciones_comprobantesCompra.find(op => op.value === comprobantePago.comprobanteCompra) || null}
                                 onChange={selectChange}
                                 name='comprobanteCompra'
                                 placeholder="Comprobante de compra..."
@@ -324,6 +336,7 @@ const newComprobantepago = ({exito}) => {
                                 name="total"
                                 />
                         </div>
+                        
                         <div className="form-submit">
                             <button
                             type="submit"
@@ -332,7 +345,7 @@ const newComprobantepago = ({exito}) => {
                                 clickChange(e);
                             }}
                             >
-                            Cargar Comprobante de Pago
+                            Cargar
                             </button>
                         </div>
                     </div>
