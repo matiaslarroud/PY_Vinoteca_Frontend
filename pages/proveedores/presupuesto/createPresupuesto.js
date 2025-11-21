@@ -396,6 +396,7 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                                 name='proveedor'
                                 placeholder="Proveedor..."
                                 isClearable
+                                isDisabled={true}
                                 styles={{
                                     container: (base) => ({
                                     ...base,
@@ -449,6 +450,7 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                                 name='solicitudPresupuesto'
                                 placeholder="Solicitud de presupuesto..."
                                 isClearable
+                                isDisabled={true}
                                 styles={{
                                     container: (base) => ({
                                     ...base,

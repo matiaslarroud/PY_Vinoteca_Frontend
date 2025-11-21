@@ -96,8 +96,11 @@ const indexPresupuesto = () => {
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
+                if (!res.ok) {
+                    alert(res.message);
+                    return;
+                }
                 fetchData();
-                console.log(res.message);
             })
             .catch((err)=>{
                 console.log("Error al enviar solicitud de presupuesto para su eliminación. \n Error: ",err);

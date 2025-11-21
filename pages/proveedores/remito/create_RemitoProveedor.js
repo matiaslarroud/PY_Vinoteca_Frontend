@@ -1,17 +1,20 @@
-const { useState, useEffect, use } = require("react")
+const { useState, useEffect } = require("react")
 import Select from 'react-select';     
 
 const { default: Link } = require("next/link")
 
-const initialState = {cliente:'',totalPrecio:0, totalBultos:0, fecha:'', comprobanteVenta:'', transporteID:'', entregado:false}
-const initialDetalle = { remitoID:'', tipoProducto:"", producto:'' ,  cantidad: 0 };
+const initialState = {proveedor:'',totalPrecio:0, totalBultos:0 , comprobanteCompra:'', transporte:''}
+const initialDetalle = { remito:'', tipoProducto:"", producto:'' ,  cantidad: 0 };
 
-const createRemitoCliente = ({exito , comprobanteVentaID}) => {
-    const [remito , setRemito] = useState(initialState);
+const createRemito = ({exito , param , tipo}) => {
+    const [remito, setRemito] = useState(initialState);
     const [puedeGuardar, setPuedeGuardar] = useState(false);
+    const [ordenes, setOrdenes] = useState([]);
     const [productos, setProductos] = useState([]);
     const [transporte , setTransporte] = useState([])
+    const [proveedores, setProveedores] = useState([]);
     const [detalles, setDetalles] = useState([]);
+    const [comprobantesCompra, setComprobantesCompra] = useState([]);
     const [tipoProductos,setTipoProductos] = useState([]);
 
     const handleDetalleChange = (index, field, value) => {
@@ -48,6 +51,7 @@ const createRemitoCliente = ({exito , comprobanteVentaID}) => {
             : 0;
         setRemito((prev) => ({ ...prev, totalPrecio: totalPedido }));
     };
+
     
     const calcularTotalBultos = (detalles) => {
         const totalPedido = Array.isArray(detalles) && detalles.length > 0
@@ -55,10 +59,35 @@ const createRemitoCliente = ({exito , comprobanteVentaID}) => {
             : 0;
         setRemito((prev) => ({ ...prev, totalBultos: totalPedido }));
     };
-
-    const fetchData_ComprobanteVentaDetalle = async (comprobanteID) => {
+    
+    const fetchData_ProveedorID = async (param) => {
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/comprobanteVentaDetalle/ComprobanteVenta/${comprobanteID}`);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompra/${param}`);
+            const s = await res.json();
+
+            if (!s?.data?.proveedor?._id) {
+                console.error("Proveedor no encontrado en el comprobante.");
+                return;
+            }
+
+            fetchData_ComprobantesCompraByProveedor(s.data.proveedor._id);
+            fetchData_ComprobanteCompraDetalle(param);
+
+            setRemito((prev) => ({
+                ...prev,
+                proveedor: s.data.proveedor._id,
+                comprobanteCompra: param
+            }));
+
+        } catch (err) {
+            console.error("Error al obtener comprobante:", err);
+        }
+    };
+
+
+    const fetchData_ComprobanteCompraDetalle = async (comprobanteID) => {
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompraDetalle/ComprobanteCompra/${comprobanteID}`);
             const s = await res.json();
             if (s.ok) {
                 setDetalles(                    
@@ -68,44 +97,10 @@ const createRemitoCliente = ({exito , comprobanteVentaID}) => {
                 calcularTotalBultos(s.data);
             }
         } catch (err) {
-            console.log("Error al cargar vinos.\nError: ", err);
+            console.log("Error al cargar detalle de comprobante de compra.\nError: ", err);
         }
     };
 
-    const fetchData_ComprobantesVenta = async (id) => {
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/comprobanteVenta/${id}`);
-            const s = await res.json();
-            if (s.ok) {
-                let pedidoData = [];
-                let clienteData = '';
-                const pedido = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido/${s.data.notaPedido}`);
-                const pedidoJSON = await pedido.json();
-                if(pedidoJSON.ok){
-                    pedidoData = pedidoJSON.data;
-                }
-                
-                const clienteID = pedidoData.cliente;
-                
-                const resCliente = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente/${clienteID}`);
-                const clienteJson = await resCliente.json();
-                if (clienteJson.ok) {
-                    clienteData = clienteJson.data;
-                }
-                
-                setRemito(prev => ({
-                ...prev,
-                cliente: { value: clienteData._id, label: clienteData.name },
-                comprobanteVenta: { value: comprobanteVentaID, label: comprobanteVentaID },
-                // comprobanteVenta: comprobanteVentaID,
-            }));
-
-            }
-        } catch (err) {
-            console.log("Error al cargar comprobantes de venta.\nError: ", err);
-            setComprobantesVenta([]);
-        }
-    };
 
     const fetchData_Productos = async () => {
         try {
@@ -142,18 +137,40 @@ const createRemitoCliente = ({exito , comprobanteVentaID}) => {
         }
     };
 
+    const fetchData_Proveedores = async () => {
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/proveedor`);
+            const s = await res.json();
+            setProveedores(s.data || []);
+        } catch (err) {
+            console.log("Error al cargar proveedores.\nError: ", err);
+            setProveedores([]);
+        }
+    };
+
+    const fetchData_ComprobantesCompraByProveedor = async (proveedor) => {
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompra/proveedor/${proveedor}`);
+            const s = await res.json();
+            setComprobantesCompra(s.data || []); 
+            console.log(s.data)
+        } catch (err) {
+            console.log("Error al cargar los comprobantes de compra.\nError: ", err);
+            setComprobantesCompra([]);
+        }
+    };
+
     const clickChange = async (e) => {
         e.preventDefault();
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/remito`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/remito`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     totalPrecio: remito.totalPrecio,
                     totalBultos: remito.totalBultos,
-                    comprobanteVentaID: remito.comprobanteVenta.value,
-                    transporteID: remito.transporteID,
-                    entregado: remito.entregado
+                    comprobanteCompra: remito.comprobanteCompra,
+                    transporte: remito.transporte
                 })
             });
             
@@ -162,13 +179,13 @@ const createRemitoCliente = ({exito , comprobanteVentaID}) => {
 
             // GUARDAMOS DETALLES
             for (const detalle of detalles) {
-                const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/remitoDetalle`, {
+                const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/remitoDetalle`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         producto: detalle.producto,
                         cantidad: detalle.cantidad,
-                        remitoID: remitoID
+                        remito: remitoID
                 })
                 
                 
@@ -191,19 +208,34 @@ const createRemitoCliente = ({exito , comprobanteVentaID}) => {
 
         setRemito({ ...remito, [name]: value });
 
-        if (name === 'transporteID' && value) {
+        if (name === 'comprobanteCompra' && value) {
+            fetchData_ComprobanteCompraDetalle(value);
             setPuedeGuardar(true);
+        }
+
+        if (name === 'proveedor' && value) {
+            fetchData_ComprobantesCompraByProveedor(value);
         }
     };
 
     useEffect(() => {
-        setDetalles([]);
-        fetchData_ComprobantesVenta(comprobanteVentaID);
-        fetchData_ComprobanteVentaDetalle(comprobanteVentaID);
         fetchData_Productos();
         fetchData_TipoProductos();
+        fetchData_Proveedores();
         fetchData_Transporte();
-    }, [comprobanteVentaID]);
+    }, []);
+
+    useEffect(() => {
+        if (tipo === "comprobanteCompra" && param) {
+            fetchData_ProveedorID(param);
+        }
+        if (tipo === "proveedor") {
+            return {
+                ...initialState,
+                proveedor: param
+            }
+        }
+    }, [tipo, param]);
     
     useEffect(() => {
         if (!productos.length || !detalles.length) return;
@@ -223,7 +255,7 @@ const createRemitoCliente = ({exito , comprobanteVentaID}) => {
         }
     }, [productos, detalles]);
 
-     const opciones_tipoProductos = tipoProductos.map(v => ({
+    const opciones_tipoProductos = tipoProductos.map(v => ({
         value: v,
         label: v === "ProductoVino" ? "Vino" :
                 v === "ProductoPicada" ? "Picada" :
@@ -236,6 +268,16 @@ const createRemitoCliente = ({exito , comprobanteVentaID}) => {
             stock: v.stock,
             tipoProducto: v.tipoProducto
         }));
+
+    const opciones_proveedores = proveedores.map(v => ({
+        value: v._id, label: v.name
+    }));
+
+    const opciones_comprobantesCompra = comprobantesCompra
+            .map(v => ({
+                value: v._id,
+                label: v._id,
+            }))
 
     const opciones_transporte = transporte.map(v => ({
         value: v._id, label: v.name
@@ -250,16 +292,17 @@ const createRemitoCliente = ({exito , comprobanteVentaID}) => {
                     <div className="form-row">
                         <div className="form-col">
                             <label>
-                                Cliente:
+                                Proveedor:
                                 <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
                                 classNamePrefix="rs"
-                                value={remito.cliente}
+                                options={opciones_proveedores}
+                                value={opciones_proveedores.find(op => op.value === remito.proveedor) || null}
                                 onChange={selectChange}
-                                name='cliente'
-                                placeholder="Cliente..."
+                                name='proveedor'
+                                placeholder="Proveedor..."
                                 isClearable
                                 isDisabled={true}
                                 styles={{
@@ -303,15 +346,16 @@ const createRemitoCliente = ({exito , comprobanteVentaID}) => {
 
                         <div className="form-col">
                             <label>
-                                Comprobante de Venta:
+                                Comprobante de Compra:
                             </label>
                             <Select
                                 className="form-select-react"
                                 classNamePrefix="rs"
-                                value={remito.comprobanteVenta}
+                                options={opciones_comprobantesCompra}
+                                value={opciones_comprobantesCompra.find(op => op.value === remito.comprobanteCompra) || null}
                                 onChange={selectChange}
-                                name='comprobanteVentaID'
-                                placeholder="Comprobante de venta..."
+                                name='comprobanteCompra'
+                                placeholder="Comprobante de compra..."
                                 isClearable
                                 isDisabled={true}
                                 styles={{
@@ -361,9 +405,9 @@ const createRemitoCliente = ({exito , comprobanteVentaID}) => {
                                 className="form-select-react"
                                 classNamePrefix="rs"
                                 options={opciones_transporte}
-                                value={opciones_transporte.find(op => op.value === remito.transporteID) || null}
+                                value={opciones_transporte.find(op => op.value === remito.transporte) || null}
                                 onChange={selectChange}
-                                name='transporteID'
+                                name='transporte'
                                 placeholder="Transporte..."
                                 isClearable
                                 styles={{
@@ -521,8 +565,6 @@ const createRemitoCliente = ({exito , comprobanteVentaID}) => {
                                         <input
                                             type="number"
                                             placeholder="Cantidad"
-                                            min={1}
-                                            max={opciones_productos.find((p) => p.value === d.producto)?.stock || 0}
                                             value={d.cantidad}
                                             disabled={true}
                                             onChange={(e) => handleDetalleChange(i, "cantidad", e.target.value)}
@@ -563,15 +605,10 @@ const createRemitoCliente = ({exito , comprobanteVentaID}) => {
                                     type="submit"
                                     className="submit-btn"
                                     onClick={(e) => {
-                                        if (!puedeGuardar) {
-                                        alert("No se puede guardar un remito sin un comprobante de venta asociado.");
-                                        e.preventDefault();
-                                        return;
-                                        }
                                         clickChange(e);
                                     }}
                                     >
-                                    Cargar Remito
+                                    Cargar
                                     </button>
                                 </div>
                             </div>
@@ -815,6 +852,7 @@ const createRemitoCliente = ({exito , comprobanteVentaID}) => {
                             color: #fff;
                             border: none;
                             border-radius: 8px;
+                            width: 100%
                             font-size: 1rem;
                             font-weight: 600;
                             cursor: pointer;
@@ -921,4 +959,4 @@ const createRemitoCliente = ({exito , comprobanteVentaID}) => {
     )
 }
 
-export default createRemitoCliente;
+export default createRemito;

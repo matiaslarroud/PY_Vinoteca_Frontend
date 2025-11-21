@@ -240,9 +240,6 @@ const indexRemito = () => {
                                                 <button onClick={() => setMostrarModalView(_id)}  className="btn-icon" title="Visualizar">
                                                     <FaEye />
                                                 </button>
-                                                <button onClick={() => deleteRemito(_id)}  className="btn-icon" title="Eliminar">
-                                                    <FaTrash />
-                                                </button>
                                             </div>
                                         </td>
                                     </tr>

@@ -8,20 +8,11 @@ const initialStatePresupuesto = {proveedor:'', empleado:''}
 const initialDetalle = { tipoProducto: "",producto: "", cantidad: 0, solicitudPresupuesto:'' };
 
 const createPresupuesto = ({exito , tipo , param}) => {
-    const [presupuesto , setPresupuesto] = useState(() => {
-            if (tipo === 'proveedor'){
-                return {
-                    ...initialStatePresupuesto,
-                        proveedor: param
-                }
-            }
-        
-            return initialStatePresupuesto
-        });
+    const [presupuesto , setPresupuesto] = useState(initialStatePresupuesto);
     
     const [proveedores,setProveedores] = useState([])
     const [empleados,setEmpleados] = useState([])
-    const [detalles,setDetalles] = useState([initialDetalle])
+    const [detalles,setDetalles] = useState([])
     const [productos,setProductos] = useState([]);
     const [tipoProductos,setTipoProductos] = useState([]);
     
@@ -70,12 +61,43 @@ const createPresupuesto = ({exito , tipo , param}) => {
                 })
     }
     useEffect(()=>{
-        setDetalles([]);
         fetchData_Proveedores();
         fetchData_Empleados();
         fetchData_Productos();
         fetchData_TipoProductos();
     }, [])    
+
+    useEffect(() => {
+        if (tipo === "producto" && param) {
+            fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/${param}`)
+                .then(a => a.json())
+                .then(s => {
+                    if (s.ok) {
+                        setPresupuesto(prev => ({
+                            ...prev,
+                            proveedor: s.data.proveedor
+                        }));
+
+                        setDetalles(prev => ([
+                            ...prev,
+                            {
+                                producto: param,
+                                tipoProducto: s.data.tipoProducto,
+                                cantidad: s.data.stockMinimo
+                            }
+                        ]));
+                    }
+                });
+        }
+        if (tipo === 'proveedor'){
+            setPresupuesto(prev => ({
+                ...prev,
+                proveedor: param
+            }));
+        }
+    }, [tipo, param]);
+
+
     const handleDetalleChange = (index, field, value) => {
         const nuevosDetalles = [...detalles];
         nuevosDetalles[index][field] = field === "cantidad" ? parseFloat(value) : value;
@@ -178,6 +200,7 @@ const createPresupuesto = ({exito , tipo , param}) => {
                                 name='proveedor'
                                 placeholder="Proveedor..."
                                 isClearable
+                                isDisabled={true}
                                 styles={{
                                     container: (base) => ({
                                     ...base,

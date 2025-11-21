@@ -52,7 +52,8 @@ const newOrdenCompra = ({exito , tipo , param}) => {
                         proveedor: s.data.proveedor || "",
                         empleado: s.data.empleado || "",
                         presupuesto: s.data._id || "",
-                        total:s.data.total || 0
+                        total:s.data.total || 0 ,
+                        medioPago: s.data.medioPago || ""
                     }));
                 })
         }
@@ -380,6 +381,7 @@ const newOrdenCompra = ({exito , tipo , param}) => {
                                 name='proveedor'
                                 placeholder="Proveedor..."
                                 isClearable
+                                isDisabled={true}
                                 styles={{
                                     container: (base) => ({
                                     ...base,
@@ -433,6 +435,7 @@ const newOrdenCompra = ({exito , tipo , param}) => {
                                 name='empleado'
                                 placeholder="Empleado..."
                                 isClearable
+                                isDisabled={true}
                                 styles={{
                                     container: (base) => ({
                                     ...base,
@@ -485,6 +488,7 @@ const newOrdenCompra = ({exito , tipo , param}) => {
                                 name='presupuesto'
                                 placeholder="Presupuesto..."
                                 isClearable
+                                isDisabled={true}
                                 styles={{
                                     container: (base) => ({
                                     ...base,
@@ -538,6 +542,7 @@ const newOrdenCompra = ({exito , tipo , param}) => {
                                 name='medioPago'
                                 placeholder="Medio de Pago..."
                                 isClearable
+                                isDisabled={true}
                                 styles={{
                                     container: (base) => ({
                                     ...base,

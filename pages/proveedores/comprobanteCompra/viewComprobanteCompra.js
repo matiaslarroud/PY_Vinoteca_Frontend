@@ -1,21 +1,18 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';          
 import { FaTrash} from "react-icons/fa";
-// import FormularioEmpleadoCreate from '../../gestion/general/empleado/createEmpleado'
-// import FormularioClienteCreate from '../createCliente'
-// import FormularioMedioPagoCreate from '../../gestion/general/medioPago/createMedioPago'
 
 const { default: Link } = require("next/link")
 
 const initialStateComprobanteCompra = {
-        total:'', fecha:'', ordenCompra:'', proveedor: ''
+        total:0, fecha:'', ordenCompra:'', proveedor: ''
     }
 const initialDetalle = { 
          tipoProducto: "", producto: "", cantidad: 0, precio: 0, importe: 0, comprobanteCompra:'' 
     };
 
-const createComprobanteCompra = ({exito , ordenID}) => {
-    const [comprobanteCompra , setComprobanteCompra] = useState(initialStateComprobanteCompra)
+const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
+    const [comprobanteCompra , setComprobanteCompra] = useState(initialStateComprobanteCompra);
     
     const [proveedores,setProveedores] = useState([])
     const [ordenes,setOrdenes] = useState([])
@@ -73,31 +70,42 @@ const createComprobanteCompra = ({exito , ordenID}) => {
                 })
     }
     
-    const fetchDataByOrden = (param) => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/ordenCompra/${param}`)
-            .then((a)=>{return a.json()})
-                .then((s)=>{
+    const fetchData = (param) => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompra/${param}`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if(s.ok){
+                    console.log(s.data)
                     setComprobanteCompra((prev) => ({
                         ...prev,
-                        proveedor: s.data.proveedor || "",
-                        ordenCompra: s.data._id || "",
-                        total:s.data.total || 0
+                        proveedor: s.data.proveedor?._id || "",
+                        ordenCompra: s.data.ordenCompra || "",
+                        total: s.data.total || 0,
                     }));
-                    agregarDetalleOrden(param)
+                }
+            })
+        .catch((err)=>{console.log("Error al cargar pedidos.\nError: ",err)})
+    }
+    
+    const fetch_DataDetalle = (param) => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompraDetalle/ComprobanteCompra/${param}`)
+            .then((a)=>{return a.json()})
+                .then((s)=>{
+                    setDetalles(s.data)
                 })
     }
     
 
     useEffect(()=>{
+        fetchData(comprobanteCompraID);
+        fetch_DataDetalle(comprobanteCompraID);
         fetchData_Proveedores();
         fetchData_Ordenes();
         fetchData_Productos();
         fetchData_TipoProductos();
-    }, [])
-
-    useEffect(()=>{
-        fetchDataByOrden(ordenID);
-    }, [ordenID])
+    }, [comprobanteCompraID])
 
     useEffect(() => {
         if (!productos.length || !detalles.length) return;
@@ -125,14 +133,29 @@ const createComprobanteCompra = ({exito , ordenID}) => {
             ordenCompra: comprobanteCompra.ordenCompra,
         };
 
-        const resComprobanteCompra = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompra`, {
-            method: 'POST',
+        const resComprobanteCompra = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompra/${comprobanteCompraID}`, {
+            method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(bodyData)
         })
 
         const comprobanteCompraCreado = await resComprobanteCompra.json();
         const comprobanteID = comprobanteCompraCreado.data._id;
+
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompraDetalle/${comprobanteID}`,
+            {
+                method:'DELETE',
+                headers: {
+                    'Content-Type':'application/json',
+                }
+            }
+        ).then((a)=>{return a.json()})
+            .then((res)=>{
+                console.log(res.message);
+            })
+            .catch((err)=>{
+                console.log("Error al enviar detalle de comprobante de compra para su eliminación. \n Error: ",err);
+            })
 
         // GUARDAMOS DETALLES
         for (const detalle of detalles) {
@@ -164,10 +187,19 @@ const createComprobanteCompra = ({exito , ordenID}) => {
         const prod = productos.find(p => p._id === nuevosDetalles[index].producto);
 
         if (prod) {
-            const precio = presupuestos.find(p => p.producto === nuevosDetalles[index].producto).precio;
+            if(prod.precioCosto){
+                const ganancia = prod.ganancia;
+                const precio = prod.precioCosto + ((prod.precioCosto * ganancia) / 100);
 
-            nuevosDetalles[index].precio = precio;
-            nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
+                nuevosDetalles[index].precio = precio;
+                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
+            }
+            if(!prod.precioCosto && prod.precioVenta){
+                const precio = prod.precioVenta;
+
+                nuevosDetalles[index].precio = precio;
+                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
+            }
 
         } else {
             nuevosDetalles[index].precio = 0;
@@ -196,10 +228,10 @@ const createComprobanteCompra = ({exito , ordenID}) => {
         const value = e.target.value;
         const name = e.target.name;
         
-        setComprobanteCompra({
-            ...comprobanteCompra,
-            [name]: value,
-        });  
+        setOrdenCompra({
+            ...ordenCompra , 
+                [name]:value
+        })   
     }
 
     const agregarDetalle = () => {
@@ -230,10 +262,6 @@ const createComprobanteCompra = ({exito , ordenID}) => {
         setComprobanteCompra((prev) => ({ ...prev, total:totalPedido }));
     };
 
-    const [mostrarModalCreate1, setMostrarModalCreate1] = useState(false);
-    const [mostrarModalCreate2, setMostrarModalCreate2] = useState(false);
-    const [mostrarModalCreate3, setMostrarModalCreate3] = useState(false);
-
     const opciones_tipoProductos = tipoProductos.map(v => ({
         value: v,
         label: v === "ProductoVino" ? "Vino" :
@@ -261,52 +289,10 @@ const createComprobanteCompra = ({exito , ordenID}) => {
 
     return(
         <>
-            {mostrarModalCreate1 && (
-                <div className="modal">
-                <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate1(false)}>&times;</button>
-                    <FormularioMedioPagoCreate
-                    exito={() => {
-                        setMostrarModalCreate1(false);
-                        fetchData_MediosPago();
-                    }}
-                    />
-                </div>
-            </div>
-            )}
-            {mostrarModalCreate2 && (
-                <div className="modal">
-                <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate2(false)}>&times;</button>
-                    <FormularioEmpleadoCreate
-                    exito={() => {
-                        setMostrarModalCreate2(false);
-                        fetchData_Empleados();
-                    }}
-                    />
-                </div>
-                </div>
-            )}
-
-            {/* {mostrarModalCreate3 && (
-                <div className="modal">
-                <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate3(false)}>&times;</button>
-                    <FormularioClienteCreate
-                    exito={() => {
-                        setMostrarModalCreate3(false);
-                        fetchData_Clientes();
-                    }}
-                    />
-                </div>
-                </div>
-            )} */}
-
-
             <div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
-                        <h1 className="titulo-pagina">Cargar comprobantes de Compra</h1>
+                        <h1 className="titulo-pagina">Visualización de Comprobante de Compra</h1>
                     </div>
                 </div>
 
@@ -315,7 +301,6 @@ const createComprobanteCompra = ({exito , ordenID}) => {
                         <div className="form-col1">
                             <label>
                                 Proveedor:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -423,10 +408,6 @@ const createComprobanteCompra = ({exito , ordenID}) => {
                         <div className="form-col-productos">
                             <label>
                                     Productos:
-                                    {/* <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button> */}
-                                    <button type="button" className="btn-add-producto" onClick={agregarDetalle}>
-                                        + Agregar Producto
-                                    </button>
                             </label>
                             <div className="form-group-presupuesto">
                                 
@@ -443,6 +424,7 @@ const createComprobanteCompra = ({exito , ordenID}) => {
                                             }
                                             placeholder="Tipo de Producto..."
                                             isClearable
+                                            isDisabled={true}
                                             styles={{
                                                 container: (base) => ({
                                                 ...base,
@@ -492,6 +474,7 @@ const createComprobanteCompra = ({exito , ordenID}) => {
                                             }
                                             placeholder="Producto..."
                                             isClearable
+                                            isDisabled={true}
                                             styles={{
                                                 container: (base) => ({
                                                 ...base,
@@ -539,25 +522,12 @@ const createComprobanteCompra = ({exito , ordenID}) => {
                                             value={d.cantidad}
                                             onChange={(e) => handleDetalleChange(i, "cantidad", e.target.value)}
                                             required
+                                            disabled
                                         />
                                     </div>
 
                                     <div className='form-col-item2'>
                                         <span>Importe: ${d.importe.toFixed(2)}</span>
-                                    </div>
-
-                                    <div className='form-col-item2'>
-                                        <button
-                                            type="button"
-                                            className="btn-icon"
-                                            onClick={() => {
-                                                const productos = detalles.filter((_, index) => index !== i);
-                                                setDetalles(productos);
-                                                calcularTotal(productos);
-                                            }}
-                                            >                                    
-                                            <FaTrash />
-                                        </button>
                                     </div>
                                 </div>
                                 ))}
@@ -577,23 +547,6 @@ const createComprobanteCompra = ({exito , ordenID}) => {
                                     name="total"
                                     disabled
                                     />
-
-                                <div className="form-submit">
-                                    <button
-                                    type="submit"
-                                    className="submit-btn"
-                                    onClick={(e) => {
-                                        if (!puedeGuardar) {
-                                        alert("No se puede guardar un comprobante de compra sin al menos un producto con cantidad.");
-                                        e.preventDefault();
-                                        return;
-                                        }
-                                        clickChange(e);
-                                    }}
-                                    >
-                                    Cargar
-                                    </button>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -949,4 +902,4 @@ const createComprobanteCompra = ({exito , ordenID}) => {
     )
 }
 
-export default createComprobanteCompra;
+export default updateComprobanteCompra;

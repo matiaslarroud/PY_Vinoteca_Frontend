@@ -9,6 +9,15 @@ export default function Home() {
   const [usuario, setUsuario] = useState(null);
   const [lowStockProducts, setLowStockProducts] = useState([]);
 
+  const cargarProductos = () => {
+    if (usuario?.rol === "administrador") {
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/lowStock`)
+        .then((res) => res.json())
+        .then((data) => setLowStockProducts(data.data))
+        .catch(console.error);
+    }
+  };
+
   useEffect(() => {
     const sesion = sessionStorage.getItem("usuario");
     if (!sesion) {
@@ -85,20 +94,30 @@ export default function Home() {
         )}
       </div>
       
-      <div className="menu-grid">
+      <div className="lowstock-container">
         {/* 🔒 Solo administrador puede ver proveedores */}
         {usuario.rol === "administrador" && (
           <div className="lowstock-wrapper">
             <LowStockGrid
               products={lowStockProducts}
               title="Productos con Stock Bajo"
+              recargar={cargarProductos} 
             />
           </div>
         )}
-        
       </div>
 
       <style jsx>{`
+        .lowstock-container {
+          width: 100%;
+          max-width: 900px; /* controla el ancho máximo */
+          margin: 20px auto;
+          padding: 10px;
+          display: flex;
+          justify-content: center;
+        }
+
+
         .header {
           display: flex;
           justify-content: space-between;
@@ -106,6 +125,11 @@ export default function Home() {
           padding: 20px;
           color: white;
         }
+
+        .lowstock-wrapper{
+          width:100%
+        }
+
         button {
           background: #a30000;
           color: white;

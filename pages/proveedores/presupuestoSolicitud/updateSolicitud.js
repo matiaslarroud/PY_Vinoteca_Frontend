@@ -40,6 +40,7 @@ const updatePresupuesto = ({exito,solicitudID}) => {
             const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuestoDetalle/solicitudPresupuesto/${presupuestoID}`);
             const s = await res.json();
             if (s.ok) {
+                console.log(s.data)
                 setDetalles(s.data); // guardamos directo
             }
         } catch (err) {

@@ -60,13 +60,51 @@ const createPresupuesto = ({exito}) => {
                     setEmpleados(s.data)
                 })
     }
+
+const fetchData_LowStockByProveedor = (proveedor) => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/lowStock/proveedor/${proveedor}`)
+        .then((a) => a.json())
+        .then((s) => {
+            console.log(s.data);
+
+            // s.data es un array unificado → lo recorremos y agregamos uno por uno
+            setDetalles((prev) => [
+                ...prev,
+                ...s.data.map(item => ({
+                    tipoProducto: item.tipo, 
+                    producto: item._id,
+                    cantidad: item.stockMinimo
+                }))
+            ]);
+        });
+};
+
+
     useEffect(()=>{
         setDetalles([]);
         fetchData_Proveedores();
         fetchData_Empleados();
         fetchData_Productos();
         fetchData_TipoProductos();
-    }, [])
+    }, [])    
+
+    useEffect(() => {
+        if (!productos.length || !detalles.length) return;
+
+        const detallesConTipo = detalles.map((d) => {
+            const prod = productos.find((p) => p._id === d.producto);
+
+            return {
+                ...d,
+                tipoProducto: d.tipoProducto || (prod ? prod.tipoProducto : ""),
+            };
+        });
+        
+        const isDifferent = JSON.stringify(detalles) !== JSON.stringify(detallesConTipo);
+        if (isDifferent) {
+            setDetalles(detallesConTipo);
+        }
+    }, [productos, detalles]);
 
     const handleDetalleChange = (index, field, value) => {
         const nuevosDetalles = [...detalles];
@@ -115,6 +153,10 @@ const createPresupuesto = ({exito}) => {
     const selectChange = (selectedOption, actionMeta) => {
         const name = actionMeta.name;
         const value = selectedOption ? selectedOption.value : "";
+
+        if(name === 'proveedor'){
+            fetchData_LowStockByProveedor(value)
+        }
 
         setPresupuesto({
             ...presupuesto,

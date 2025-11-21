@@ -1,276 +1,405 @@
 const { useState, useEffect } = require("react")
-import { FaTrash } from "react-icons/fa";
-import Select from 'react-select';    
+import Select from 'react-select';          
+import { FaTrash} from "react-icons/fa";
+import updateOrden from '@/pages/products/ordenProduccion/updateOrdenProduccion';
+// import FormularioEmpleadoCreate from '../../gestion/general/empleado/createEmpleado'
+// import FormularioClienteCreate from '../createCliente'
+// import FormularioMedioPagoCreate from '../../gestion/general/medioPago/createMedioPago'
 
 const { default: Link } = require("next/link")
 
-const initialState = {name:'',stock:0 , stockMinimo:'', proveedor:'' , bodega:'' , paraje:'' , crianza : '' , precioCosto:0 , ganancia:0 , tipo:'', uva:'' , varietal:'' , volumen:'' , deposito:''}
+const initialStateOrdenCompra = {
+        total:'', fecha:'', fechaEntrega:'', proveedor:'', empleado:'',
+        presupuesto:'', medioPago:'',
+    }
 const initialDetalle = { 
-         vino: "", uva: ""
+         tipoProducto: "", producto: "", cantidad: 0, precio: 0, importe: 0, ordenCompra:'' 
     };
-const formProducto = ({exito}) => {
-    const [product , setProduct] = useState(initialState);
-    const [bodegas, setBodegas] = useState([]);
-    const [parajes, setParajes] = useState([]);
-    const [detalles,setDetalles] = useState([initialDetalle])
-    const [crianzas, setCrianzas] = useState([]);
-    const [tiposVino, setTiposVino] = useState([]);
-    const [tiposUva, setTiposUva] = useState([]);
-    const [varietales, setVarietales] = useState([]);
-    const [volumenes, setVolumenes] = useState([]);
-    const [proveedores, setProveedores] = useState([]);
-    const [depositos, setDepositos] = useState([]);
+
+const viewOrdenCompra = ({exito , ordenID}) => {
+    const [ordenCompra , setOrdenCompra] = useState(initialStateOrdenCompra);
     
-    const fetchBodegas = ()=>{
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/bodega`)
-            .then((a)=>{return a.json()})
-                .then((s)=>{
-                    setBodegas(s.data)
-                })
-            .catch((err)=>{console.log(err)})
+    const [proveedores,setProveedores] = useState([])
+    const [presupuestos,setPresupuestos] = useState([])
+    const [empleados,setEmpleados] = useState([])
+    const [mediosPago,setMediosPago] = useState([])
+    const [detalles,setDetalles] = useState([initialDetalle])
+    const [productos,setProductos] = useState([]);
+    const [tipoProductos,setTipoProductos] = useState([]);
+    
+    const detallesValidos = detalles.filter(d => d.producto && d.cantidad > 0);
+    const puedeGuardar = detallesValidos.length > 0;
+
+    const fetchData = (param) => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/ordenCompra/${param}`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if (!s.ok || !s.data) {
+                    console.warn("No se pudo cargar la orden de compra o los datos son inválidos");
+                    return;
+                }
+                if(s.ok){
+    
+                    const {
+                        total,
+                        proveedor,
+                        fechaEntrega,
+                        empleado,
+                        presupuesto,
+                        medioPago
+                    } = s.data;
+
+                    // Actualiza todo el estado de la orden de compra
+                    setOrdenCompra((prev) => ({
+                        ...prev,
+                        total: total ?? 0,
+                        proveedor: Number(proveedor) || "",
+                        empleado: Number(empleado) || "",
+                        presupuesto: Number(presupuesto) || "",
+                        medioPago: Number(medioPago) || "",
+                        fechaEntrega: fechaEntrega ? fechaEntrega.split("T")[0] : ""
+                    }));
+        }})
+        .catch((err)=>{console.log("Error al cargar orden de compra.\nError: ",err)})
+    }
+
+    const fetchData_Detalle = (param) => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/ordenCompraDetalle/OrdenCompra/${param}`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if(s.ok){
+                    setDetalles(s.data)
+                }
+            })
+        .catch((err)=>{console.log("Error al cargar detalle de orden de compra.\nError: ",err)})
+    }
+
+    const fetchData_Presupuestos = () => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuesto`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if(s.ok){
+                    setPresupuestos(s.data)
+                }
+            })
+        .catch((err)=>{console.log("Error al cargar presupuestos.\nError: ",err)})
     }
     
-    const fetchProveedores = ()=>{
+    const fetchData_TipoProductos = () => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/tipos`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if(s.ok){
+                    setTipoProductos(s.data);
+                }
+            })
+        .catch((err)=>{console.log("Error al cargar tipos de productos.\nError: ",err)})
+    }
+
+    const fetchData_Productos = () => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if(s.ok){
+                    setProductos(s.data)
+                }
+            })
+        .catch((err)=>{console.log("Error al cargar productos.\nError: ",err)})
+    }
+    
+    const fetchData_Proveedores = () => {
         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/proveedor`)
             .then((a)=>{return a.json()})
                 .then((s)=>{
                     setProveedores(s.data)
                 })
-            .catch((err)=>{console.log(err)})
     }
-    const fetchParajes = ()=>{
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/bodega-paraje`)
+
+    const fetchData_Empleados = () => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/empleado`)
             .then((a)=>{return a.json()})
                 .then((s)=>{
-                    setParajes(s.data)
+                    setEmpleados(s.data)
                 })
-            .catch((err)=>{console.log(err)})
     }
-    const fetchCrianzas = ()=>{
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/crianza`)
+
+    const fetchData_MediosPago = () => {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/mediopago`)
             .then((a)=>{return a.json()})
                 .then((s)=>{
-                    setCrianzas(s.data)
+                    setMediosPago(s.data)
                 })
-            .catch((err)=>{console.log(err)})
-    }
-    const fetchTiposVino = ()=>{
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/tipoVino`)
-            .then((a)=>{return a.json()})
-                .then((s)=>{
-                    setTiposVino(s.data)
-                })
-            .catch((err)=>{console.log(err)})
-    }
-    const fetchTiposUva = ()=>{
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/uva`)
-            .then((a)=>{return a.json()})
-                .then((s)=>{
-                    setTiposUva(s.data)
-                })
-            .catch((err)=>{console.log(err)})
-    }
-    const fetchVarietales = ()=>{
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/varietal`)
-            .then((a)=>{return a.json()})
-                .then((s)=>{
-                    setVarietales(s.data)
-                })
-            .catch((err)=>{console.log(err)})
-    }
-    const fetchVolumenes = ()=>{
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/volumen`)
-            .then((a)=>{return a.json()})
-                .then((s)=>{
-                    setVolumenes(s.data)
-                })
-            .catch((err)=>{console.log(err)})
-    }
-    const fetchDepositos = ()=>{
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/deposito`)
-            .then((a)=>{return a.json()})
-                .then((s)=>{
-                    setDepositos(s.data)
-                })
-            .catch((err)=>{console.log(err)})
     }
     
+
+    useEffect(()=>{
+        setDetalles([]);
+        fetchData(ordenID);
+        fetchData_Detalle(ordenID)
+        fetchData_Proveedores();
+        fetchData_Empleados();
+        fetchData_Presupuestos();
+        fetchData_MediosPago();
+        fetchData_Productos();
+        fetchData_TipoProductos();
+    }, [ordenID])
+
     useEffect(() => {
-        fetchBodegas();
-        fetchParajes();
-        fetchCrianzas();
-        fetchTiposVino();
-        fetchTiposUva();
-        fetchVarietales();
-        fetchVolumenes();
-        fetchDepositos();
-        fetchProveedores();
-    }, []);
+        if (!productos.length || !detalles.length) return;
 
-    
-    const inputChange = (e) => {
-        const value = e.target.value;
-        const name = e.target.name;
-        
-        setProduct({
-            ...product , 
-                [name]:value
-        })   
-    }
-  
-    const handleDetalleChange = (index, field, value) => {
-        const nuevosDetalles = [...detalles];
-        nuevosDetalles[index][field] = value;
-        setDetalles(nuevosDetalles);
-    };
+        const detallesConTipo = detalles.map((d) => {
+            const prod = productos.find((p) => p._id === d.producto);
 
-
-    const selectChange = (selectedOption, actionMeta) => {
-        const name = actionMeta.name;
-        const value = selectedOption ? selectedOption.value : "";
-
-        setProduct({
-            ...product,
-            [name]: value,
+            return {
+                ...d,
+                tipoProducto: d.tipoProducto || (prod ? prod.tipoProducto : ""),
+            };
         });
-    };
-    
+        
+        const isDifferent = JSON.stringify(detalles) !== JSON.stringify(detallesConTipo);
+        if (isDifferent) {
+            setDetalles(detallesConTipo);
+        }
+    }, [productos, detalles]);
 
-    const agregarDetalle = () => {
-        setDetalles([...detalles, { ...{vino:"" , uva: ""} }]);
-    };
 
     const clickChange = async(e) => {
         e.preventDefault();
         const bodyData = {
-            name: product.name,
-            precioCosto: product.precioCosto,
-            stock: product.stock,
-            bodega:product.bodega,
-            paraje:product.paraje,
-            crianza:product.crianza,
-            ganancia: product.ganancia,
-            tipo:product.tipo,
-            varietal:product.varietal,
-            volumen: product.volumen,
-            proveedor: product.proveedor,
-            deposito: product.deposito
+            total: ordenCompra.total,
+            proveedor: ordenCompra.proveedor,
+            empleado: ordenCompra.empleado,
+            medioPago: ordenCompra.medioPago,
+            fechaEntrega: ordenCompra.fechaEntrega
         };
 
-        if(product.stockMinimo){
-            bodyData.stockMinimo = product.stockMinimo;
+        if (ordenCompra.presupuesto) {
+            bodyData.presupuesto = ordenCompra.presupuesto;
         }
 
-        const resVino = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productVino`, {
-            method: 'POST',
+        const resOrdenCompra = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/ordenCompra/${ordenID}`, {
+            method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(bodyData)
         })
 
-        const vinoCreado = await resVino.json();
-        const vinoID = vinoCreado.data?._id;
+        const ordenCompraCreado = await resOrdenCompra.json();
+        const ordenID = ordenCompraCreado.data._id;
+
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompraDetalle/${ordenID}`,
+            {
+                method:'DELETE',
+                headers: {
+                    'Content-Type':'application/json',
+                }
+            }
+        ).then((a)=>{return a.json()})
+            .then((res)=>{
+                console.log(res.message);
+            })
+            .catch((err)=>{
+                console.log("Error al enviar detalle de orden de compra para su eliminación. \n Error: ",err);
+            })
 
         // GUARDAMOS DETALLES
         for (const detalle of detalles) {
-            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productVinoDetalle`, {
+            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/ordenCompraDetalle`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    uva: detalle.uva,
-                    vino: vinoID
+                    producto: detalle.producto,
+                    precio: detalle.precio,
+                    cantidad: detalle.cantidad,
+                    importe: detalle.importe,
+                    ordenCompra: ordenID
             })
             
             
             });
             if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
             
+            setDetalles([initialDetalle]);
+            setOrdenCompra(initialStateOrdenCompra);
+            exito();
         }
-        
-        setDetalles([initialDetalle]);
-        setProduct(initialState);
-        exito();
     }
 
+    const handleDetalleChange = (index, field, value) => {
+        const nuevosDetalles = [...detalles];
+        nuevosDetalles[index][field] = field === "cantidad" ? parseFloat(value) : value;
+        
+        const prod = productos.find(p => p._id === nuevosDetalles[index].producto);
+       
+        if (prod) {
+            if(prod.precioCosto){
+                const ganancia = prod.ganancia;
+                const precio = prod.precioCosto + ((prod.precioCosto * ganancia) / 100);
+                
+                nuevosDetalles[index].precio = precio;
+                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
+            }
+            if(!prod.precioCosto && prod.precioVenta){
+                const precio = prod.precioVenta;
+
+                nuevosDetalles[index].precio = precio;
+                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
+            }
+
+        } else {
+            nuevosDetalles[index].precio = 0;
+            nuevosDetalles[index].importe = 0;
+        }
+
+        setDetalles(nuevosDetalles);
+        calcularTotal(nuevosDetalles);
+    };
     
-    const opciones_tipoVino = tiposVino.map(v => ({ value: v._id,label: v.name }));
-    const opciones_varietales = varietales.map(v => ({ value: v._id,label: v.name }));
-    const opciones_volumen = volumenes.map(v => ({ value: v._id,label: v.name }));
-    const opciones_uvas = tiposUva.map(v => ({ value: v._id,label: v.name }));
-    const opciones_deposito = depositos.map(v => ({ value: v._id,label: v.name }));
-    const opciones_crianza = crianzas.map(v => ({ value: v._id,label: v.name }));
-    const opciones_bodega = bodegas.map(v => ({ value: v._id,label: v.name }));
-    const opciones_paraje = parajes.filter(p => (p.bodega === product.bodega)).map(v => ({ value: v._id,label: v.name }));
+    const selectChange = (selectedOption, actionMeta) => {
+        const name = actionMeta.name;
+        const value = selectedOption ? selectedOption.value : "";
+
+        setOrdenCompra({
+            ...ordenCompra,
+            [name]: value,
+        });
+
+        if (name === 'presupuesto' && value) {
+            agregarDetallePresupuesto(value);
+        }
+    };
+
+    const inputChange = (e) => {
+        const value = e.target.value;
+        const name = e.target.name;
+        
+        setOrdenCompra({
+            ...ordenCompra , 
+                [name]:value
+        })   
+    }
+
+    const agregarDetalle = () => {
+        setDetalles([...detalles, { ...{tipoProducto:"" , producto: "", cantidad: 0, precio: 0, importe: 0 } }]);
+    };
+    
+    const agregarDetallePresupuesto = async (presupuestoID) => {
+    try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuestoDetalle/presupuesto/${presupuestoID}`);
+        const s = await res.json();
+
+        if (s.ok) {
+            setDetalles(s.data);
+            calcularTotal(s.data);
+        } else {
+            console.error('Error al cargar detalles del presupuesto:', s.message);
+        }
+    } catch (error) {
+        console.error('Error de red al cargar detalles del presupuesto:', error);
+    }
+};
+
+    
+    const calcularTotal = (detalles) => {
+        const totalPedido = Array.isArray(detalles) && detalles.length > 0
+            ? detalles.reduce((acc, d) => acc + (d.importe || 0), 0)
+                : 0;
+        setOrdenCompra((prev) => ({ ...prev, total:totalPedido }));
+    };
+
+    const [mostrarModalCreate1, setMostrarModalCreate1] = useState(false);
+    const [mostrarModalCreate2, setMostrarModalCreate2] = useState(false);
+    const [mostrarModalCreate3, setMostrarModalCreate3] = useState(false);
+
+    const opciones_tipoProductos = tipoProductos.map(v => ({
+        value: v,
+        label: v === "ProductoVino" ? "Vino" :
+                v === "ProductoPicada" ? "Picada" :
+                v === "ProductoInsumo" ? "Insumo" : v
+    }));
+    const opciones_productos = productos
+        .map(v => ({
+            value: v._id,
+            label: v.name,
+            stock: v.stock,
+            tipoProducto: v.tipoProducto
+        }));
+    const opciones_empleados = empleados.map(v => ({ value: v._id,label: v.name }));
     const opciones_proveedores = proveedores.map(v => ({ value: v._id,label: v.name }));
+    const opciones_mediosPago = mediosPago.map(v => ({ value: v._id,label: v.name }));
+    const opciones_presupuestos = presupuestos.filter((s)=>{return s.proveedor === ordenCompra.proveedor })
+        .map(v => {
+            return {
+                value: v._id,
+                label: `${v._id} - ${v.fecha.split("T")[0]} - $${v.total}`,
+                proveedor: v.proveedor,
+                total: v.total
+            };
+        }
+    );
 
     return(
         <>
+            {mostrarModalCreate1 && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalCreate1(false)}>&times;</button>
+                    <FormularioMedioPagoCreate
+                    exito={() => {
+                        setMostrarModalCreate1(false);
+                        fetchData_MediosPago();
+                    }}
+                    />
+                </div>
+            </div>
+            )}
+            {mostrarModalCreate2 && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalCreate2(false)}>&times;</button>
+                    <FormularioEmpleadoCreate
+                    exito={() => {
+                        setMostrarModalCreate2(false);
+                        fetchData_Empleados();
+                    }}
+                    />
+                </div>
+                </div>
+            )}
+
+            {mostrarModalCreate3 && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalCreate3(false)}>&times;</button>
+                    <FormularioClienteCreate
+                    exito={() => {
+                        setMostrarModalCreate3(false);
+                        fetchData_Clientes();
+                    }}
+                    />
+                </div>
+                </div>
+            )}
+
+
             <div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
-                        <h1 className="titulo-pagina">Cargar Vino</h1>
+                        <h1 className="titulo-pagina">Visualización de Orden de Compra</h1>
                     </div>
                 </div>
 
                 <form id="formProducto" className="formulario-presupuesto">
                     <div className="form-row">
-                        <div className="form-col1">
-                            <label>
-                                Nombre:
-                            </label>
-                            <input type='text' onChange={inputChange}  name='name' value={product.name} placeholder='Escriba aqui el nombre...' required/>
-                        </div>
-                        <div className="form-col1">
-                            <label>
-                                Tipo de Vino:
-                            </label>
-                            <Select
-                                className="form-select-react"
-                                classNamePrefix="rs"
-                                options={opciones_tipoVino}
-                                value={opciones_tipoVino.find(op => op.value === product.tipo) || null}
-                                onChange={selectChange}
-                                name='tipo'
-                                placeholder="Tipo de vino..."
-                                isClearable
-                                styles={{
-                                    container: (base) => ({
-                                    ...base,
-                                    width: 220, // ⬅️ ancho fijo total
-                                    }),
-                                    control: (base) => ({
-                                    ...base,
-                                    minWidth: 220,
-                                    maxWidth: 220,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    border: '1px solid #444',
-                                    borderRadius: 8,
-                                    }),
-                                    singleValue: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                    }),
-                                    menu: (base) => ({
-                                    ...base,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    option: (base, { isFocused }) => ({
-                                    ...base,
-                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    input: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    }),
-                                }}
-                            />
-                        </div>
-
                         <div className="form-col1">
                             <label>
                                 Proveedor:
@@ -279,10 +408,11 @@ const formProducto = ({exito}) => {
                                 className="form-select-react"
                                 classNamePrefix="rs"
                                 options={opciones_proveedores}
-                                value={opciones_proveedores.find(op => op.value === product.proveedor) || null}
+                                value={opciones_proveedores.find(op => op.value === ordenCompra.proveedor) || null}
                                 onChange={selectChange}
                                 name='proveedor'
                                 placeholder="Proveedor..."
+                                isDisabled={true}
                                 isClearable
                                 styles={{
                                     container: (base) => ({
@@ -325,16 +455,17 @@ const formProducto = ({exito}) => {
 
                         <div className="form-col1">
                             <label>
-                                Varietal:
+                                Empleado:
                             </label>
                             <Select
                                 className="form-select-react"
                                 classNamePrefix="rs"
-                                options={opciones_varietales}
-                                value={opciones_varietales.find(op => op.value === product.varietal) || null}
+                                options={opciones_empleados}
+                                value={opciones_empleados.find(op => op.value === ordenCompra.empleado) || null}
                                 onChange={selectChange}
-                                name='varietal'
-                                placeholder="Varietal..."
+                                name='empleado'
+                                placeholder="Empleado..."
+                                isDisabled={true}
                                 isClearable
                                 styles={{
                                     container: (base) => ({
@@ -377,16 +508,17 @@ const formProducto = ({exito}) => {
 
                         <div className="form-col1">
                             <label>
-                                Crianza:
+                                Presupuesto:
                             </label>
                             <Select
                                 className="form-select-react"
                                 classNamePrefix="rs"
-                                options={opciones_crianza}
-                                value={opciones_crianza.find(op => op.value === product.crianza) || null}
+                                options={opciones_presupuestos}
+                                value={opciones_presupuestos.find(op => op.value === ordenCompra.presupuesto) || null}
                                 onChange={selectChange}
-                                name='crianza'
-                                placeholder="Crianza..."
+                                name='presupuesto'
+                                placeholder="Presupuesto..."
+                                isDisabled={true}
                                 isClearable
                                 styles={{
                                     container: (base) => ({
@@ -429,16 +561,17 @@ const formProducto = ({exito}) => {
 
                         <div className="form-col1">
                             <label>
-                                Volumen:
+                                Medio de Pago:
                             </label>
                             <Select
                                 className="form-select-react"
                                 classNamePrefix="rs"
-                                options={opciones_volumen}
-                                value={opciones_volumen.find(op => op.value === product.volumen) || null}
+                                options={opciones_mediosPago}
+                                value={opciones_mediosPago.find(op => op.value === ordenCompra.medioPago) || null}
                                 onChange={selectChange}
-                                name='volumen'
-                                placeholder="Volumen..."
+                                name='medioPago'
+                                placeholder="Medio de Pago..."
+                                isDisabled={true}
                                 isClearable
                                 styles={{
                                     container: (base) => ({
@@ -477,194 +610,12 @@ const formProducto = ({exito}) => {
                                     }),
                                 }}
                             />
-                        </div>
-
-                        <div className="form-col1">
-                            <label>
-                                Bodega:
-                            </label>
-                            <Select
-                                className="form-select-react"
-                                classNamePrefix="rs"
-                                options={opciones_bodega}
-                                value={opciones_bodega.find(op => op.value === product.bodega) || null}
-                                onChange={selectChange}
-                                name='bodega'
-                                placeholder="Bodega..."
-                                isClearable
-                                styles={{
-                                    container: (base) => ({
-                                    ...base,
-                                    width: 220, // ⬅️ ancho fijo total
-                                    }),
-                                    control: (base) => ({
-                                    ...base,
-                                    minWidth: 220,
-                                    maxWidth: 220,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    border: '1px solid #444',
-                                    borderRadius: 8,
-                                    }),
-                                    singleValue: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                    }),
-                                    menu: (base) => ({
-                                    ...base,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    option: (base, { isFocused }) => ({
-                                    ...base,
-                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    input: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    }),
-                                }}
-                            />
-                        </div>
-
-                        <div className="form-col1">
-                            <label>
-                                Paraje:
-                            </label>
-                            <Select
-                                className="form-select-react"
-                                classNamePrefix="rs"
-                                options={opciones_paraje}
-                                value={opciones_paraje.find(op => op.value === product.paraje) || null}
-                                onChange={selectChange}
-                                name='paraje'
-                                placeholder="Paraje..."
-                                isClearable
-                                styles={{
-                                    container: (base) => ({
-                                    ...base,
-                                    width: 220, // ⬅️ ancho fijo total
-                                    }),
-                                    control: (base) => ({
-                                    ...base,
-                                    minWidth: 220,
-                                    maxWidth: 220,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    border: '1px solid #444',
-                                    borderRadius: 8,
-                                    }),
-                                    singleValue: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                    }),
-                                    menu: (base) => ({
-                                    ...base,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    option: (base, { isFocused }) => ({
-                                    ...base,
-                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    input: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    }),
-                                }}
-                            />
-                        </div>
-
-                        <div className="form-col1">
-                            <label>
-                                Deposito:
-                            </label>
-                            <Select
-                                className="form-select-react"
-                                classNamePrefix="rs"
-                                options={opciones_deposito}
-                                value={opciones_deposito.find(op => op.value === product.deposito) || null}
-                                onChange={selectChange}
-                                name='deposito'
-                                placeholder="Deposito..."
-                                isClearable
-                                styles={{
-                                    container: (base) => ({
-                                    ...base,
-                                    width: 220, // ⬅️ ancho fijo total
-                                    }),
-                                    control: (base) => ({
-                                    ...base,
-                                    minWidth: 220,
-                                    maxWidth: 220,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    border: '1px solid #444',
-                                    borderRadius: 8,
-                                    }),
-                                    singleValue: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                    }),
-                                    menu: (base) => ({
-                                    ...base,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    option: (base, { isFocused }) => ({
-                                    ...base,
-                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    input: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    }),
-                                }}
-                            />
-                        </div>
-                        <div className="form-col1">
-                            <label>
-                                Precio costo:
-                            </label>
-                            <input type='number' onChange={inputChange}  name='precioCosto' value={product.precioCosto} placeholder='Escriba aqui el precio costo...' required/>
-                        </div>
-                        <div className="form-col1">
-                            <label>
-                                Ganancia:
-                            </label>
-                            <input type='number' onChange={inputChange}  name='ganancia' value={product.ganancia} placeholder='Escriba aqui la ganancia...' required/>
-                        </div>
-                        <div className="form-col1">
-                            <label>
-                                Stock:
-                            </label>
-                            <input type='number' onChange={inputChange}  name='stock' value={product.stock} placeholder='Escriba aqui el stock...' required/>
-                        </div>
-                        <div className="form-col1">
-                            <label>
-                                Stock minimo:
-                            </label>
-                            <input type='number' onChange={inputChange}  name='stockMinimo' value={product.stockMinimo} placeholder='Escriba aqui el stock minimo...'/>
                         </div>
                     </div>
                     <div className="form-row">
                         <div className="form-col-productos">
                             <label>
-                                    Uvas:<button type="button" className="btn-add-producto" onClick={agregarDetalle}>
-                                        + Agregar Uva
-                                    </button>
+                                    Productos:
                             </label>
                             <div className="form-group-presupuesto">
                                 
@@ -674,22 +625,23 @@ const formProducto = ({exito}) => {
                                         <Select
                                             className="form-select-react"
                                             classNamePrefix="rs"
-                                            options={opciones_uvas}
-                                            value={opciones_uvas.find(op => op.value === d.uva) || null}
+                                            options={opciones_tipoProductos}
+                                            value={opciones_tipoProductos.find(op => op.value === d.tipoProducto) || null}
                                             onChange={(selectedOption) =>
-                                                handleDetalleChange(i, "uva", selectedOption ? selectedOption.value : "")
+                                                handleDetalleChange(i, "tipoProducto", selectedOption ? selectedOption.value : "")
                                             }
-                                            placeholder="Uva..."
+                                            placeholder="Tipo de Producto..."
                                             isClearable
+                                            isDisabled={true}
                                             styles={{
                                                 container: (base) => ({
                                                 ...base,
-                                                width: 250, // ⬅️ ancho fijo total
+                                                width: 120, // ⬅️ ancho fijo total
                                                 }),
                                                 control: (base) => ({
                                                 ...base,
-                                                minWidth: 250,
-                                                maxWidth: 300,
+                                                minWidth: 150,
+                                                maxWidth: 150,
                                                 backgroundColor: '#2c2c2c',
                                                 color: 'white',
                                                 border: '1px solid #444',
@@ -719,34 +671,97 @@ const formProducto = ({exito}) => {
                                             }}
                                         />
                                     </div>
+                                    <div className='form-col-item1'>
+                                        <Select
+                                            className="form-select-react"
+                                            classNamePrefix="rs"
+                                            options={opciones_productos.filter(op => op.tipoProducto === d.tipoProducto)}
+                                            value={opciones_productos.find(op => op.value === d.producto) || null}
+                                            onChange={(selectedOption) =>
+                                                handleDetalleChange(i, "producto", selectedOption ? selectedOption.value : "")
+                                            }
+                                            placeholder="Producto..."
+                                            isClearable
+                                            isDisabled={true}
+                                            styles={{
+                                                container: (base) => ({
+                                                ...base,
+                                                width: 150, // ⬅️ ancho fijo total
+                                                }),
+                                                control: (base) => ({
+                                                ...base,
+                                                minWidth: 150,
+                                                maxWidth: 150,
+                                                backgroundColor: '#2c2c2c',
+                                                color: 'white',
+                                                border: '1px solid #444',
+                                                borderRadius: 8,
+                                                }),
+                                                singleValue: (base) => ({
+                                                ...base,
+                                                color: 'white',
+                                                whiteSpace: 'nowrap',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                                }),
+                                                menu: (base) => ({
+                                                ...base,
+                                                backgroundColor: '#2c2c2c',
+                                                color: 'white',
+                                                }),
+                                                option: (base, { isFocused }) => ({
+                                                ...base,
+                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                                color: 'white',
+                                                }),
+                                                input: (base) => ({
+                                                ...base,
+                                                color: 'white',
+                                                }),
+                                            }}
+                                        />
+                                    </div>
+                                    
+                                    <div className='form-col-item1'>
+                                        <input
+                                            type="number"
+                                            placeholder="Cantidad"
+                                            min={1}
+                                            value={d.cantidad}
+                                            onChange={(e) => handleDetalleChange(i, "cantidad", e.target.value)}
+                                            required
+                                            disabled
+                                        />
+                                    </div>
 
                                     <div className='form-col-item2'>
-                                        <button
-                                            type="button"
-                                            className="btn-icon"
-                                            onClick={() => {
-                                                const productos = detalles.filter((_, index) => index !== i);
-                                                setDetalles(productos);
-                                            }}
-                                            >                                    
-                                            <FaTrash />
-                                        </button>
+                                        <span>Importe: ${d.importe.toFixed(2)}</span>
                                     </div>
                                 </div>
                                 ))}
                             </div>
                         </div> 
 
-                        <div className="form-submit">
-                            <button
-                                type="submit"
-                                className="submit-btn"
-                                onClick={(e) => {
-                                    clickChange(e);
-                                }}
-                                >
-                                Cargar Vino
-                            </button>
+
+                        <div className="form-col-precioVenta">
+                            <div className="form-secondary">
+                                <label>
+                                    Fecha de Entrega:
+                                </label>
+                                <input type="date" onChange={inputChange} value={ordenCompra.fechaEntrega} name="fechaEntrega" required disabled/>
+                            </div>
+                            <div className="form-secondary">
+                                <label htmlFor="precioVenta" className="label-box">
+                                    Total:
+                                </label>
+                                <input
+                                    type="number"
+                                    className="input-secondary"
+                                    value={ordenCompra.total}
+                                    name="total"
+                                    disabled
+                                    />
+                            </div>
                         </div>
                     </div>
                 </form>
@@ -1131,4 +1146,4 @@ const formProducto = ({exito}) => {
     )
 }
 
-export default formProducto;
+export default viewOrdenCompra;

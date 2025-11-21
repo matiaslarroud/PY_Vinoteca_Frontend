@@ -6,7 +6,7 @@ import Select from 'react-select';
 
 const { default: Link } = require("next/link")
 
-const initialState = {name:'',stock:0, stockMinimo:'' , bodega:'' , paraje:'' , crianza : '' , precioCosto:0 , ganancia:0 , tipo:'', uva:'' , varietal:'' , volumen:'' , deposito:''}
+const initialState = {name:'',stock:0, stockMinimo:'', proveedor:'' , bodega:'' , paraje:'' , crianza : '' , precioCosto:0 , ganancia:0 , tipo:'', uva:'' , varietal:'' , volumen:'' , deposito:''}
 const initialDetalle = { 
          vino: "", uva: ""
     };
@@ -20,6 +20,7 @@ const updateProducto = ({exito,vinoID}) => {
     const [tiposUva, setTiposUva] = useState([]);
     const [varietales, setVarietales] = useState([]);
     const [volumenes, setVolumenes] = useState([]);
+    const [proveedores, setProveedores] = useState([]);
     const [depositos, setDepositos] = useState([]);
     
     const fetchProduct = (vinoID)=>{
@@ -27,6 +28,15 @@ const updateProducto = ({exito,vinoID}) => {
             .then((a)=>{return a.json()})
                 .then((s)=>{
                     setProduct(s.data)
+                })
+            .catch((err)=>{console.log(err)})
+    }
+    
+    const fetchProveedores = (vinoID)=>{
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/proveedor`)
+            .then((a)=>{return a.json()})
+                .then((s)=>{
+                    setProveedores(s.data)
                 })
             .catch((err)=>{console.log(err)})
     }
@@ -116,6 +126,7 @@ const updateProducto = ({exito,vinoID}) => {
         fetchVarietales();
         fetchVolumenes();
         fetchDepositos();
+        fetchProveedores();
     }, [vinoID]);
 
     
@@ -164,7 +175,8 @@ const updateProducto = ({exito,vinoID}) => {
             tipo:product.tipo,
             varietal:product.varietal,
             volumen: product.volumen,
-            deposito: product.deposito
+            deposito: product.deposito ,
+            proveedor:product.proveedor
         };
 
         if(product.stockMinimo){
@@ -225,6 +237,7 @@ const updateProducto = ({exito,vinoID}) => {
     const opciones_crianza = crianzas.map(v => ({ value: v._id,label: v.name }));
     const opciones_bodega = bodegas.map(v => ({ value: v._id,label: v.name }));
     const opciones_paraje = parajes.filter(p => (p.bodega === product.bodega)).map(v => ({ value: v._id,label: v.name }));
+    const opciones_proveedores = proveedores.map(v => ({ value: v._id,label: v.name }));
 
     return(
         <>
@@ -255,6 +268,58 @@ const updateProducto = ({exito,vinoID}) => {
                                 onChange={selectChange}
                                 name='tipo'
                                 placeholder="Tipo de vino..."
+                                isClearable
+                                styles={{
+                                    container: (base) => ({
+                                    ...base,
+                                    width: 220, // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 220,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }}
+                            />
+                        </div>
+
+                        <div className="form-col1">
+                            <label>
+                                Proveedor:
+                            </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_proveedores}
+                                value={opciones_proveedores.find(op => op.value === product.proveedor) || null}
+                                onChange={selectChange}
+                                name='proveedor'
+                                placeholder="Proveedor..."
                                 isClearable
                                 styles={{
                                     container: (base) => ({

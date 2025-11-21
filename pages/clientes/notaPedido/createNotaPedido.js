@@ -487,6 +487,7 @@ const createNotaPedido = ({exito , param , tipo}) => {
                                 name='cliente'
                                 placeholder="Cliente..."
                                 isClearable
+                                isDisabled={true}
                                 styles={{
                                     container: (base) => ({
                                     ...base,

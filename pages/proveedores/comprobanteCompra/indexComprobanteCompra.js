@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit , FaSearch , FaFileInvoice } from "react-icons/fa";
+import { FaPlus, FaHome, FaArrowLeft, FaReceipt, FaEdit , FaSearch , FaFileInvoice , FaEye } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import FormularioComprobanteCompraUpdate from './updateComprobanteCompra'
 import FormularioComprobanteCompraCreate from './newComprobanteCompra'
 import FormularioBusquedaComprobante from './busquedaComprobanteCompra'
 import FormularioComprobantePagoCreate from '../comprobantePago/createComprobantePago'
+import FormularioRemitoCreate from '../remito/create_RemitoProveedor'
+import FormularioComprobanteView from '../comprobanteCompra/viewComprobanteCompra'
 
 const { default: Link } = require("next/link")
 
@@ -20,6 +22,8 @@ const initialStateComprobanteCompra = {
     const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
     const [mostrarModalBusqueda, setMostrarModalBusqueda] = useState(null);
     const [mostrarModalComprobantePago, setMostrarModalComprobantePago] = useState(null);
+    const [mostrarModalRemito, setMostrarModalRemito] = useState(null);
+    const [mostrarModalComprobanteView, setMostrarModalComprobanteView] = useState(null);
         
     const [filtro , setFiltro] = useState(initialStateComprobanteCompra);
     const [filtroDetalle , setFiltroDetalle] = useState([]);  
@@ -145,6 +149,24 @@ const initialStateComprobanteCompra = {
                     </div>
                 </div>
             )}
+            
+            {mostrarModalRemito && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="close" onClick={() => setMostrarModalRemito(false)}>
+                            &times;
+                        </button>
+                        <FormularioRemitoCreate 
+                            exito={()=>{
+                                setMostrarModalRemito(false);
+                                fetchData();
+                            }}
+                            tipo="comprobanteCompra"
+                            param={mostrarModalRemito}
+                        />
+                    </div>
+                </div>
+            )}
 
             {mostrarModalUpdate && (
                 <div className="modal">
@@ -156,6 +178,23 @@ const initialStateComprobanteCompra = {
                             comprobanteCompraID={mostrarModalUpdate} 
                             exito={()=>{
                                 setMostrarModalUpdate(null);
+                                fetchData();
+                            }}    
+                        />
+                    </div>
+                </div>
+            )}
+
+            {mostrarModalComprobanteView && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="close" onClick={() => setMostrarModalComprobanteView(null)}>
+                            &times;
+                        </button>
+                        <FormularioComprobanteView 
+                            comprobanteCompraID={mostrarModalComprobanteView} 
+                            exito={()=>{
+                                setMostrarModalComprobanteView(null);
                                 fetchData();
                             }}    
                         />
@@ -239,7 +278,6 @@ const initialStateComprobanteCompra = {
                             <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
                             <th onClick={() => toggleOrden('cliente')}>Proveedor ⬍</th>
                             <th onClick={() => toggleOrden('presupuesto')}>Orden de Compra ⬍</th>
-                            <th onClick={() => toggleOrden('completo')}>Recepción ⬍</th>
                             <th onClick={() => toggleOrden('fecha')}>Fecha ⬍</th>
                             <th onClick={() => toggleOrden('total')}>Total ⬍</th>
                             <th>Acciones</th>
@@ -247,7 +285,7 @@ const initialStateComprobanteCompra = {
                         </thead>
                         <tbody>
                             {
-                                comprobantesFiltrados.map(({_id , fecha, total , ordenCompra , completo}) => {
+                                comprobantesFiltrados.map(({_id , fecha, total , ordenCompra , tieneRemito}) => {
                                     const proveedor = ordenes.find((p)=>{return p._id === ordenCompra})?.proveedor;
                                     const proveedorEncontrado = proveedores.find((p)=>{return p._id === proveedor});
 
@@ -255,20 +293,43 @@ const initialStateComprobanteCompra = {
                                         <td className="columna">{_id}</td>
                                         <td className="columna">{proveedorEncontrado?.name}</td>
                                         <td className="columna">{ordenCompra}</td>
-                                        <td className="columna">{completo ? 'COMPLETA' : 'PARCIAL'}</td>
                                         <td className="columna">{fecha.split("T")[0]}</td>
                                         <td className="columna">${total}</td>
                                         <td className="columna">
                                             <div className="acciones">
+                                                <button className="btn-icon" title="Visualizar"
+                                                    onClick={() => {
+                                                        setMostrarModalComprobanteView(_id);
+                                                    }} 
+                                                >
+                                                    <FaEye />
+                                                </button>
+                                                <button className="btn-icon"
+                                                    title={tieneRemito ? "Ya existe un remito de este comprobante, no se puede generar uno nuevo." : "Generar remito"}
+                                                    onClick={() => {
+                                                        if (tieneRemito) {
+                                                        alert("Este comprobante de compra ya se encuentra en un remito y no se puede generar uno nuevo.");
+                                                        return;
+                                                        }
+                                                        setMostrarModalRemito(_id);
+                                                    }} 
+                                                >
+                                                    <FaFileInvoice />
+                                                </button>
                                                 <button className="btn-icon" title="Generar comprobante de pago"
                                                     onClick={() => {
                                                         setMostrarModalComprobantePago(_id);
                                                     }} 
                                                 >
-                                                    <FaFileInvoice />
+                                                    < FaReceipt/>
                                                 </button>
-                                                <button className="btn-icon" title="Modificar"
+                                                <button className="btn-icon"
+                                                    title={tieneRemito ? "Ya existe un remito de este comprobante, no se puede modificar." : "Modificar"}
                                                     onClick={() => {
+                                                        if (tieneRemito) {
+                                                        alert("Este comprobante de compra ya se encuentra en un remito y no se puede modificar.");
+                                                        return;
+                                                        }
                                                         setMostrarModalUpdate(_id);
                                                     }} 
                                                 >

@@ -219,13 +219,14 @@ const vinosFiltrados = vinos
                             <th onClick={() => toggleOrden('name')}>Nombre ⬍</th>
                             <th onClick={() => toggleOrden('tipo')}>Tipo ⬍</th>
                             <th onClick={() => toggleOrden('bodega')}>Bodega ⬍</th>
-                            <th onClick={() => toggleOrden('price')}>Precio ⬍</th>
+                            <th onClick={() => toggleOrden('proveedor')}>Proveedor ⬍</th>
+                            <th onClick={() => toggleOrden('precio')}>Precio ⬍</th>
                             <th>Acciones</th>
                         </tr>
                         </thead>
                         <tbody>
                             {
-                                vinosFiltrados.map(({_id,name , precioCosto, ganancia , bodega , tipo}) => {
+                                vinosFiltrados.map(({_id,name , precioCosto, ganancia , bodega , tipo , proveedor}) => {
                                     const bodegaEncontrada = bodegas.find((p)=>{return p._id === bodega})
                                     const tipoEncontrada = tiposV.find((p)=>{return p._id === tipo})
 
@@ -233,7 +234,8 @@ const vinosFiltrados = vinos
                                         <td className="columna">{_id}</td>                     
                                         <td className="columna">{name}</td>
                                         <td className="columna">{tipoEncontrada?.name}</td>
-                                        <td className="columna">{bodegaEncontrada?.name}</td>
+                                        <td className="columna">{bodegaEncontrada?.name}</td>                  
+                                        <td className="columna">{proveedor}</td>
                                         <td className="columna">{precioCosto+((precioCosto*ganancia)/100)}</td>
                                         <td className="columna">
                                             <div className="acciones">

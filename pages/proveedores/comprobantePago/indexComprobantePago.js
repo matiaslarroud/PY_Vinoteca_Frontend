@@ -292,9 +292,9 @@ const indexComprobante = () => {
                             <button className="btn-icon" onClick={() => imprimirComprobante(_id)}>
                                 <FaPrint />
                             </button>
-                            <button className="btn-icon" onClick={() => deleteComprobante(_id)}>
+                            {/* <button className="btn-icon" onClick={() => deleteComprobante(_id)}>
                                 <FaTrash />
-                            </button>
+                            </button> */}
                         </div>
                     </td>
                 </tr>

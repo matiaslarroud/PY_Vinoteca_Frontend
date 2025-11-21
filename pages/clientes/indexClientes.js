@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaShoppingCart , FaHome, FaCartArrowDown, FaArrowLeft, FaTrash, FaEdit , FaFileInvoiceDollar, FaFileInvoice , FaSearch  , FaReceipt } from "react-icons/fa";
+import { FaPlus, FaShoppingCart , FaHome, FaCartArrowDown, FaArrowLeft, FaTrash, FaEdit ,FaSearch , FaReceipt } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import Link from "next/link";
 import FormularioClienteUpdate from './updateCliente'
@@ -7,6 +7,7 @@ import FormularioClienteCreate from './createCliente'
 import CreateNotaPedido from "./notaPedido/createNotaPedido";
 import CreatePresupuesto from "./presupuesto/createPresupuesto";
 import BusquedaAvanzadaClientes from "./busquedaCliente";
+import FormularioReciboPago from "../clientes/reciboPago/createReciboPago";
 
 export default function indexClientes() {
   const router = useRouter();
@@ -17,6 +18,7 @@ export default function indexClientes() {
   const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
   const [mostrarPresupuestoCreate, setmostrarPresupuestoCreate] = useState(null);
   const [mostrarModalBuscar, setMostrarModalBuscar] = useState(null);
+  const [mostrarModalReciboPago, setMostrarModalReciboPago] = useState(null);
   const [orden, setOrden] = useState({ campo: '', asc: true });
 
 const initialState = {
@@ -139,6 +141,30 @@ const deleteCliente = async (clienteID) => {
               setMostrarModalCreate(false)
               fetchData()
           }} />
+      </div>
+    </div>
+  )}
+
+  {mostrarModalReciboPago && (
+    <div className="modal">
+      <div className="modal-content">
+        <button className="close" onClick={() => 
+          {
+              setMostrarModalReciboPago(false)
+              fetchData()
+          }
+        }>
+        &times;
+        </button>
+        <FormularioReciboPago 
+          tipo='cliente'
+          param={mostrarModalReciboPago}
+          exito={() => 
+          {
+              setMostrarModalReciboPago(false)
+              fetchData()
+          }} 
+          />
       </div>
     </div>
   )}
@@ -292,6 +318,9 @@ const deleteCliente = async (clienteID) => {
                           </button>
                           <button onClick={() => setmostrarPedidoCreate(_id)} className="btn-icon" title="Generar Pedido">
                               <FaShoppingCart />
+                          </button>
+                          <button onClick={() => setMostrarModalReciboPago(_id)} className="btn-icon" title="Generar Recibo de Pago">
+                              <FaReceipt />
                           </button>
                           <button onClick={() => setMostrarModalUpdate(_id)} className="btn-icon" title="Modificar">
                               <FaEdit />

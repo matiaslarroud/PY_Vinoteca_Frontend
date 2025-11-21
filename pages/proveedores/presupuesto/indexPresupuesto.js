@@ -277,9 +277,9 @@ const indexPresupuesto = () => {
                                                 <button onClick={() => imprimirPresupuesto(_id)}  className="btn-icon" title="Imprimir">
                                                     <FaPrint />
                                                 </button>
-                                                <button onClick={() => deletePresupuesto(_id)}  className="btn-icon" title="Eliminar">
+                                                {/* <button onClick={() => deletePresupuesto(_id)}  className="btn-icon" title="Eliminar">
                                                     <FaTrash />
-                                                </button>
+                                                </button> */}
                                             </div>
                                         </td>
                                     </tr>

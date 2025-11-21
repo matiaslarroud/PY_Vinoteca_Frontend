@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit , FaPrint , FaSearch ,  FaFileInvoiceDollar  } from "react-icons/fa";
+import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit , FaPrint , FaSearch ,  FaFileInvoiceDollar , FaEye  } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import FormularioOrdenCompraUpdate from './updateOrdenCompra'
 import FormularioOrdenCompraCreate from './newOrdenCompra'
 import BusquedaAvanzadaOrdenCompra from "./busquedaOrdenCompra";
 import FormularioComprobanteCompraByCompra from '../comprobanteCompra/createComprobanteCompra'
+import FormularioOrdenCompraView from '../ordenCompra/viewOrdenCompra'
 
 const { default: Link } = require("next/link")
 
@@ -20,6 +21,7 @@ const indexOrdenCompra = () => {
     const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
     const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
     const [mostrarModalBuscar, setMostrarModalBuscar] = useState(null);
+    const [mostrarModalView, setMostrarModalView] = useState(null);
     const [mostrarModalComprobanteCompra, setMostrarModalComprobanteCompra] = useState(null);
     
     const [filtro , setFiltro] = useState(initialStateOrdenCompra);
@@ -240,6 +242,23 @@ const indexOrdenCompra = () => {
                 </div>
             )}
 
+            {mostrarModalView && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="close" onClick={() => setMostrarModalView(null)}>
+                            &times;
+                        </button>
+                        <FormularioOrdenCompraView 
+                            ordenID={mostrarModalView} 
+                            exito={()=>{
+                                setMostrarModalView(null);
+                                fetchData();
+                            }}    
+                        />
+                    </div>
+                </div>
+            )}
+
             <h1 className="titulo-pagina">Orden de Compra</h1>
             
             <div className="botonera">
@@ -271,12 +290,13 @@ const indexOrdenCompra = () => {
                             <th onClick={() => toggleOrden('presupuesto')}>Presupuesto ⬍</th>
                             <th onClick={() => toggleOrden('fecha')}>Fecha ⬍</th>
                             <th onClick={() => toggleOrden('total')}>Total ⬍</th>
+                            <th onClick={() => toggleOrden('completo')}>Recepción ⬍</th>
                             <th>Acciones</th>
                         </tr>
                         </thead>
                         <tbody>
                             {
-                                ordenesFiltrados.map(({_id, proveedor , fecha, total , presupuesto}) => {
+                                ordenesFiltrados.map(({_id, proveedor , fecha, total , presupuesto , completo , tieneComprobante}) => {
                                     const proveedorEncontrado = proveedores.find((p)=>{return p._id === proveedor})
 
                                     return <tr key={_id}>
@@ -285,15 +305,28 @@ const indexOrdenCompra = () => {
                                         <td className="columna">{presupuesto}</td>
                                         <td className="columna">{fecha.split("T")[0]}</td>
                                         <td className="columna">${total}</td>
+                                        <td className="columna">{completo ? 'COMPLETA' : 'PARCIAL'}</td>
                                         <td className="columna">
                                             <div className="acciones">
+                                                <button className="btn-icon"
+                                                    onClick={() => {
+                                                        setMostrarModalView(_id);
+                                                    }} 
+                                                >
+                                                    <FaEye />
+                                                </button>
                                                 <button onClick={() => setMostrarModalComprobanteCompra(_id)} className="btn-icon" title="Generar Comprobante de Compra">
                                                     <FaFileInvoiceDollar />
                                                 </button>
                                                 <button className="btn-icon"
                                                     onClick={() => {
+                                                        if (tieneComprobante) {
+                                                        alert("Esta orden de compra ya se encuentra en un comprobante y no se puede modificar.");
+                                                        return;
+                                                        }
                                                         setMostrarModalUpdate(_id);
                                                     }} 
+                                                    title={tieneComprobante ? "Ya existe comprobante de compra, no se puede modificar" : "Modificar"}
                                                 >
                                                     <FaEdit />
                                                 </button>
