@@ -65,6 +65,7 @@ const updateReciboPago = ({exito , reciboPagoID}) => {
         const reciboCreado = await resRecibo.json();
 
         if(!reciboCreado.ok){
+            alert(reciboCreado.message)
             console.log("Error con el envio de datos.")
             return
         }
@@ -263,7 +264,7 @@ const updateReciboPago = ({exito , reciboPagoID}) => {
                                 clickChange(e);
                             }}
                             >
-                            Cargar Recibo de Pago
+                            Guardar
                             </button>
                         </div>
                     </div>

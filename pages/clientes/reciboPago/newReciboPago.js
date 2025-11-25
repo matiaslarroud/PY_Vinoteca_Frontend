@@ -55,6 +55,7 @@ const newReciboPago = ({exito}) => {
         const reciboCreado = await resRecibo.json();
 
         if(!reciboCreado.ok){
+            alert(reciboCreado.message)
             console.log("Error con el envio de datos.")
             return
         }
@@ -88,8 +89,15 @@ const newReciboPago = ({exito}) => {
     const [mostrarModalCreate1, setMostrarModalCreate1] = useState(false);
     const [mostrarModalCreate3, setMostrarModalCreate3] = useState(false);
 
-    const opciones_clientes = clientes.map(v => ({ value: v._id,label: v.name }));
+    const opciones_clientes = clientes.map(v => ({ 
+        value: v._id,
+        label: v.name,
+        saldoCuentaCorriente: v.saldoCuentaCorriente ,
+        saldoActualCuentaCorriente: v.saldoActualCuentaCorriente
+    }));
     const opciones_mediosPago = mediosPago.map(v => ({ value: v._id,label: v.name }));
+
+    
 
     return(
         <>
@@ -253,7 +261,7 @@ const newReciboPago = ({exito}) => {
                                 clickChange(e);
                             }}
                             >
-                            Cargar Recibo de Pago
+                            Cargar
                             </button>
                         </div>
                     </div>

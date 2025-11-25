@@ -98,7 +98,6 @@ const updatePicada = ({exito , picadaID}) => {
          e.preventDefault();
          const bodyData = {
             name: picada.name,
-            stock: picada.stock,
             deposito: picada.deposito,
             precioVenta: picada.precioVenta,
         }
@@ -113,6 +112,11 @@ const updatePicada = ({exito , picadaID}) => {
                 body: JSON.stringify(bodyData)
             }
         )
+            
+        if (!resPicada.ok) {
+            alert(resPicada.message)
+            return
+        };
 
         const picadaCreada = await resPicada.json();
         const identificador = picadaCreada.data._id;
@@ -146,7 +150,12 @@ const updatePicada = ({exito , picadaID}) => {
             })
                 });
             
-            if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
+            
+            
+        if (!resDetalle.ok) {
+            alert(resDetalle.message)
+            return
+        };
         }
         setDetalles([initialStateDetalle]);
         setPicada(initialState);
@@ -225,20 +234,6 @@ const updatePicada = ({exito , picadaID}) => {
                             placeholder="Nombre del producto"
                             required
                         />
-                        </div>
-
-                        <div className="form-col">
-                            <label htmlFor="stock">
-                                Stock:
-                            </label>
-                            <input
-                                type="number"
-                                onChange={inputChange}
-                                value={picada.stock}
-                                name="stock"
-                                placeholder="Cantidad en stock"
-                                required
-                            />
                         </div>
 
                         <div className="form-col">
@@ -376,7 +371,6 @@ const updatePicada = ({exito , picadaID}) => {
                                             type="number"
                                             placeholder="Cantidad"
                                             min={1}
-                                            max={opciones_insumos.find((p) => p.value === d.insumo)?.stock || 0}
                                             value={d.cantidad}
                                             onChange={(e) => handleDetalleChange(i, "cantidad", e.target.value)}
                                             required

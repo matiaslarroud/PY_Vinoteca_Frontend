@@ -8,7 +8,7 @@ import FormularioDepositoCreate from '../../gestion/deposito/createDeposito'
 const initialState = {fechaElaboracion:'' , fechaEntrega:'' , empleado:''}
 const initialStateDetalle = {ordenProduccion:'',picada:'', cantidad:0}
 
-const updateOrden = ({exito , ordenID}) => {
+const viewOrden = ({exito , ordenID}) => {
     const [ordenProduccion , setOrdenProducion] = useState(initialState);
     const [empleados, setEmpleados] = useState([]);
     const [picadas, setPicadas] = useState([]);
@@ -209,7 +209,7 @@ const updateOrden = ({exito , ordenID}) => {
             <div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
-                        <h1 className="titulo-pagina">Cargar Orden de Produccion</h1>
+                        <h1 className="titulo-pagina">Visualización de Orden de Produccion</h1>
                     </div>
                 </div>
 
@@ -219,18 +219,17 @@ const updateOrden = ({exito , ordenID}) => {
                             <label>
                                 Fecha de Elaboración:
                             </label>
-                            <input type="date" onChange={inputChange} value={ordenProduccion.fechaElaboracion} name="fechaElaboracion" required />
+                            <input type="date" onChange={inputChange} value={ordenProduccion.fechaElaboracion} name="fechaElaboracion" required disabled/>
                         </div>
                         <div className="form-col">
                             <label>
                                 Fecha de Entrega:
                             </label>
-                            <input type="date" onChange={inputChange} value={ordenProduccion.fechaEntrega} name="fechaEntrega" required />
+                            <input type="date" onChange={inputChange} value={ordenProduccion.fechaEntrega} name="fechaEntrega" required  disabled/>
                         </div>
                         <div className="form-col">
                             <label>
                                 Empleado:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate1(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -241,6 +240,7 @@ const updateOrden = ({exito , ordenID}) => {
                                 name='empleado'
                                 placeholder="Empleado..."
                                 isClearable
+                                isDisabled={true}
                                 styles={{
                                     container: (base) => ({
                                     ...base,
@@ -285,9 +285,6 @@ const updateOrden = ({exito , ordenID}) => {
                         <div className="form-col-productos">
                             <label>
                                     Picadas:
-                                    <button type="button" className="btn-add-insumo" onClick={agregarDetalle}>
-                                        + Agregar Picada
-                                    </button>
                             </label>
                          <div className="form-group-insumos">
                                 
@@ -307,6 +304,7 @@ const updateOrden = ({exito , ordenID}) => {
                                                 name='picada'
                                                 placeholder="Picada..."
                                                 isClearable
+                                                isDisabled={true}
                                                 styles={{
                                                     container: (base) => ({
                                                     ...base,
@@ -352,47 +350,15 @@ const updateOrden = ({exito , ordenID}) => {
                                             type="number"
                                             placeholder="Cantidad"
                                             min={1}
+                                            max={opciones_picadas.find((p) => p.value === Number(d.picada))?.stock || 0}
                                             value={d.cantidad}
                                             onChange={(e) => handleDetalleChange(i, "cantidad", e.target.value)}
                                             required
+                                            disabled
                                         />
-                                    </div>
-
-                                    <div className='form-col-item2'>
-                                        <button
-                                            type="button"
-                                            className="btn-icon"
-                                            onClick={() => {
-                                                const productos = detalles.filter((_, index) => index !== i);
-                                                setDetalles(productos);
-                                            }}
-                                            >
-                                            <FaTrash />
-                                        </button>
                                     </div>
                                 </div>
                                 ))}
-                            </div>
-                        </div>
-                        <div className="form-col-precioVenta">
-                            <div className="box-cargar" >
-                                
-                                <div className="form-submit">
-                                    <button
-                                    type="submit"
-                                    className="submit-btn"
-                                    onClick={(e) => {
-                                        if (!puedeGuardar) {
-                                        alert("No se puede guardar una orden de produccion sin al menos una picada con cantidad.");
-                                        e.preventDefault();
-                                        return;
-                                        }
-                                        clickChange(e);
-                                    }}
-                                    >
-                                    Guardar
-                                    </button>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -642,4 +608,4 @@ const updateOrden = ({exito , ordenID}) => {
     )
 }
 
-export default updateOrden;
+export default viewOrden;

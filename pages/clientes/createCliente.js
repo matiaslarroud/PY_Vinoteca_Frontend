@@ -6,7 +6,7 @@ const { default: Link } = require("next/link")
 const initialState = {
     name:'', lastname:'', fechaNacimiento:'', telefono:'', email:'', cuit:'',
     pais:'', provincia:'', localidad:'', barrio:'', calle:'', condicionIva:'', cuentaCorriente:false,
-    altura:0, deptoNumero:0, deptoLetra:''
+    altura:0, deptoNumero:0, deptoLetra:'', saldoCuentaCorriente:''
 }
 const createCliente = ({exito}) => {
     const [cliente , setCliente] = useState(initialState);
@@ -81,17 +81,22 @@ const createCliente = ({exito}) => {
 
     const clickChange = (e) => {
         e.preventDefault();
+        const bodyData = {
+            name: cliente.name, lastname: cliente.lastname, fechaNacimiento: cliente.fechaNacimiento,
+            telefono: cliente.telefono, email: cliente.email, cuit: cliente.cuit,
+            pais: Number(cliente.pais), provincia: Number(cliente.provincia), localidad: Number(cliente.localidad),
+            barrio: Number(cliente.barrio), calle: Number(cliente.calle), condicionIva: Number(cliente.condicionIva), cuentaCorriente: cliente.cuentaCorriente,
+            altura: Number(cliente.altura), deptoNumero: cliente.deptoNumero, deptoLetra: cliente.deptoLetra 
+        };
+
+        if (cliente.cuentaCorriente) {
+            bodyData.saldoCuentaCorriente = cliente.saldoCuentaCorriente;
+        }
          fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente`,
             {
                 method: 'POST',
                 headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({
-                    name: cliente.name, lastname: cliente.lastname, fechaNacimiento: cliente.fechaNacimiento,
-                    telefono: cliente.telefono, email: cliente.email, cuit: cliente.cuit,
-                    pais: Number(cliente.pais), provincia: Number(cliente.provincia), localidad: Number(cliente.localidad),
-                    barrio: Number(cliente.barrio), calle: Number(cliente.calle), condicionIva: Number(cliente.condicionIva), cuentaCorriente: cliente.cuentaCorriente,
-                    altura: Number(cliente.altura), deptoNumero: cliente.deptoNumero, deptoLetra: cliente.deptoLetra
-                })
+                body: JSON.stringify(bodyData)
             }
          ).then((a) => {
                         return a.json()
@@ -280,6 +285,21 @@ const createCliente = ({exito}) => {
                                     }
                                 />
                             </div>
+                        </div>
+                        <div className="form-col">
+                            {cliente.cuentaCorriente && (
+                                <div className="saldo-input-container">
+                                    <label>Saldo Cuenta:</label>
+                                    <input
+                                        type="number"
+                                        name="saldoCuentaCorriente"
+                                        value={cliente.saldoCuentaCorriente}
+                                        onChange={inputChange}
+                                        placeholder="Ingrese el saldo..."
+                                        className="input-secondary saldo-input"
+                                    />
+                                </div>
+                            )}
                         </div>
                     </div>
                     <div className="form-row">

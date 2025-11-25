@@ -224,18 +224,20 @@ const indexPicada = () => {
                 <tr>
                   <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
                   <th onClick={() => toggleOrden('name')}>Nombre ⬍</th>
+                  <th onClick={() => toggleOrden('stock')}>Stock ⬍</th>
                   <th onClick={() => toggleOrden('deposito')}>Depósito ⬍</th>
                   <th onClick={() => toggleOrden('precioVenta')}>Precio ⬍</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {picadasFiltradas.map(({ _id, name, deposito, precioVenta }) => {
+                {picadasFiltradas.map(({ _id, name, deposito, precioVenta , stock }) => {
                   const depositoEncontrado = depositos.find((p) => p._id === deposito);
                   return (
                     <tr key={_id}>
                       <td>{_id}</td>
                       <td>{name}</td>
+                      <td>{stock}</td>
                       <td>{depositoEncontrado?.name}</td>
                       <td>${precioVenta}</td>
                       <td>

@@ -345,14 +345,15 @@ const indexPedido = () => {
                                                 >
                                                     <FaEye />
                                                 </button>
-                                                <button   className="btn-icon" title="Generar comprobante de venta">
-                                                    <FaFileInvoiceDollar onClick={() => {
+                                                <button   className="btn-icon" title="Generar comprobante de venta" onClick={() => {
                                                         if (facturado) {
                                                         alert("Este pedido ya fue facturado y no se puede modificar.");
                                                         return;
                                                         }
                                                         setMostrarModalComprobanteVenta(_id);
-                                                    }} />
+                                                    }}
+                                                >
+                                                    <FaFileInvoiceDollar  />
                                                 </button>
                                                 <button onClick={() => imprimirPedido(_id)}  className="btn-icon" title="Imprimir">
                                                     <FaPrint />

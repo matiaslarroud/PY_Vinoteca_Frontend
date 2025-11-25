@@ -56,7 +56,7 @@ const createMedioPago = ({exito}) => {
                     </div>
                     
                     </fieldset>
-                    <button type="submit" className="submit-btn" onClick={clickChange}>Cargar Medio de Pago</button>
+                    <button type="submit" className="submit-btn" onClick={clickChange}>Cargar</button>
                 </form>
             </div>
             <style jsx>{`

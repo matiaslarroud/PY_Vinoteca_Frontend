@@ -309,7 +309,6 @@ const formOrden = ({exito}) => {
                                             type="number"
                                             placeholder="Cantidad"
                                             min={1}
-                                            max={opciones_picadas.find((p) => p.value === Number(d.picada))?.stock || 0}
                                             value={d.cantidad}
                                             onChange={(e) => handleDetalleChange(i, "cantidad", e.target.value)}
                                             required
@@ -348,7 +347,7 @@ const formOrden = ({exito}) => {
                                         clickChange(e);
                                     }}
                                     >
-                                    Cargar Orden
+                                    Cargar
                                     </button>
                                 </div>
                             </div>

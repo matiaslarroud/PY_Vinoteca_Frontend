@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit } from "react-icons/fa";
+import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit , FaEye } from "react-icons/fa";
 import { useRouter } from "next/router";
 import FormularioOrdenCreate from "./createOrdenProduccion";
 import FormularioOrdenUpdate from "./updateOrdenProduccion";
+import FormularioOrdenView from "./viewOrdenProduccion";
 
 const { default: Link } = require("next/link");
 
@@ -14,6 +15,7 @@ const indexOrdenProduccion = () => {
 
   const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
   const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
+  const [mostrarModalView, setMostrarModalView] = useState(null);
 
   const [filtroPicada, setFiltroPicada] = useState('');
   const [orden, setOrden] = useState({ campo: '', asc: true });
@@ -74,7 +76,65 @@ const indexOrdenProduccion = () => {
       campo,
       asc: prev.campo === campo ? !prev.asc : true
     }));
-  };
+  };        
+    
+  const handleCheck = async (_id) => {
+  const orden = ordenes.find((r) => r._id === _id);
+
+  if (!orden) return;
+
+  if (orden.estadoProduccion) {
+    alert("Esta orden de produccion ya finalizo.");
+    return;
+  }
+
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/products/ordenProduccion/finalizar/${_id}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    // Parsear el JSON SIEMPRE
+    const data = await res.json();
+
+    if (!res.ok) {
+      // Mostrar faltantes de forma clara
+      if (data.faltantes) {
+        const mensaje = data.faltantes
+          .map(f => 
+            `🧂 Insumo: ${f.insumoNombre}\n` +
+            `📦 Disponible: ${f.disponible}\n` +
+            `📝 Requerido: ${f.requerido}\n` +
+            `❌ Falta: ${f.faltante}`
+          )
+          .join("\n\n");
+
+        alert("Stock insuficiente para finalizar la orden:\n\n" + mensaje);
+      } else {
+        alert(data.message || "Error al finalizar la orden.");
+      }
+
+      return; // No sigas actualizando estado
+    }
+
+    // Éxito → marcar como finalizada en la UI
+    setOrdenes((prev) =>
+      prev.map((r) =>
+        r._id === _id ? { ...r, estadoProduccion: true } : r
+      )
+    );
+
+    alert("Orden finalizada correctamente.");
+
+  } catch (error) {
+    console.error(error);
+    alert("Hubo un problema al marcar como finalizada la orden de producción.");
+  }
+};
+
 
   return (
       <>
@@ -108,6 +168,19 @@ const indexOrdenProduccion = () => {
           </div>
         )}
 
+        {mostrarModalView && (
+          <div className="modal">
+            <div className="modal-content">
+              <button className="close" onClick={() => setMostrarModalView(null)}>&times;</button>
+              <FormularioOrdenView
+                ordenID={mostrarModalView}
+                exito={() => {
+                  setMostrarModalView(null);
+                }}
+              />
+            </div>
+          </div>
+        )}
         <h1 className="titulo-pagina">Ordenes de Produccion</h1>
 
         <div className="botonera">
@@ -131,19 +204,42 @@ const indexOrdenProduccion = () => {
               <thead>
                 <tr>
                   <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
+                  <th onClick={() => toggleOrden('estadoProduccion')}>Finalizada ⬍</th>
                   <th onClick={() => toggleOrden('fechaElaboracion')}>Fecha de elaboracion ⬍</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {ordenesFiltradas.map(({ _id, fechaElaboracion }) => {
+                {ordenesFiltradas.map(({ _id, fechaElaboracion , estadoProduccion }) => {
                   return (
                     <tr key={_id}>
                       <td>{_id}</td>
+                      <td className="columna">
+                          <input
+                              type="checkbox"
+                              className="toggle"
+                              title="Produccion finalizada..."
+                              checked={estadoProduccion}
+                              onChange={() => handleCheck(_id)}
+                          />
+                      </td>
                       <td>{fechaElaboracion.split("T")[0]}</td>
                       <td>
                         <div className="acciones">
-                          <button onClick={() => setMostrarModalUpdate(_id)} className="btn-icon" title="Modificar">
+                          <button className="btn-icon" title="Modificar" onClick={() => {
+                                  setMostrarModalView(_id);
+                              }}
+                          >
+                            <FaEye />
+                          </button>
+                          <button className="btn-icon" title="Modificar" onClick={() => {
+                                  if (estadoProduccion) {
+                                  alert("Esta orden de producción ya finalizo y no se puede modificar.");
+                                  return;
+                                  }
+                                  setMostrarModalUpdate(_id);
+                              }}
+                          >
                             <FaEdit />
                           </button>
                           <button onClick={() => deleteOrden(_id)} className="btn-icon" title="Eliminar">
@@ -160,6 +256,36 @@ const indexOrdenProduccion = () => {
         </div>
 
         <style jsx>{`
+                    input[type="checkbox"].toggle {
+                        appearance: none;
+                        -webkit-appearance: none;
+                        width: 50px;
+                        height: 26px;
+                        background: #444;
+                        border-radius: 50px;
+                        position: relative;
+                        cursor: pointer;
+                        transition: background 0.3s ease;
+                        outline: none;
+                        border: 2px solid #666;
+                    }
+
+                    input[type="checkbox"].toggle::before {
+                        content: "";
+                        position: absolute;
+                        width: 20px;
+                        height: 20px;
+                        top: 2px;
+                        left: 2px;
+                        background: #707070ff;
+                        border-radius: 50%;
+                        transition: transform 0.3s ease;
+                    }
+
+                    input[type="checkbox"].toggle:checked {
+                        background: #8b0000; /* verde moderno */
+                        border-color: #000000ff;
+                    }
         `}</style>
       </div>
     </>
