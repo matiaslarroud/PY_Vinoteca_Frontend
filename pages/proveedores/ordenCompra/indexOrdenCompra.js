@@ -333,9 +333,6 @@ const indexOrdenCompra = () => {
                                                 <button onClick={() => imprimirOrden(_id)}  className="btn-icon" title="Imprimir">
                                                     <FaPrint />
                                                 </button>
-                                                {/* <button onClick={() => deleteOrden(_id)}  className="btn-icon" title="Eliminar">
-                                                    <FaTrash />
-                                                </button> */}
                                             </div>
                                         </td>
                                     </tr>

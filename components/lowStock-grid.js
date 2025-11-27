@@ -3,12 +3,16 @@ import { FaShoppingCart, FaEdit} from "react-icons/fa";
 import styles from "@/styles/LowStockGrid.module.css";
 import FormularioUpdateVino from '../pages/products/vinos/updateVino'
 import FormularioUpdateInsumo from '../pages/products/insumos/updateInsumo'
+import FormularioUpdatePicada from '../pages/products/picadas/updatePicada'
 import FormularioSolicitudPresupuestoCreate from '../pages/proveedores/presupuestoSolicitud/createSolicitud'
+import FormularioOrdenProduccionCreate from '../pages/products/ordenProduccion/createOrdenProduccion'
 
 export default function LowStockGrid({ products = [], title = "Productos con Stock Bajo" , recargar }) {
   const [mostrarProductoInsumoUpdate ,setMostrarProductoInsumoUpdate] = useState(null)
   const [mostrarProductoVinoUpdate ,setMostrarProductoVinoUpdate] = useState(null)
+  const [mostrarProductoPicadaUpdate ,setMostrarProductoPicadaUpdate] = useState(null)
   const [mostrarSolicitudPresupuesto ,setMostrarSolicitudPresupuesto] = useState(null)
+  const [mostrarOrdenProduccion ,setMostrarOrdenProduccion] = useState(null)
   return (
     <>
 
@@ -56,6 +60,28 @@ export default function LowStockGrid({ products = [], title = "Productos con Sto
       </div>
     )}
 
+    {mostrarProductoPicadaUpdate && (
+      <div className="modal">
+        <div className="modal-content">
+          <button className="close" onClick={() => 
+              {
+                  setMostrarProductoPicadaUpdate(false)
+              }
+          }>
+              &times;
+          </button>
+          <FormularioUpdatePicada
+              picadaID = {mostrarProductoPicadaUpdate}
+              exito={() => 
+                  {
+                      setMostrarProductoPicadaUpdate(false)
+                      recargar()
+                  }}
+          />
+        </div>
+      </div>
+    )}
+
     {mostrarSolicitudPresupuesto && (
       <div className="modal">
         <div className="modal-content">
@@ -79,6 +105,29 @@ export default function LowStockGrid({ products = [], title = "Productos con Sto
       </div>
     )}
 
+
+    {mostrarOrdenProduccion && (
+      <div className="modal">
+        <div className="modal-content">
+          <button className="close" onClick={() => 
+              {
+                  setMostrarOrdenProduccion(null)
+              }
+          }>
+              &times;
+          </button>
+          <FormularioOrdenProduccionCreate
+              tipo='producto'
+              param={mostrarOrdenProduccion}
+              exito={() => 
+                  {
+                      setMostrarOrdenProduccion(false)
+                      recargar()
+                  }}
+          />
+        </div>
+      </div>
+    )}
     <div className={styles.container}>
       <h2>{title}</h2>
 
@@ -103,7 +152,16 @@ export default function LowStockGrid({ products = [], title = "Productos con Sto
                 <td className="columna">{product.stock}</td>
                 <td className="columna">{product.stockMinimo}</td>
                 <td className="acciones">
-                  <button onClick={() => setMostrarSolicitudPresupuesto(product._id)} className="btn-icon2" title="Pedir">
+                  <button onClick={() => {
+                          if(product.tipoProducto === 'ProductoInsumo' || product.tipoProducto === 'ProductoVino' ){
+                            setMostrarSolicitudPresupuesto(product._id)
+                          } else if (product.tipoProducto === 'ProductoPicada'){
+                            setMostrarOrdenProduccion(product._id)
+                          } 
+                        }} 
+                        className="btn-icon2" 
+                        title="Pedir"
+                      >
                       <FaShoppingCart />
                   </button>
                   <button onClick={() => {
@@ -111,6 +169,8 @@ export default function LowStockGrid({ products = [], title = "Productos con Sto
                           setMostrarProductoInsumoUpdate(product._id)
                         } else if (product.tipoProducto === 'ProductoVino'){
                           setMostrarProductoVinoUpdate(product._id)
+                        } else if (product.tipoProducto === 'ProductoPicada'){
+                          setMostrarProductoPicadaUpdate(product._id)
                         }
                       }
                     } 

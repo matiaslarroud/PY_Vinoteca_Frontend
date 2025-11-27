@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit , FaPrint , FaSearch } from "react-icons/fa";
+import { FaPlus, FaHome, FaArrowLeft, FaEye, FaEdit , FaPrint , FaSearch } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import FormularioComprobanteUpdate from './updateComprobantePago'
 import FormularioComprobanteCreate from './newComprobantePago'
 import BusquedaAvanzadaComprobante from "./busquedaComprobantePago";
+import ComprobantePagoView from "./viewComprobantePago";
 
 const { default: Link } = require("next/link")
 
@@ -21,6 +22,7 @@ const indexComprobante = () => {
     const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
     const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
     const [mostrarModalBuscar, setMostrarModalBuscar] = useState(null);
+    const [mostrarModalView, setMostrarModalView] = useState(null);
     
     const [filtro , setFiltro] = useState(initialStateComprobante);
     const [orden, setOrden] = useState({ campo: '', asc: true });
@@ -231,6 +233,22 @@ const indexComprobante = () => {
                     </div>
                 </div>
             )}
+
+            {mostrarModalView && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="close" onClick={() => setMostrarModalView(null)}>
+                            &times;
+                        </button>
+                        <ComprobantePagoView 
+                            comprobantePagoID={mostrarModalView} 
+                            exito={()=>{
+                                setMostrarModalView(null);
+                            }}    
+                        />
+                    </div>
+                </div>
+            )}
             <h1 className="titulo-pagina">Comprobante de Pago</h1>
             
             <div className="botonera">
@@ -286,15 +304,15 @@ const indexComprobante = () => {
 
                     <td className="columna">
                         <div className="acciones">
-                            <button className="btn-icon" onClick={() => setMostrarModalUpdate(_id)}>
+                            <button className="btn-icon" onClick={() => setMostrarModalView(_id)} title="Visualizar">
+                                <FaEye />
+                            </button>
+                            <button className="btn-icon" onClick={() => setMostrarModalUpdate(_id)} title="Modificar">
                                 <FaEdit />
                             </button>
-                            <button className="btn-icon" onClick={() => imprimirComprobante(_id)}>
+                            <button className="btn-icon" onClick={() => imprimirComprobante(_id)} title="Imprimir">
                                 <FaPrint />
                             </button>
-                            {/* <button className="btn-icon" onClick={() => deleteComprobante(_id)}>
-                                <FaTrash />
-                            </button> */}
                         </div>
                     </td>
                 </tr>

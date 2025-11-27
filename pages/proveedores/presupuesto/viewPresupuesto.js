@@ -4,17 +4,19 @@ import { FaTrash} from "react-icons/fa";
 
 const { default: Link } = require("next/link")
 
-const initialStatePresupuesto = {proveedor:'', empleado:''}
-const initialDetalle = { tipoProducto: "" , producto: "", cantidad: 0, solicitudPresupuesto:'' };
+const initialStatePresupuesto = {total:'', proveedor:'', solicitudPresupuesto:'', empleado:'', medioPago:''}
+const initialDetalle = { tipoProducto: "",producto: "", cantidad: 0, precio: 0, importe: 0, presupuesto:'' };
 
-const createPresupuesto = ({exito}) => {
+const updatePresupuesto = ({exito, presupuestoID}) => {
     const [presupuesto , setPresupuesto] = useState(initialStatePresupuesto);
     
     const [proveedores,setProveedores] = useState([])
     const [empleados,setEmpleados] = useState([])
+    const [mediosPago,setMediosPago] = useState([])
     const [detalles,setDetalles] = useState([initialDetalle])
     const [productos,setProductos] = useState([]);
     const [tipoProductos,setTipoProductos] = useState([]);
+    const [solicitudesPresupuesto,setSolicitudesPresupuesto] = useState([]);
     
     const detallesValidos = detalles.filter(d => d.producto && d.cantidad > 0);
     const puedeGuardar = detallesValidos.length > 0;
@@ -32,6 +34,45 @@ const createPresupuesto = ({exito}) => {
         .catch((err)=>{console.log("Error al cargar productos.\nError: ",err)})
     }
     
+    const fetchData_MediosPago = () => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/medioPago`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if(s.ok){
+                    setMediosPago(s.data);
+                }
+            })
+        .catch((err)=>{console.log("Error al cargar los medios de pago.\nError: ",err)})
+    }
+    
+    const fetchData_Presupuesto = (param) => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuesto/${param}`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if(s.ok){
+                    setPresupuesto(s.data);
+                }
+            })
+        .catch((err)=>{console.log("Error al cargar el presupuesto.\nError: ",err)})
+    }
+    
+    const fetchData_PresupuestoDetalle = (param) => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuestoDetalle/presupuesto/${param}`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if(s.ok){
+                    setDetalles(s.data);
+                }
+            })
+        .catch((err)=>{console.log("Error al cargar los medios de pago.\nError: ",err)})
+    }
+    
     const fetchData_TipoProductos = () => {
     fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/tipos`)
         .then((a)=>{
@@ -40,6 +81,19 @@ const createPresupuesto = ({exito}) => {
             .then((s)=>{
                 if(s.ok){
                     setTipoProductos(s.data);
+                }
+            })
+        .catch((err)=>{console.log("Error al cargar tipos de productos.\nError: ",err)})
+    }
+    
+    const fetchData_Solicitudes = () => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuesto`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if(s.ok){
+                    setSolicitudesPresupuesto(s.data);
                 }
             })
         .catch((err)=>{console.log("Error al cargar tipos de productos.\nError: ",err)})
@@ -61,32 +115,16 @@ const createPresupuesto = ({exito}) => {
                 })
     }
 
-const fetchData_LowStockByProveedor = (proveedor) => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/lowStock/proveedor/${proveedor}`)
-        .then((a) => a.json())
-        .then((s) => {
-            console.log(s.data);
-
-            // s.data es un array unificado → lo recorremos y agregamos uno por uno
-            setDetalles((prev) => [
-                ...prev,
-                ...s.data.map(item => ({
-                    tipoProducto: item.tipo, 
-                    producto: item._id,
-                    cantidad: item.stockMinimo
-                }))
-            ]);
-        });
-};
-
-
     useEffect(()=>{
-        setDetalles([]);
         fetchData_Proveedores();
         fetchData_Empleados();
         fetchData_Productos();
+        fetchData_MediosPago();
         fetchData_TipoProductos();
-    }, [])    
+        fetchData_Solicitudes();
+        fetchData_Presupuesto(presupuestoID);
+        fetchData_PresupuestoDetalle(presupuestoID);
+    }, [presupuestoID])
 
     useEffect(() => {
         if (!productos.length || !detalles.length) return;
@@ -106,68 +144,192 @@ const fetchData_LowStockByProveedor = (proveedor) => {
         }
     }, [productos, detalles]);
 
-    const handleDetalleChange = (index, field, value) => {
-        const nuevosDetalles = [...detalles];
-        nuevosDetalles[index][field] = field === "cantidad" ? parseFloat(value) : value;
-
-        setDetalles(nuevosDetalles);
-    };
-    
-
     const clickChange = async(e) => {
          e.preventDefault();
-         const resPresupuesto = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuesto`,
+         const bodyData = {
+            total: presupuesto.total,
+            proveedor: presupuesto.proveedor,
+            empleado: presupuesto.empleado,
+            medioPago: presupuesto.medioPago
+         }
+
+         if(presupuesto.solicitudPresupuesto){
+            bodyData.solicitudPresupuesto = presupuesto.solicitudPresupuesto;
+         }
+
+         const resPresupuesto = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuesto/${presupuestoID}`,
             {
-                method: 'POST',
+                method: 'PUT',
                 headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({
-                    proveedor: presupuesto.proveedor,
-                    empleado: presupuesto.empleado,
-                })
+                body: JSON.stringify(bodyData)
             }
         )
 
-        const solicitudCreada = await resPresupuesto.json();
-        const identificador = solicitudCreada.data._id;
+        const presupuestoCreado = await resPresupuesto.json();
+        const identificador = presupuestoCreado.data._id;
+
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuestoDetalle/${identificador}`,
+            {
+                method:'DELETE',
+                headers: {
+                    'Content-Type':'application/json',
+                }
+            }
+        ).then((a)=>{return a.json()})
+            .then((res)=>{
+                console.log(res.message);
+            })
+            .catch((err)=>{
+                console.log("Error al enviar detalle de presupuesto para su eliminación. \n Error: ",err);
+            })
 
         // GUARDAMOS DETALLES
         for (const detalle of detalles) {
-            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuestoDetalle`, {
+            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuestoDetalle`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     producto: detalle.producto,
+                    precio: detalle.precio,
                     cantidad: detalle.cantidad,
-                    solicitudPresupuesto: identificador
+                    importe: detalle.importe,
+                    presupuesto: identificador
             })
-        });
+                });
             
-        if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
+            if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
         }
-
         setDetalles([initialDetalle]);
         setPresupuesto(initialStatePresupuesto);
         exito();
     }
+
+    const inputChange = (e) => {
+        const value = e.target.value;
+        const name = e.target.name;
+        
+        setPresupuesto({
+            ...presupuesto , 
+                [name]:value
+        })   
+    }
+    
+const agregarDetallePresupuesto = async (solicitudID) => {
+    try {
+        // 1. Traer los detalles de la solicitud
+        const res = await fetch(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuestoDetalle/solicitudPresupuesto/${solicitudID}`
+        );
+
+        const data = await res.json();
+
+        if (!Array.isArray(data?.data) || data.data.length === 0) {
+            console.error("La solicitud no contiene ningún detalle.");
+            return;
+        }
+
+        const detallesSolicitud = data.data;
+
+        const nuevosDetalles = [...detalles];
+
+        // 2. Recorrer los detalles y obtener la info del producto
+        for (const det of detallesSolicitud) {
+            const productoID = det.producto;
+
+            // Obtener producto por ID
+            const resProducto = await fetch(
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/${productoID}`
+            );
+
+            const dataProducto = await resProducto.json();
+
+            if (!dataProducto?.data) {
+                console.error(`No se encontró el producto con ID ${productoID}`);
+                continue;
+            }
+
+            const prod = dataProducto.data;
+
+            // 3. Armar el nuevo detalle
+            const nuevoDetalle = {
+                tipoProducto: prod.tipoProducto || "",
+                producto: prod._id || "",
+                cantidad: Number(det.cantidad) || 0,
+
+                // Campos a completar por el usuario
+                precio: 0,
+                importe: 0,
+            };
+
+            // 4. Agregar al array final
+            nuevosDetalles.push(nuevoDetalle);
+        }
+
+        // 5. Actualizar estado y recálculo
+        setDetalles(nuevosDetalles);
+        calcularTotal(nuevosDetalles);
+
+    } catch (error) {
+        console.error("Error al cargar el detalle de la solicitud:", error);
+    }
+};
+
+
+
+    const handleDetalleChange = (index, field, value) => {
+    const nuevosDetalles = [...detalles];
+
+    // Siempre convertir valor de entrada a número si corresponde
+    const numValue = parseFloat(value) || 0;
+
+    if (field === "cantidad") {
+        nuevosDetalles[index].cantidad = numValue;
+        nuevosDetalles[index].importe =
+            (nuevosDetalles[index].precio || 0) * numValue;
+    }
+
+    else if (field === "precio") {
+        nuevosDetalles[index].precio = numValue;
+        nuevosDetalles[index].importe =
+            numValue * (nuevosDetalles[index].cantidad || 0);
+    }
+
+    else {
+        // Para cualquier otro campo (ej: nombre, productoVino, etc.)
+        nuevosDetalles[index][field] = value;
+    }
+
+    setDetalles(nuevosDetalles);
+    calcularTotal(nuevosDetalles);
+};
     
     const selectChange = (selectedOption, actionMeta) => {
         const name = actionMeta.name;
         const value = selectedOption ? selectedOption.value : "";
 
-        if(name === 'proveedor'){
-            fetchData_LowStockByProveedor(value)
-        }
-
         setPresupuesto({
             ...presupuesto,
             [name]: value,
         });
+
+        if (name === 'solicitudPresupuesto' && value) {
+            agregarDetallePresupuesto(value);
+        }
     };
 
     const agregarDetalle = () => {
-        setDetalles([...detalles, { ...{tipoProducto:"",producto: "", cantidad: 0 } }]);
+        setDetalles([...detalles, { ...{tipoProducto:"",producto: "", cantidad: 0, precio: 0, importe: 0 } }]);
     };
     
+    const calcularTotal = (detalles) => {
+        const totalPresupuesto = Array.isArray(detalles) && detalles.length > 0
+            ? detalles.reduce((acc, d) => acc + (d.importe || 0), 0)
+                : 0;
+        setPresupuesto((prev) => ({ ...prev, total:totalPresupuesto }));
+    };
+
+    const [mostrarModalCreate2, setMostrarModalCreate2] = useState(false);
+    const [mostrarModalCreate3, setMostrarModalCreate3] = useState(false);
 
     const opciones_tipoProductos = tipoProductos.map(v => ({
         value: v,
@@ -184,15 +346,22 @@ const fetchData_LowStockByProveedor = (proveedor) => {
         }));
     const opciones_empleados = empleados.map(v => ({ value: v._id,label: `${v._id} - ${v.name}` }));
     const opciones_proveedores = proveedores.map(v => ({ value: v._id,label: `${v._id} - ${v.name}` }));
+    const opciones_mediosPago = mediosPago.map(v => ({ value: v._id,label: `${v.name}` }));
+    const opciones_solicitudes = solicitudesPresupuesto.filter((s)=>{return s.proveedor === presupuesto.proveedor })
+        .map(v => {
+            return {
+                value: v._id,
+                label: `${v._id}`
+            };
+        }
+    );
 
     return(
         <>
-
-
-            <div className="form-container">
+           <div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
-                        <h1 className="titulo-pagina">Cargar Solicitud de Presupuesto</h1>
+                        <h1 className="titulo-pagina">Visualización de Presupuesto</h1>
                     </div>
                 </div>
 
@@ -201,7 +370,6 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                         <div className="form-col">
                             <label>
                                 Proveedor:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -212,6 +380,60 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                                 name='proveedor'
                                 placeholder="Proveedor..."
                                 isClearable
+                                isDisabled={true}
+                                styles={{
+                                    container: (base) => ({
+                                    ...base,
+                                    width: 220, // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 220,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }}
+                            />
+                        </div>
+
+                        <div className="form-col">
+                            <label>
+                                Solicitud de Presupuesto:
+                             </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_solicitudes}
+                                value={opciones_solicitudes.find(op => op.value === presupuesto.solicitudPresupuesto) || null}
+                                onChange={selectChange}
+                                name='solicitudPresupuesto'
+                                placeholder="Solicitud de presupuesto..."
+                                isClearable
+                                isDisabled={true}
                                 styles={{
                                     container: (base) => ({
                                     ...base,
@@ -254,8 +476,7 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                         <div className="form-col">
                             <label>
                                 Empleado:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate2(true)}>+</button>
-                            </label>
+                             </label>
                             <Select
                                 className="form-select-react"
                                 classNamePrefix="rs"
@@ -265,6 +486,60 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                                 name='empleado'
                                 placeholder="Empleado..."
                                 isClearable
+                                isDisabled={true}
+                                styles={{
+                                    container: (base) => ({
+                                    ...base,
+                                    width: 220, // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 220,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }}
+                            />
+                        </div>
+
+                        <div className="form-col">
+                            <label>
+                                Medio de Pago:
+                           </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_mediosPago}
+                                value={opciones_mediosPago.find(op => op.value === presupuesto.medioPago) || null}
+                                onChange={selectChange}
+                                name='medioPago'
+                                placeholder="Medio de Pago..."
+                                isClearable
+                                isDisabled={true}
                                 styles={{
                                     container: (base) => ({
                                     ...base,
@@ -309,9 +584,6 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                         <div className="form-col-productos">
                             <label>
                                     Productos:
-                                    <button type="button" className="btn-add-producto" onClick={agregarDetalle}>
-                                        + Agregar Producto
-                                    </button>
                             </label>
                             <div className="form-group-presupuesto">
                                 
@@ -329,6 +601,7 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                                             }
                                             placeholder="Tipo de Producto..."
                                             isClearable
+                                            isDisabled={true}
                                             styles={{
                                                 container: (base) => ({
                                                 ...base,
@@ -336,7 +609,7 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                                                 }),
                                                 control: (base) => ({
                                                 ...base,
-                                                minWidth: 150,
+                                                minWidth: 120,
                                                 maxWidth: 150,
                                                 backgroundColor: '#2c2c2c',
                                                 color: 'white',
@@ -378,6 +651,7 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                                             }
                                             placeholder="Producto..."
                                             isClearable
+                                            isDisabled={true}
                                             styles={{
                                                 container: (base) => ({
                                                 ...base,
@@ -425,19 +699,24 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                                             value={d.cantidad}
                                             onChange={(e) => handleDetalleChange(i, "cantidad", e.target.value)}
                                             required
+                                            disabled
                                         />
                                     </div>
+                                    
+                                    <div className='form-col-item1'>
+                                        <input
+                                            type="number"
+                                            placeholder="Precio Unitario"
+                                            min={0}
+                                            value={d.precio}
+                                            onChange={(e) => handleDetalleChange(i, "precio", e.target.value)}
+                                            required
+                                            disabled
+                                        />
+                                    </div>
+
                                     <div className='form-col-item2'>
-                                        <button
-                                            type="button"
-                                            className="btn-icon"
-                                            onClick={() => {
-                                                const productos = detalles.filter((_, index) => index !== i);
-                                                setDetalles(productos);
-                                            }}
-                                            >                                    
-                                            <FaTrash />
-                                        </button>
+                                        <span>Importe: ${d.importe.toFixed(2)}</span>
                                     </div>
                                 </div>
                                 })}
@@ -445,22 +724,17 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                         </div> 
                         <div className="form-col-precioVenta">
                             <div className="box-cargar" >
-                                <div className="form-submit">
-                                    <button
-                                    type="submit"
-                                    className="submit-btn"
-                                    onClick={(e) => {
-                                        if (!puedeGuardar) {
-                                        alert("No se puede guardar una solicitud presupuesto sin al menos un producto con cantidad.");
-                                        e.preventDefault();
-                                        return;
-                                        }
-                                        clickChange(e);
-                                    }}
-                                    >
-                                    Cargar
-                                    </button>
-                                </div>
+                                <label htmlFor="precioVenta">
+                                    Total:
+                                    <input
+                                        type="number"
+                                        className='precio-venta'
+                                        onChange={inputChange}
+                                        value={presupuesto.total}
+                                        name="total"
+                                        disabled
+                                    />
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -468,7 +742,30 @@ const fetchData_LowStockByProveedor = (proveedor) => {
             </div>
             <style jsx>
                 {`
+                    .modal {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background-color: rgba(0,0,0,0.5); /* oscurece fondo */
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        z-index: 1000;
+                    }
                     
+
+
+                    .close {
+                        position: absolute;
+                        top: 1rem;
+                        right: 1.5rem;
+                        font-size: 1.5rem;
+                        background: transparent;
+                        border: none;
+                        cursor: pointer;
+                    }
                     .btn-icon {
                         background-color: #8b0000;
                         color: white;
@@ -490,6 +787,18 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                     transform: translateY(-3px);
                     }
 
+                    .modal-content {
+                        background-color: #121212;
+                        padding: 40px;
+                        border-radius: 12px;
+                        width: 90%;
+                        height:80%;
+                        max-width: 500px;
+                        max-height: 800px;
+                        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                        position: relative;
+                        margin: 20px;
+                    }
 
                     .form-container {
                         background-color: #1f1f1f;
@@ -505,6 +814,14 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                     .box-cargar{
                         justify-content: center;
                         align-items: center;
+                    }
+
+                    .titulo-pagina {
+                        text-align: center;
+                        font-size: 2rem;
+                        margin-bottom: 1.5rem;
+                        font-weight: bold;
+                        color: #f5f5f5;
                     }
 
                     .formulario-presupuesto {
@@ -529,27 +846,6 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                     .form-col-productos {
                         flex: 8;
                         min-width: 0; /* Importante para que no desborde */
-                        display: flex;
-                        flex-direction: column;
-                    }
-                        
-                    .form-col-item1 {
-                        flex: 3;
-                        min-width: 0; /* Importante para que no desborde */
-                        display: flex;
-                        flex-direction: column;
-                    }
-                        
-                    .form-col-item2 {
-                        flex: 2;
-                        min-width: 0; /* Importante para que no desborde */
-                        display: flex;
-                        flex-direction: column;
-                    }
-
-                    .form-col-precioVenta {
-                        flex: 2;
-                        min-width: 0;
                         display: flex;
                         flex-direction: column;
                     }
@@ -601,11 +897,43 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                     }
 
                     .presupuesto-item {
-                        display: flex;
+                        display: grid;
+                        grid-template-columns: 150px 170px 100px 100px 120px 60px;
+                        /*      Tipo      Producto   Cant.  Precio  Importe  Borrar */
+                        gap: 0.5rem;
                         align-items: center;
-                        gap: 1rem;
-                        flex-wrap: wrap;
+                        width: 100%;
                     }
+                        
+                    .form-col-item1 {
+                        flex: 0 0 auto;      /* ⬅️ evita que se estiren demasiado */
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                    }
+
+                        
+                    .form-col-item2 {
+                        flex: 2;
+                        min-width: 0; /* Importante para que no desborde */
+                        display: flex;
+                        flex-direction: column;
+                    }
+
+                    .form-col-precioVenta {
+                        flex: 2;
+                        min-width: 0;
+                        display: flex;
+                        flex-direction: column;
+                    }
+                    
+                    .form-col-item1,
+                    .form-col-item2 {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                    }
+
 
                     .presupuesto-item input[type="number"] {
                         width: 80px;
@@ -642,17 +970,20 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                         margin-top: 1rem;
                     }
 
-                    
-                    input[type="text"],
-                    input[type="number"] {
-                        background-color: #2c2c2c;
+                    .submit-btn {
+                        background-color: #651616ff;
                         color: white;
-                        border: 1px solid #444;
-                        border-radius: 8px;
-                        padding: 0.6rem;
+                        border: none;
+                        padding: 0.8rem 1.5rem;
                         font-size: 1rem;
-                        outline: none;
-                        transition: border-color 0.2s ease-in-out;
+                        border-radius: 10px;
+                        cursor: pointer;
+                        transition: background-color 0.2s ease-in-out;
+                    }
+
+                    .submit-btn:hover {
+                        background-color: #571212ff;
+                        transform: translateY(-3px);
                     }
 
                     button.submit-btn {
@@ -671,10 +1002,32 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                         background-color: rgb(115, 8, 8);
                         transform: translateY(-3px);
                     }
+                    
+                    .titulo-pagina {
+                        font-size: 2rem;
+                        color: white;
+                        text-align: center;
+                        margin-top: 2px;
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+                    }
+
+                    
+                    input[type="text"],
+                    input[type="number"] {
+                        background-color: #2c2c2c;
+                        color: white;
+                        border: 1px solid #444;
+                        border-radius: 8px;
+                        padding: 0.6rem;
+                        font-size: 1rem;
+                        outline: none;
+                        transition: border-color 0.2s ease-in-out;
+                    }
                 `}
             </style>
         </>
     )
 }
 
-export default createPresupuesto;
+export default updatePresupuesto;

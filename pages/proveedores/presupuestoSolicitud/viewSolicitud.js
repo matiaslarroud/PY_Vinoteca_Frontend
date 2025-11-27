@@ -1,13 +1,13 @@
 const { useState, useEffect } = require("react")
-import Select from 'react-select';          
+import Select from 'react-select';      
 import { FaTrash} from "react-icons/fa";
 
 const { default: Link } = require("next/link")
 
 const initialStatePresupuesto = {proveedor:'', empleado:''}
-const initialDetalle = { tipoProducto: "" , producto: "", cantidad: 0, solicitudPresupuesto:'' };
+const initialDetalle = { tipoProducto: "",producto: "", cantidad: 0, solicitudPresupuesto:''};
 
-const createPresupuesto = ({exito}) => {
+const updatePresupuesto = ({exito,solicitudID}) => {
     const [presupuesto , setPresupuesto] = useState(initialStatePresupuesto);
     
     const [proveedores,setProveedores] = useState([])
@@ -18,6 +18,35 @@ const createPresupuesto = ({exito}) => {
     
     const detallesValidos = detalles.filter(d => d.producto && d.cantidad > 0);
     const puedeGuardar = detallesValidos.length > 0;
+
+    
+    const fetchData_SolicitudPresupuesto = (param) => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuesto/${param}`)
+        .then((a)=>{
+            return a.json();
+        })
+            .then((s)=>{
+                if(s.ok){
+                    setPresupuesto(s.data)
+                }
+            })
+        .catch((err)=>{console.log("Error al cargar solicitud de presupuesto.\nError: ",err)})
+    }
+
+    
+    
+    const fetchData_SolicitudPresupuestoDetalle = async (presupuestoID) => {
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuestoDetalle/solicitudPresupuesto/${presupuestoID}`);
+            const s = await res.json();
+            if (s.ok) {
+                console.log(s.data)
+                setDetalles(s.data); // guardamos directo
+            }
+        } catch (err) {
+            console.log("Error al cargar detalles.\nError: ", err);
+        }
+    };
 
     const fetchData_Productos = () => {
     fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products`)
@@ -60,33 +89,15 @@ const createPresupuesto = ({exito}) => {
                     setEmpleados(s.data)
                 })
     }
-
-const fetchData_LowStockByProveedor = (proveedor) => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/lowStock/proveedor/${proveedor}`)
-        .then((a) => a.json())
-        .then((s) => {
-            console.log(s.data);
-
-            // s.data es un array unificado → lo recorremos y agregamos uno por uno
-            setDetalles((prev) => [
-                ...prev,
-                ...s.data.map(item => ({
-                    tipoProducto: item.tipo, 
-                    producto: item._id,
-                    cantidad: item.stockMinimo
-                }))
-            ]);
-        });
-};
-
-
     useEffect(()=>{
         setDetalles([]);
+        fetchData_SolicitudPresupuesto(solicitudID);
+        fetchData_SolicitudPresupuestoDetalle(solicitudID);
         fetchData_Proveedores();
         fetchData_Empleados();
         fetchData_Productos();
         fetchData_TipoProductos();
-    }, [])    
+    }, [solicitudID])
 
     useEffect(() => {
         if (!productos.length || !detalles.length) return;
@@ -105,7 +116,7 @@ const fetchData_LowStockByProveedor = (proveedor) => {
             setDetalles(detallesConTipo);
         }
     }, [productos, detalles]);
-
+    
     const handleDetalleChange = (index, field, value) => {
         const nuevosDetalles = [...detalles];
         nuevosDetalles[index][field] = field === "cantidad" ? parseFloat(value) : value;
@@ -116,9 +127,9 @@ const fetchData_LowStockByProveedor = (proveedor) => {
 
     const clickChange = async(e) => {
          e.preventDefault();
-         const resPresupuesto = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuesto`,
+         const resPresupuesto = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuesto/${solicitudID}`,
             {
-                method: 'POST',
+                method: 'PUT',
                 headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({
                     proveedor: presupuesto.proveedor,
@@ -129,6 +140,22 @@ const fetchData_LowStockByProveedor = (proveedor) => {
 
         const solicitudCreada = await resPresupuesto.json();
         const identificador = solicitudCreada.data._id;
+
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuestoDetalle/${identificador}`,
+            {
+                method:'DELETE',
+                headers: {
+                    'Content-Type':'application/json',
+                }
+            }
+        ).then((a)=>{return a.json()})
+            .then((res)=>{
+                console.log(res.message);
+            })
+            .catch((err)=>{
+                console.log("Error al envia detalle de solicitud para su eliminación. \n Error: ",err);
+            })
+
 
         // GUARDAMOS DETALLES
         for (const detalle of detalles) {
@@ -142,9 +169,8 @@ const fetchData_LowStockByProveedor = (proveedor) => {
             })
         });
             
-        if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
+            if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
         }
-
         setDetalles([initialDetalle]);
         setPresupuesto(initialStatePresupuesto);
         exito();
@@ -153,10 +179,6 @@ const fetchData_LowStockByProveedor = (proveedor) => {
     const selectChange = (selectedOption, actionMeta) => {
         const name = actionMeta.name;
         const value = selectedOption ? selectedOption.value : "";
-
-        if(name === 'proveedor'){
-            fetchData_LowStockByProveedor(value)
-        }
 
         setPresupuesto({
             ...presupuesto,
@@ -167,7 +189,6 @@ const fetchData_LowStockByProveedor = (proveedor) => {
     const agregarDetalle = () => {
         setDetalles([...detalles, { ...{tipoProducto:"",producto: "", cantidad: 0 } }]);
     };
-    
 
     const opciones_tipoProductos = tipoProductos.map(v => ({
         value: v,
@@ -192,7 +213,7 @@ const fetchData_LowStockByProveedor = (proveedor) => {
             <div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
-                        <h1 className="titulo-pagina">Cargar Solicitud de Presupuesto</h1>
+                        <h1 className="titulo-pagina">Visualización de Solicitud de Presupuesto</h1>
                     </div>
                 </div>
 
@@ -201,7 +222,6 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                         <div className="form-col">
                             <label>
                                 Proveedor:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -212,6 +232,7 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                                 name='proveedor'
                                 placeholder="Proveedor..."
                                 isClearable
+                                isDisabled={true}
                                 styles={{
                                     container: (base) => ({
                                     ...base,
@@ -254,8 +275,7 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                         <div className="form-col">
                             <label>
                                 Empleado:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate2(true)}>+</button>
-                            </label>
+                             </label>
                             <Select
                                 className="form-select-react"
                                 classNamePrefix="rs"
@@ -265,6 +285,7 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                                 name='empleado'
                                 placeholder="Empleado..."
                                 isClearable
+                                isDisabled={true}
                                 styles={{
                                     container: (base) => ({
                                     ...base,
@@ -309,9 +330,6 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                         <div className="form-col-productos">
                             <label>
                                     Productos:
-                                    <button type="button" className="btn-add-producto" onClick={agregarDetalle}>
-                                        + Agregar Producto
-                                    </button>
                             </label>
                             <div className="form-group-presupuesto">
                                 
@@ -329,6 +347,7 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                                             }
                                             placeholder="Tipo de Producto..."
                                             isClearable
+                                            isDisabled={true}
                                             styles={{
                                                 container: (base) => ({
                                                 ...base,
@@ -378,6 +397,7 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                                             }
                                             placeholder="Producto..."
                                             isClearable
+                                            isDisabled={true}
                                             styles={{
                                                 container: (base) => ({
                                                 ...base,
@@ -425,50 +445,37 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                                             value={d.cantidad}
                                             onChange={(e) => handleDetalleChange(i, "cantidad", e.target.value)}
                                             required
+                                            disabled
                                         />
-                                    </div>
-                                    <div className='form-col-item2'>
-                                        <button
-                                            type="button"
-                                            className="btn-icon"
-                                            onClick={() => {
-                                                const productos = detalles.filter((_, index) => index !== i);
-                                                setDetalles(productos);
-                                            }}
-                                            >                                    
-                                            <FaTrash />
-                                        </button>
                                     </div>
                                 </div>
                                 })}
                             </div>
                         </div> 
-                        <div className="form-col-precioVenta">
-                            <div className="box-cargar" >
-                                <div className="form-submit">
-                                    <button
-                                    type="submit"
-                                    className="submit-btn"
-                                    onClick={(e) => {
-                                        if (!puedeGuardar) {
-                                        alert("No se puede guardar una solicitud presupuesto sin al menos un producto con cantidad.");
-                                        e.preventDefault();
-                                        return;
-                                        }
-                                        clickChange(e);
-                                    }}
-                                    >
-                                    Cargar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </form>
             </div>
             <style jsx>
                 {`
                     
+
+                    button.submit-btn {
+                        padding: 0.75rem 1rem;
+                        background-color: #8B0000;
+                        color: #fff;
+                        border: none;
+                        border-radius: 8px;
+                        font-size: 1rem;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: background-color 0.3s ease;
+                    }
+
+                    button.submit-btn:hover {
+                        background-color: rgb(115, 8, 8);
+                        transform: translateY(-3px);
+                    }
+                        
                     .btn-icon {
                         background-color: #8b0000;
                         color: white;
@@ -654,27 +661,10 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                         outline: none;
                         transition: border-color 0.2s ease-in-out;
                     }
-
-                    button.submit-btn {
-                        padding: 0.75rem 1rem;
-                        background-color: #8B0000;
-                        color: #fff;
-                        border: none;
-                        border-radius: 8px;
-                        font-size: 1rem;
-                        font-weight: 600;
-                        cursor: pointer;
-                        transition: background-color 0.3s ease;
-                    }
-
-                    button.submit-btn:hover {
-                        background-color: rgb(115, 8, 8);
-                        transform: translateY(-3px);
-                    }
                 `}
             </style>
         </>
     )
 }
 
-export default createPresupuesto;
+export default updatePresupuesto;

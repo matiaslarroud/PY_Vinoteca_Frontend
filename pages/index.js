@@ -25,12 +25,6 @@ export default function Home() {
       return;
     }
     setUsuario(JSON.parse(sesion));
-
-    // // Cargar productos con stock bajo
-    // fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/lowStock`)
-    //   .then((res) => res.json())
-    //   .then((data) => setLowStockProducts(data.data))
-    //   .catch(console.error);
   }, []);
 
   useEffect(() => {

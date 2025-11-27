@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaShoppingCart , FaHome, FaArrowLeft, FaTrash, FaEdit , FaPrint , FaSearch } from "react-icons/fa";
+import { FaPlus, FaShoppingCart , FaHome, FaArrowLeft, FaEye, FaEdit , FaPrint , FaSearch } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import FormularioPresupuestoUpdate from './updatePresupuesto'
 import FormularioPresupuestoCreate from './newPresupuesto'
 import CreateNotaPedido from "../ordenCompra/createOrdenCompra";
 import BusquedaAvanzadaPresupuesto from "./busquedaPresupuesto";
+import PresupuestoView from "./viewPresupuesto";
 
 const { default: Link } = require("next/link")
 
@@ -16,6 +17,7 @@ const indexPresupuesto = () => {
     const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
     const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
     const [mostrarModalBuscar, setMostrarModalBuscar] = useState(null);
+    const [mostrarModalView, setMostrarModalView] = useState(null);
 
     const initialStatePresupuesto = {total:'', proveedor:'', solicitudPresupuesto:'', empleado:'', medioPago:''}
         
@@ -198,6 +200,22 @@ const indexPresupuesto = () => {
                 </div>
             )}
 
+            {mostrarModalView && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="close" onClick={() => setMostrarModalView(null)}>
+                            &times;
+                        </button>
+                        <PresupuestoView 
+                            presupuestoID={mostrarModalView} 
+                            exito={()=>{
+                                setMostrarModalView(null);
+                            }}    
+                        />
+                    </div>
+                </div>
+            )}
+
             {mostrarPedidoCreate && (
                 <div className="modal">
                 <div className="modal-content">
@@ -268,6 +286,9 @@ const indexPresupuesto = () => {
                                         <td className="columna">${total}</td>
                                         <td className="columna">
                                             <div className="acciones">
+                                                <button onClick={() => setMostrarModalView(_id)} className="btn-icon" title="Visualizar">
+                                                    <FaEye />
+                                                </button>
                                                 <button onClick={() => setmostrarPedidoCreate(_id)} className="btn-icon" title="Generar Orden de Compra">
                                                     <FaShoppingCart />
                                                 </button>
@@ -277,9 +298,6 @@ const indexPresupuesto = () => {
                                                 <button onClick={() => imprimirPresupuesto(_id)}  className="btn-icon" title="Imprimir">
                                                     <FaPrint />
                                                 </button>
-                                                {/* <button onClick={() => deletePresupuesto(_id)}  className="btn-icon" title="Eliminar">
-                                                    <FaTrash />
-                                                </button> */}
                                             </div>
                                         </td>
                                     </tr>

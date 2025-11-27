@@ -213,7 +213,7 @@ const updatePresupuesto = ({exito,solicitudID}) => {
             <div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
-                        <h1 className="titulo-pagina">Modificar Presupuesto</h1>
+                        <h1 className="titulo-pagina">Modificar Solicitud de Presupuesto</h1>
                     </div>
                 </div>
 

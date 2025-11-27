@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaCartArrowDown , FaHome, FaArrowLeft, FaTrash, FaEdit , FaPrint , FaSearch } from "react-icons/fa";
+import { FaPlus, FaCartArrowDown , FaHome, FaArrowLeft, FaTrash, FaEdit , FaPrint , FaSearch  , FaEye} from "react-icons/fa";
 import { useRouter } from 'next/router';
 import FormularioPresupuestoUpdate from './updateSolicitud'
 import FormularioPresupuestoCreate from './newSolicitud'
 import FormularioPresupuesto from "../presupuesto/createPresupuesto";
 import BusquedaAvanzadaSolicitudes from "./busquedaSolicitud";
+import SolicitudPresupuestoView from "./viewSolicitud";
 
 const { default: Link } = require("next/link")
 
@@ -16,6 +17,7 @@ const indexPresupuesto = () => {
     const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
     const [mostrarPresupuesto, setMostrarPresupuesto] = useState(null);
     const [mostrarModalBuscar, setMostrarModalBuscar] = useState(null);
+    const [mostrarModalView, setMostrarModalView] = useState(null);
     
     const initialStatePresupuesto = {proveedor:'', empleado:''}
     
@@ -115,7 +117,7 @@ const indexPresupuesto = () => {
 
         try {
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuesto/imprimir/${presupuestoID}`
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuesto/imprimir/${presupuestoID}`
             );
 
             if (!res.ok) throw new Error("No se pudo generar el PDF");
@@ -219,6 +221,22 @@ const indexPresupuesto = () => {
                 </div>
             )}
 
+            {mostrarModalView && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="close" onClick={() => setMostrarModalView(null)}>
+                            &times;
+                        </button>
+                        <SolicitudPresupuestoView 
+                            solicitudID={mostrarModalView} 
+                            exito={()=>{
+                                setMostrarModalView(null);
+                            }}    
+                        />
+                    </div>
+                </div>
+            )}
+
             <h1 className="titulo-pagina">Solicitud de Presupuesto</h1>
             
             <div className="botonera">
@@ -263,7 +281,10 @@ const indexPresupuesto = () => {
                                         <td className="columna">{fecha.split("T")[0]}</td>
                                         <td className="columna">
                                             <div className="acciones">
-                                                <button onClick={() => setMostrarPresupuesto(_id)} className="btn-icon" title="Generar Presupuesto">
+                                                <button onClick={() => setMostrarModalView(_id)} className="btn-icon" title="Visualizar">
+                                                    <FaEye />
+                                                </button>
+                                                <button onClick={() => setMostrarPresupuesto(_id)} className="btn-icon" title="Generar Solicitud de Presupuesto">
                                                     <FaCartArrowDown />
                                                 </button>
                                                 <button onClick={() => setMostrarModalUpdate(_id)} className="btn-icon" title="Modificar">

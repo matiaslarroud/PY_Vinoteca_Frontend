@@ -7,7 +7,7 @@ import FormularioDepositoCreate from '../../gestion/deposito/createDeposito'
 const initialState = {fechaElaboracion:'' , fechaEntrega:'' , empleado:''}
 const initialStateDetalle = {ordenProduccion:'',picada:'', cantidad:0}
 
-const formOrden = ({exito}) => {
+const formOrden = ({exito , tipo , param}) => {
     const [ordenProduccion , setOrdenProducion] = useState(initialState);
     const [empleados, setEmpleados] = useState([]);
     const [picadas , setPicadas] = useState([]);
@@ -38,7 +38,27 @@ const formOrden = ({exito}) => {
         setDetalles([]);
         fetch_Picadas();
         fetch_Empleados();
-    } , [])
+    } , [])   
+
+    useEffect(() => {
+        if (tipo === "producto" && param) {
+            fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/${param}`)
+                .then(a => a.json())
+                .then(s => {
+                    if (s.ok) {
+                        console.log(s.data)
+                        setDetalles(prev => ([
+                            ...prev,
+                            {
+                                picada: param,
+                                tipoProducto: s.data.tipoProducto,
+                                cantidad: s.data.stockMinimo
+                            }
+                        ]));
+                    }
+                });
+        }
+    }, [tipo, param]);
     
     const inputChange = (e) => {
         const value = e.target.value;
