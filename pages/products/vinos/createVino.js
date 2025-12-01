@@ -20,6 +20,7 @@ const formProducto = ({exito}) => {
     const [volumenes, setVolumenes] = useState([]);
     const [proveedores, setProveedores] = useState([]);
     const [depositos, setDepositos] = useState([]);
+    const [imagenes, setImagenes] = useState([]);
     
     const fetchBodegas = ()=>{
         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/bodega`)
@@ -140,6 +141,31 @@ const formProducto = ({exito}) => {
         setDetalles([...detalles, { ...{vino:"" , uva: ""} }]);
     };
 
+    const uploadImagenes = async (productoID) => {
+        try {
+            const formData = new FormData();
+
+            imagenes.forEach((img) => {
+                formData.append("fotos", img); // varias fotos, un solo request
+            });
+
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productFoto/${productoID}`, {
+                method: "POST",
+                body: formData,
+            });
+
+            const data = await res.json();
+
+            if (!data.ok) {
+                console.log("Error en backend:", data);
+                return;
+            }
+
+        } catch (err) {
+            console.log("Error subiendo imágenes:", err);
+        }
+    };
+
     const clickChange = async(e) => {
         e.preventDefault();
         const bodyData = {
@@ -169,6 +195,10 @@ const formProducto = ({exito}) => {
 
         const vinoCreado = await resVino.json();
         const vinoID = vinoCreado.data?._id;
+        
+        if (imagenes.length > 0) {
+            await uploadImagenes(vinoID);
+        }
 
         // GUARDAMOS DETALLES
         for (const detalle of detalles) {
@@ -735,7 +765,7 @@ const formProducto = ({exito}) => {
                                 </div>
                                 ))}
                             </div>
-                        </div> 
+                        </div>   
 
                         <div className="form-submit">
                             <button
@@ -745,10 +775,22 @@ const formProducto = ({exito}) => {
                                     clickChange(e);
                                 }}
                                 >
-                                Cargar Vino
+                                Cargar
                             </button>
                         </div>
-                    </div>
+                    </div>              
+
+                        <div className="form-row">
+                            <div className="form-col">
+                                <label>Fotos del producto:</label>
+                                <input
+                                    type="file"
+                                    multiple
+                                    accept="image/*"
+                                    onChange={(e) => setImagenes([...e.target.files])}
+                                />
+                            </div>
+                        </div>
                 </form>
             </div>
             <style jsx>

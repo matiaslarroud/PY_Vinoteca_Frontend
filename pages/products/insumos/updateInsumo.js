@@ -8,9 +8,9 @@ const initialState = {name:'',stock:0 , stockMinimo:'', precioCosto:0 , ganancia
 const updateProducto = ({exito , insumoID}) => {
     const [product , setProduct] = useState(initialState);
     const [depositos, setDepositos] = useState([]);
-    const [proveedores, setProveedores] = useState([]);
-    
-
+    const [proveedores, setProveedores] = useState([]);   
+    const [imagenes, setImagenes] = useState([]);
+    const [imagenesActuales, setImagenesActuales] = useState([]);
 
     const fetch_Depositos = async () => {
         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/deposito`)
@@ -55,12 +55,22 @@ const updateProducto = ({exito , insumoID}) => {
                 })
             .catch((err)=>{console.log(err)});
     }
+
+    const fetch_Imagenes = async (param) => {
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productFoto/producto/${param}`)
+            .then ((a)=>{return a.json()})
+                .then ((s)=>{
+                    setImagenesActuales(s.data || [])
+                })
+            .catch((err)=>{console.log(err)});
+    }
     
     useEffect(()=>{
         if(!insumoID){return}
         fetch_Depositos();
         fetch_Proveedores();
         fetch_Insumo(insumoID);
+        fetch_Imagenes(insumoID)
     } , [insumoID])
     
     const inputChange = (e) => {
@@ -81,6 +91,49 @@ const updateProducto = ({exito , insumoID}) => {
             ...product,
             [name]: value,
         });
+    };
+
+    const uploadImagenes = async (productoID) => {
+        try {
+            const formData = new FormData();
+
+            imagenes.forEach((img) => {
+                formData.append("fotos", img); // varias fotos, un solo request
+            });
+
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productFoto/${productoID}`, {
+                method: "POST",
+                body: formData,
+            });
+
+            const data = await res.json();
+
+            if (!data.ok) {
+                console.log("Error en backend:", data);
+                return;
+            }
+
+        } catch (err) {
+            console.log("Error subiendo imágenes:", err);
+        }
+    };
+
+    const eliminarImagen = async (fotoID) => {
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productFoto/${fotoID}`, {
+                method: "DELETE"
+            });
+
+            const data = await res.json();
+
+            if (data.ok) {
+                setImagenesActuales(prev => prev.filter(img => img._id !== fotoID));
+            } else {
+                console.log("Error eliminando imagen", data);
+            }
+        } catch (err) {
+            console.log("Error:", err);
+        }
     };
 
 
@@ -110,8 +163,13 @@ const updateProducto = ({exito , insumoID}) => {
                     })
                     .then((s) => {
                             if(s.ok){
-                                console.log(s.message)
+                                const productoID = s.data._id;
+
+                                if (imagenes.length > 0) {
+                                    uploadImagenes(productoID);
+                                }
                                 setProduct(initialState);
+                                setImagenes([]);
                                 exito();
                             }
                         })
@@ -135,12 +193,12 @@ const updateProducto = ({exito , insumoID}) => {
                 <form className="formulario-picada">
                 
                  <div className="form-row">
-                    <div className="form-group">
+                    <div className="form-col">
                         <label htmlFor="nombre">Nombre:</label>
                         <input type="text" onChange={inputChange} value={product.name} name="name" placeholder="Ingresa el nombre del insumo" required></input>
                     </div>
                     
-                    <div className="form-group">
+                    <div className="form-col1">
                         <label htmlFor="deposito">Proveedor:</label>
                         <Select
                             className="form-select-react" // Clase contenedora, podés usarla para aplicar un margen por ejemplo
@@ -189,7 +247,7 @@ const updateProducto = ({exito , insumoID}) => {
                             }}
                         />
                     </div>
-                    <div className="form-group">
+                    <div className="form-col1">
                         <label htmlFor="deposito">Deposito:</label>
                         <Select
                             className="form-select-react" // Clase contenedora, podés usarla para aplicar un margen por ejemplo
@@ -240,34 +298,154 @@ const updateProducto = ({exito , insumoID}) => {
                     </div>
                  </div>
                  <div className="form-row">
-                    <div className="form-group">
+                    <div className="form-col">
                         <label htmlFor="stock">Stock:</label>
                         <input type="number" onChange={inputChange} value={product.stock} name="stock" placeholder="Ingresa el stock del insumo" required></input>
                     </div>             
-                    <div className="form-group">
+                    <div className="form-col">
                         <label htmlFor="stock">Stock minimo:</label>
                         <input type="number" onChange={inputChange} value={product.stockMinimo} name="stockMinimo" placeholder="Ingresa el stock minimo del insumo"></input>
                     </div>          
-                    <div className="form-group">
+                    <div className="form-col">
                         <label htmlFor="precioC">Precio costo:</label>
                         <input type="number" onChange={inputChange} value={product.precioCosto} name="precioCosto" placeholder="Ingresa el precio costo del insumo" required></input>
                     </div>
                     
-                    <div className="form-group">
+                    <div className="form-col">
                         <label htmlFor="ganancia">% Ganancia:</label>
                         <input type="number" onChange={inputChange} value={product.ganancia} name="ganancia" placeholder="Ingresa la ganancia del insumo" required></input>
                     </div>
                  </div>
+
+                 <div className="form-row">
+                    <div className="form-col">
+                        <label>Fotos del producto:</label>
+                        <input
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            onChange={(e) => setImagenes([...e.target.files])}
+                        />
+                    </div>
+                </div>
+                 <div className="form-row">
+                    <div className="imagenes-actuales-container">
+                        <h3>Imágenes actuales:</h3>
+                        {imagenesActuales.length === 0 && (
+                            <p>No hay imágenes cargadas.</p>
+                        )}
+
+                        <div className="imagenes-grid">
+                            {imagenesActuales.map((img) => (
+                                <div key={img._id} className="imagen-card">
+                                    <img src={img.imagenURL} alt="Foto del producto" />
+
+                                    <button
+                                        type="button"
+                                        className="btn-eliminar"
+                                        onClick={(e) => {
+                                            e.stopPropagation();   // evita cierre del modal
+                                            eliminarImagen(img._id);
+                                        }}
+                                    >
+                                        ✕
+                                    </button>
+
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
                  
                  <div className="form-row">
                     <div className="form-carga-button">
                         <button type="submit" className="submit-btn" onClick={clickChange}>Guardar</button>
                     </div>
-                 </div> 
+                </div> 
+
                 </form>
             </div>
             <style jsx>
                 {`
+                    .imagenes-actuales-container {
+                        margin-top: 20px;
+                    }
+
+                    .imagenes-grid {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 10px;
+                    }
+
+                    .imagen-card {
+                        width: 90px;
+                        height: 90px;
+                        background: #1e1e1e;
+                        border-radius: 6px;
+                        padding: 4px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        position: relative;
+                        transition: transform 0.15s ease-in-out;
+                    }
+
+                    .imagen-card:hover {
+                        transform: scale(1.1);
+                    }
+
+                    .imagen-card img {
+                        width: 80px;
+                        height: 80px;
+                        object-fit: cover;
+                        border-radius: 4px;
+                    }
+
+                    /* Botón eliminar pequeño */
+                    .btn-eliminar {
+                        position: absolute;
+                        top: -5px;
+                        right: -5px;
+                        background: #e74c3c;
+                        border: none;
+                        color: white;
+                        font-size: 10px;
+                        width: 16px;
+                        height: 16px;
+                        border-radius: 50%;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        transition: 0.15s ease-in-out;
+                    }
+
+                    .btn-eliminar:hover {
+                        background: #c0392b;
+                    }
+
+
+                    .preview-img {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                        border-radius: 6px;
+                        border: 1px solid #444;
+                    }
+
+                    .btn-eliminar-img {
+                        position: absolute;
+                        top: 5px;
+                        right: 5px;
+                        background: rgba(255, 0, 0, 0.8);
+                        color: white;
+                        border: none;
+                        padding: 3px 6px;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        font-size: 12px;
+                    }
+
                     .box-cargar{
                         justify-content: center;
                         align-items: center;
@@ -391,7 +569,7 @@ const updateProducto = ({exito , insumoID}) => {
                         display: flex;
                         flex-direction: column;
                         gap: 1rem;
-                        height: 160px;
+                        height: 50x;
                         overflow-y: auto;
                         padding-right: 8px;
                     }

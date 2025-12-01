@@ -9,6 +9,7 @@ const formProducto = ({exito}) => {
     const [product , setProduct] = useState(initialState);
     const [depositos, setDepositos] = useState([]);
     const [proveedores, setProveedores] = useState([]);
+    const [imagenes, setImagenes] = useState([]);
     
     const fetch_Depositos = async () => {
         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/deposito`)
@@ -53,38 +54,75 @@ const formProducto = ({exito}) => {
         });
     };
 
+    const uploadImagenes = async (productoID) => {
+        try {
+            const formData = new FormData();
 
-    const clickChange = (e) => {
-        e.preventDefault();
-        const bodyData = {
-            name: product.name , 
-            precioCosto: product.precioCosto , 
-            stock: product.stock , 
-            ganancia: product.ganancia , 
-            deposito: product.deposito , 
-            proveedor: product.proveedor
+            imagenes.forEach((img) => {
+                formData.append("fotos", img); // varias fotos, un solo request
+            });
+
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productFoto/${productoID}`, {
+                method: "POST",
+                body: formData,
+            });
+
+            const data = await res.json();
+
+            if (!data.ok) {
+                console.log("Error en backend:", data);
+                return;
+            }
+
+        } catch (err) {
+            console.log("Error subiendo imágenes:", err);
         }
+    };
 
-        if(product.stockMinimo){
+
+    const clickChange = async (e) => {
+        e.preventDefault();
+
+        const bodyData = {
+            name: product.name,
+            precioCosto: product.precioCosto,
+            stock: product.stock,
+            ganancia: product.ganancia,
+            deposito: product.deposito,
+            proveedor: product.proveedor
+        };
+
+        if (product.stockMinimo) {
             bodyData.stockMinimo = product.stockMinimo;
         }
-         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productInsumo`,
-            {
-                method: 'POST',
-                headers: {'Content-Type':'application/json'},
-                body: JSON.stringify(bodyData)
+
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productInsumo`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(bodyData),
+            });
+
+            const data = await res.json();
+
+            if (!data.ok) {
+                return;
             }
-         ).then((a) => {
-                        return a.json()
-                    })
-                    .then((data) => {
-                            if(data.ok){
-                                setProduct(initialState);
-                                exito();
-                            }
-                        })
-                .catch((err) => {console.log('Error al enviar datos. \n Error: ',err)})
-                    }
+            
+            const productoID = data.producto._id;
+
+            if (imagenes.length > 0) {
+                await uploadImagenes(productoID);
+            }
+
+            setProduct(initialState);
+            setImagenes([]);
+            exito();
+
+        } catch (error) {
+            console.log("Error: ", error);
+        }
+    };
 
 
     const opciones_proveedores = proveedores.map(v => ({ value: v._id,label: v.name }))
@@ -101,12 +139,12 @@ const formProducto = ({exito}) => {
                 
                 <form className="formulario-picada">
                  <div className="form-row">
-                    <div className="form-group">
+                    <div className="form-col">
                         <label htmlFor="nombre">Nombre:</label>
                         <input type="text" onChange={inputChange} value={product.name} name="name" placeholder="Ingresa el nombre del insumo" required></input>
                     </div>
                     
-                    <div className="form-group">
+                    <div className="form-col1">
                         <label htmlFor="deposito">Proveedor:</label>
                         <Select
                             className="form-select-react" // Clase contenedora, podés usarla para aplicar un margen por ejemplo
@@ -155,7 +193,7 @@ const formProducto = ({exito}) => {
                             }}
                         />
                     </div>
-                    <div className="form-group">
+                    <div className="form-col1">
                         <label htmlFor="deposito">Deposito:</label>
                         <Select
                             className="form-select-react" // Clase contenedora, podés usarla para aplicar un margen por ejemplo
@@ -206,34 +244,47 @@ const formProducto = ({exito}) => {
                     </div>
                  </div>
                  <div className="form-row">
-                    <div className="form-group">
+                    <div className="form-col">
                         <label htmlFor="stock">Stock:</label>
-                        <input type="number" onChange={inputChange} value={product.stock} name="stock" placeholder="Ingresa el stock del insumo" required></input>
+                        <input type="number" onChange={inputChange} value={product.stock} min={0} name="stock" placeholder="Ingresa el stock del insumo" required></input>
                     </div>              
-                    <div className="form-group">
+                    <div className="form-col">
                         <label htmlFor="stock">Stock minimo:</label>
-                        <input type="number" onChange={inputChange} value={product.stockMinimo} name="stockMinimo" placeholder="Ingresa el stock minimo del insumo"></input>
+                        <input type="number" onChange={inputChange} value={product.stockMinimo} min={0} name="stockMinimo" placeholder="Ingresa el stock minimo del insumo"></input>
                     </div>            
-                    <div className="form-group">
+                    <div className="form-col">
                         <label htmlFor="precioC">Precio costo:</label>
-                        <input type="number" onChange={inputChange} value={product.precioCosto} name="precioCosto" placeholder="Ingresa el precio costo del insumo" required></input>
+                        <input type="number" onChange={inputChange} value={product.precioCosto} min={0} name="precioCosto" placeholder="Ingresa el precio costo del insumo" required></input>
                     </div>
                     
-                    <div className="form-group">
+                    <div className="form-col">
                         <label htmlFor="ganancia">% Ganancia:</label>
-                        <input type="number" onChange={inputChange} value={product.ganancia} name="ganancia" placeholder="Ingresa la ganancia del insumo" required></input>
+                        <input type="number" onChange={inputChange} value={product.ganancia} min={0} name="ganancia" placeholder="Ingresa la ganancia del insumo" required></input>
                     </div>
                  </div>
+
+                 <div className="form-row">
+                    <div className="form-col">
+                        <label>Fotos del producto:</label>
+                        <input
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            onChange={(e) => setImagenes([...e.target.files])}
+                        />
+                    </div>
+                </div>
                  
                  <div className="form-row">
                     <div className="form-carga-button">
-                        <button type="submit" className="submit-btn" onClick={clickChange}>Cargar Producto</button>
+                        <button type="submit" className="submit-btn" onClick={clickChange}>Cargar</button>
                     </div>
                  </div> 
                 </form>
             </div>
             <style jsx>
                 {`
+                        
                     .box-cargar{
                         justify-content: center;
                         align-items: center;
