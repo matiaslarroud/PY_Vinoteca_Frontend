@@ -65,7 +65,7 @@ const indexVolumen = () => {
 
     const deleteVolumen= async(volumenID) => {
         if(!volumenID) {
-            console.log("Error con el ID del volumen al querer eliminarlo.")
+            console.log("❌ Error con el ID del volumen al querer eliminarlo.")
             return
         }
         const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
@@ -78,11 +78,15 @@ const indexVolumen = () => {
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
-                fetchData()
-                console.log(res.message);
+                if(res.ok) {
+                    alert(res.message);
+                    fetchData();
+                } else {
+                    alert(res.message);
+                }
             })
             .catch((err)=>{
-                console.log("Error al enviar volumen para su eliminacion. \n ERROR: ",err);
+                console.log("❌ Error al enviar volumen para su eliminacion. \n ERROR: ",err);
             })
     }
 

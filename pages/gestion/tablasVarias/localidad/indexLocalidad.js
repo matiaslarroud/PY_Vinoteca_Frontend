@@ -86,7 +86,7 @@ const indexLocalidad = () => {
 
     const deleteLocalidad = async(localidadID) => {
         if(!localidadID) {
-            console.log("Error con el ID de la localidad al querer eliminarla.")
+            console.log("❌ Error con el ID de la localidad al querer eliminarla.")
             return
         }
         const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
@@ -99,11 +99,15 @@ const indexLocalidad = () => {
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
-                fetchData()
-                console.log(res.message);
+                if(res.ok){
+                    alert(res.message);
+                    fetchData();
+                } else {
+                    alert(res.message)
+                }
             })
             .catch((err)=>{
-                console.log("Error al enviar localidad para su eliminacion. \n ERROR: ",err);
+                console.log("❌ Error al enviar localidad para su eliminacion. \n ERROR: ",err);
             })
     }
 

@@ -134,6 +134,10 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
         )
 
         const presupuestoCreado = await resPresupuesto.json();
+        if(!presupuestoCreado.ok) {
+            alert(presupuestoCreado.message)
+            return
+        }
         const identificador = presupuestoCreado.data._id;
 
         await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuestoDetalle/${identificador}`,
@@ -145,10 +149,13 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
-                console.log(res.message);
+                if(!res.ok){
+                    alert(res.message)
+                    return
+                }
             })
             .catch((err)=>{
-                console.log("Error al envia Picada para su eliminación. \n Error: ",err);
+                console.log("❌ Error al envia Picada para su eliminación. \n Error: ",err);
             })
 
         // GUARDAMOS DETALLES
@@ -164,11 +171,16 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                     presupuesto: presupuestoID
             })
                 });
-            
-            if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
+
+            const dataDetalle = await resDetalle.json();
+            if (!dataDetalle.ok) {
+                alert(dataDetalle.message);
+                return;
+            }
         }
         setDetalles([initialDetalle]);
         setPresupuesto(initialStatePresupuesto);
+        alert(presupuestoCreado.message)
         exito();
     }
 
@@ -564,7 +576,7 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                                     className="submit-btn"
                                     onClick={(e) => {
                                         if (!puedeGuardar) {
-                                        alert("No se puede guardar un presupuesto sin al menos un producto con cantidad.");
+                                        alert("❌ No se puede guardar un presupuesto sin al menos un producto con cantidad.");
                                         e.preventDefault();
                                         return;
                                         }

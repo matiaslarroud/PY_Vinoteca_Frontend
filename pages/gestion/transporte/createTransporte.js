@@ -123,8 +123,17 @@ const formTransporte = ({exito}) => {
                     condicionIva: transporte.condicionIva
                 })
             })
-        setTransporte(initialState);
-        exito();
+            .then((s) => s.json())
+                .then((a) => {
+                    if(a.ok){
+                        setTransporte(initialState);
+                        alert(a.message)                        
+                        exito();
+                    } else {
+                        alert(a.message)
+                    }
+                })
+                .catch((err) => console.error("❌ Error al agregar transporte:", err))
     }
 
     const opciones_paises = paises.map(p => ({ value: p._id, label: p.name }));
@@ -529,7 +538,7 @@ const formTransporte = ({exito}) => {
                                         clickChange(e);
                                     }}
                                     >
-                                    Cargar Transporte
+                                    Cargar
                                     </button>
                                 </div>
                             </div>

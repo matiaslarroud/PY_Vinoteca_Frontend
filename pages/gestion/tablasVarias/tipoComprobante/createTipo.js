@@ -52,9 +52,11 @@ const createTipo = ({exito}) => {
                     })
                     .then((data) => {
                             if(data.ok){
-                                console.log('Tipo de comprobante creado exitosamente.');
                                 setTipo(initialState);
+                                alert(data.message)
                                 exito();
+                            } else {
+                              alert(data.message)
                             }
                         })
                 .catch((err) => {console.log('Error al enviar datos. \n Error: ',err)})
@@ -139,7 +141,7 @@ const createTipo = ({exito}) => {
                 </fieldset>
                 <div className="button-area">
                     <button type="submit" className="submit-btn" onClick={clickChange}>
-                    Cargar Tipo
+                    Cargar
                     </button>
                 </div>
                 </form>

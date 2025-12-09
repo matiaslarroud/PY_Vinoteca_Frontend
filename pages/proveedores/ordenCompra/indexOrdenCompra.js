@@ -138,7 +138,7 @@ const indexOrdenCompra = () => {
 
     const deleteOrden = async(ordenID) => {
         if(!ordenID) {
-            console.log("Error con el ID de la orden de compra al querer eliminarla.")
+            console.log("❌ Error con el ID de la orden de compra al querer eliminarla.")
             return
         }
         const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
@@ -151,11 +151,15 @@ const indexOrdenCompra = () => {
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
-                fetchData();
-                console.log(res.message);
+                if(res.ok) {
+                    alert(res.message);
+                    fetchData();
+                } else {
+                    alert(res.message)
+                }
             })
             .catch((err)=>{
-                console.log("Error al enviar orden de compra para su eliminación. \n Error: ",err);
+                console.log("❌ Error al enviar orden de compra para su eliminación. \n Error: ",err);
             })
     }
 
@@ -183,7 +187,7 @@ const indexOrdenCompra = () => {
                         setOrdenes(resultados);
                         setMostrarModalBuscar(false);
                     } else {
-                        alert("No se encontraron resultados");
+                        alert("❌ No se encontraron resultados");
                     }
                     }}
                     onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)} // ✅ manejamos los cambios desde el hijo
@@ -315,13 +319,21 @@ const indexOrdenCompra = () => {
                                                 >
                                                     <FaEye />
                                                 </button>
-                                                <button onClick={() => setMostrarModalComprobanteCompra(_id)} className="btn-icon" title="Generar Comprobante de Compra">
+                                                <button onClick={() => {if (completo) {
+                                                        alert("❌ La entrega esta completa, no se puede cargar mas comprobantes.");
+                                                        return;
+                                                        }
+                                                        setMostrarModalComprobanteCompra(_id)
+                                                    }} 
+                                                    className="btn-icon" 
+                                                    title={completo ? "La entrega esta completa, no se puede cargar mas comprobantes" : "Generar Comprobante de Compra"}
+                                                    >
                                                     <FaFileInvoiceDollar />
                                                 </button>
                                                 <button className="btn-icon"
                                                     onClick={() => {
                                                         if (tieneComprobante) {
-                                                        alert("Esta orden de compra ya se encuentra en un comprobante y no se puede modificar.");
+                                                        alert("❌ Esta orden de compra ya se encuentra en un comprobante de compra y no se puede modificar.");
                                                         return;
                                                         }
                                                         setMostrarModalUpdate(_id);
@@ -332,6 +344,9 @@ const indexOrdenCompra = () => {
                                                 </button>
                                                 <button onClick={() => imprimirOrden(_id)}  className="btn-icon" title="Imprimir">
                                                     <FaPrint />
+                                                </button>
+                                                <button onClick={() => deleteOrden(_id)}  className="btn-icon" title="Eliminar">
+                                                    <FaTrash />
                                                 </button>
                                             </div>
                                         </td>

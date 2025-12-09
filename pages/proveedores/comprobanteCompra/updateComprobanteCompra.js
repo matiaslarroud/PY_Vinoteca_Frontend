@@ -143,27 +143,16 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
         })
 
         const comprobanteCompraCreado = await resComprobanteCompra.json();
+        if(!comprobanteCompraCreado.ok) {
+            alert(comprobanteCompraCreado.message)
+            return
+        }
         const comprobanteID = comprobanteCompraCreado.data._id;
-
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompraDetalle/${comprobanteID}`,
-            {
-                method:'DELETE',
-                headers: {
-                    'Content-Type':'application/json',
-                }
-            }
-        ).then((a)=>{return a.json()})
-            .then((res)=>{
-                console.log(res.message);
-            })
-            .catch((err)=>{
-                console.log("Error al enviar detalle de comprobante de compra para su eliminación. \n Error: ",err);
-            })
 
         // GUARDAMOS DETALLES
         for (const detalle of detalles) {
-            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompraDetalle`, {
-                method: "POST",
+            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompraDetalle/${comprobanteID}`, {
+                method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     producto: detalle.producto,
@@ -175,38 +164,29 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
             
             
             });
-            if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
-            
-            setDetalles([initialDetalle]);
-            setComprobanteCompra(initialStateComprobanteCompra);
-            exito();
+            if (!resDetalle.ok) {
+                const errorData = await resDetalle.json();
+                alert(errorData.message); 
+                return;
+            }
         }
+            
+        setDetalles([initialDetalle]);
+        setComprobanteCompra(initialStateComprobanteCompra);
+        alert(comprobanteCompraCreado.message)
+        exito();
     }
 
     const handleDetalleChange = (index, field, value) => {
         const nuevosDetalles = [...detalles];
-        nuevosDetalles[index][field] = field === "cantidad" ? parseFloat(value) : value;
-        
-        const prod = productos.find(p => p._id === nuevosDetalles[index].producto);
+        const detalle = nuevosDetalles[index];
 
-        if (prod) {
-            if(prod.precioCosto){
-                const ganancia = prod.ganancia;
-                const precio = prod.precioCosto + ((prod.precioCosto * ganancia) / 100);
+        // Actualizamos el campo directamente
+        detalle[field] = field === "cantidad" ? parseFloat(value) : value;
 
-                nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
-            }
-            if(!prod.precioCosto && prod.precioVenta){
-                const precio = prod.precioVenta;
-
-                nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
-            }
-
-        } else {
-            nuevosDetalles[index].precio = 0;
-            nuevosDetalles[index].importe = 0;
+        // Si cambió la cantidad → SOLO recalcular importe
+        if (field === "cantidad") {
+            detalle.importe = detalle.precio * detalle.cantidad;
         }
 
         setDetalles(nuevosDetalles);
@@ -278,7 +258,7 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
     const opciones_productos = productos
         .map(v => ({
             value: v._id,
-            label: v.name,
+            label: `${v._id} - ${v.name}`,
             stock: v.stock,
             tipoProducto: v.tipoProducto
         }));
@@ -323,21 +303,6 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
                 </div>
             )}
 
-            {/* {mostrarModalCreate3 && (
-                <div className="modal">
-                <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate3(false)}>&times;</button>
-                    <FormularioClienteCreate
-                    exito={() => {
-                        setMostrarModalCreate3(false);
-                        fetchData_Clientes();
-                    }}
-                    />
-                </div>
-                </div>
-            )} */}
-
-
             <div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
@@ -361,6 +326,7 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
                                 name='proveedor'
                                 placeholder="Proveedor..."
                                 isClearable
+                                isDisabled={true}
                                 styles={{
                                     container: (base) => ({
                                     ...base,
@@ -413,6 +379,7 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
                                 name='ordenCompra'
                                 placeholder="Orden de compra..."
                                 isClearable
+                                isDisabled={true}
                                 styles={{
                                     container: (base) => ({
                                     ...base,
@@ -456,10 +423,6 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
                         <div className="form-col-productos">
                             <label>
                                     Productos:
-                                    {/* <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button> */}
-                                    <button type="button" className="btn-add-producto" onClick={agregarDetalle}>
-                                        + Agregar Producto
-                                    </button>
                             </label>
                             <div className="form-group-presupuesto">
                                 
@@ -476,6 +439,7 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
                                             }
                                             placeholder="Tipo de Producto..."
                                             isClearable
+                                            isDisabled={true}
                                             styles={{
                                                 container: (base) => ({
                                                 ...base,
@@ -525,6 +489,7 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
                                             }
                                             placeholder="Producto..."
                                             isClearable
+                                            isDisabled={true}
                                             styles={{
                                                 container: (base) => ({
                                                 ...base,
@@ -617,7 +582,7 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
                                     className="submit-btn"
                                     onClick={(e) => {
                                         if (!puedeGuardar) {
-                                        alert("No se puede guardar un comprobante de compra sin al menos un producto con cantidad.");
+                                        alert("❌ No se puede guardar un comprobante de compra sin al menos un producto con cantidad.");
                                         e.preventDefault();
                                         return;
                                         }

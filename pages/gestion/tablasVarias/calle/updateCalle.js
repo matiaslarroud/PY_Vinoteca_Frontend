@@ -59,9 +59,13 @@ const updateCalle = ({calleID , exito}) => {
             }
         )
             .then((a) => {return a.json()})
-                .then((s) => { 
-                    console.log(s.message) 
-                    exito();
+                .then((s) => {
+                    if(s.ok){
+                        alert(s.message)
+                        exito();
+                    } else{
+                        alert(s.message)
+                    }
                 })
 
     }

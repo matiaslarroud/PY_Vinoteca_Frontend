@@ -78,11 +78,15 @@ const indexVinoTipo = () => {
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
-                fetchData()
-                console.log(res.message);
+                if(res.ok) {
+                    alert(res.message)
+                    fetchData()
+                } else {
+                    alert(res.message)
+                }
             })
             .catch((err)=>{
-                console.log("Error al enviar tipo de vino para su eliminacion. \n ERROR: ",err);
+                console.log("❌ Error al enviar tipo de vino para su eliminacion. \n ERROR: ",err);
             })
     }
 

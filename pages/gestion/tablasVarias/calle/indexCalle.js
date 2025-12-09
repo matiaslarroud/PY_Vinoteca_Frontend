@@ -86,7 +86,7 @@ const indexCalle = () => {
 
     const deleteCalle = async(calleID) => {
         if(!calleID) {
-            console.log("Error con el ID de la calle al querer eliminarla.")
+            console.log("❌ Error con el ID de la calle al querer eliminarla.")
             return
         }
         const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
@@ -99,11 +99,15 @@ const indexCalle = () => {
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
-                fetchData()
-                console.log(res.message);
+                if(res.ok){
+                    alert(res.message)
+                    fetchData();
+                } else{
+                    alert(res.message)
+                }
             })
             .catch((err)=>{
-                console.log("Error al enviar calle para su eliminacion. \n ERROR: ",err);
+                console.log("❌ Error al enviar calle para su eliminacion. \n ERROR: ",err);
             })
     }
 

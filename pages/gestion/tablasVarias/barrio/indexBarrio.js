@@ -86,7 +86,7 @@ const indexBarrio = () => {
 
     const deleteBarrio = async(barrioID) => {
         if(!barrioID) {
-            console.log("Error con el ID del barrio al querer eliminarlo.")
+            console.log("❌ Error con el ID del barrio al querer eliminarlo.")
             return
             
         }
@@ -100,11 +100,15 @@ const indexBarrio = () => {
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
-                fetchData()
-                console.log(res.message);
+                if(res.ok){
+                    alert(res.message);
+                    fetchData()
+                } else {
+                    alert(res.message)
+                }
             })
             .catch((err)=>{
-                console.log("Error al enviar barrio para su eliminacion. \n ERROR: ",err);
+                console.log("❌ Error al enviar barrio para su eliminacion. \n ERROR: ",err);
             })
     }
 

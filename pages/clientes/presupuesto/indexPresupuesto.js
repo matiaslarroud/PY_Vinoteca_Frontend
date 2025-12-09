@@ -73,7 +73,7 @@ const indexPresupuesto = () => {
 
     const deletePresupuesto = async (presupuestoID) => {
         if (!presupuestoID) {
-            console.error("Error con el ID del presupuesto al querer eliminarlo.");
+            console.error("❌ Error con el ID del presupuesto al querer eliminarlo.");
             return;
         }
 
@@ -89,18 +89,15 @@ const indexPresupuesto = () => {
             const data = await response.json();
 
             if (!response.ok || !data.ok) {
-                alert(data.message || "No se pudo eliminar el presupuesto.");
-                console.warn("Error al eliminar presupuesto:", data);
+                alert(data.message);
                 return;
             }
 
-            alert(data.message || "Presupuesto eliminado correctamente.");
+            alert(data.message);
             fetchData();
-            console.log(data.message);
 
         } catch (err) {
-            console.error("Error al enviar presupuesto para su eliminación:", err);
-            alert("Ocurrió un error al intentar eliminar el presupuesto.");
+            alert("❌ Ocurrió un error al intentar eliminar el presupuesto. \nERROR:",err);
         }
     };
 
@@ -116,7 +113,10 @@ const indexPresupuesto = () => {
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto/imprimir/${presupuestoID}`
             );
 
-            if (!res.ok) throw new Error("No se pudo generar el PDF");
+            if (!res.ok) {
+                alert("❌ No se pudo generar el PDF")
+                return
+            };
 
             // 📌 Convertir respuesta en blob (PDF)
             const blob = await res.blob();
@@ -132,7 +132,7 @@ const indexPresupuesto = () => {
             // win.print();
 
         } catch (err) {
-            console.error("Error al imprimir presupuesto:", err);
+            console.error("❌ Error al imprimir presupuesto:", err);
         }
     };
 
@@ -206,7 +206,7 @@ const indexPresupuesto = () => {
                         setPresupuestos(resultados);
                         setmostrarBusqueda(false);
                     } else {
-                        alert("No se encontraron resultados");
+                        alert("❌ No se encontraron resultados");
                     }
                     }}
                     onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)} // ✅ manejamos los cambios desde el hijo
@@ -294,7 +294,7 @@ const indexPresupuesto = () => {
                         <tbody>
                             {
                                 
-                                presupuestosFiltrados.map(({_id,cliente , fecha, total}) => {
+                                presupuestosFiltrados.map(({_id,cliente , fecha, total , tieneNotaPedido}) => {
                                     const clienteEncontrado = clientes[cliente];
 
                                     return <tr key={_id}>
@@ -307,7 +307,14 @@ const indexPresupuesto = () => {
                                                 <button onClick={() => setmostrarPedidoCreate(_id)} className="btn-icon" title="Generar Pedido">
                                                     <FaShoppingCart />
                                                 </button>
-                                                <button onClick={() => setMostrarModalUpdate(_id)} className="btn-icon" title="Modificar">
+                                                <button onClick={() => {
+                                                    if(tieneNotaPedido){
+                                                        alert("❌ Este presupuesto ya esta en una Nota de Pedido y no puede modificarse")
+                                                        return
+                                                    }
+                                                    setMostrarModalUpdate(_id)
+                                                    }} 
+                                                    className="btn-icon" title="Modificar">
                                                     <FaEdit />
                                                 </button>
                                                 <button onClick={() => imprimirPresupuesto(_id)}  className="btn-icon" title="Imprimir">

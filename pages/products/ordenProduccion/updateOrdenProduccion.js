@@ -123,7 +123,17 @@ const updateOrden = ({exito , ordenID}) => {
         )
 
         const ordenCreada = await resOrdenProduccion.json();
+
+        if(!ordenCreada.ok){
+            alert(ordenCreada.message)
+            return
+        }
         const identificador = ordenCreada.data._id;
+
+        if(!identificador){
+            alert("❌ Error al generar detalles de orden .")
+            return
+        }
 
         await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/ordenProduccionDetalle/${identificador}`,
             {
@@ -134,10 +144,13 @@ const updateOrden = ({exito , ordenID}) => {
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
-                console.log(res.message);
+                if(!res.ok) {
+                    alert(res.message)
+                    return
+                }
             })
             .catch((err)=>{
-                console.log("Error al enviar detalle para su eliminación. \n Error: ",err);
+                console.log("❌ Error al enviar detalle para su eliminación. \n Error: ",err);
             })
 
         // GUARDAMOS DETALLES
@@ -152,10 +165,15 @@ const updateOrden = ({exito , ordenID}) => {
             })
                 });
             
-            if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
+            if (!resDetalle.ok) {
+                const errorData = await resDetalle.json();
+                alert(errorData.message); 
+                return;
+            }
         }
         setDetalles([initialStateDetalle]);
         setOrdenProducion(initialState);
+        alert(ordenCreada.message)
         exito();
     }
 
@@ -383,7 +401,7 @@ const updateOrden = ({exito , ordenID}) => {
                                     className="submit-btn"
                                     onClick={(e) => {
                                         if (!puedeGuardar) {
-                                        alert("No se puede guardar una orden de produccion sin al menos una picada con cantidad.");
+                                        alert("❌ No se puede guardar una orden de produccion sin al menos una picada.");
                                         e.preventDefault();
                                         return;
                                         }

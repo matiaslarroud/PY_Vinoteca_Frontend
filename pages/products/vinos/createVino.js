@@ -22,6 +22,9 @@ const formProducto = ({exito}) => {
     const [depositos, setDepositos] = useState([]);
     const [imagenes, setImagenes] = useState([]);
     
+    const detallesValidos = detalles.filter(d => d.uva);
+    const puedeGuardar = detallesValidos.length > 0;
+    
     const fetchBodegas = ()=>{
         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/bodega`)
             .then((a)=>{return a.json()})
@@ -97,6 +100,7 @@ const formProducto = ({exito}) => {
     }
     
     useEffect(() => {
+        setDetalles([])
         fetchBodegas();
         fetchParajes();
         fetchCrianzas();
@@ -106,8 +110,7 @@ const formProducto = ({exito}) => {
         fetchVolumenes();
         fetchDepositos();
         fetchProveedores();
-    }, []);
-
+    }, []); 
     
     const inputChange = (e) => {
         const value = e.target.value;
@@ -157,12 +160,12 @@ const formProducto = ({exito}) => {
             const data = await res.json();
 
             if (!data.ok) {
-                console.log("Error en backend:", data);
+                alert(data.message)
                 return;
             }
 
         } catch (err) {
-            console.log("Error subiendo imágenes:", err);
+            console.log("❌ Error subiendo imágenes:", err);
         }
     };
 
@@ -185,7 +188,7 @@ const formProducto = ({exito}) => {
 
         if(product.stockMinimo){
             bodyData.stockMinimo = product.stockMinimo;
-        }
+        } 
 
         const resVino = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productVino`, {
             method: 'POST',
@@ -194,6 +197,10 @@ const formProducto = ({exito}) => {
         })
 
         const vinoCreado = await resVino.json();
+        if(!vinoCreado.ok){
+            alert(vinoCreado.message)
+            return
+        }
         const vinoID = vinoCreado.data?._id;
         
         if (imagenes.length > 0) {
@@ -212,12 +219,17 @@ const formProducto = ({exito}) => {
             
             
             });
-            if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
+            if (!resDetalle.ok) {
+                const errorData = await resDetalle.json();
+                alert(errorData.message); 
+                return;
+            }
             
         }
         
         setDetalles([initialDetalle]);
         setProduct(initialState);
+        alert(vinoCreado.message)
         exito();
     }
 
@@ -772,6 +784,11 @@ const formProducto = ({exito}) => {
                                 type="submit"
                                 className="submit-btn"
                                 onClick={(e) => {
+                                    if (!puedeGuardar) {
+                                        alert("❌ No se puede cargar un vino sin al menos una uva seleccionada.");
+                                        e.preventDefault();
+                                        return;
+                                    }
                                     clickChange(e);
                                 }}
                                 >

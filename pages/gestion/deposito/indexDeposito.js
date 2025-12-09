@@ -128,7 +128,7 @@ const indexDeposito = () => {
 
     const deleteDeposito = async(depositoID) => {
         if(!depositoID) {
-            console.log("Error con el ID del deposito al querer eliminarlo.")
+            console.log("❌ Error con el ID del deposito al querer eliminarlo.")
             return
         }
         const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
@@ -141,11 +141,15 @@ const indexDeposito = () => {
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
-                fetchData()
-                console.log(res.message);
+                if(res.ok) {
+                    alert(res.message)
+                    fetchData()
+                } else {
+                    alert(res.message)
+                }        
             })
             .catch((err)=>{
-                console.log("Error al enviar deposito para su eliminacion. \n ERROR: ",err);
+                console.log("❌ Error al enviar deposito para su eliminacion. \n ERROR: ",err);
             })
     }
 

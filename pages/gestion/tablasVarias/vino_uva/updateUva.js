@@ -49,9 +49,14 @@ const updateUva = ({uvaID,exito}) => {
         )
             .then((a) => {return a.json()})
                 .then((s) => { 
-                    console.log(s.message) 
-                    exito();
+                    if(s.ok) {
+                        alert(s.message)
+                        exito();
+                    } else {
+                        alert(s.message)
+                    }
                 })
+                .catch((err) => {console.log('❌ Error al enviar datos. \n Error: ',err)})
 
     }
 

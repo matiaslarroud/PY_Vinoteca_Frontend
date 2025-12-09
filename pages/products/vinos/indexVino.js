@@ -117,7 +117,7 @@ const vinosFiltrados = vinos
 
     const deleteProduct = async(productID) => {
         if(!productID) {
-            console.log("Error con el ID del vino al querer eliminarlo.")
+            console.log("❌ Error con el ID del vino al querer eliminarlo.")
             return
         }
         const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
@@ -130,11 +130,15 @@ const vinosFiltrados = vinos
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
-                fetchData();
-                console.log(res.message);
+                if(res.ok){
+                    alert(res.message)
+                    fetchData();
+                } else {
+                    alert(res.message)
+                }
             })
             .catch((err)=>{
-                console.log("Error al envia vino para su eliminación. \n Error: ",err);
+                console.log("❌ Error al envia vino para su eliminación. \n Error: ",err);
             })
     }
 
@@ -217,6 +221,7 @@ const vinosFiltrados = vinos
                         <tr className="fila">
                             <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
                             <th onClick={() => toggleOrden('name')}>Nombre ⬍</th>
+                            <th onClick={() => toggleOrden('stock')}>Stock ⬍</th>
                             <th onClick={() => toggleOrden('tipo')}>Tipo ⬍</th>
                             <th onClick={() => toggleOrden('bodega')}>Bodega ⬍</th>
                             <th onClick={() => toggleOrden('proveedor')}>Proveedor ⬍</th>
@@ -226,13 +231,14 @@ const vinosFiltrados = vinos
                         </thead>
                         <tbody>
                             {
-                                vinosFiltrados.map(({_id,name , precioCosto, ganancia , bodega , tipo , proveedor}) => {
+                                vinosFiltrados.map(({_id,name , stock , precioCosto, ganancia , bodega , tipo , proveedor}) => {
                                     const bodegaEncontrada = bodegas.find((p)=>{return p._id === bodega})
                                     const tipoEncontrada = tiposV.find((p)=>{return p._id === tipo})
 
                                     return <tr key={_id}>                                        
                                         <td className="columna">{_id}</td>                     
-                                        <td className="columna">{name}</td>
+                                        <td className="columna">{name}</td>                   
+                                        <td className="columna">{stock}</td>
                                         <td className="columna">{tipoEncontrada?.name}</td>
                                         <td className="columna">{bodegaEncontrada?.name}</td>                  
                                         <td className="columna">{proveedor}</td>

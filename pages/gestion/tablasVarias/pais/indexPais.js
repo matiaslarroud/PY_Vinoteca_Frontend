@@ -62,7 +62,7 @@ const router = useRouter();
 
     const deletePais = async(paisID) => {
         if(!paisID) {
-            console.log("Error con el ID del producto al querer eliminarlo.")
+            console.log("❌ Error con el ID del producto al querer eliminarlo.")
             return
         }
         const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
@@ -75,11 +75,15 @@ const router = useRouter();
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
-                fetchData();
-                console.log(res.message);
+                if(res.ok){
+                    alert(res.message)
+                    fetchData();
+                } else {
+                    alert(res.message)
+                }
             })
             .catch((err)=>{
-                console.log("Error al enviar DELETE para pais. \n ERROR: ",err);
+                console.log("❌ Error al enviar DELETE para pais. \n ERROR: ",err);
             })
     }
 

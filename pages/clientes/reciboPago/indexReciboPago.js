@@ -123,7 +123,7 @@ const indexPedido = () => {
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/reciboPago/imprimir/${recibo}`
             );
 
-            if (!res.ok) throw new Error("No se pudo generar el PDF");
+            if (!res.ok) throw new Error("❌ No se pudo generar el PDF");
 
             // 📌 Convertir respuesta en blob (PDF)
             const blob = await res.blob();
@@ -135,14 +135,14 @@ const indexPedido = () => {
             window.open(url, "_blank");
 
         } catch (err) {
-            console.error("Error al imprimir pedido:", err);
+            console.error("❌ Error al imprimir pedido:", err);
         }
     };
 
 
     const deleteRecibo = async(recibo) => {
         if(!recibo) {
-            console.log("Error con el ID del recibo al querer eliminarlo.")
+            console.log("❌ Error con el ID del recibo al querer eliminarlo.")
             return
         }
 
@@ -161,7 +161,7 @@ const indexPedido = () => {
                 fetchData();
             })
             .catch((err)=>{
-                console.log("Error al enviar recibo de pago para su eliminación. \n Error: ",err);
+                console.log("❌ Error al enviar recibo de pago para su eliminación. \n Error: ",err);
             })
     }
 

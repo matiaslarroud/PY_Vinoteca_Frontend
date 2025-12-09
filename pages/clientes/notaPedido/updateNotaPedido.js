@@ -330,6 +330,10 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
             bodyData.descuento = notaPedido.descuento;
         }
 
+        if(notaPedido.fechaEntrega===""){
+            alert("❌ Faltan completar algunos campos obligatorios.")
+            return
+        }
 
          const resNotaPedido = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido/${notaPedidoID}`,
             {
@@ -340,6 +344,10 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
         )
 
         const notaPedidoCreado = await resNotaPedido.json();
+        if(!notaPedidoCreado.ok) {
+            alert(notaPedidoCreado.message)
+            return
+        }
         const identificador = notaPedidoCreado.data._id;
 
         await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedidoDetalle/${identificador}`,
@@ -351,10 +359,13 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
-                console.log(res.message);
+                if(!res.ok){
+                    alert(res.message)
+                    return
+                }
             })
             .catch((err)=>{
-                console.log("Error al enviar producto para su eliminación. \n Error: ",err);
+                console.log("❌ Error al enviar producto para su eliminación. \n Error: ",err);
             })
 
         // GUARDAMOS DETALLES
@@ -370,7 +381,11 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                     notaPedido: notaPedidoID
             })
                 });
-            if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
+            if (!resDetalle.ok) {
+                const errData = await resDetalle.json();
+                alert(errData.message)
+                return
+            }
     
             const resStock = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/stock/${detalle.producto}`, {
                     method: 'PUT',
@@ -379,13 +394,18 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                         cantidadVendida: detalle.cantidad 
                 })
             });
-
-            if (!resStock.ok) throw new Error("Error al actualizar stock del producto");
+            
+            if (!resStock.ok) {
+                const errData = await resStock.json();
+                alert(errData.message)
+                return
+            }
         }
        
         
         setDetalles([initialDetalle]);
         setNotaPedido(initialStateNotaPedido);
+        alert(notaPedidoCreado.message)
         exito();
     }
 
@@ -1215,7 +1235,7 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                                     className="submit-btn"
                                     onClick={(e) => {
                                         if (!puedeGuardar) {
-                                        alert("No se puede guardar una nota de pedido sin al menos un producto con cantidad.");
+                                        alert("❌ No se puede guardar una nota de pedido sin al menos un producto con cantidad.");
                                         e.preventDefault();
                                         return;
                                         }

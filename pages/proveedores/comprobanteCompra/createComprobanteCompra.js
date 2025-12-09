@@ -119,59 +119,88 @@ const createComprobanteCompra = ({exito , ordenID}) => {
 
 
     const clickChange = async(e) => {
-        e.preventDefault();
-        const bodyData = {
-            total: comprobanteCompra.total,
-            ordenCompra: comprobanteCompra.ordenCompra,
-        };
+    e.preventDefault();
 
-        const resComprobanteCompra = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompra`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(bodyData)
-        })
+    const bodyData = {
+        total: comprobanteCompra.total,
+        ordenCompra: comprobanteCompra.ordenCompra,
+    };
 
-        const comprobanteCompraCreado = await resComprobanteCompra.json();
-        const comprobanteID = comprobanteCompraCreado.data._id;
+    // 1️⃣ VALIDAMOS DETALLE POR DETALLE ANTES DE CREAR NADA
+    for (const detalle of detalles) {
 
-        // GUARDAMOS DETALLES
-        for (const detalle of detalles) {
-            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompraDetalle`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    producto: detalle.producto,
-                    precio: detalle.precio,
-                    cantidad: detalle.cantidad,
-                    importe: detalle.importe,
-                    comprobanteCompra: comprobanteID
+        const resValidacion = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompraDetalle/validar`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                ordenCompra: comprobanteCompra.ordenCompra,
+                producto: detalle.producto,
+                cantidad: detalle.cantidad
             })
-            
-            
-            });
-            if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
-            
-            setDetalles([initialDetalle]);
-            setComprobanteCompra(initialStateComprobanteCompra);
-            exito();
+        });
+
+        const validation = await resValidacion.json();
+        if (!validation.ok) {
+            alert(validation.message);
+            return; // ❌ aborta si un detalle no cumple
         }
     }
 
+    // 2️⃣ SI TODO VALIDÓ BIEN → CREAMOS EL COMPROBANTE
+    const resComprobanteCompra = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompra`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bodyData)
+    });
+
+    const comprobanteCompraCreado = await resComprobanteCompra.json();
+    if (!comprobanteCompraCreado.ok) {
+        alert(comprobanteCompraCreado.message);
+        return;
+    }
+
+    const comprobanteID = comprobanteCompraCreado.data._id;
+
+    // 3️⃣ GUARDAMOS CADA DETALLE
+    for (const detalle of detalles) {
+
+        const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompraDetalle`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                producto: detalle.producto,
+                precio: detalle.precio,
+                cantidad: detalle.cantidad,
+                importe: detalle.importe,
+                comprobanteCompra: comprobanteID
+            })
+        });
+
+        const dataDetalle = await resDetalle.json();
+        if (!dataDetalle.ok) {
+            alert(dataDetalle.message);
+            return;
+        }
+    }
+
+    // 4️⃣ LIMPIAMOS ESTADO
+    setDetalles([initialDetalle]);
+    setComprobanteCompra(initialStateComprobanteCompra);
+
+    alert(comprobanteCompraCreado.message);
+    exito();
+};
+
     const handleDetalleChange = (index, field, value) => {
         const nuevosDetalles = [...detalles];
-        nuevosDetalles[index][field] = field === "cantidad" ? parseFloat(value) : value;
-        
-        const prod = productos.find(p => p._id === nuevosDetalles[index].producto);
+        const detalle = nuevosDetalles[index];
 
-        if (prod) {
-            const precio = presupuestos.find(p => p.producto === nuevosDetalles[index].producto).precio;
+        // Actualizamos el campo directamente
+        detalle[field] = field === "cantidad" ? parseFloat(value) : value;
 
-            nuevosDetalles[index].precio = precio;
-            nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
-
-        } else {
-            nuevosDetalles[index].precio = 0;
-            nuevosDetalles[index].importe = 0;
+        // Si cambió la cantidad → SOLO recalcular importe
+        if (field === "cantidad") {
+            detalle.importe = detalle.precio * detalle.cantidad;
         }
 
         setDetalles(nuevosDetalles);
@@ -243,7 +272,7 @@ const createComprobanteCompra = ({exito , ordenID}) => {
     const opciones_productos = productos
         .map(v => ({
             value: v._id,
-            label: v.name,
+            label: `${v._id} - ${v.name}`,
             stock: v.stock,
             tipoProducto: v.tipoProducto
         }));
@@ -306,7 +335,7 @@ const createComprobanteCompra = ({exito , ordenID}) => {
             <div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
-                        <h1 className="titulo-pagina">Cargar comprobantes de Compra</h1>
+                        <h1 className="titulo-pagina">Cargar Comprobante de Compra</h1>
                     </div>
                 </div>
 
@@ -423,10 +452,6 @@ const createComprobanteCompra = ({exito , ordenID}) => {
                         <div className="form-col-productos">
                             <label>
                                     Productos:
-                                    {/* <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button> */}
-                                    <button type="button" className="btn-add-producto" onClick={agregarDetalle}>
-                                        + Agregar Producto
-                                    </button>
                             </label>
                             <div className="form-group-presupuesto">
                                 
@@ -443,6 +468,7 @@ const createComprobanteCompra = ({exito , ordenID}) => {
                                             }
                                             placeholder="Tipo de Producto..."
                                             isClearable
+                                            isDisabled={true}
                                             styles={{
                                                 container: (base) => ({
                                                 ...base,
@@ -492,6 +518,7 @@ const createComprobanteCompra = ({exito , ordenID}) => {
                                             }
                                             placeholder="Producto..."
                                             isClearable
+                                            isDisabled={true}
                                             styles={{
                                                 container: (base) => ({
                                                 ...base,
@@ -584,7 +611,7 @@ const createComprobanteCompra = ({exito , ordenID}) => {
                                     className="submit-btn"
                                     onClick={(e) => {
                                         if (!puedeGuardar) {
-                                        alert("No se puede guardar un comprobante de compra sin al menos un producto con cantidad.");
+                                        alert("❌ No se puede guardar un comprobante de compra sin al menos un producto con cantidad.");
                                         e.preventDefault();
                                         return;
                                         }

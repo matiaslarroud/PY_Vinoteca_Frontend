@@ -108,30 +108,6 @@ const initialStateComprobanteCompra = {
         fetchData_Proveedores();
     }, [] )
 
-
-    const deleteComprobante = async(comprobanteID) => {
-        if(!comprobanteID) {
-            console.log("Error con el ID del comprobante de compra al querer eliminarlo.")
-            return
-        }
-        const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompra/${comprobanteID}`,
-            {
-                method:'DELETE',
-                headers: {
-                    'Content-Type':'application/json',
-                }
-            }
-        ).then((a)=>{return a.json()})
-            .then((res)=>{
-                fetchData();
-                console.log(res.message);
-            })
-            .catch((err)=>{
-                console.log("Error al enviar comprobante de compra para su eliminación. \n Error: ",err);
-            })
-    }
-
     return(
         <>
             {mostrarModalCreate && (
@@ -308,7 +284,7 @@ const initialStateComprobanteCompra = {
                                                     title={tieneRemito ? "Ya existe un remito de este comprobante, no se puede generar uno nuevo." : "Generar remito"}
                                                     onClick={() => {
                                                         if (tieneRemito) {
-                                                        alert("Este comprobante de compra ya se encuentra en un remito y no se puede generar uno nuevo.");
+                                                        alert("❌ Este comprobante de compra ya se encuentra en un remito y no se puede generar uno nuevo.");
                                                         return;
                                                         }
                                                         setMostrarModalRemito(_id);
@@ -327,7 +303,7 @@ const initialStateComprobanteCompra = {
                                                     title={tieneRemito ? "Ya existe un remito de este comprobante, no se puede modificar." : "Modificar"}
                                                     onClick={() => {
                                                         if (tieneRemito) {
-                                                        alert("Este comprobante de compra ya se encuentra en un remito y no se puede modificar.");
+                                                        alert("❌ Este comprobante de compra ya se encuentra en un remito y no se puede modificar.");
                                                         return;
                                                         }
                                                         setMostrarModalUpdate(_id);

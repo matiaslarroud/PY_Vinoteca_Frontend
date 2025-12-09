@@ -56,15 +56,13 @@ const newReciboPago = ({exito}) => {
 
         if(!reciboCreado.ok){
             alert(reciboCreado.message)
-            console.log("Error con el envio de datos.")
             return
         }
 
         setRecibo(initialStateRecibo);
+        alert(reciboCreado.message)
         exito();
     }
-  
-
     
     const selectChange = (selectedOption, actionMeta) => {
         const name = actionMeta.name;

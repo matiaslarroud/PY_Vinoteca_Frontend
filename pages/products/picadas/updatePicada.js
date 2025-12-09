@@ -122,12 +122,12 @@ const updatePicada = ({exito , picadaID}) => {
             const data = await res.json();
 
             if (!data.ok) {
-                console.log("Error en backend:", data);
+                alert(data.message)
                 return;
             }
 
         } catch (err) {
-            console.log("Error subiendo imágenes:", err);
+            console.log("❌ Error subiendo imágenes:", err);
         }
     };
 
@@ -142,7 +142,7 @@ const updatePicada = ({exito , picadaID}) => {
             if (data.ok) {
                 setImagenesActuales(prev => prev.filter(img => img._id !== fotoID));
             } else {
-                console.log("Error eliminando imagen", data);
+               alert(data.message)
             }
         } catch (err) {
             console.log("Error:", err);
@@ -167,13 +167,11 @@ const updatePicada = ({exito , picadaID}) => {
                 body: JSON.stringify(bodyData)
             }
         )
-            
-        if (!resPicada.ok) {
-            alert(resPicada.message)
-            return
-        };
-
         const picadaCreada = await resPicada.json();
+        if(!picadaCreada.ok) {
+            alert(picadaCreada.message)
+            return
+        }
         const identificador = picadaCreada.data._id;
 
         if (imagenes.length > 0) {
@@ -189,10 +187,13 @@ const updatePicada = ({exito , picadaID}) => {
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
-                console.log(res.message);
+                if(!res.ok){
+                    alert(res.message)
+                    return
+                }
             })
             .catch((err)=>{
-                console.log("Error al envia detalles de picada para su eliminación. \n Error: ",err);
+                console.log("❌ Error al envia detalles de picada para su eliminación. \n Error: ",err);
             })
 
 
@@ -212,12 +213,14 @@ const updatePicada = ({exito , picadaID}) => {
             
             
         if (!resDetalle.ok) {
-            alert(resDetalle.message)
+            const errData = await resDetalle.json();
+            alert(errData.message)
             return
         };
         }
         setDetalles([initialStateDetalle]);
         setPicada(initialState);
+        alert(picadaCreada.message)
         exito();
     }
 

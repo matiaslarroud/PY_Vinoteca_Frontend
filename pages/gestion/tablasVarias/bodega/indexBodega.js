@@ -69,7 +69,7 @@ const indexBodega = () => {
 
     const deleteBodega = async(bodegaID) => {
         if(!bodegaID) {
-            console.log("Error con el ID de la bodega al querer eliminarlo.")
+            alert("❌ Error con el ID de la bodega al querer eliminarlo.")
             return
         }
         const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
@@ -82,11 +82,15 @@ const indexBodega = () => {
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
-                fetchData();
-                console.log(res.message);
+                if(res.ok){
+                    alert(res.message)
+                    fetchData();
+                } else {
+                    alert(res.message)
+                }
             })
             .catch((err)=>{
-                console.log("Error al enviar bodega para su eliminación. \n Error: ",err);
+                console.log("❌ Error al enviar bodega para su eliminación. \n Error: ",err);
             })
     }
 

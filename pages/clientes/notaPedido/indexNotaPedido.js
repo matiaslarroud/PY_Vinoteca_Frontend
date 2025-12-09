@@ -109,7 +109,7 @@ const indexPedido = () => {
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido/imprimir/${pedidoID}`
             );
 
-            if (!res.ok) throw new Error("No se pudo generar el PDF");
+            if (!res.ok) throw new Error("❌ No se pudo generar el PDF");
 
             // 📌 Convertir respuesta en blob (PDF)
             const blob = await res.blob();
@@ -121,14 +121,14 @@ const indexPedido = () => {
             window.open(url, "_blank");
 
         } catch (err) {
-            console.error("Error al imprimir pedido:", err);
+            console.error("❌ Error al imprimir pedido:", err);
         }
     };
 
 
     const deletePedido = async (pedidoID) => {
         if (!pedidoID) {
-            console.error("Error con el ID del pedido al querer eliminarlo.");
+            console.error("❌ Error con el ID del pedido al querer eliminarlo.");
             return;
         }
 
@@ -144,18 +144,15 @@ const indexPedido = () => {
             const data = await response.json();
 
             if (!response.ok || !data.ok) {
-                alert(data.message || "No se pudo eliminar la nota de pedido.");
-                console.warn("Error al eliminar nota de pedido:", data);
+                alert(data.message);
                 return;
             }
 
-            alert(data.message || "Nota de pedido eliminada correctamente.");
-            fetchData(); // recarga la lista
-            console.log(data.message);
+            alert(data.message);
+            fetchData(); 
 
         } catch (err) {
-            console.error("Error al enviar nota de pedido para su eliminación:", err);
-            alert("Ocurrió un error al intentar eliminar la nota de pedido.");
+            alert("❌ Ocurrió un error al intentar eliminar la nota de pedido.\nERROR:",err);
         }
     };
 
@@ -276,7 +273,7 @@ const indexPedido = () => {
                         setPedidos(resultados);
                         setmostrarBusqueda(false);
                     } else {
-                        alert("No se encontraron resultados");
+                        alert("❌ No se encontraron resultados");
                     }
                     }}
                     onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)} // ✅ manejamos los cambios desde el hijo
@@ -347,7 +344,7 @@ const indexPedido = () => {
                                                 </button>
                                                 <button   className="btn-icon" title="Generar comprobante de venta" onClick={() => {
                                                         if (facturado) {
-                                                        alert("Este pedido ya fue facturado y no se puede modificar.");
+                                                        alert("❌ Este pedido ya fue facturado.");
                                                         return;
                                                         }
                                                         setMostrarModalComprobanteVenta(_id);
@@ -361,7 +358,7 @@ const indexPedido = () => {
                                                 <button className="btn-icon" title={facturado ? "Ya facturado, no se puede modificar" : "Modificar"}
                                                     onClick={() => {
                                                         if (facturado) {
-                                                        alert("Este pedido ya fue facturado y no se puede modificar.");
+                                                        alert("❌ Este pedido ya fue facturado y no se puede modificar.");
                                                         return;
                                                         }
                                                         setMostrarModalUpdate(_id);

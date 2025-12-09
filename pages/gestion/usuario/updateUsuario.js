@@ -14,6 +14,7 @@ const updateUsuario = ({ exito , usuarioID }) => {
   const roles = [
     { value: "vendedor", label: "Vendedor" },
     { value: "administrador", label: "Administrador" },
+    { value: "cliente", label: "Cliente" },
   ];
 
   const inputChange = (e) => {
@@ -54,7 +55,7 @@ const updateUsuario = ({ exito , usuarioID }) => {
     e.preventDefault();
 
     if (usuario.password !== usuario.password2) {
-      alert("Las contraseñas no coinciden");
+      alert("❌ Las contraseñas no coinciden");
       return;
     }
 
@@ -72,14 +73,14 @@ const updateUsuario = ({ exito , usuarioID }) => {
       const data = await res.json();
 
       if (data.ok) {
-        console.log("Usuario creado exitosamente");
         setUsuario(initialState);
+        alert(data.message)
         exito();
       } else {
-        alert("Error al crear el usuario");
+        alert(data.message);
       }
     } catch (err) {
-      console.error("Error al enviar datos:", err);
+      console.error("❌ Error al enviar datos:", err);
     }
   };
 

@@ -82,11 +82,14 @@ const newComprobantepago = ({exito}) => {
         const comprobanteCreado = await resComprobante.json();
 
         if(!comprobanteCreado.ok){
-            console.log("Error con el envio de datos.")
+            alert(comprobanteCreado.message)
             return
         }
 
+        setComprobantePago(initialStateComprobante);
+        alert(comprobanteCreado.message);
         exito();
+
     }
   
 

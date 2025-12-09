@@ -139,7 +139,16 @@ const updatePresupuesto = ({exito,solicitudID}) => {
         )
 
         const solicitudCreada = await resPresupuesto.json();
+        if(!solicitudCreada.ok){
+            alert(solicitudCreada.message)
+            return
+        }
+
         const identificador = solicitudCreada.data._id;
+        if(!identificador){
+            alert("❌ Error al agregar solicitud de presupuesto.")
+            return
+        }
 
         await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuestoDetalle/${identificador}`,
             {
@@ -169,10 +178,15 @@ const updatePresupuesto = ({exito,solicitudID}) => {
             })
         });
             
-            if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
+            if (!resDetalle.ok) {
+                const errorData = await resDetalle.json();
+                alert(errorData.message); 
+                return;
+            }
         }
         setDetalles([initialDetalle]);
         setPresupuesto(initialStatePresupuesto);
+        alert(solicitudCreada.message)
         exito();
     }
     
@@ -473,7 +487,7 @@ const updatePresupuesto = ({exito,solicitudID}) => {
                                     className="submit-btn"
                                     onClick={(e) => {
                                         if (!puedeGuardar) {
-                                        alert("No se puede guardar una solicitud presupuesto sin al menos un producto con cantidad.");
+                                        alert("❌ No se puede guardar una solicitud presupuesto sin al menos un producto con cantidad.");
                                         e.preventDefault();
                                         return;
                                         }

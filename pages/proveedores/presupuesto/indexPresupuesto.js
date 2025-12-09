@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaShoppingCart , FaHome, FaArrowLeft, FaEye, FaEdit , FaPrint , FaSearch } from "react-icons/fa";
+import { FaPlus, FaShoppingCart , FaHome, FaTrash , FaArrowLeft, FaEye, FaEdit , FaPrint , FaSearch } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import FormularioPresupuestoUpdate from './updatePresupuesto'
 import FormularioPresupuestoCreate from './newPresupuesto'
@@ -85,7 +85,7 @@ const indexPresupuesto = () => {
 
     const deletePresupuesto = async(presupuestoID) => {
         if(!presupuestoID) {
-            console.log("Error con el ID del presupuesto al querer eliminarlo.")
+            console.log("❌ Error con el ID del presupuesto al querer eliminarlo.")
             return
         }
         const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
@@ -98,11 +98,15 @@ const indexPresupuesto = () => {
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
-                fetchData();
-                console.log(res.message);
+                if(res.ok){
+                    alert(res.message);
+                    fetchData();
+                } else {
+                    alert(res.message);
+                }
             })
             .catch((err)=>{
-                console.log("Error al enviar presupuesto para su eliminación. \n Error: ",err);
+                console.log("❌ Error al enviar presupuesto para su eliminación. \n Error: ",err);
             })
     }
 
@@ -173,7 +177,7 @@ const indexPresupuesto = () => {
                         setPresupuestos(resultados);
                         setMostrarModalBuscar(false);
                     } else {
-                        alert("No se encontraron resultados");
+                        alert("❌ No se encontraron resultados");
                     }
                     }}
                     onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)} // ✅ manejamos los cambios desde el hijo
@@ -297,6 +301,9 @@ const indexPresupuesto = () => {
                                                 </button>
                                                 <button onClick={() => imprimirPresupuesto(_id)}  className="btn-icon" title="Imprimir">
                                                     <FaPrint />
+                                                </button>
+                                                <button onClick={() => deletePresupuesto(_id)}  className="btn-icon" title="Eliminar">
+                                                    <FaTrash />
                                                 </button>
                                             </div>
                                         </td>

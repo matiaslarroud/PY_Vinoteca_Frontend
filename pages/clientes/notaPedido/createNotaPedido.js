@@ -245,6 +245,11 @@ const createNotaPedido = ({exito , param , tipo}) => {
             bodyData.deptoLetra = notaPedido.deptoLetra;
         }
 
+        if(notaPedido.fechaEntrega===""){
+            alert("❌ Faltan completar algunos campos obligatorios.")
+            return
+        }
+
         const resNotaPedido = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -252,6 +257,10 @@ const createNotaPedido = ({exito , param , tipo}) => {
         })
 
         const notaPedidoCreado = await resNotaPedido.json();
+        if(!notaPedidoCreado.ok) {
+            alert(notaPedidoCreado.message)
+            return
+        }
         const notaPedidoID = notaPedidoCreado.data._id;
 
         // GUARDAMOS DETALLES
@@ -269,7 +278,11 @@ const createNotaPedido = ({exito , param , tipo}) => {
             
             
             });
-            if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
+            if (!resDetalle.ok) {
+                const errorData = await resDetalle.json();
+                alert(errorData.message)
+                return
+            }
         
             const resStock = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/stock/${detalle.producto}`, {
                     method: 'PUT',
@@ -279,10 +292,16 @@ const createNotaPedido = ({exito , param , tipo}) => {
                 })
             });
 
-            if (!resStock.ok) throw new Error("Error al actualizar stock del producto");
+            
+            if (!resStock.ok) {
+                const errorData = await resStock.json();
+                alert(errorData.message)
+                return
+            }
             
             setDetalles([initialDetalle]);
             setNotaPedido(initialStateNotaPedido);
+            alert(notaPedidoCreado.message)
             exito();
         }
     }
@@ -1134,14 +1153,14 @@ const createNotaPedido = ({exito , param , tipo}) => {
                                     className="submit-btn"
                                     onClick={(e) => {
                                         if (!puedeGuardar) {
-                                        alert("No se puede guardar una nota de pedido sin al menos un producto con cantidad.");
+                                        alert("❌ No se puede guardar una nota de pedido sin al menos un producto con cantidad.");
                                         e.preventDefault();
                                         return;
                                         }
                                         clickChange(e);
                                     }}
                                     >
-                                    Cargar Pedido
+                                    Cargar
                                     </button>
                                 </div>
                             </div>

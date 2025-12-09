@@ -90,7 +90,7 @@ useEffect(() => {
 
 const deleteCliente = async (clienteID) => {
   if (!clienteID) {
-    console.error("Error con el ID del cliente al querer eliminarlo.");
+    console.error("❌ Error con el ID del cliente al querer eliminarlo.");
     return;
   }
 
@@ -101,23 +101,19 @@ const deleteCliente = async (clienteID) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente/${clienteID}`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-    });
+    })
+    .then((a)=>a.json())
+      .then((s)=>{
+        if(s.ok) {
+          alert(s.message);
+          fetchData();
+        }  else {
+          alert(s.message);
+        }
+      })
 
-    const data = await response.json();
-
-    if (!response.ok || !data.ok) {
-      alert(data.message || "No se pudo eliminar el cliente.");
-      console.warn("Error al eliminar cliente:", data);
-      return;
-    }
-
-    alert(data.message || "Cliente eliminado correctamente.");
-    fetchData(); // recarga la lista
-    console.log(data.message);
-
-  } catch (err) {
-    console.error("Error al enviar cliente para su eliminación:", err);
-    alert("Ocurrió un error al intentar eliminar el cliente.");
+    } catch (err) {
+    console.error("❌ Error al enviar cliente para su eliminación:", err);
   }
 };
 

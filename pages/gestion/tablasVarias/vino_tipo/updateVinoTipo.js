@@ -49,8 +49,13 @@ const updateVinoTipo = ({vinoTipoID , exito}) => {
         )
             .then((a) => {return a.json()})
                 .then((s) => { 
-                    console.log(s.message) 
-                    exito()
+                    if(s.ok) {
+                        alert(s.message)
+                        exito()
+                    } else {
+                        alert(s.message)
+                    }
+                    
                 })
 
     }

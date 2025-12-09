@@ -167,6 +167,10 @@ const createPresupuesto = ({exito , tipo , param}) => {
         )
 
         const presupuestoCreado = await resPresupuesto.json();
+        if(!presupuestoCreado.ok){
+            alert(presupuestoCreado.message)
+            return
+        }
         const presupuestoID = presupuestoCreado.data._id;
 
         // GUARDAMOS DETALLES
@@ -182,10 +186,16 @@ const createPresupuesto = ({exito , tipo , param}) => {
                     presupuesto: presupuestoID
             })});
             
-            if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
+            
+            if (!resDetalle.ok) {
+                const errorData = await resDetalle.json();
+                alert(errorData.message); 
+                return;
+            }
         }
         setDetalles([initialDetalle]);
         setPresupuesto(initialStatePresupuesto);
+        alert(presupuestoCreado.message);
         exito();
     }
 
@@ -770,7 +780,7 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                                     className="submit-btn"
                                     onClick={(e) => {
                                         if (!puedeGuardar) {
-                                        alert("No se puede guardar un presupuesto sin al menos un producto con cantidad.");
+                                        alert("❌ No se puede guardar un presupuesto sin al menos un producto con cantidad.");
                                         e.preventDefault();
                                         return;
                                         }

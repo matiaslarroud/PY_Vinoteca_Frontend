@@ -17,34 +17,6 @@ const createRemito = ({exito , param , tipo}) => {
     const [comprobantesCompra, setComprobantesCompra] = useState([]);
     const [tipoProductos,setTipoProductos] = useState([]);
 
-    const handleDetalleChange = (index, field, value) => {
-        const nuevosDetalles = [...detalles];
-        nuevosDetalles[index][field] = field === "cantidad" ? parseFloat(value) : value;
-        
-        const prod = productos.find(p => p._id === nuevosDetalles[index].producto);
-
-        if (prod) {
-            if (prod.precioCosto) {
-                const ganancia = prod.ganancia;
-                const precio = prod.precioCosto + ((prod.precioCosto * ganancia) / 100);
-
-                nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
-            } else if (prod.precioVenta) {
-                const precio = prod.precioVenta;
-                nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
-            }
-        } else {
-            nuevosDetalles[index].precio = 0;
-            nuevosDetalles[index].importe = 0;
-        }
-
-        setDetalles(nuevosDetalles);
-        calcularTotal(nuevosDetalles);
-        calcularTotalBultos(nuevosDetalles);
-    };
-
     const calcularTotalPrecio = (detalles) => {
         const totalPedido = Array.isArray(detalles) && detalles.length > 0
             ? detalles.reduce((acc, d) => acc + (d.importe || 0), 0)
@@ -175,6 +147,10 @@ const createRemito = ({exito , param , tipo}) => {
             });
             
             const remitoCreado = await res.json();
+            if(!remitoCreado.ok){
+                alert(remitoCreado.message)
+                return
+            }       
             const remitoID = remitoCreado.data._id;
 
             // GUARDAMOS DETALLES
@@ -190,15 +166,20 @@ const createRemito = ({exito , param , tipo}) => {
                 
                 
                 });
-                if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
+                if (!resDetalle.ok)  {
+                    const errorData = await resDetalle.json();
+                    alert(errorData.message); 
+                    return;
+                }
+            }
             
                 setDetalles(initialDetalle);
                 setRemito(initialState);
+                alert(remitoCreado.message)
                 exito();
-            }
         } 
         catch (err) {
-            console.log('Error al enviar datos. \n Error: ', err);
+            console.log('❌ Error al enviar datos. \n Error: ', err);
         }
     };
 
@@ -466,9 +447,6 @@ const createRemito = ({exito , param , tipo}) => {
                                             classNamePrefix="rs"
                                             options={opciones_tipoProductos}
                                             value={opciones_tipoProductos.find(op => op.value === d.tipoProducto) || null}
-                                            onChange={(selectedOption) =>
-                                                handleDetalleChange(i, "tipoProducto", selectedOption ? selectedOption.value : "")
-                                            }
                                             placeholder="Tipo de Producto..."
                                             isClearable
                                             isDisabled={true}
@@ -516,9 +494,6 @@ const createRemito = ({exito , param , tipo}) => {
                                             classNamePrefix="rs"
                                             options={opciones_productos.filter(op => op.tipoProducto === d.tipoProducto)}
                                             value={opciones_productos.find(op => op.value === d.producto) || null}
-                                            onChange={(selectedOption) =>
-                                                handleDetalleChange(i, "producto", selectedOption ? selectedOption.value : "")
-                                            }
                                             placeholder="Producto..."
                                             isClearable
                                             isDisabled={true}
@@ -567,7 +542,6 @@ const createRemito = ({exito , param , tipo}) => {
                                             placeholder="Cantidad"
                                             value={d.cantidad}
                                             disabled={true}
-                                            onChange={(e) => handleDetalleChange(i, "cantidad", e.target.value)}
                                             required
                                         />
                                     </div>

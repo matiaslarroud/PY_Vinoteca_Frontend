@@ -112,7 +112,7 @@ const busquedaSolicitud = ({ exito, filtro, onChangeFiltro , filtroDetalle , onC
         if (data.ok){
             exito(data.data);
         } else {
-            exito({})
+            alert(data.message)
         }
     };
     

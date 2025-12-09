@@ -66,7 +66,7 @@ const indexVarietal = () => {
 
     const deleteVarietal = async(varietalID) => {
         if(!varietalID) {
-            console.log("Error con el ID al querer eliminarlo.")
+            console.log("❌ Error con el ID al querer eliminarlo.")
             return
         }
         const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
@@ -79,11 +79,15 @@ const indexVarietal = () => {
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
-                fetchData()
-                console.log(res.message);
+                if(res.ok) {
+                    alert(res.message)
+                    fetchData()
+                } else {
+                    alert(res.message)
+                }
             })
             .catch((err)=>{
-                console.log("Error al eliminar. \n ERROR: ",err);
+                console.log("❌ Error al eliminar. \n ERROR: ",err);
             })
     }
 

@@ -46,7 +46,10 @@ const formCalle = ({exito}) => {
                     .then((s) => {
                             if(s.ok){
                                 setCalle(initialState);
+                                alert(s.message)
                                 exito();
+                            } else{
+                                alert(s.message)
                             }
                         })
                 .catch((err) => {console.log('Error al enviar datos. \n Error: ',err)})

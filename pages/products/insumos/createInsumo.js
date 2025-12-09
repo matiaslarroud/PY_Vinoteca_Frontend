@@ -70,12 +70,12 @@ const formProducto = ({exito}) => {
             const data = await res.json();
 
             if (!data.ok) {
-                console.log("Error en backend:", data);
+                alert(data.message)
                 return;
             }
 
         } catch (err) {
-            console.log("Error subiendo imágenes:", err);
+            console.log("❌ Error subiendo imágenes:", err);
         }
     };
 
@@ -106,6 +106,7 @@ const formProducto = ({exito}) => {
             const data = await res.json();
 
             if (!data.ok) {
+                alert(data.message)
                 return;
             }
             
@@ -117,10 +118,11 @@ const formProducto = ({exito}) => {
 
             setProduct(initialState);
             setImagenes([]);
+            alert(data.message)
             exito();
 
         } catch (error) {
-            console.log("Error: ", error);
+            console.log("❌ Error: ", error);
         }
     };
 

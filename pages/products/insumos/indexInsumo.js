@@ -96,7 +96,7 @@ const indexInsumo = () => {
 
     const deleteProduct = async(productID) => {
         if(!productID) {
-            console.log("Error con el ID de la insumo al querer eliminarla.")
+            console.log("❌ Error con el ID de la insumo al querer eliminarla.")
             return
         }
             const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
@@ -109,11 +109,15 @@ const indexInsumo = () => {
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
-                fetchData();
-                console.log(res.message);
+                if(res.ok){
+                    alert(res.message)
+                    fetchData();
+                } else {
+                    alert(res.message)
+                }
             })
             .catch((err)=>{
-                console.log("Error al enviar insumo para su eliminación. \n Error: ",err);
+                console.log("❌ Error al enviar insumo para su eliminación. \n Error: ",err);
             })
     }
 
@@ -172,7 +176,7 @@ const indexInsumo = () => {
                         setInsumos(resultados);
                         setMostrarModalBuscar(false);
                     } else {
-                        alert("No se encontraron resultados");
+                        alert("❌ No se encontraron resultados");
                     }
                     }}
                     onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)} // ✅ manejamos los cambios desde el hijo

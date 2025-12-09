@@ -97,7 +97,11 @@ const buscarProveedor = ({exito, filtro, onChangeFiltro}) => {
         body: JSON.stringify(filtros),
         });
         const data = await res.json();
-        if (data.ok) {exito(data.data)};
+        if (data.ok) {
+            exito(data.data)
+        } else {
+            alert(data.message)
+        };
     }; 
     
     const selectChange = (selectedOption, actionMeta) => {

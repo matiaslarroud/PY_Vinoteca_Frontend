@@ -168,10 +168,13 @@ const fetchPaises = () => {
                     .then((data) => {
                             if(data.ok){
                                 setCliente(initialState);
+                                alert(data.message);
                                 exito();
+                            } else {
+                                alert(data.message);
                             }
                         })
-                .catch((err) => {console.log('Error al enviar datos. \n Error: ',err)})
+                .catch((err) => {console.log('❌ Error al enviar datos. \n Error: ',err)})
     }
 
     const opciones_paises = paises.map(v => ({ value: v._id,label: v.name }));

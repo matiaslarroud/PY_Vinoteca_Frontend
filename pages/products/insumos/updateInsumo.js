@@ -109,12 +109,12 @@ const updateProducto = ({exito , insumoID}) => {
             const data = await res.json();
 
             if (!data.ok) {
-                console.log("Error en backend:", data);
+                alert(data.message)
                 return;
             }
 
         } catch (err) {
-            console.log("Error subiendo imágenes:", err);
+            console.log("❌ Error subiendo imágenes:", err);
         }
     };
 
@@ -129,10 +129,11 @@ const updateProducto = ({exito , insumoID}) => {
             if (data.ok) {
                 setImagenesActuales(prev => prev.filter(img => img._id !== fotoID));
             } else {
-                console.log("Error eliminando imagen", data);
+                alert(data.message)
+                return
             }
         } catch (err) {
-            console.log("Error:", err);
+            console.log("❌ Error:", err);
         }
     };
 
@@ -162,6 +163,10 @@ const updateProducto = ({exito , insumoID}) => {
                         return a.json();
                     })
                     .then((s) => {
+                            if(!s.ok){
+                                alert(s.message)
+                                return
+                            }
                             if(s.ok){
                                 const productoID = s.data._id;
 
@@ -170,10 +175,11 @@ const updateProducto = ({exito , insumoID}) => {
                                 }
                                 setProduct(initialState);
                                 setImagenes([]);
+                                alert(s.message)
                                 exito();
                             }
                         })
-                .catch((err) => {console.log('Error al enviar datos. \n Error: ',err)})
+                .catch((err) => {console.log('❌ Error al enviar datos. \n Error: ',err)})
     }
 
 

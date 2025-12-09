@@ -227,6 +227,10 @@ const createComprobanteVenta = ({exito}) => {
         })
 
         const comprobanteVentaCreado = await resNotaComprobanteVenta.json();
+        if(!comprobanteVentaCreado.ok) {
+            alert(comprobanteVentaCreado.message)
+            return
+        }
         const comprobanteVentaID = comprobanteVentaCreado.data._id;
 
         // GUARDAMOS DETALLES
@@ -244,12 +248,17 @@ const createComprobanteVenta = ({exito}) => {
             
             
             });
-            if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
+            if (!resDetalle.ok) {
+                const errData = await resDetalle.json();
+                alert(errData.message)
+                return
+            }
         
-            setDetalles([initialDetalle]);
-            setComprobanteVenta(initialStateComprobanteVenta);
-            exito();
         }
+        setDetalles([initialDetalle]);
+        setComprobanteVenta(initialStateComprobanteVenta);
+        alert(comprobanteVentaCreado.message)
+        exito();
     }
 
     const [mostrarModalCreate1, setMostrarModalCreate1] = useState(false);
@@ -693,14 +702,14 @@ const createComprobanteVenta = ({exito}) => {
                                     className="submit-btn"
                                     onClick={(e) => {
                                         if (!puedeGuardar) {
-                                        alert("No se puede guardar un comprobante de venta sin una nota de pedido.");
+                                        alert("❌ No se puede guardar un comprobante de venta sin una nota de pedido.");
                                         e.preventDefault();
                                         return;
                                         }
                                         clickChange(e);
                                     }}
                                     >
-                                    Cargar Comprobante
+                                    Cargar
                                     </button>
                                 </div>
                             </div>

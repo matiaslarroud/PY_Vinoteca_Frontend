@@ -45,10 +45,13 @@ const formLocalidad = ({exito}) => {
                     .then((s) => {
                             if(s.ok){
                                 setLocalidad(initialState);
+                                alert(s.message)
                                 exito()
+                            } else {
+                              alert(s.message)
                             }
                         })
-                .catch((err) => {console.log('Error al enviar datos. \n Error: ',err)})
+                .catch((err) => {console.log('❌ Error al enviar datos. \n Error: ',err)})
     }
 
     return(
@@ -80,7 +83,7 @@ const formLocalidad = ({exito}) => {
                     </fieldset>
                     <div className="button-area">
                         <button type="submit" className="submit-btn" onClick={clickChange}>
-                        Cargar Localidad
+                        Cargar
                         </button>
                     </div>
                 </form>

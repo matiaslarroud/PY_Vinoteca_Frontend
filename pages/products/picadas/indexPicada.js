@@ -61,8 +61,15 @@ const indexPicada = () => {
       headers: { "Content-Type": "application/json" },
     })
       .then((res) => res.json())
-      .then(() => fetchData())
-      .catch((err) => console.error("Error al eliminar Picada:", err));
+      .then((s) => {
+          if(s.ok){
+            alert(s.message)
+            fetchData()
+          } else {
+            alert(s.message)
+          }
+      })
+      .catch((err) => console.error("❌ Error al eliminar Picada:", err));
   };
 
   const toggleOrden = (campo) => {
@@ -165,7 +172,7 @@ const indexPicada = () => {
                     setPicadas(resultados);
                     setMostrarModalBuscar(false);
                 } else {
-                    alert("No se encontraron resultados");
+                    alert("❌ No se encontraron resultados");
                 }
                 }}
                 onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)} // ✅ manejamos los cambios desde el hijo

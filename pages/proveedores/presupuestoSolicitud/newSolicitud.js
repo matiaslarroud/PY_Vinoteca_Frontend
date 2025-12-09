@@ -128,7 +128,16 @@ const fetchData_LowStockByProveedor = (proveedor) => {
         )
 
         const solicitudCreada = await resPresupuesto.json();
+        if(!solicitudCreada.ok){
+            alert(solicitudCreada.message)
+            return
+        }
+
         const identificador = solicitudCreada.data._id;
+        if(!identificador){
+            alert("❌ Error al agregar solicitud de presupuesto.")
+            return
+        }
 
         // GUARDAMOS DETALLES
         for (const detalle of detalles) {
@@ -142,11 +151,16 @@ const fetchData_LowStockByProveedor = (proveedor) => {
             })
         });
             
-        if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
+            if (!resDetalle.ok) {
+                const errorData = await resDetalle.json();
+                alert(errorData.message); 
+                return;
+            }
         }
 
         setDetalles([initialDetalle]);
         setPresupuesto(initialStatePresupuesto);
+        alert(solicitudCreada.message)
         exito();
     }
     

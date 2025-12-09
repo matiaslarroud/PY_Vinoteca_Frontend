@@ -84,7 +84,7 @@ useEffect(() => {
 
 const deleteProveedor = async(proveedorID) => {
     if(!proveedorID) {
-        console.log("Error con el ID del proveedor al querer eliminarlo.")
+        console.log("❌ Error con el ID del proveedor al querer eliminarlo.")
         return
     }
 
@@ -99,11 +99,15 @@ const deleteProveedor = async(proveedorID) => {
         }
     ).then((a)=>{return a.json()})
         .then((res)=>{
-            fetchData();
-            console.log(res.message);
+          if(res.ok){
+            alert(res.message)
+            fetchData()
+          } else {
+            alert(res.message)
+          }
         })
         .catch((err)=>{
-            console.log("Error al enviar proveedor para su eliminación. \n Error: ",err);
+            console.log("❌ Error al enviar proveedor para su eliminación. \n Error: ",err);
         })
 }
 
@@ -173,7 +177,7 @@ const deleteProveedor = async(proveedorID) => {
             setProveedores(resultados);
             setMostrarModalBuscar(false);
           } else {
-            alert("No se encontraron resultados");
+            alert("❌ No se encontraron resultados");
           }
         }}
         onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)} // ✅ manejamos los cambios desde el hijo

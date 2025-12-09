@@ -65,7 +65,7 @@ const indexCrianza = () => {
 
     const deleteCrianza = async(crianza) => {
         if(!crianza) {
-            console.log("Error con el ID de la crianza al querer eliminarla.")
+            console.log("❌ Error con el ID de la crianza al querer eliminarla.")
             return
             
         }
@@ -79,11 +79,15 @@ const indexCrianza = () => {
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
-                fetchData()
-                console.log(res.message);
+                if (res.ok) {
+                    alert(res.message)
+                    fetchData()
+                } else {
+                    alert(res.message)
+                }
             })
             .catch((err)=>{
-                console.log("Error al enviar crianza para su eliminacion. \n ERROR: ",err);
+                console.log("❌ Error al enviar crianza para su eliminacion. \n ERROR: ",err);
             })
     }
 

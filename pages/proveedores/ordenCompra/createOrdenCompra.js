@@ -169,6 +169,11 @@ const newOrdenCompra = ({exito , tipo , param}) => {
             bodyData.presupuesto = ordenCompra.presupuesto;
         }
 
+        if(ordenCompra.fechaEntrega===""){
+            alert("❌ Faltan completar algunos campos obligatorios.")
+            return
+        }
+
         const resOrdenCompra = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/ordenCompra`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -176,6 +181,10 @@ const newOrdenCompra = ({exito , tipo , param}) => {
         })
 
         const ordenCompraCreado = await resOrdenCompra.json();
+        if(!ordenCompraCreado.ok){
+            alert(ordenCompraCreado.message)
+            return
+        }
         const ordenID = ordenCompraCreado.data._id;
 
         // GUARDAMOS DETALLES
@@ -193,38 +202,28 @@ const newOrdenCompra = ({exito , tipo , param}) => {
             
             
             });
-            if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
-            
+            if (!resDetalle.ok) {
+                const errorData = await resDetalle.json();
+                alert(errorData.message); 
+                return;
+            }
+        }
             setDetalles([initialDetalle]);
             setOrdenCompra(initialStateOrdenCompra);
+            alert(ordenCompraCreado.message)
             exito();
-        }
     }
 
     const handleDetalleChange = (index, field, value) => {
         const nuevosDetalles = [...detalles];
-        nuevosDetalles[index][field] = field === "cantidad" ? parseFloat(value) : value;
-        
-        const prod = productos.find(p => p._id === nuevosDetalles[index].producto);
-       
-        if (prod) {
-            if(prod.precioCosto){
-                const ganancia = prod.ganancia;
-                const precio = prod.precioCosto + ((prod.precioCosto * ganancia) / 100);
-                
-                nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
-            }
-            if(!prod.precioCosto && prod.precioVenta){
-                const precio = prod.precioVenta;
+        const detalle = nuevosDetalles[index];
 
-                nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
-            }
+        // Actualizamos el campo directamente
+        detalle[field] = field === "cantidad" ? parseFloat(value) : value;
 
-        } else {
-            nuevosDetalles[index].precio = 0;
-            nuevosDetalles[index].importe = 0;
+        // Si cambió la cantidad → SOLO recalcular importe
+        if (field === "cantidad") {
+            detalle.importe = detalle.precio * detalle.cantidad;
         }
 
         setDetalles(nuevosDetalles);
@@ -586,10 +585,6 @@ const newOrdenCompra = ({exito , tipo , param}) => {
                         <div className="form-col-productos">
                             <label>
                                     Productos:
-                                    {/* <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button> */}
-                                    <button type="button" className="btn-add-producto" onClick={agregarDetalle}>
-                                        + Agregar Producto
-                                    </button>
                             </label>
                             <div className="form-group-presupuesto">
                                 
@@ -606,6 +601,7 @@ const newOrdenCompra = ({exito , tipo , param}) => {
                                             }
                                             placeholder="Tipo de Producto..."
                                             isClearable
+                                            isDisabled={true}
                                             styles={{
                                                 container: (base) => ({
                                                 ...base,
@@ -655,6 +651,7 @@ const newOrdenCompra = ({exito , tipo , param}) => {
                                             }
                                             placeholder="Producto..."
                                             isClearable
+                                            isDisabled={true}
                                             styles={{
                                                 container: (base) => ({
                                                 ...base,
@@ -753,7 +750,7 @@ const newOrdenCompra = ({exito , tipo , param}) => {
                                     className="submit-btn"
                                     onClick={(e) => {
                                         if (!puedeGuardar) {
-                                        alert("No se puede guardar una nota de pedido sin al menos un producto con cantidad.");
+                                        alert("❌ No se puede guardar una orden de compra sin al menos un producto con cantidad.");
                                         e.preventDefault();
                                         return;
                                         }

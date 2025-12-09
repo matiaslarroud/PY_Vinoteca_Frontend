@@ -85,7 +85,7 @@ const indexPresupuesto = () => {
 
     const deletePresupuesto = async(presupuestoID) => {
         if(!presupuestoID) {
-            console.log("Error con el ID de la solicitud de presupuesto al querer eliminarlo.")
+            console.log("❌ Error con el ID de la solicitud de presupuesto al querer eliminarlo.")
             return
         }
         const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
@@ -98,14 +98,16 @@ const indexPresupuesto = () => {
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
-                if (!res.ok) {
+                if (res.ok) {
                     alert(res.message);
-                    return;
+                    fetchData();
+                } else {
+                    alert(res.message);
                 }
-                fetchData();
+                
             })
             .catch((err)=>{
-                console.log("Error al enviar solicitud de presupuesto para su eliminación. \n Error: ",err);
+                console.log("❌ Error al enviar solicitud de presupuesto para su eliminación. \n Error: ",err);
             })
     }
 

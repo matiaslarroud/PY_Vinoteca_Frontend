@@ -67,8 +67,15 @@ const indexOrdenProduccion = () => {
       headers: { "Content-Type": "application/json" },
     })
       .then((res) => res.json())
-      .then(() => fetchData())
-      .catch((err) => console.error("Error al eliminar orden de produccion:", err));
+      .then((s) => {
+          if(s.ok){
+            alert(s.message);
+            fetchData()
+          } else {
+            alert(s.message)
+          }
+      })
+      .catch((err) => console.error("❌ Error al eliminar orden de produccion:", err));
   };
 
   const toggleOrden = (campo) => {
@@ -84,7 +91,7 @@ const indexOrdenProduccion = () => {
   if (!orden) return;
 
   if (orden.estadoProduccion) {
-    alert("Esta orden de produccion ya finalizo.");
+    alert("❌ Esta orden de produccion ya finalizo.");
     return;
   }
 
@@ -114,7 +121,7 @@ const indexOrdenProduccion = () => {
 
         alert("Stock insuficiente para finalizar la orden:\n\n" + mensaje);
       } else {
-        alert(data.message || "Error al finalizar la orden.");
+        alert(data.message || "❌ Error al finalizar la orden.");
       }
 
       return; // No sigas actualizando estado
@@ -127,11 +134,11 @@ const indexOrdenProduccion = () => {
       )
     );
 
-    alert("Orden finalizada correctamente.");
+    alert("✔️ Orden finalizada correctamente.");
 
   } catch (error) {
     console.error(error);
-    alert("Hubo un problema al marcar como finalizada la orden de producción.");
+    alert("❌ Hubo un problema al marcar como finalizada la orden de producción.");
   }
 };
 
@@ -234,7 +241,7 @@ const indexOrdenProduccion = () => {
                           </button>
                           <button className="btn-icon" title="Modificar" onClick={() => {
                                   if (estadoProduccion) {
-                                  alert("Esta orden de producción ya finalizo y no se puede modificar.");
+                                  alert("❌ Esta orden de producción ya finalizo y no se puede modificar.");
                                   return;
                                   }
                                   setMostrarModalUpdate(_id);

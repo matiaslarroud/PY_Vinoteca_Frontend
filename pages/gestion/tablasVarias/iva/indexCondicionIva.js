@@ -62,7 +62,7 @@ const indexCondicionIva = () => {
 
     const deleteCondicionIva = async(condicionIvaID) => {
         if(!condicionIvaID) {
-            console.log("Error con el ID de la condicion de iva al querer eliminarla.")
+            console.log("❌ Error con el ID de la condicion de iva al querer eliminarla.")
             return
         }
         const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
@@ -75,11 +75,15 @@ const indexCondicionIva = () => {
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
-                fetchData();
-                console.log(res.message);
+                if(res.ok){
+                    alert(res.message)
+                    fetchData();
+                } else {
+                    alert(res.message)
+                }
             })
             .catch((err)=>{
-                console.log("Error al enviar condicion de iva para su eliminación. \n Error: ",err);
+                console.log("❌ Error al enviar condicion de iva para su eliminación. \n Error: ",err);
             })
     }
 

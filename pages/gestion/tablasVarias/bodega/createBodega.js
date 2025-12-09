@@ -32,12 +32,14 @@ const createBodega = ({exito}) => {
                     })
                     .then((data) => {
                             if(data.ok){
-                                console.log('Bodega creada exitosamente.');
                                 setBodega(initialState);
+                                alert(data.message);
                                 exito();
+                            } else {
+                                alert(data.message)
                             }
                         })
-                .catch((err) => {console.log('Error al enviar datos. \n Error: ',err)})
+                .catch((err) => {console.log('❌ Error al enviar datos. \n Error: ',err)})
     }
 
     return(

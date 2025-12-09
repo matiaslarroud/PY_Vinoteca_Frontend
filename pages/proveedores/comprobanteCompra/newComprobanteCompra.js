@@ -33,7 +33,8 @@ const newComprobanteCompra = ({exito}) => {
         })
             .then((s)=>{
                 if(s.ok){
-                    setOrdenes(s.data)
+                    const completas = s.data.filter(oc => oc.completo === false);
+                    setOrdenes(completas)
                 }
             })
         .catch((err)=>{console.log("Error al cargar ordenes de compra.\nError: ",err)})
@@ -100,75 +101,96 @@ const newComprobanteCompra = ({exito}) => {
         }
     }, [productos, detalles]);
 
+const clickChange = async(e) => {
+    e.preventDefault();
 
-    const clickChange = async(e) => {
-        e.preventDefault();
-        const bodyData = {
-            total: comprobanteCompra.total,
-            ordenCompra: comprobanteCompra.ordenCompra,
-        };
+    const bodyData = {
+        total: comprobanteCompra.total,
+        ordenCompra: comprobanteCompra.ordenCompra,
+    };
 
-        const resComprobanteCompra = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompra`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(bodyData)
-        })
+    // 1️⃣ VALIDAMOS DETALLE POR DETALLE ANTES DE CREAR NADA
+    for (const detalle of detalles) {
 
-        const comprobanteCompraCreado = await resComprobanteCompra.json();
-        const comprobanteID = comprobanteCompraCreado.data._id;
-
-        // GUARDAMOS DETALLES
-        for (const detalle of detalles) {
-            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompraDetalle`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    producto: detalle.producto,
-                    precio: detalle.precio,
-                    cantidad: detalle.cantidad,
-                    importe: detalle.importe,
-                    comprobanteCompra: comprobanteID
+        const resValidacion = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompraDetalle/validar`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                ordenCompra: comprobanteCompra.ordenCompra,
+                producto: detalle.producto,
+                cantidad: detalle.cantidad
             })
-            
-            
-            });
-            if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
-            
-            setDetalles([initialDetalle]);
-            setComprobanteCompra(initialStateComprobanteCompra);
-            exito();
+        });
+
+        const validation = await resValidacion.json();
+        if (!validation.ok) {
+            alert(validation.message);
+            return; // ❌ aborta si un detalle no cumple
         }
     }
 
+    // 2️⃣ SI TODO VALIDÓ BIEN → CREAMOS EL COMPROBANTE
+    const resComprobanteCompra = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompra`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bodyData)
+    });
+
+    const comprobanteCompraCreado = await resComprobanteCompra.json();
+    if (!comprobanteCompraCreado.ok) {
+        alert(comprobanteCompraCreado.message);
+        return;
+    }
+
+    const comprobanteID = comprobanteCompraCreado.data._id;
+
+    // 3️⃣ GUARDAMOS CADA DETALLE
+    for (const detalle of detalles) {
+
+        const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompraDetalle`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                producto: detalle.producto,
+                precio: detalle.precio,
+                cantidad: detalle.cantidad,
+                importe: detalle.importe,
+                comprobanteCompra: comprobanteID
+            })
+        });
+
+        const dataDetalle = await resDetalle.json();
+        if (!dataDetalle.ok) {
+            alert(dataDetalle.message);
+            return;
+        }
+    }
+
+    // 4️⃣ LIMPIAMOS ESTADO
+    setDetalles([initialDetalle]);
+    setComprobanteCompra(initialStateComprobanteCompra);
+
+    alert(comprobanteCompraCreado.message);
+    exito();
+};
+
+
     const handleDetalleChange = (index, field, value) => {
         const nuevosDetalles = [...detalles];
-        nuevosDetalles[index][field] = field === "cantidad" ? parseFloat(value) : value;
-        
-        const prod = productos.find(p => p._id === nuevosDetalles[index].producto);
+        const detalle = nuevosDetalles[index];
 
-        if (prod) {
-            if(prod.precioCosto){
-                const ganancia = prod.ganancia;
-                const precio = prod.precioCosto + ((prod.precioCosto * ganancia) / 100);
+        // Actualizamos el campo directamente
+        detalle[field] = field === "cantidad" ? parseFloat(value) : value;
 
-                nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
-            }
-            if(!prod.precioCosto && prod.precioVenta){
-                const precio = prod.precioVenta;
-
-                nuevosDetalles[index].precio = precio;
-                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
-            }
-
-        } else {
-            nuevosDetalles[index].precio = 0;
-            nuevosDetalles[index].importe = 0;
+        // Si cambió la cantidad → SOLO recalcular importe
+        if (field === "cantidad") {
+            detalle.importe = detalle.precio * detalle.cantidad;
         }
 
         setDetalles(nuevosDetalles);
         calcularTotal(nuevosDetalles);
     };
+
     
     const selectChange = (selectedOption, actionMeta) => {
         const name = actionMeta.name;
@@ -235,7 +257,7 @@ const newComprobanteCompra = ({exito}) => {
     const opciones_productos = productos
         .map(v => ({
             value: v._id,
-            label: v.name,
+            label: `${v._id} - ${v.name}`,
             stock: v.stock,
             tipoProducto: v.tipoProducto
         }));
@@ -413,10 +435,6 @@ const newComprobanteCompra = ({exito}) => {
                         <div className="form-col-productos">
                             <label>
                                     Productos:
-                                    {/* <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button> */}
-                                    <button type="button" className="btn-add-producto" onClick={agregarDetalle}>
-                                        + Agregar Producto
-                                    </button>
                             </label>
                             <div className="form-group-presupuesto">
                                 
@@ -433,6 +451,7 @@ const newComprobanteCompra = ({exito}) => {
                                             }
                                             placeholder="Tipo de Producto..."
                                             isClearable
+                                            isDisabled={true}
                                             styles={{
                                                 container: (base) => ({
                                                 ...base,
@@ -482,6 +501,7 @@ const newComprobanteCompra = ({exito}) => {
                                             }
                                             placeholder="Producto..."
                                             isClearable
+                                            isDisabled={true}
                                             styles={{
                                                 container: (base) => ({
                                                 ...base,
@@ -525,7 +545,7 @@ const newComprobanteCompra = ({exito}) => {
                                         <input
                                             type="number"
                                             placeholder="Cantidad"
-                                            min={1}
+                                            min={0}
                                             value={d.cantidad}
                                             onChange={(e) => handleDetalleChange(i, "cantidad", e.target.value)}
                                             required
@@ -535,7 +555,7 @@ const newComprobanteCompra = ({exito}) => {
                                     <div className='form-col-item2'>
                                         <span>Importe: ${d.importe.toFixed(2)}</span>
                                     </div>
-
+                                    
                                     <div className='form-col-item2'>
                                         <button
                                             type="button"
@@ -574,7 +594,7 @@ const newComprobanteCompra = ({exito}) => {
                                     className="submit-btn"
                                     onClick={(e) => {
                                         if (!puedeGuardar) {
-                                        alert("No se puede guardar un comprobante de compra sin al menos un producto con cantidad.");
+                                        alert("❌ No se puede guardar un comprobante de compra sin al menos un producto con cantidad.");
                                         e.preventDefault();
                                         return;
                                         }

@@ -132,7 +132,7 @@ const indexComprobante = () => {
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobantePago/imprimir/${comprobante}`
             );
 
-            if (!res.ok) throw new Error("No se pudo generar el PDF");
+            if (!res.ok) throw new Error("❌ No se pudo generar el PDF");
 
             // 📌 Convertir respuesta en blob (PDF)
             const blob = await res.blob();
@@ -144,14 +144,14 @@ const indexComprobante = () => {
             window.open(url, "_blank");
 
         } catch (err) {
-            console.error("Error al imprimir comprobante de pago:", err);
+            console.error("❌ Error al imprimir comprobante de pago:", err);
         }
     };
 
 
     const deleteComprobante = async(comprobante) => {
         if(!comprobante) {
-            console.log("Error con el ID del comprobante de pago al querer eliminarlo.")
+            console.log("❌ Error con el ID del comprobante de pago al querer eliminarlo.")
             return
         }
         const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
@@ -167,7 +167,7 @@ const indexComprobante = () => {
                 fetchData();
             })
             .catch((err)=>{
-                console.log("Error al enviar comprobante de pago para su eliminación. \n Error: ",err);
+                console.log("❌ Error al enviar comprobante de pago para su eliminación. \n Error: ",err);
             })
     }
 

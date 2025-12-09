@@ -88,7 +88,7 @@ const indexRemito = () => {
 
     const deleteRemito = async(remitoID) => {
         if(!remitoID) {
-            console.log("Error con el ID del remito al querer eliminarlo.")
+            console.log("❌ Error con el ID del remito al querer eliminarlo.")
             return
         }
         const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
@@ -101,11 +101,15 @@ const indexRemito = () => {
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
-                fetchData();
-                console.log(res.message);
+                if(res.ok){
+                    alert(res.message)
+                    fetchData()
+                } else {
+                    alert(res.message)
+                }
             })
             .catch((err)=>{
-                console.log("Error al enviar remito para su eliminación. \n Error: ",err);
+                console.log("❌ Error al enviar remito para su eliminación. \n Error: ",err);
             })
     }
 
@@ -181,7 +185,7 @@ const indexRemito = () => {
                             setRemitos(resultados);
                             setMostrarModalBusqueda(false);
                         } else {
-                            alert("No se encontraron resultados");
+                            alert("❌ No se encontraron resultados");
                         }
                         }}
                         onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)} // ✅ manejamos los cambios desde el hijo

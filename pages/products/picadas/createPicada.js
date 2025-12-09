@@ -92,12 +92,12 @@ const formProducto = ({exito}) => {
             const data = await res.json();
 
             if (!data.ok) {
-                console.log("Error en backend:", data);
+                alert(data.message)
                 return;
             }
 
         } catch (err) {
-            console.log("Error subiendo imágenes:", err);
+            console.log("❌ Error subiendo imágenes:", err);
         }
     };
 
@@ -118,12 +118,11 @@ const formProducto = ({exito}) => {
                 body: JSON.stringify(bodyData)
             }
         )
-            
-        if (!resPicada.ok) {
-            alert(resPicada.message)
-            return
-        };
         const picadaCreada = await resPicada.json();
+        if(!picadaCreada.ok){
+            alert(picadaCreada.message)
+            return
+        }
         const picadaID = picadaCreada.data._id;
         
         if (imagenes.length > 0) {
@@ -143,12 +142,14 @@ const formProducto = ({exito}) => {
                 });
             
             if (!resDetalle.ok) {
-                alert(resDetalle.message)
+                const errorData = await resDetalle.json();
+                alert(errorData.message)
                 return
             };
         }
         setDetalles([initialStateDetalle]);
         setPicada(initialState);
+        alert(picadaCreada.message)
         exito();
     }
 

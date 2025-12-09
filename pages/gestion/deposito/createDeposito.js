@@ -93,10 +93,13 @@ const formDeposito = ({exito}) => {
                     .then((s) => {
                             if(s.ok){
                                 setDeposito(initialState);
+                                alert(s.message)
                                 exito();
+                            } else {
+                                alert(s.message)
                             }
                         })
-                .catch((err) => {console.log('Error al enviar datos. \n Error: ',err)})
+                .catch((err) => {console.log('❌ Error al enviar datos. \n Error: ',err)})
     }
 
     return(
@@ -204,7 +207,7 @@ const formDeposito = ({exito}) => {
                     </fieldset>
                     
                     <div className="form-footer">
-                        <button type="submit" onClick={clickChange} className="submit-btn">Cargar Deposito</button>
+                        <button type="submit" onClick={clickChange} className="submit-btn">Cargar</button>
                     </div>
                 </form>
             </div>

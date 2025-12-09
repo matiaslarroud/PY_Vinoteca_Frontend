@@ -87,7 +87,7 @@ const fetchData = ()=>{
 
     const deleteParaje = async(parajeID) => {
         if(!parajeID) {
-            console.log("Error con el ID del paraje al querer eliminarlo.")
+            console.log("❌ Error con el ID del paraje al querer eliminarlo.")
             return
         }
         const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
@@ -100,11 +100,15 @@ const fetchData = ()=>{
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
-                fetchData()
-                console.log(res.message);
+                if(res.ok){
+                    alert(res.message)
+                    fetchData()
+                } else{
+                    alert(res.message)
+                }
             })
             .catch((err)=>{
-                console.log("Error al enviar paraje para su eliminacion. \n ERROR: ",err);
+                console.log("❌ Error al enviar paraje para su eliminacion. \n ERROR: ",err);
             })
     }
 

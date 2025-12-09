@@ -35,7 +35,7 @@ const indexRemitoCliente = () => {
     if (!remito) return;
 
     if (remito.entregado) {
-      alert("⚠️ Este pedido ya fue entregado y no puede modificarse.");
+      alert("❌ Este pedido ya fue entregado y no puede modificarse.");
       return;
     }
 
@@ -46,7 +46,11 @@ const indexRemitoCliente = () => {
         body: JSON.stringify({ entregado: true }),
       });
 
-      if (!res.ok) throw new Error("Error al actualizar el remito");
+      if (!res.ok) {
+        alert("❌ Error al marcar como entregado el remito.")
+      } else {
+        alert("✔️ Remito entregado correctamente.")
+      }
 
       setRemitos((prev) =>
         prev.map((r) =>
@@ -124,7 +128,7 @@ const indexRemitoCliente = () => {
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/remito/imprimir/${id}`
             );
 
-            if (!res.ok) throw new Error("No se pudo generar el PDF");
+            if (!res.ok) throw new Error("❌ No se pudo generar el PDF");
 
             // 📌 Convertir respuesta en blob (PDF)
             const blob = await res.blob();
@@ -136,7 +140,7 @@ const indexRemitoCliente = () => {
             window.open(url, "_blank");
 
         } catch (err) {
-            console.error("Error al imprimir remito:", err);
+            console.error("❌ Error al imprimir remito:", err);
         }
     };
 
@@ -155,8 +159,12 @@ const indexRemitoCliente = () => {
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
-                fetchData();
-                console.log(res.message);
+                if(res.ok) {
+                    alert(res.message)
+                    fetchData();
+                } else{
+                    alert(res.message)
+                }
             })
             .catch((err)=>{
                 console.log("Error al enviar remito para su eliminación. \n Error: ",err);

@@ -37,8 +37,15 @@ const indexTransporte = () => {
       headers: { "Content-Type": "application/json" },
     })
       .then((res) => res.json())
-      .then(() => fetchData())
-      .catch((err) => console.error("Error al eliminar transporte:", err));
+      .then((a) => {
+          if(a.ok) {
+            alert(a.message)
+            fetchData()
+          } else {
+            alert(a.message)
+          }
+      })
+      .catch((err) => console.error("❌ Error al eliminar transporte:", err));
   };
 
   const toggleOrden = (campo) => {

@@ -94,9 +94,16 @@ const createCliente = ({ exito, filtro, onChangeFiltro }) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(filtros),
-        });
-        const data = await res.json();
-        if (data.ok) {exito(data.data)};
+        })
+        .then((a)=>a.json())
+            .then((data) => {
+                if (data.ok) {
+                            exito(data.data)
+                        } else {
+                            alert(data.message)
+                        };
+            })
+        
     }; 
     
     const selectChange = (selectedOption, actionMeta) => {

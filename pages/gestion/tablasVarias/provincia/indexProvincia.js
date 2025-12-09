@@ -82,7 +82,7 @@ const indexProvincia = () => {
 
     const deleteProvincia = async(provinciaID) => {
         if(!provinciaID) {
-            console.log("Error con el ID de la provincia al querer eliminarla.")
+            console.log("❌ Error con el ID de la provincia al querer eliminarla.")
             return
         }
         const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
@@ -95,11 +95,15 @@ const indexProvincia = () => {
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
-                fetchData()
-                console.log(res.message);
+                if(res.ok){
+                    alert(res.message)
+                    fetchData()
+                } else {
+                    alert(res.message)
+                }
             })
             .catch((err)=>{
-                console.log("Error al envia provincia para su eliminacion. \n ERROR: ",err);
+                console.log("❌ Error al enviar provincia para su eliminacion. \n ERROR: ",err);
             })
     }
 

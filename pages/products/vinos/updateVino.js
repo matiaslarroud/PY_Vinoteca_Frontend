@@ -7,9 +7,7 @@ import Select from 'react-select';
 const { default: Link } = require("next/link")
 
 const initialState = {name:'',stock:0, stockMinimo:'', proveedor:'' , bodega:'' , paraje:'' , crianza : '' , precioCosto:0 , ganancia:0 , tipo:'', uva:'' , varietal:'' , volumen:'' , deposito:''}
-const initialDetalle = { 
-         vino: "", uva: ""
-    };
+const initialDetalle = {  vino: "", uva: "" };
 const updateProducto = ({exito,vinoID}) => {
     const [product , setProduct] = useState(initialState);
     const [bodegas, setBodegas] = useState([]);
@@ -25,6 +23,10 @@ const updateProducto = ({exito,vinoID}) => {
     const [imagenes, setImagenes] = useState([]);
     const [imagenesActuales, setImagenesActuales] = useState([]);
     
+    const detallesValidos = detalles.filter(d => d.uva );
+    const puedeGuardar = detallesValidos.length > 0;
+
+    
     const fetchProduct = (vinoID)=>{
         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productVino/${vinoID}`)
             .then((a)=>{return a.json()})
@@ -34,7 +36,7 @@ const updateProducto = ({exito,vinoID}) => {
             .catch((err)=>{console.log(err)})
     }
     
-    const fetchProveedores = (vinoID)=>{
+    const fetchProveedores = ()=>{
         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/proveedor`)
             .then((a)=>{return a.json()})
                 .then((s)=>{
@@ -139,8 +141,7 @@ const updateProducto = ({exito,vinoID}) => {
         fetchVolumenes();
         fetchDepositos();
         fetchProveedores();
-    }, [vinoID]);
-
+    }, [vinoID]); 
     
     const inputChange = (e) => {
         const value = e.target.value;
@@ -190,12 +191,12 @@ const updateProducto = ({exito,vinoID}) => {
             const data = await res.json();
 
             if (!data.ok) {
-                console.log("Error en backend:", data);
+                alert(data.message)
                 return;
             }
 
         } catch (err) {
-            console.log("Error subiendo imágenes:", err);
+            console.log("❌ Error subiendo imágenes:", err);
         }
     };
 
@@ -209,11 +210,12 @@ const updateProducto = ({exito,vinoID}) => {
 
             if (data.ok) {
                 setImagenesActuales(prev => prev.filter(img => img._id !== fotoID));
+                alert(data.message)
             } else {
-                console.log("Error eliminando imagen", data);
+                alert(data.message)
             }
         } catch (err) {
-            console.log("Error:", err);
+            console.log("❌ Error:", err);
         }
     };
 
@@ -245,6 +247,11 @@ const updateProducto = ({exito,vinoID}) => {
         })
 
         const vinoCreado = await resVino.json();
+        if(!vinoCreado.ok){
+            alert(vinoCreado.message)
+            return
+        }
+
         const id = vinoCreado.data?._id;
 
         if (imagenes.length > 0) {
@@ -263,7 +270,7 @@ const updateProducto = ({exito,vinoID}) => {
                 console.log(res.message);
             })
             .catch((err)=>{
-                console.log("Error al enviar producto para su eliminación. \n Error: ",err);
+                console.log("❌Error al enviar producto para su eliminación. \n Error: ",err);
             })
 
         // GUARDAMOS DETALLES
@@ -278,12 +285,17 @@ const updateProducto = ({exito,vinoID}) => {
             
             
             });
-            if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
+            if (!resDetalle.ok) {
+                const errorData = await resDetalle.json();
+                alert(errorData.message); 
+                return;
+            }
             
         }
         
         setDetalles([initialDetalle]);
         setProduct(initialState);
+        alert(vinoCreado.message)
         exito();
     }
 
@@ -832,18 +844,6 @@ const updateProducto = ({exito,vinoID}) => {
                                 ))}
                             </div>
                         </div> 
-
-                        <div className="form-submit">
-                            <button
-                                type="submit"
-                                className="submit-btn"
-                                onClick={(e) => {
-                                    clickChange(e);
-                                }}
-                                >
-                                Guardar
-                            </button>
-                        </div>
                     </div>
 
                  <div className="form-row">
@@ -891,6 +891,11 @@ const updateProducto = ({exito,vinoID}) => {
                         type="submit"
                         className="submit-btn"
                         onClick={(e) => {
+                            if (!puedeGuardar) {
+                                alert("❌ No se puede guardar un vino sin al menos una uva seleccionada.");
+                                e.preventDefault();
+                                return;
+                            }
                             clickChange(e);
                         }}
                         >

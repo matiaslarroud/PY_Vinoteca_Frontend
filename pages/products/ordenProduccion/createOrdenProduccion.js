@@ -115,7 +115,18 @@ const formOrden = ({exito , tipo , param}) => {
         )
 
         const ordenCreada = await resOrdenProduccion.json();
+
+        if(!ordenCreada.ok){
+            alert(ordenCreada.message)
+            return
+        }
+
         const ordenID = ordenCreada.data._id;
+
+        if(!ordenID){
+            alert("❌ Error al generar detalles de orden .")
+            return
+        }
 
         // GUARDAMOS DETALLES
         for (const detalle of detalles) {
@@ -129,10 +140,15 @@ const formOrden = ({exito , tipo , param}) => {
             })
                 });
             
-            if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
+            if (!resDetalle.ok) {
+                const errorData = await resDetalle.json();
+                alert(errorData.message); 
+                return;
+            }
         }
         setDetalles([initialStateDetalle]);
         setOrdenProducion(initialState);
+        alert(ordenCreada.message)
         exito();
     }
 
@@ -360,7 +376,7 @@ const formOrden = ({exito , tipo , param}) => {
                                     className="submit-btn"
                                     onClick={(e) => {
                                         if (!puedeGuardar) {
-                                        alert("No se puede guardar una orden de produccion sin al menos una picada con cantidad.");
+                                        alert("❌ No se puede guardar una orden de produccion sin al menos una picada.");
                                         e.preventDefault();
                                         return;
                                         }

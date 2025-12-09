@@ -17,7 +17,6 @@ const updateLocalidad = ({localidadID , exito}) => {
                             if(s.ok && s.data.name){
                                 const nombreP = s.data.name;
                                 const provinciaP = s.data.provincia;
-                                console.log('Localidad encontrada exitosamente.');
                                 setLocalidad({name: nombreP, provincia:provinciaP} )
                             }
                         })
@@ -60,8 +59,12 @@ const updateLocalidad = ({localidadID , exito}) => {
         )
             .then((a) => {return a.json()})
                 .then((s) => { 
-                    console.log(s.message)
-                    exito()
+                    if(s.ok) {
+                      alert(s.message)
+                      exito()
+                    } else {
+                      alert(s.message)
+                    }
                  })
 
     }

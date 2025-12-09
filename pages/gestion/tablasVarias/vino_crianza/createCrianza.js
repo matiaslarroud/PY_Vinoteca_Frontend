@@ -33,10 +33,13 @@ const formCrianza = ({exito}) => {
                     .then((s) => {
                             if(s.ok){
                                 setCrianza(initialState);
+                                alert(s.message)
                                 exito();
+                            } else {
+                                alert(s.message)
                             }
                         })
-                .catch((err) => {console.log('Error al enviar datos. \n Error: ',err)})
+                .catch((err) => {console.log('❌ Error al enviar datos. \n Error: ',err)})
     }
 
     return(
@@ -53,7 +56,7 @@ const formCrianza = ({exito}) => {
                     </fieldset>
                     <div className="button-area">
                         <button type="submit" className="submit-btn" onClick={clickChange}>
-                        Cargar Crianza
+                        Cargar
                         </button>
                     </div>
                 </form>

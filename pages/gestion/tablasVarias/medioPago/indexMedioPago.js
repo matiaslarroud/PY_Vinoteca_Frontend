@@ -63,7 +63,7 @@ const indexMedioPago = () => {
 
     const deleteMedioPago = async(medioPagoID) => {
         if(!medioPagoID) {
-            console.log("Error con el ID del medio de pago al querer eliminarlo.")
+            console.log("❌ Error con el ID del medio de pago al querer eliminarlo.")
             return
         }
         const confirmar = window.confirm("¿Estás seguro de que quieres eliminar?"); if (!confirmar) return;
@@ -76,11 +76,15 @@ const indexMedioPago = () => {
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
-                fetchData();
-                console.log(res.message);
+                if(res.ok) {
+                    alert(res.message)
+                    fetchData();
+                } else {
+                    alert(res.message)
+                }
             })
             .catch((err)=>{
-                console.log("Error al enviar medio de pago para su eliminación. \n Error: ",err);
+                console.log("❌ Error al enviar medio de pago para su eliminación. \n Error: ",err);
             })
     }
 

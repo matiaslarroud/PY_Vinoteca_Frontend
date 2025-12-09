@@ -163,6 +163,10 @@ const newRemitoCliente = ({exito}) => {
             });
             
             const remitoCreado = await res.json();
+            if(!remitoCreado.ok) {
+                alert(remitoCreado.message)
+                return
+            }
             const remitoID = remitoCreado.data._id;
 
             // GUARDAMOS DETALLES
@@ -178,12 +182,17 @@ const newRemitoCliente = ({exito}) => {
                 
                 
                 });
-                if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
+                if (!resDetalle.ok) {
+                    const errData = await resDetalle.json();
+                    alert(errData.message)
+                    return
+                }
             
+            }
                 setDetalles(initialDetalle);
                 setRemito(initialState);
+                alert(remitoCreado.message)
                 exito();
-            }
         } 
         catch (err) {
             console.log('Error al enviar datos. \n Error: ', err);
@@ -592,14 +601,14 @@ const newRemitoCliente = ({exito}) => {
                                     className="submit-btn"
                                     onClick={(e) => {
                                         if (!puedeGuardar) {
-                                        alert("No se puede guardar un remito sin un comprobante de venta asociado.");
+                                        alert("❌ No se puede guardar un remito sin un comprobante de venta asociado.");
                                         e.preventDefault();
                                         return;
                                         }
                                         clickChange(e);
                                     }}
                                     >
-                                    Cargar Remito
+                                    Cargar
                                     </button>
                                 </div>
                             </div>

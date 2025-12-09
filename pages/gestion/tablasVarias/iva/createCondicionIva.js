@@ -31,12 +31,14 @@ const createCondicionIva = ({exito}) => {
                     })
                     .then((data) => {
                             if(data.ok){
-                                console.log('Condicion de iva creada exitosamente.');
                                 setIva(initialState);
+                                alert(data.message)
                                 exito();
+                            } else {
+                              alert(data.message)
                             }
                         })
-                .catch((err) => {console.log('Error al enviar datos. \n Error: ',err)})
+                .catch((err) => {console.log('❌ Error al enviar datos. \n Error: ',err)})
     }
 
     return(
@@ -59,7 +61,7 @@ const createCondicionIva = ({exito}) => {
                 </fieldset>
                 <div className="button-area">
                     <button type="submit" className="submit-btn" onClick={clickChange}>
-                    Cargar IVA
+                    Cargar
                     </button>
                 </div>
                 </form>

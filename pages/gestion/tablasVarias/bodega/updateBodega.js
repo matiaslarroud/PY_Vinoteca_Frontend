@@ -53,10 +53,13 @@ const updateBodega = ({bodegaID , exito}) => {
                     .then((data) => {
                             if(data.ok){
                                 setBodega(initialState);
-                                exito()
+                                alert(data.message);
+                                exito();
+                            } else {
+                                alert(data.message)
                             }
                         })
-                .catch((err) => {console.log('Error al enviar datos. \n Error: ',err)})
+                .catch((err) => {console.log('❌ Error al enviar datos para su eliminación. \n Error: ',err)})
     }
 
     return(

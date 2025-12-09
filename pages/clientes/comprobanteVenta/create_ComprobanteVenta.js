@@ -201,6 +201,10 @@ const createComprobanteVenta = ({exito , pedidoID}) => {
         })
 
         const comprobanteVentaCreado = await resNotaComprobanteVenta.json();
+        if(!comprobanteVentaCreado.ok) {
+            alert(comprobanteVentaCreado.message)
+            return
+        }
         const comprobanteVentaID = comprobanteVentaCreado.data._id;
 
         // GUARDAMOS DETALLES
@@ -218,12 +222,16 @@ const createComprobanteVenta = ({exito , pedidoID}) => {
             
             
             });
-            if (!resDetalle.ok) throw new Error("Error al guardar un detalle");
-        
-            setDetalles([initialDetalle]);
-            setComprobanteVenta(initialStateComprobanteVenta);
-            exito();
+            if (!resDetalle.ok) {
+                const errData = await resDetalle.json()
+                alert(errData.message)
+                return
+            }
         }
+        setDetalles([initialDetalle]);
+        setComprobanteVenta(initialStateComprobanteVenta);
+        alert(comprobanteVentaCreado.message)
+        exito();
     }
 
     const [mostrarModalCreate1, setMostrarModalCreate1] = useState(false);
@@ -657,14 +665,14 @@ const createComprobanteVenta = ({exito , pedidoID}) => {
                                     className="submit-btn"
                                     onClick={(e) => {
                                         if (!puedeGuardar) {
-                                        alert("No se puede guardar un comprobante de venta sin una nota de pedido.");
+                                        alert("❌ No se puede guardar un comprobante de venta sin una nota de pedido.");
                                         e.preventDefault();
                                         return;
                                         }
                                         clickChange(e);
                                     }}
                                     >
-                                    Cargar Comprobante
+                                    Cargar
                                     </button>
                                 </div>
                             </div>

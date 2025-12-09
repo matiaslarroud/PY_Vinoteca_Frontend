@@ -44,10 +44,13 @@ const formBarrio = ({exito}) => {
                     .then((s) => {
                             if(s.ok){
                                 setBarrio(initialState);
+                                alert(s.message)
                                 exito();
+                            } else {
+                                alert(s.message)
                             }
                         })
-                .catch((err) => {console.log('Error al enviar datos. \n Error: ',err)})
+                .catch((err) => {console.log('❌ Error al enviar datos. \n Error: ',err)})
     }
 
     return(

@@ -142,7 +142,7 @@ const indexComprobantesVenta = () => {
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/comprobanteVenta/imprimir/${id}`
             );
 
-            if (!res.ok) throw new Error("No se pudo generar el PDF");
+            if (!res.ok) throw new Error("❌ No se pudo generar el PDF");
 
             // 📌 Convertir respuesta en blob (PDF)
             const blob = await res.blob();
@@ -160,7 +160,7 @@ const indexComprobantesVenta = () => {
 
     const deleteComprobanteVenta = async(comprobanteVentaID) => {
         if(!comprobanteVentaID) {
-            console.log("Error con el ID del comprobante de venta al querer eliminarlo.")
+            console.log("❌ Error con el ID del comprobante de venta al querer eliminarlo.")
             return
         }
         const confirmar = window.confirm("¿Estás seguro de que querés eliminar este recibo?"); if (!confirmar) return;
@@ -174,11 +174,15 @@ const indexComprobantesVenta = () => {
             }
         ).then((a)=>{return a.json()})
             .then((res)=>{
-                fetchData();
-                console.log(res.message);
+                if(res.ok){
+                    alert(res.message)
+                    fetchData();
+                } else {
+                    alert(res.message)
+                }
             })
             .catch((err)=>{
-                console.log("Error al enviar comprobante de venta para su eliminación. \n Error: ",err);
+                console.log("❌ Error al enviar comprobante de venta para su eliminación. \n Error: ",err);
             })
     }
 

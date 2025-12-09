@@ -134,10 +134,17 @@ const updateTransporte = ({exito , transporteID}) => {
                     condicionIva: transporte.condicionIva
                 })
             }
-        )
-        
-        setTransporte(initialState);
-        exito();
+        ) 
+        .then((a) => a.json())
+            .then((s)=>{
+                if(s.ok){
+                    alert(s.message)
+                    exito()
+                } else {
+                    alert(s.message)
+                }
+            })
+            .catch((err) => console.error("❌ Error al actualizar transporte:", err))
     }
 
     const opciones_paises = paises.map(p => ({ value: p._id, label: p.name }));
@@ -542,7 +549,7 @@ const updateTransporte = ({exito , transporteID}) => {
                                         clickChange(e);
                                     }}
                                     >
-                                    Cargar Transporte
+                                    Guardar
                                     </button>
                                 </div>
                             </div>
