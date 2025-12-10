@@ -98,7 +98,7 @@ const formPais = ({exito}) => {
     margin: 0 auto;
     overflow-y: auto;
     border-radius: 12px;
-    background: #1a1a1a;
+    background-color: #1f1f1f;
     box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
     text-align: center;
   }
