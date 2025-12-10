@@ -83,7 +83,7 @@ const formPais = ({exito}) => {
                     </fieldset>
                     <div className="button-area">
                         <button type="submit" className="submit-btn" onClick={clickChange}>
-                        Cargar Provincia
+                        Cargar
                         </button>
                     </div>
                 </form>

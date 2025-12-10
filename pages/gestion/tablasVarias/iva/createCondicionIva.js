@@ -125,7 +125,6 @@ const createCondicionIva = ({exito}) => {
     width: 300px;
     padding: 0.6rem;
     border-radius: 6px;
-    border: 1px solid #ccc;
     font-size: 1rem;
     color: white;
     background-color: #272626;

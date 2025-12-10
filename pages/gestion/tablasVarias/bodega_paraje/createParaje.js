@@ -1,4 +1,5 @@
 const { useState, useEffect } = require("react")
+import Select from "react-select";
 
 const { default: Link } = require("next/link")
 
@@ -72,7 +73,17 @@ const formParaje = ({exito}) => {
             ...paraje , 
                 [name]:value
         })   
-    }
+    } 
+    
+    const selectChange = (selectedOption, actionMeta) => {
+        const name = actionMeta.name;
+        const value = selectedOption ? selectedOption.value : "";
+
+        setParaje({
+            ...paraje,
+            [name]: value,
+        });
+    };
 
     const clickChange = (e) => {
         e.preventDefault();
@@ -106,220 +117,296 @@ const formParaje = ({exito}) => {
                 .catch((err) => {console.log('❌ Error al enviar datos. \n Error: ',err)})
     }
 
+    const opciones_paises = paises.map(v => ({ value: v._id,label: v.name }));
+    const opciones_provincias = provincias.filter(a => a.pais === paraje.pais).map(v => ({ value: v._id,label: v.name }));
+    const opciones_localidades = localidades.filter(a => a.provincia === paraje.provincia).map(v => ({ value: v._id,label: v.name }));
+    const opciones_barrios = barrios.filter(a => a.localidad === paraje.localidad).map(v => ({ value: v._id,label: v.name }));
+    const opciones_calles = calles.filter(a => a.barrio === paraje.barrio).map(v => ({ value: v._id,label: v.name }));
+
+    const customStylesSelect = {
+       container: (base) => ({
+        ...base,
+        width: 220, // ⬅️ ancho fijo total
+        }),
+        control: (base) => ({
+        ...base,
+        minWidth: 220,
+        maxWidth: 220,
+        backgroundColor: '#2c2c2c',
+        color: 'white',
+        border: '1px solid #444',
+        borderRadius: 8,
+        }),
+        singleValue: (base) => ({
+        ...base,
+        color: 'white',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+        }),
+        menu: (base) => ({
+        ...base,
+        backgroundColor: '#2c2c2c',
+        color: 'white',
+        }),
+        option: (base, { isFocused }) => ({
+        ...base,
+        backgroundColor: isFocused ? '#444' : '#2c2c2c',
+        color: 'white',
+        }),
+        input: (base) => ({
+        ...base,
+        color: 'white',
+        }),
+    };
+
+
     return(
-        <>
-            <div className="form-container">
-                <h1 className="titulo-pagina">Cargar Paraje</h1>
-                <form id="formC" onSubmit={clickChange}>
-                    <fieldset className="grid-container">
-                    <div className="form-group">
-                        <label htmlFor="nombre">Nombre:</label>
-                        <input type="text" onChange={inputChange} value={paraje.name} name="name" placeholder="Ingresa el nombre del paraje" required></input>
-                    </div>
-                    
-                    <div className="form-group">
-                        <label htmlFor="nombre">Bodega:</label>
-                        <select name="bodega" onChange={inputChange} value={paraje.bodega}>
-                            <option value=''>Seleccione una bodega...</option>
-                            {
-                                bodegas.map(({_id,name}) => 
-                                    (
-                                        <option key={_id} value={_id}>
-                                            {name}
-                                        </option>                                        
-                                    )
-                                )
-                            }
-                        </select>
-                    </div>
-                    
-                    <div className="form-group">
-                        <label htmlFor="nombre">Pais:</label>
-                        <select name="pais" onChange={inputChange} value={paraje.pais}>
-                            <option value=''>Seleccione un pais...</option>
-                            {
-                                paises.map(({_id,name}) => 
-                                    (
-                                        <option key={_id} value={_id}>
-                                            {name}
-                                        </option>                                        
-                                    )
-                                )
-                            }
-                        </select>
-                    </div>
-                    
-                    <div className="form-group">
-                        <label htmlFor="nombre">Provincia:</label>
-                        <select name="provincia" onChange={inputChange} value={paraje.provincia}>
-                            <option value=''>Seleccione una provincia...</option>
-                            {
-                                provincias.filter((p)=>{return p.pais === Number(paraje.pais)}).map(({_id,name}) => 
-                                    (
-                                        <option key={_id} value={_id}>
-                                            {name}
-                                        </option>                                        
-                                    )
-                                )
-                            }
-                        </select>
-                    </div>
-                    
-                    <div className="form-group">
-                        <label htmlFor="nombre">Localidad:</label>
-                        <select name="localidad" onChange={inputChange} value={paraje.localidad}>
-                            <option value=''>Seleccione una localidad...</option>
-                            {
-                                localidades.filter((p)=>{return p.provincia === Number(paraje.provincia)}).map(({_id,name}) => 
-                                    (
-                                        <option key={_id} value={_id}>
-                                            {name}
-                                        </option>                                        
-                                    )
-                                )
-                            }
-                        </select>
-                    </div>
-                    
-                    <div className="form-group">
-                        <label htmlFor="nombre">Barrio:</label>
-                        <select name="barrio" onChange={inputChange} value={paraje.barrio}>
-                            <option value=''>Seleccione un barrio...</option>
-                            {
-                                barrios.filter((p)=>{return p.localidad === Number(paraje.localidad)}).map(({_id,name}) => 
-                                    (
-                                        <option key={_id} value={_id}>
-                                            {name}
-                                        </option>                                        
-                                    )
-                                )
-                            }
-                        </select>
-                    </div>
-                    
-                    <div className="form-group">
-                        <label htmlFor="nombre">Calle:</label>
-                        <select name="calle" onChange={inputChange} value={paraje.calle}>
-                            <option value=''>Seleccione una calle...</option>
-                            {
-                                calles.filter((p)=>{return p.barrio === Number(paraje.barrio)}).map(({_id,name}) => 
-                                    (
-                                        <option key={_id} value={_id}>
-                                            {name}
-                                        </option>                                        
-                                    )
-                                )
-                            }
-                        </select>
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="nombre">Altura:</label>
-                        <input type="Number" onChange={inputChange} value={paraje.altura} name="altura" placeholder="Ingresa la altura del domicilio del paraje" required></input>
-                    </div>
-                    </fieldset>
-                    <div className="form-footer">
-                        <button type="submit" className="submit-btn">Cargar Paraje</button>
-                    </div>
-                </form>
+       <>
+    <div className="form-container">
+        <h1 className="titulo-pagina">Cargar Paraje</h1>
+
+        <form id="formC" onSubmit={clickChange} className="formulario">
+
+            <div className="form-row">
+                {/* NOMBRE */}
+                <div className="form-col">
+                    <label>Nombre:</label>
+                    <input
+                        type="text"
+                        onChange={inputChange}
+                        value={paraje.name}
+                        name="name"
+                        placeholder="Ingresa el nombre del paraje"
+                        required
+                    />
+                </div>
+
+                {/* BODEGA */}
+                <div className="form-col">
+                    <label>Bodega:</label>
+                    <Select
+                        className="form-select-react"
+                        classNamePrefix="rs"
+                        options={bodegas.map(b => ({ value: b._id, label: b.name }))}
+                        value={
+                            bodegas
+                                .map(b => ({ value: b._id, label: b.name }))
+                                .find(op => op.value === paraje.bodega) || null
+                        }
+                        onChange={selectChange}
+                        name='bodega'
+                        placeholder="Bodega..."
+                        isClearable
+                        required
+                        styles={customStylesSelect}
+                    />
+                </div>
             </div>
-            <style jsx>
-                {`
-                    .form-container {
-                    display: flex;
-                    flex-direction: column;
-                    width: 100%;
-                    max-width: 900px;
-                    max-height: 90vh;
-                    padding: 1rem;
-                    overflow-y: auto;
-                    border-radius: 12px;
-                    background: #1a1a1a;
-                    box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
-                    }
 
-                    .titulo-pagina {
-                    font-size: 2rem;
-                    color: white;
-                    text-align: center;
-                    margin-bottom: 1rem;
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                    text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
-                    }
+            <div className="form-row">
 
-                    .grid-container {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 1rem;
-                    }
+                {/* PAIS */}
+                <div className="form-col">
+                    <label>Pais:</label>
+                    <Select
+                        className="form-select-react"
+                        classNamePrefix="rs"
+                        options={opciones_paises}
+                        value={opciones_paises.find(op => op.value === paraje.pais) || null}
+                        onChange={selectChange}
+                        name='pais'
+                        placeholder="País..."
+                        isClearable
+                        required
+                        styles={customStylesSelect}
+                    />
+                </div>
 
-                    .form-group {
-                    display: flex;
-                    flex-direction: column;
-                    }
+                {/* PROVINCIA */}
+                <div className="form-col">
+                    <label>Provincia:</label>
+                    <Select
+                        className="form-select-react"
+                        classNamePrefix="rs"
+                        options={opciones_provincias}
+                        value={opciones_provincias.find(op => op.value === paraje.provincia) || null}
+                        onChange={selectChange}
+                        name='provincia'
+                        placeholder="Provincia..."
+                        isClearable
+                        required
+                        styles={customStylesSelect}
+                    />
+                </div>
 
-                    .form-group label {
-                    font-weight: 600;
-                    color: white;
-                    margin-bottom: 0.4rem;
-                    }
+                {/* LOCALIDAD */}
+                <div className="form-col">
+                    <label>Localidad:</label>
+                    <Select
+                        className="form-select-react"
+                        classNamePrefix="rs"
+                        options={opciones_localidades}
+                        value={opciones_localidades.find(op => op.value === paraje.localidad) || null}
+                        onChange={selectChange}
+                        name='localidad'
+                        placeholder="Localidad..."
+                        isClearable
+                        required
+                        styles={customStylesSelect}
+                    />
+                </div>
+            </div>
 
-                    .form-group input,
-                    .form-group select {
-                    padding: 0.6rem;
-                    border-radius: 6px;
-                    border: 1px solid #ccc;
-                    font-size: 1rem;
-                    color: white;
-                    background-color: #272626ff;
-                    transition: border-color 0.2s ease-in-out;
-                    }
+            <div className="form-row">
+                {/* BARRIO */}
+                <div className="form-col">
+                    <label>Barrio:</label>
+                    <Select
+                        className="form-select-react"
+                        classNamePrefix="rs"
+                        options={opciones_barrios}
+                        value={opciones_barrios.find(op => op.value === paraje.barrio) || null}
+                        onChange={selectChange}
+                        name='barrio'
+                        placeholder="Barrio..."
+                        isClearable
+                        required
+                        styles={customStylesSelect}
+                    />
+                </div>
 
-                    .form-group input:focus,
-                    .form-group select:focus {
-                    border-color: rgb(115, 8, 8);
-                    outline: none;
-                    }
+                {/* CALLE */}
+                <div className="form-col">
+                    <label>Calle:</label>
+                    <Select
+                        className="form-select-react"
+                        classNamePrefix="rs"
+                        options={opciones_calles}
+                        value={opciones_calles.find(op => op.value === paraje.calle) || null}
+                        onChange={selectChange}
+                        name='calle'
+                        placeholder="Calle..."
+                        isClearable
+                        required
+                        styles={customStylesSelect}
+                    />
+                </div>
 
-                    .checkbox-group {
-                    display: flex;
-                    align-items: center;
-                    margin-top: 1.5rem;
-                    }
+                {/* ALTURA */}
+                <div className="form-col">
+                    <label>Altura:</label>
+                    <input
+                        type="number"
+                        name="altura"
+                        placeholder="Altura"
+                        value={paraje.altura}
+                        onChange={inputChange}
+                        required
+                    />
+                </div>
+            </div>
 
-                    .checkbox-group label {
-                    color: #eee;
-                    font-weight: 500;
-                    }
+            <div className="form-submit">
+                <button type="submit" className="submit-btn">Cargar</button>
+            </div>
 
-                    .form-footer {
-                    margin-top: 2rem;
-                    text-align: center;
-                    }
+        </form>
+    </div>
 
-                    button.submit-btn {
-                    padding: 0.75rem 2rem;
-                    background-color: #8B0000;
-                    color: white;
-                    border: none;
-                    border-radius: 8px;
-                    font-size: 1.1rem;
-                    font-weight: bold;
-                    cursor: pointer;
-                    transition: background-color 0.3s ease;
-                    }
+    {/* ----------- ESTILOS UNIFICADOS ----------- */}
+    <style jsx>{`
+        .form-container {
+            background-color: #1f1f1f;
+            color: #fff;
+            padding: 2rem;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
+        }
 
-                    button.submit-btn:hover {
-                    background-color: rgb(115, 8, 8);
-                    }
+        .titulo-pagina {
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
 
-                    @media (max-width: 768px) {
-                    .grid-container {
-                        grid-template-columns: 1fr;
-                    }
+        .formulario {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
 
-                `}
-            </style>
-        </>
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .form-col {
+            flex: 1;
+            min-width: 220px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            background-color: #2c2c2c;
+            color: white;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 0.6rem;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s ease-in-out;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            border-color: #a30000;
+        }
+
+        .form-select-react {
+            min-width: 100%;
+        }
+
+        .form-submit {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .submit-btn {
+            background-color: #8B0000;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: 600;
+        }
+
+        .submit-btn:hover {
+            background-color: #a30000;
+            transform: translateY(-3px);
+        }
+    `}</style>
+</>
+
+
+
     )
 }
 

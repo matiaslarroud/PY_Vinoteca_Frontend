@@ -43,103 +43,146 @@ const createBodega = ({exito}) => {
     }
 
     return(
-        <>
-            <div className="form-container">
-                <h1 className="titulo-pagina">Cargar Bodega</h1>
-                <form id="formC">
-                    <fieldset className="grid-container">
-                    <div className="form-group input-centered">
-                        <label htmlFor="nombre">Nombre:</label>
-                        <input type="text" onChange={inputChange} value={bodega.name} name="name" placeholder="Ingresa el nombre de la bodega" required></input>
-                    </div>
-                    <div className="form-group input-centered">
-                        <label htmlFor="nombre">Familia:</label>
-                        <input type="text" onChange={inputChange} value={bodega.familia} name="familia" placeholder="Ingresa el nombre de la familia" required></input>
-                    </div>
-                    
-                    </fieldset>
-                    <div className="button-area">
-                        <button type="submit" className="submit-btn" onClick={clickChange}>
-                        Cargar Bodega
-                        </button>
-                    </div>
-                </form>
-            </div>
-            <style jsx>
-                {`
-                    .form-container {
-                        display: flex;
-                        flex-direction: column;
-                        width: 100%;
-                        height: 100%;
-                        max-height: 90vh;
-                        overflow-y: auto;                        
-                        max-width: 500px;
-                        border-radius: 12px;
-                        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-                        }
+       <>
+  <div className="form-container">
+    <h1 className="titulo-pagina">Cargar Bodega</h1>
 
-                        .form-carga-button{
-                            text-align: center;
-                            margin-top: auto;
-                        }
+    <form id="formC">
+      <fieldset className="grid-container">
 
-                        .form-group {
-                        display: flex;
-                        flex-direction: column;
-                        heigth:2rem;
-                        width: 90%;
-                        }
+        <div className="form-group input-centered">
+          <label htmlFor="nombre">Nombre:</label>
+          <input
+            type="text"
+            onChange={inputChange}
+            value={bodega.name}
+            name="name"
+            placeholder="Ingresa el nombre de la bodega"
+            required
+          />
+        </div>
 
-                        .form-group label {
-                        margin-bottom: 0.5rem;
-                        font-weight: 600;
-                        color: #444;
-                        }
+        <div className="form-group input-centered">
+          <label htmlFor="familia">Familia:</label>
+          <input
+            type="text"
+            onChange={inputChange}
+            value={bodega.familia}
+            name="familia"
+            placeholder="Ingresa el nombre de la familia"
+            required
+          />
+        </div>
 
-                        .form-group input,
-                        .form-group select,
-                        .form-group textarea {
-                        padding: 0.75rem;
-                        border: 1px solid #ccc;
-                        border-radius: 8px;
-                        font-size: 1rem;
-                        transition: border-color 0.3s ease;
-                        }
+      </fieldset>
 
-                        .form-group input:focus,
-                        .form-group select:focus,
-                        .form-group textarea:focus {
-                        outline: none;
-                        border-color:rgb(115, 8, 8);
-                        }
+      <div className="button-area">
+        <button type="submit" className="submit-btn" onClick={clickChange}>
+          Cargar
+        </button>
+      </div>
+    </form>
+  </div>
 
-                        button.submit-btn {
-                        padding: 0.75rem 1rem;
-                        background-color: #8B0000;
-                        color: #fff;
-                        border: none;
-                        border-radius: 8px;
-                        font-size: 1rem;
-                        font-weight: 600;
-                        cursor: pointer;
-                        transition: background-color 0.3s ease;
-                        }
+  <style jsx>{`
+    .form-container {
+      display: flex;
+      flex-direction: column;
+      width: fit-content;
+      max-height: 90vh;
+      padding: 1rem;
+      margin: 0 auto;
+      overflow-y: auto;
+      border-radius: 12px;
+      background: #1a1a1a;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
+      text-align: center;
+    }
 
-                        button.submit-btn:hover {
-                        background-color: rgb(115, 8, 8);
-                        }
-                        .titulo-pagina {
-                            font-size: 2rem;
-                            color: white;
-                            text-align: center;
-                            margin-top: 2px;
-                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-                        }
-                `}
-            </style>
-        </>
+    .titulo-pagina {
+      font-size: 2rem;
+      color: white;
+      text-align: center;
+      margin-bottom: 1rem;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    fieldset.grid-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      padding: 0;
+      border: none;
+      width: 100%;
+      align-items: center;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      align-items: flex-start;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      color: white;
+      margin-bottom: 0.4rem;
+    }
+
+    .form-group input {
+      width: 300px;
+      padding: 0.6rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      color: white;
+      background-color: #272626;
+      transition: border-color 0.2s ease-in-out;
+    }
+
+    .form-group input:focus {
+      border-color: rgb(115, 8, 8);
+      outline: none;
+    }
+
+    button.submit-btn {
+      padding: 0.75rem 2rem;
+      background-color: #8b0000;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: 1rem;
+    }
+
+    button.submit-btn:hover {
+      background-color: rgb(115, 8, 8);
+    }
+
+    @media (max-width: 768px) {
+      .form-container {
+        width: 95%;
+      }
+
+      .form-group input {
+        width: 100%;
+      }
+    }
+  `}</style>
+</>
+
     )
 }
 

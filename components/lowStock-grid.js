@@ -134,6 +134,7 @@ export default function LowStockGrid({ products = [], title = "Productos con Sto
       {products.length === 0 ? (
         <p>No hay productos con stock bajo.</p>
       ) : (
+       <div className={styles.tableWrapper}> 
         <table className={styles.table}>
           <thead>
             <tr className="fila">
@@ -184,6 +185,7 @@ export default function LowStockGrid({ products = [], title = "Productos con Sto
             ))}
           </tbody>
         </table>
+       </div>
       )}
     </div>
 

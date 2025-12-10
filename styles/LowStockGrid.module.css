@@ -1,8 +1,8 @@
 .container {
   margin-top: 60px;
   width: 100%;
-  min-width: 400px;
-  max-width: 800px;
+  /* min-width: 400px; */
+  /* max-width: 800px; */
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(15px);
   padding: 30px;
@@ -16,10 +16,23 @@
   margin-bottom: 20px;
 }
 
-.table {
+/* .table {
   width: 100%;
   border-collapse: collapse;
+} */
+
+.tableWrapper {
+  width: 100%;
+  overflow-x: auto;       /* 🔥 permite scroll horizontal */
+  overflow-y: hidden;     /* opcional */
 }
+
+.table {
+  width: max-content;     /* 🔥 permite que la tabla crezca todo lo que necesite */
+  min-width: 100%;        /* 🔥 evita que sea más chica que el container */
+  border-collapse: collapse;
+}
+
 
 .table th,
 .table td {

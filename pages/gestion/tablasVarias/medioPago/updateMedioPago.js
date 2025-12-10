@@ -63,125 +63,142 @@ const updateMedioPago = ({medioPagoID, exito}) => {
     }
 
     return(
-        <>
-            <div className="form-container">
+       <>
+    <div className="form-container">
+        <div className="form-row">
+            <div className="form-col">
                 <h1 className="titulo-pagina">Modificar Medio de Pago</h1>
-                <form id="formC">
-                    <fieldset className="grid-container">
-                    <div className="form-group input-centered">
-                        <label htmlFor="nombre">Nombre:</label>
-                        <input type="text" onChange={inputChange} value={medioPago.name} name="name" placeholder="Ingresa el nombre del medio de pago" required></input>
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="nombre">Interes:</label>
-                        <input type="number" onChange={inputChange} value={medioPago.interes} name="interes" placeholder="Ingresa el interes del medio de pago" required></input>
-                    </div>
-                    
-                    </fieldset>
-                    <button type="submit" className="submit-btn" onClick={clickChange}>Guardar</button>
-                </form>
             </div>
-            <style jsx>{`
-  .form-container {
-    display: flex;
-    flex-direction: column;
-    width: fit-content;
-    max-height: 90vh;
-    padding: 1rem;
-    margin: 0 auto;
-    overflow-y: auto;
-    border-radius: 12px;
-    background: #1a1a1a;
-    box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
-    text-align: center;
-  }
+        </div>
 
-  .titulo-pagina {
-    font-size: 2rem;
-    color: white;
-    text-align: center;
-    margin-bottom: 1rem;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
-  }
+        <form className="formulario-picada">
+            <div className="form-row">
+                <div className="form-col">
+                    <label htmlFor="name">Nombre:</label>
+                    <input
+                        type="text"
+                        name="name"
+                        value={medioPago.name}
+                        onChange={inputChange}
+                        placeholder="Ingresa el nombre del medio de pago"
+                        required
+                    />
+                </div>
 
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    align-items: center;
-  }
+                <div className="form-col">
+                    <label htmlFor="interes">Interés:</label>
+                    <input
+                        type="number"
+                        name="interes"
+                        value={medioPago.interes}
+                        onChange={inputChange}
+                        placeholder="Ingresa el interés"
+                        required
+                    />
+                </div>
+            </div>
 
-  fieldset.grid-container {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    padding: 0;
-    border: none;
-    align-items: center;
-  }
+            <div className="form-row">
+                <div className="form-carga-button">
+                    <button type="submit" className="submit-btn" onClick={clickChange}>
+                        Guardar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
 
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-  }
+    <style jsx>{`
+        .form-container {
+            background-color: #1f1f1f;
+            color: #fff;
+            padding: 2rem;
+            border-radius: 16px;
+            width: 100%;
+            height: 100%;
+            margin: 0 auto;
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
+        }
 
-  .form-group label {
-    font-weight: 600;
-    color: white;
-    margin-bottom: 0.4rem;
-  }
+        .titulo-pagina {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            font-weight: bold;
+            color: #f5f5f5;
+        }
 
-  .form-group input,
-  .form-group select {
-    width: 300px;
-    padding: 0.6rem;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    font-size: 1rem;
-    color: white;
-    background-color: #272626;
-    transition: border-color 0.2s ease-in-out;
-  }
+        .formulario-picada {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
 
-  .form-group input:focus,
-  .form-group select:focus {
-    border-color: rgb(115, 8, 8);
-    outline: none;
-  }
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            justify-content: center;
+        }
 
-  button.submit-btn {
-    padding: 0.75rem 2rem;
-    background-color: #8b0000;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin-top: 1rem;
-  }
+        .form-col {
+            flex: 1;
+            min-width: 250px;
+            display: flex;
+            flex-direction: column;
+        }
 
-  button.submit-btn:hover {
-    background-color: rgb(115, 8, 8);
-  }
+        label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
 
-  @media (max-width: 768px) {
-    .form-container {
-      width: 95%;
-    }
+        input[type="text"],
+        input[type="number"] {
+            background-color: #2c2c2c;
+            color: white;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 0.6rem;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s ease-in-out;
+        }
 
-    .form-group input,
-    .form-group select {
-      width: 100%;
-    }
-  }
-`}</style>
+        input:focus {
+            border-color: #571212ff;
+        }
 
-        </>
+        .submit-btn {
+            background-color: #8b0000;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        .submit-btn:hover {
+            background-color: #a30000;
+            transform: translateY(-3px);
+        }
+
+        .form-carga-button {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .form-col {
+                min-width: 100%;
+            }
+        }
+    `}</style>
+</>
+
     )
 }
 

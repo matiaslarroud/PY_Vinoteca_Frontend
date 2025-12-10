@@ -67,27 +67,45 @@ tr:hover {
   
 .modal {
     position: fixed;
-    inset: 0; /* top: 0; bottom: 0; left: 0; right: 0 */
+    inset: 0;
     background-color: rgba(0, 0, 0, 0.5);
-    z-index:1000;
+    z-index: 1000;
+
     display: flex;
     justify-content: center;
-    align-items: c;
-    padding: 1rem; /* para espacio lateral en pantallas pequeñas */
+    align-items: center;
+
+    padding: 1rem;
     overflow-y: auto;
-    
 }
 
 .modal-content {
     background-color: #121212;
     padding: 2rem;
-    border-radius: 10px;
-    width: 100%;
-    max-width: 1200px;
-    max-height: 90vh;
+    border-radius: 12px;
+
+    /* ⭐ ANCHO PROPORCIONAL */
+    width: auto;            /* ocupa 90% de la pantalla */
+    max-width: 1200px;     /* pero nunca más grande que 1200px */
+    min-width: 280px;      /* evita romperse en celulares muy chicos */
+
+    /* ⭐ ALTO PROPORCIONAL */
+    max-height: 90vh;      /* hasta 90% de la altura total */
+    height: auto;
+
     overflow-y: auto;
     position: relative;
 }
+
+/* ⭐ Ajustes especiales para pantallas muy pequeñas (celulares) */
+@media (max-width: 600px) {
+    .modal-content {
+        width: 95%;       /* casi todo el ancho */
+        padding: 1.2rem;  /* menos padding para no comer espacio */
+        border-radius: 10px;
+    }
+}
+
 
 
 .close {
@@ -180,3 +198,4 @@ button.submit-btn {
 button.submit-btn:hover {
   background-color: rgb(115, 8, 8);
 }
+
