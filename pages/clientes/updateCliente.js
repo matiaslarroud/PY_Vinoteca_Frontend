@@ -192,7 +192,6 @@ const fetchPaises = () => {
                     <button className="close" onClick={() => 
                         {
                             setMostrarPais(null)
-                            fetchPaises();
                         }
                     }>
                         &times;
@@ -213,7 +212,6 @@ const fetchPaises = () => {
                     <button className="close" onClick={() => 
                         {
                             setMostrarProvincia(null)
-                            fetchData()
                         }
                     }>
                         &times;
@@ -222,7 +220,7 @@ const fetchPaises = () => {
                         exito={() => 
                             {
                                 setMostrarProvincia(false)
-                                fetchData()
+                                fetchProvincias()
                             }}
                     />
                 </div>
@@ -235,7 +233,6 @@ const fetchPaises = () => {
                     <button className="close" onClick={() => 
                         {
                             setMostrarLocalidad(null)
-                            fetchData()
                         }
                     }>
                         &times;
@@ -244,7 +241,7 @@ const fetchPaises = () => {
                         exito={() => 
                             {
                                 setMostrarLocalidad(false)
-                                fetchData()
+                                fetchLocalidades()
                             }}
                     />
                 </div>
@@ -257,7 +254,6 @@ const fetchPaises = () => {
                     <button className="close" onClick={() => 
                         {
                             setMostrarBarrio(null)
-                            fetchData()
                         }
                     }>
                         &times;
@@ -266,7 +262,7 @@ const fetchPaises = () => {
                         exito={() => 
                             {
                                 setMostrarBarrio(false)
-                                fetchData()
+                                fetchBarrios()
                             }}
                     />
                 </div>
@@ -279,7 +275,6 @@ const fetchPaises = () => {
                     <button className="close" onClick={() => 
                         {
                             setMostrarCalle(null)
-                            fetchData()
                         }
                     }>
                         &times;
@@ -288,7 +283,7 @@ const fetchPaises = () => {
                         exito={() => 
                             {
                                 setMostrarCalle(false)
-                                fetchData()
+                                fetchCalles()
                             }}
                     />
                 </div>
@@ -301,7 +296,6 @@ const fetchPaises = () => {
                     <button className="close" onClick={() => 
                         {
                             setMostrarCondicionIva(null)
-                            fetchData()
                         }
                     }>
                         &times;
@@ -310,7 +304,7 @@ const fetchPaises = () => {
                         exito={() => 
                             {
                                 setMostrarCondicionIva(false)
-                                fetchData()
+                                fetchCondicionesIVA()
                             }}
                     />
                 </div>
@@ -820,18 +814,6 @@ const fetchPaises = () => {
             </div>
             <style jsx>
                 {`
-                    .modal {
-                        position: fixed;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: rgba(0,0,0,0.5); /* oscurece fondo */
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        z-index: 1000;
-                    }
                     
                     .checkbox-modern {
                         display: flex;
@@ -881,28 +863,6 @@ const fetchPaises = () => {
                         cursor: pointer;
                     }
 
-                    .input-date {
-                        width: 100%;
-                        padding: 0.6rem;
-                        border-radius: 6px;
-                        border: 1px solid #444;
-                        background-color: #1f1f1f;
-                        color: #fff;
-                        font-size: 1rem;
-                        transition: 0.2s;
-                    }
-
-                    .input-date:focus {
-                        border-color: #a30000;
-                        outline: none;
-                    }
-
-                    .input-date::-webkit-calendar-picker-indicator {
-                        filter: invert(1);
-                        cursor: pointer;
-                    }
-
-
                     .close {
                         position: absolute;
                         top: 1rem;
@@ -931,19 +891,6 @@ const fetchPaises = () => {
                     .btn-icon:hover {
                     background-color: #a30000;
                     transform: translateY(-3px);
-                    }
-
-                    .modal-content {
-                        background-color: #121212;
-                        padding: 40px;
-                        border-radius: 12px;
-                        width: 90%;
-                        height:80%;
-                        max-width: 500px;
-                        max-height: 800px;
-                        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                        position: relative;
-                        margin: 20px;
                     }
 
                     .form-container {
@@ -1152,6 +1099,80 @@ const fetchPaises = () => {
                         font-size: 1rem;
                         outline: none;
                         transition: border-color 0.2s ease-in-out;
+                    }
+                    
+                    .input-date {
+                        background-color: #2c2c2c;
+                        color: white;
+                        border: 1px solid #444;
+                        border-radius: 8px;
+                        padding: 0.6rem;
+                        font-size: 1rem;
+                        outline: none;
+                        transition: border-color 0.2s ease-in-out;
+                        width: 200px; /* igual que tus otros inputs */
+                    }
+
+                    /* Mantener el icono del calendario visible en modo oscuro */
+                    .input-date::-webkit-calendar-picker-indicator {
+                        filter: invert(1);
+                        cursor: pointer;
+                    }
+
+                    /* Mantener visible el texto del campo */
+                    .input-date::-webkit-datetime-edit-text,
+                    .input-date::-webkit-datetime-edit-month-field,
+                    .input-date::-webkit-datetime-edit-day-field,
+                    .input-date::-webkit-datetime-edit-year-field {
+                        color: white;
+                    }
+
+                    /* Efecto al hacer focus */
+                    .input-date:focus {
+                        border-color: rgb(115, 8, 8);
+                    }
+
+                    
+  
+                    .modal {
+                        position: fixed;
+                        inset: 0;
+                        background-color: rgba(0, 0, 0, 0.5);
+                        z-index: 1000;
+
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+
+                        padding: 1rem;
+                        overflow-y: auto;
+                    }
+
+                    .modal-content {
+                        background-color: #121212;
+                        padding: 2rem;
+                        border-radius: 12px;
+
+                        /* ⭐ ANCHO PROPORCIONAL */
+                        width: auto;            /* ocupa 90% de la pantalla */
+                        max-width: 1200px;     /* pero nunca más grande que 1200px */
+                        min-width: 280px;      /* evita romperse en celulares muy chicos */
+
+                        /* ⭐ ALTO PROPORCIONAL */
+                        max-height: 90vh;      /* hasta 90% de la altura total */
+                        height: auto;
+
+                        overflow-y: auto;
+                        position: relative;
+                    }
+
+                    /* ⭐ Ajustes especiales para pantallas muy pequeñas (celulares) */
+                    @media (max-width: 600px) {
+                        .modal-content {
+                            width: 95%;       /* casi todo el ancho */
+                            padding: 1.2rem;  /* menos padding para no comer espacio */
+                            border-radius: 10px;
+                        }
                     }
                 `}
             </style>

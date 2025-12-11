@@ -143,6 +143,43 @@ const formTransporte = ({exito}) => {
     const opciones_calles = calles.filter(a => (a.barrio === transporte.barrio)).map(p => ({ value: p._id, label: p.name }));
     const opciones_condicionesIva = condicionesIva.map(p => ({ value: p._id, label: p.name }));
 
+    const customStyle = {
+        container: (base) => ({
+        ...base,
+        width: 220, // ⬅️ ancho fijo total
+        }),
+        control: (base) => ({
+        ...base,
+        minWidth: 220,
+        maxWidth: 220,
+        backgroundColor: '#2c2c2c',
+        color: 'white',
+        border: '1px solid #444',
+        borderRadius: 8,
+        }),
+        singleValue: (base) => ({
+        ...base,
+        color: 'white',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+        }),
+        menu: (base) => ({
+        ...base,
+        backgroundColor: '#2c2c2c',
+        color: 'white',
+        }),
+        option: (base, { isFocused }) => ({
+        ...base,
+        backgroundColor: isFocused ? '#444' : '#2c2c2c',
+        color: 'white',
+        }),
+        input: (base) => ({
+        ...base,
+        color: 'white',
+        }),
+    }
+
     return(
         <>
             
@@ -152,7 +189,7 @@ const formTransporte = ({exito}) => {
                     <h1 className="titulo-pagina">Cargar Transporte</h1>
                 </div>
 
-                <form id="updatePicada" className="formulario-picada">
+                <form className="formulario-presupuesto">
                     <div className="form-row">
                         <div className="form-col">
                             <label htmlFor="nombre">
@@ -182,58 +219,7 @@ const formTransporte = ({exito}) => {
                                 required
                             />
                         </div>
-                         <div className="form-col">
-                            <label >
-                                Condicion de IVA:
-                            </label>
-                            <Select
-                                className="form-select-react"
-                                classNamePrefix="rs"
-                                options={opciones_condicionesIva}
-                                value={opciones_condicionesIva.find(op => op.value === transporte.condicionIva) || null}
-                                onChange={selectChange}
-                                name='condicionIva'
-                                placeholder="Condicion de iva..."
-                                isClearable
-                                required={true}
-                                styles={{
-                                    container: (base) => ({
-                                    ...base,
-                                    width: '100%', // ⬅️ ancho fijo total
-                                    }),
-                                    control: (base) => ({
-                                    ...base,
-                                    minWidth: 100,
-                                    maxWidth: 220,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    border: '1px solid #444',
-                                    borderRadius: 8,
-                                    }),
-                                    singleValue: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                    }),
-                                    menu: (base) => ({
-                                    ...base,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    option: (base, { isFocused }) => ({
-                                    ...base,
-                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    input: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    }),
-                                }}
-                            />
-                        </div> 
+
                         <div className="form-col">
                             <label htmlFor="nombre">
                                 Telefono:
@@ -249,6 +235,8 @@ const formTransporte = ({exito}) => {
                                 required
                             />
                         </div>
+                    </div>
+                    <div className="form-row">
                         <div className="form-col">
                             <label htmlFor="nombre">
                                 E-mail:
@@ -262,6 +250,23 @@ const formTransporte = ({exito}) => {
                                 required
                             />
                         </div>
+                         <div className="form-col">
+                            <label >
+                                Condicion de IVA:
+                            </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_condicionesIva}
+                                value={opciones_condicionesIva.find(op => op.value === transporte.condicionIva) || null}
+                                onChange={selectChange}
+                                name='condicionIva'
+                                placeholder="Condicion de iva..."
+                                isClearable
+                                required={true}
+                                styles={customStyle}
+                            />
+                        </div> 
                     </div>
                     
                     <div className="form-row">  
@@ -279,42 +284,7 @@ const formTransporte = ({exito}) => {
                                 placeholder="Pais..."
                                 isClearable
                                 required={true}
-                                styles={{
-                                    container: (base) => ({
-                                    ...base,
-                                    width: '100%', // ⬅️ ancho fijo total
-                                    }),
-                                    control: (base) => ({
-                                    ...base,
-                                    minWidth: 100,
-                                    maxWidth: 220,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    border: '1px solid #444',
-                                    borderRadius: 8,
-                                    }),
-                                    singleValue: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                    }),
-                                    menu: (base) => ({
-                                    ...base,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    option: (base, { isFocused }) => ({
-                                    ...base,
-                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    input: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    }),
-                                }}
+                                styles={customStyle}
                             />
                         </div> 
                         <div className="form-col">
@@ -331,42 +301,7 @@ const formTransporte = ({exito}) => {
                                 placeholder="Provincia..."
                                 required={true}
                                 isClearable
-                                styles={{
-                                    container: (base) => ({
-                                    ...base,
-                                    width: '100%', // ⬅️ ancho fijo total
-                                    }),
-                                    control: (base) => ({
-                                    ...base,
-                                    minWidth: 100,
-                                    maxWidth: 220,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    border: '1px solid #444',
-                                    borderRadius: 8,
-                                    }),
-                                    singleValue: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                    }),
-                                    menu: (base) => ({
-                                    ...base,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    option: (base, { isFocused }) => ({
-                                    ...base,
-                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    input: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    }),
-                                }}
+                                styles={customStyle}
                             />
                         </div>
                         <div className="form-col">
@@ -383,44 +318,11 @@ const formTransporte = ({exito}) => {
                                 placeholder="Localidad..."
                                 required={true}
                                 isClearable
-                                styles={{
-                                    container: (base) => ({
-                                    ...base,
-                                    width: '100%', // ⬅️ ancho fijo total
-                                    }),
-                                    control: (base) => ({
-                                    ...base,
-                                    minWidth: 100,
-                                    maxWidth: 220,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    border: '1px solid #444',
-                                    borderRadius: 8,
-                                    }),
-                                    singleValue: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                    }),
-                                    menu: (base) => ({
-                                    ...base,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    option: (base, { isFocused }) => ({
-                                    ...base,
-                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    input: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    }),
-                                }}
+                                styles={customStyle}
                             />
                         </div>
+                    </div>
+                    <div className="form-row">
                         <div className="form-col">
                             <label >
                                 Barrio
@@ -435,42 +337,7 @@ const formTransporte = ({exito}) => {
                                 placeholder="Barrio..."
                                 required={true}
                                 isClearable
-                                styles={{
-                                    container: (base) => ({
-                                    ...base,
-                                    width: '100%', // ⬅️ ancho fijo total
-                                    }),
-                                    control: (base) => ({
-                                    ...base,
-                                    minWidth: 100,
-                                    maxWidth: 220,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    border: '1px solid #444',
-                                    borderRadius: 8,
-                                    }),
-                                    singleValue: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                    }),
-                                    menu: (base) => ({
-                                    ...base,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    option: (base, { isFocused }) => ({
-                                    ...base,
-                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    input: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    }),
-                                }}
+                                styles={customStyle}
                             />
                         </div>
                         <div className="form-col">
@@ -487,71 +354,151 @@ const formTransporte = ({exito}) => {
                                 placeholder="Calle..."
                                 required={true}
                                 isClearable
-                                styles={{
-                                    container: (base) => ({
-                                    ...base,
-                                    width: '100%', // ⬅️ ancho fijo total
-                                    }),
-                                    control: (base) => ({
-                                    ...base,
-                                    minWidth: 100,
-                                    maxWidth: 220,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    border: '1px solid #444',
-                                    borderRadius: 8,
-                                    }),
-                                    singleValue: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                    }),
-                                    menu: (base) => ({
-                                    ...base,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    option: (base, { isFocused }) => ({
-                                    ...base,
-                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    input: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    }),
-                                }}
+                                styles={customStyle}
                             />
                         </div>
                     </div>
 
-                    <div className="form-row">
-                        <div className="form-col-precioVenta">
-                            <div className="box-cargar" >
-                                <div className="form-submit">
-                                    <button
-                                    type="submit"
-                                    className="submit-btn"
-                                    onClick={(e) => {
-                                        clickChange(e);
-                                    }}
-                                    >
-                                    Cargar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                    <div className="form-submit">
+                       <button
+                            type="submit"
+                            className="submit-btn"
+                            onClick={(e) => {
+                                clickChange(e);
+                            }}
+                            >
+                            Cargar
+                        </button>
                     </div>
-            </form>
+                </form>
 
             </div>
             <style jsx>
                 {`
-                    .box-cargar{
+                    .modal {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background-color: rgba(0,0,0,0.5); /* oscurece fondo */
+                        display: flex;
                         justify-content: center;
                         align-items: center;
+                        z-index: 1000;
+                    }
+                    
+                    .checkbox-modern {
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        cursor: pointer;
+                        user-select: none;
+                        position: relative;
+                    }
+
+                    .checkbox-modern input[type='checkbox'] {
+                        appearance: none;
+                        -webkit-appearance: none;
+                        width: 22px;
+                        height: 22px;
+                        border: 2px solid #a30000;
+                        border-radius: 6px;
+                        background-color: #2c2c2c;
+                        cursor: pointer;
+                        position: relative;
+                        transition: all 0.25s ease;
+                    }
+
+                    .checkbox-modern input[type='checkbox']:hover {
+                        border-color: #cc0000;
+                    }
+
+                    .checkbox-modern input[type='checkbox']:checked {
+                        background-color: #a30000;
+                        border-color: #a30000;
+                    }
+
+                    .checkbox-modern input[type='checkbox']:checked::after {
+                        content: '✔';
+                        color: white;
+                        font-size: 14px;
+                        position: absolute;
+                        top: 0;
+                        left: 4px;
+                        font-weight: bold;
+                    }
+
+                    .checkbox-modern label {
+                        color: #fff;
+                        font-size: 1rem;
+                        font-weight: 500;
+                        cursor: pointer;
+                    }
+
+                    .input-date {
+                        width: 100%;
+                        padding: 0.6rem;
+                        border-radius: 6px;
+                        border: 1px solid #444;
+                        background-color: #1f1f1f;
+                        color: #fff;
+                        font-size: 1rem;
+                        transition: 0.2s;
+                    }
+
+                    .input-date:focus {
+                        border-color: #a30000;
+                        outline: none;
+                    }
+
+                    .input-date::-webkit-calendar-picker-indicator {
+                        filter: invert(1);
+                        cursor: pointer;
+                    }
+
+
+                    .close {
+                        position: absolute;
+                        top: 1rem;
+                        right: 1.5rem;
+                        font-size: 1.5rem;
+                        background: transparent;
+                        border: none;
+                        cursor: pointer;
+                    }
+                    .btn-icon {
+                        background-color: #8b0000;
+                        color: white;
+                        padding: 0.8rem;
+                        font-size: 1.2rem;
+                        border-radius: 50%;
+                        border: none;
+                        cursor: pointer;
+                        width: 2.5rem;
+                        height: 2.5rem;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        transition: background-color 0.3s, transform 0.2s;
+                    }
+                    
+                    .btn-icon:hover {
+                    background-color: #a30000;
+                    transform: translateY(-3px);
+                    }
+
+                    .modal-content {
+                        background-color: #121212;
+                        padding: 40px;
+                        border-radius: 12px;
+                        width: 90%;
+                        height:80%;
+                        max-width: 500px;
+                        max-height: 800px;
+                        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                        position: relative;
+                        margin: 20px;
                     }
 
                     .form-container {
@@ -564,21 +511,13 @@ const formTransporte = ({exito}) => {
                         margin: 0 auto;
                         box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
                     }
-
-                    .precio-venta {
-                        max-width: 100px;
+                        
+                    .box-cargar{
+                        justify-content: center;
+                        align-items: center;
                     }
 
-                    .titulo-pagina {
-                        text-align: center;
-                        width: 100%;
-                        font-size: 2rem;
-                        margin-bottom: 1.5rem;
-                        font-weight: bold;
-                        color: #f5f5f5;
-                    }
-
-                    .formulario-picada {
+                    .formulario-presupuesto {
                         display: flex;
                         flex-direction: column;
                         gap: 2rem;
@@ -592,11 +531,9 @@ const formTransporte = ({exito}) => {
 
                     .form-col {
                         flex: 1;
-                        min-width: 100px;
-                        max-width: 200px; 
+                        max-width: 220px;
                         display: flex;
                         flex-direction: column;
-                        gap: 8px;
                     }
 
                     .form-col-productos {
@@ -627,6 +564,7 @@ const formTransporte = ({exito}) => {
                         flex-direction: column;
                     }
 
+
                     label {
                         font-weight: 500;
                         margin-bottom: 0.5rem;
@@ -635,16 +573,8 @@ const formTransporte = ({exito}) => {
                         gap: 0.5rem;
                     }
 
-                    input[type="text"],
-                    input[type="number"] {
-                        background-color: #2c2c2c;
-                        color: white;
-                        border: 1px solid #444;
-                        border-radius: 8px;
-                        padding: 0.6rem;
-                        font-size: 1rem;
-                        outline: none;
-                        transition: border-color 0.2s ease-in-out;
+                    .precio-venta {
+                        max-width: 100px;
                     }
 
                     input:focus {
@@ -658,7 +588,7 @@ const formTransporte = ({exito}) => {
                         flex: 1;
                     }
 
-                    .btn-plus {
+                        .btn-plus {
                         background-color: transparent;
                         color: #651616ff;
                         border: none;
@@ -668,9 +598,10 @@ const formTransporte = ({exito}) => {
 
                     .btn-plus:hover {
                         color: #571212ff;
+                        transform: translateY(-3px);
                     }
 
-                    .form-group-insumos {
+                    .form-group-presupuesto {
                         display: flex;
                         flex-direction: column;
                         gap: 1rem;
@@ -679,19 +610,29 @@ const formTransporte = ({exito}) => {
                         padding-right: 8px;
                     }
 
-                    .insumo-item {
+                    .presupuesto-item {
                         display: flex;
                         align-items: center;
                         gap: 1rem;
                         flex-wrap: wrap;
                     }
 
-                    .insumo-item input[type="number"] {
-                        width: 120px;
+                    .presupuesto-item input[type="number"] {
+                        width: 80px;
                     }
 
-                    .btn-add-insumo {
-                        background-color: #a30000;
+                    .btn-remove {
+                        background-color: #651616ff;
+                        color: white;
+                        border: none;
+                        padding: 0.4rem 0.8rem;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        transition: background-color 0.2s ease-in-out;
+                    }
+
+                    .btn-add-producto {
+                        background-color: #651616ff;
                         color: white;
                         border: none;
                         padding: 0.5rem 1rem;
@@ -701,18 +642,19 @@ const formTransporte = ({exito}) => {
                         transition: background-color 0.2s ease-in-out;
                     }
 
-                    .btn-add-insumo:hover {
-                        background-color: #8b0000;
+                    .btn-add-producto:hover {
+                        background-color: #571212ff;
                         transform: translateY(-3px);
                     }
 
                     .form-submit {
                         justify-content: center;
+                        text-align: center;
                         margin-top: 1rem;
                     }
 
                     .submit-btn {
-                        background-color: #a30000;
+                        background-color: #651616ff;
                         color: white;
                         border: none;
                         padding: 0.8rem 1.5rem;
@@ -723,65 +665,48 @@ const formTransporte = ({exito}) => {
                     }
 
                     .submit-btn:hover {
-                        background-color: #8b0000;
+                        background-color: #571212ff;
                         transform: translateY(-3px);
                     }
-                        
-                    .modal {
-                        position: fixed;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: rgba(0,0,0,0.5); /* oscurece fondo */
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        z-index: 1000;
-                    }
 
-                    .modal-content {
-                        background-color: #121212;
-                        padding: 40px;
-                        border-radius: 12px;
-                        width: 90%;
-                        height:80%;
-                        max-width: 500px;
-                        max-height: 800px;
-                        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                        position: relative;
-                        margin: 20px;
-                    }
-
-                    .close {
-                        position: absolute;
-                        top: 1rem;
-                        right: 1.5rem;
-                        font-size: 1.5rem;
-                        background: transparent;
+                    button.submit-btn {
+                        padding: 0.75rem 1rem;
+                        background-color: #8B0000;
+                        color: #fff;
                         border: none;
+                        border-radius: 8px;
+                        font-size: 1rem;
+                        font-weight: 600;
                         cursor: pointer;
+                        transition: background-color 0.3s ease;
                     }
 
-                    .btn-icon {
-                        background-color: #8b0000;
-                        color: white;
-                        padding: 0.8rem;
-                        font-size: 1.2rem;
-                        border-radius: 50%;
-                        border: none;
-                        cursor: pointer;
-                        width: 2.5rem;
-                        height: 2.5rem;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        transition: background-color 0.3s, transform 0.2s;
+                    button.submit-btn:hover {
+                        background-color: rgb(115, 8, 8);
+                        transform: translateY(-3px);
                     }
                     
-                    .btn-icon:hover {
-                        background-color: #a30000;
-                        transform: translateY(-3px);
+                    .titulo-pagina {
+                        font-size: 2rem;
+                        width: 100%;
+                        color: white;
+                        text-align: center;
+                        margin-top: 2px;
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+                    }
+
+                    
+                    input[type="text"],
+                    input[type="number"] {
+                        background-color: #2c2c2c;
+                        color: white;
+                        border: 1px solid #444;
+                        border-radius: 8px;
+                        padding: 0.6rem;
+                        font-size: 1rem;
+                        outline: none;
+                        transition: border-color 0.2s ease-in-out;
                     }
                 `}
             </style>
