@@ -440,34 +440,29 @@ const formOrden = ({exito , tipo , param}) => {
 
                     .form-col {
                         flex: 1;
-                        min-width: 250px;
                         display: flex;
                         flex-direction: column;
                     }
 
                     .form-col-productos {
-                        flex: 8;
                         min-width: 0; /* Importante para que no desborde */
                         display: flex;
                         flex-direction: column;
                     }
                         
                     .form-col-item1 {
-                        flex: 3;
                         min-width: 0; /* Importante para que no desborde */
                         display: flex;
                         flex-direction: column;
                     }
                         
                     .form-col-item2 {
-                        flex: 2;
                         min-width: 0; /* Importante para que no desborde */
                         display: flex;
                         flex-direction: column;
                     }
 
                     .form-col-precioVenta {
-                        flex: 2;
                         min-width: 0;
                         display: flex;
                         flex-direction: column;

@@ -268,6 +268,7 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
 
     return(
         <>
+           
             {mostrarModalCreate2 && (
                 <div className="modal">
                 <div className="modal-content">
@@ -412,20 +413,21 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                             />
                         </div>
 
+                        
                     </div>
                     <div className="form-row">
                         <div className="form-col-productos">
                             <label>
                                     Productos:
-                                    {/* <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button> */}
                                     <button type="button" className="btn-add-producto" onClick={agregarDetalle}>
                                         + Agregar Producto
                                     </button>
                             </label>
                             <div className="form-group-presupuesto">
                                 
-                                {detalles.map((d, i) => (
-                                <div key={i} className="presupuesto-item">
+                                {detalles.map((d, i) => {
+
+                                return <div key={i} className="presupuesto-item">
                                     <div className='form-col-item1'>
                                         <Select
                                             className="form-select-react"
@@ -439,38 +441,34 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                                             isClearable
                                             styles={{
                                                 container: (base) => ({
-                                                ...base,
-                                                width: 120, // ⬅️ ancho fijo total
+                                                    ...base,
+                                                    width: 150,
                                                 }),
-                                                control: (base) => ({
-                                                ...base,
-                                                minWidth: 150,
-                                                maxWidth: 150,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                border: '1px solid #444',
-                                                borderRadius: 8,
-                                                }),
-                                                singleValue: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                                control: (base, state) => ({
+                                                    ...base,
+                                                    width: 150,
+                                                    backgroundColor: '#2c2c2c !important',
+                                                    borderColor: state.isFocused ? '#666' : '#444',
+                                                    borderRadius: 8,
+                                                    color: 'white',
                                                 }),
                                                 menu: (base) => ({
-                                                ...base,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
+                                                    ...base,
+                                                    backgroundColor: '#2c2c2c',
+                                                    color: 'white',
                                                 }),
                                                 option: (base, { isFocused }) => ({
-                                                ...base,
-                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                                color: 'white',
+                                                    ...base,
+                                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                                    color: 'white',
+                                                }),
+                                                singleValue: (base) => ({
+                                                    ...base,
+                                                    color: 'white !important',
                                                 }),
                                                 input: (base) => ({
-                                                ...base,
-                                                color: 'white',
+                                                    ...base,
+                                                    color: 'white !important',
                                                 }),
                                             }}
                                         />
@@ -488,38 +486,34 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                                             isClearable
                                             styles={{
                                                 container: (base) => ({
-                                                ...base,
-                                                width: 150, // ⬅️ ancho fijo total
+                                                    ...base,
+                                                    width: 180,
                                                 }),
-                                                control: (base) => ({
-                                                ...base,
-                                                minWidth: 150,
-                                                maxWidth: 150,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                border: '1px solid #444',
-                                                borderRadius: 8,
-                                                }),
-                                                singleValue: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                                control: (base, state) => ({
+                                                    ...base,
+                                                    width: 180,
+                                                    backgroundColor: '#2c2c2c !important',
+                                                    borderColor: state.isFocused ? '#666' : '#444',
+                                                    borderRadius: 8,
+                                                    color: 'white',
                                                 }),
                                                 menu: (base) => ({
-                                                ...base,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
+                                                    ...base,
+                                                    backgroundColor: '#2c2c2c',
+                                                    color: 'white',
                                                 }),
                                                 option: (base, { isFocused }) => ({
-                                                ...base,
-                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                                color: 'white',
+                                                    ...base,
+                                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                                    color: 'white',
+                                                }),
+                                                singleValue: (base) => ({
+                                                    ...base,
+                                                    color: 'white !important',
                                                 }),
                                                 input: (base) => ({
-                                                ...base,
-                                                color: 'white',
+                                                    ...base,
+                                                    color: 'white !important',
                                                 }),
                                             }}
                                         />
@@ -555,23 +549,22 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                                         </button>
                                     </div>
                                 </div>
-                                ))}
+                                })}
                             </div>
-                        </div> 
-                        <div className="form-col-precioVenta">
-                            <div className="box-cargar" >
-                                <label htmlFor="precioVenta">Total:
-                                    <input
-                                        type="number"
-                                        className='precio-venta'
-                                        onChange={inputChange}
-                                        value={presupuesto.total}
-                                        name="total"
-                                        disabled
-                                    />
+                        </div>
+                            <div className="form-secondary">
+                                <label htmlFor="precioVenta" className="label-box">
+                                    Total:
                                 </label>
-                                <div className="form-submit">
-                                    <button
+                                <input
+                                    type="number"
+                                    className="input-secondary"
+                                    value={presupuesto.total}
+                                    name="total"
+                                    disabled
+                                    />
+
+                                <button
                                     type="submit"
                                     className="submit-btn"
                                     onClick={(e) => {
@@ -585,10 +578,9 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                                     >
                                     Guardar
                                     </button>
-                                </div>
                             </div>
-                        </div>
-                    </div>
+                    </div> 
+                        
                 </form>
             </div>
             <style jsx>
@@ -605,20 +597,18 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                         align-items: center;
                         z-index: 1000;
                     }
+                    
 
-                    .modal-content {
-                        background-color: #121212;
-                        padding: 40px;
-                        border-radius: 12px;
-                        width: 90%;
-                        height:80%;
-                        max-width: 500px;
-                        max-height: 800px;
-                        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                        position: relative;
-                        margin: 20px;
+
+                    .close {
+                        position: absolute;
+                        top: 1rem;
+                        right: 1.5rem;
+                        font-size: 1.5rem;
+                        background: transparent;
+                        border: none;
+                        cursor: pointer;
                     }
-                        
                     .btn-icon {
                         background-color: #8b0000;
                         color: white;
@@ -640,6 +630,18 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                     transform: translateY(-3px);
                     }
 
+                    .modal-content {
+                        background-color: #121212;
+                        padding: 40px;
+                        border-radius: 12px;
+                        width: 90%;
+                        height:80%;
+                        max-width: 500px;
+                        max-height: 800px;
+                        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                        position: relative;
+                        margin: 20px;
+                    }
 
                     .form-container {
                         background-color: #1f1f1f;
@@ -651,11 +653,7 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                         margin: 0 auto;
                         box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
                     }
-                        
-                    .box-cargar{
-                        justify-content: center;
-                        align-items: center;
-                    }
+                       
 
                     .titulo-pagina {
                         text-align: center;
@@ -706,11 +704,12 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                     }
 
                     .form-col-precioVenta {
-                        flex: 2;
-                        min-width: 0;
-                        display: flex;
-                        flex-direction: column;
+                            flex: 2;
+                            min-width: 0;
+                            display: flex;
+                            flex-direction: column;
                     }
+
 
                     label {
                         font-weight: 500;
@@ -757,7 +756,6 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                         padding-right: 8px;
                     }
 
-
                     .presupuesto-item {
                         display: flex;
                         align-items: center;
@@ -766,7 +764,7 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                     }
 
                     .presupuesto-item input[type="number"] {
-                        width: 120px;
+                        width: 80px;
                     }
 
                     .btn-remove {
@@ -780,7 +778,7 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                     }
 
                     .btn-add-producto {
-                        background-color: #651616ff;
+                        background-color: #8B0000;
                         color: white;
                         border: none;
                         padding: 0.5rem 1rem;
@@ -794,10 +792,25 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                         background-color: #571212ff;
                         transform: translateY(-3px);
                     }
-
-                    .form-submit {
-                        justify-content: center;
-                        margin-top: 1rem;
+                        
+                    .form-secondary {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center; /* centra horizontalmente */
+                           gap: 0.5rem;
+                    }
+                        
+                    .form-secondary {
+                            display: flex;
+                            flex-direction: column;
+                            gap: 0.5rem;
+                            padding: 1rem;
+                            background-color: #1e1e1e;
+                            border-radius: 12px;
+                            box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+                            font-family: 'Segoe UI', sans-serif;
+                            color: #f0f0f0;
+                            max-width: 200px;
                     }
 
                     .submit-btn {
@@ -814,24 +827,25 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                     .submit-btn:hover {
                         background-color: #571212ff;
                         transform: translateY(-3px);
-                    }
+                    }   
 
                     button.submit-btn {
-                        padding: 0.75rem 1rem;
-                        background-color: #8B0000;
-                        color: #fff;
-                        border: none;
-                        border-radius: 8px;
-                        font-size: 1rem;
-                        font-weight: 600;
-                        cursor: pointer;
-                        transition: background-color 0.3s ease;
+                            padding: 0.75rem 1rem;
+                            background-color: #8B0000;
+                            color: #fff;
+                            border: none;
+                            border-radius: 8px;
+                            font-size: 1rem;
+                            font-weight: 600;
+                            cursor: pointer;
+                            width: 100%;
+                            transition: background-color 0.3s ease;
                     }
 
                     button.submit-btn:hover {
                         background-color: rgb(115, 8, 8);
                         transform: translateY(-3px);
-                    }
+                    }   
                     
                     .titulo-pagina {
                         font-size: 2rem;
@@ -852,8 +866,40 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                         padding: 0.6rem;
                         font-size: 1rem;
                         outline: none;
+                        width:100%;
                         transition: border-color 0.2s ease-in-out;
                     }
+
+                    .input-secondary {
+                            padding: 0.65rem 1rem;
+                            font-size: 1rem;
+                            border-radius: 8px;
+                            border: 1px solid #ccc;
+                            background-color: #f9f9f9;
+                            color: #333;
+                            width:100%;
+                            transition: border-color 0.3s, box-shadow 0.3s;
+                    }
+                            
+                     /* --- ARREGLO PARA QUE LOS SELECT NO SE PISEN --- */
+                    .presupuesto-item {
+                        display: flex;
+                        align-items: center;
+                        gap: 1rem;
+                        flex-wrap: wrap;            /* Permite bajar a otra línea si falta espacio */
+                    }
+                    .form-col-item1,
+                    .form-col-item2 {
+                        flex: 0 0 auto;             /* ❗ Evita que se achiquen y se encimen */
+                        display: flex;
+                        flex-direction: column;
+                    }
+                    /* Opcional: evitar que react-select se expanda */
+                    .form-select-react {
+                        min-width: 150px;
+                        max-width: 180px;
+                    }
+
                 `}
             </style>
         </>

@@ -647,38 +647,34 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                                             isClearable
                                             styles={{
                                                 container: (base) => ({
-                                                ...base,
-                                                width: 120, // ⬅️ ancho fijo total
+                                                    ...base,
+                                                    width: 150,
                                                 }),
-                                                control: (base) => ({
-                                                ...base,
-                                                minWidth: 120,
-                                                maxWidth: 150,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                border: '1px solid #444',
-                                                borderRadius: 8,
-                                                }),
-                                                singleValue: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                                control: (base, state) => ({
+                                                    ...base,
+                                                    width: 150,
+                                                    backgroundColor: '#2c2c2c !important',
+                                                    borderColor: state.isFocused ? '#666' : '#444',
+                                                    borderRadius: 8,
+                                                    color: 'white',
                                                 }),
                                                 menu: (base) => ({
-                                                ...base,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
+                                                    ...base,
+                                                    backgroundColor: '#2c2c2c',
+                                                    color: 'white',
                                                 }),
                                                 option: (base, { isFocused }) => ({
-                                                ...base,
-                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                                color: 'white',
+                                                    ...base,
+                                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                                    color: 'white',
+                                                }),
+                                                singleValue: (base) => ({
+                                                    ...base,
+                                                    color: 'white !important',
                                                 }),
                                                 input: (base) => ({
-                                                ...base,
-                                                color: 'white',
+                                                    ...base,
+                                                    color: 'white !important',
                                                 }),
                                             }}
                                         />
@@ -696,38 +692,34 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                                             isClearable
                                             styles={{
                                                 container: (base) => ({
-                                                ...base,
-                                                width: 150, // ⬅️ ancho fijo total
+                                                    ...base,
+                                                    width: 150,
                                                 }),
-                                                control: (base) => ({
-                                                ...base,
-                                                minWidth: 150,
-                                                maxWidth: 150,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                border: '1px solid #444',
-                                                borderRadius: 8,
-                                                }),
-                                                singleValue: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                                control: (base, state) => ({
+                                                    ...base,
+                                                    width: 150,
+                                                    backgroundColor: '#2c2c2c !important',
+                                                    borderColor: state.isFocused ? '#666' : '#444',
+                                                    borderRadius: 8,
+                                                    color: 'white',
                                                 }),
                                                 menu: (base) => ({
-                                                ...base,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
+                                                    ...base,
+                                                    backgroundColor: '#2c2c2c',
+                                                    color: 'white',
                                                 }),
                                                 option: (base, { isFocused }) => ({
-                                                ...base,
-                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                                color: 'white',
+                                                    ...base,
+                                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                                    color: 'white',
+                                                }),
+                                                singleValue: (base) => ({
+                                                    ...base,
+                                                    color: 'white !important',
                                                 }),
                                                 input: (base) => ({
-                                                ...base,
-                                                color: 'white',
+                                                    ...base,
+                                                    color: 'white !important',
                                                 }),
                                             }}
                                         />
@@ -913,7 +905,6 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                     }
 
                     .form-col-productos {
-                        flex: 8;
                         min-width: 0; /* Importante para que no desborde */
                         display: flex;
                         flex-direction: column;
@@ -966,19 +957,20 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                     }
 
                     .presupuesto-item {
-                        display: grid;
-                        grid-template-columns: 150px 170px 100px 100px 120px 60px;
-                        /*      Tipo      Producto   Cant.  Precio  Importe  Borrar */
-                        gap: 0.5rem;
+                        display: flex;
                         align-items: center;
-                        width: 100%;
+                        gap: 1rem;
+                        flex-wrap: wrap;
+                    }
+
+                    .presupuesto-item input[type="number"] {
+                        width: 80px;
                     }
                         
                     .form-col-item1 {
-                        flex: 0 0 auto;      /* ⬅️ evita que se estiren demasiado */
+                        min-width: 0; /* Importante para que no desborde */
                         display: flex;
                         flex-direction: column;
-                        align-items: center;
                     }
 
                         
@@ -990,22 +982,16 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                     }
 
                     .form-col-precioVenta {
-                        flex: 2;
                         min-width: 0;
                         display: flex;
                         flex-direction: column;
                     }
                     
                     .form-col-item1,
-                    .form-col-item2 {
+                    {
                         display: flex;
                         flex-direction: column;
                         align-items: center;
-                    }
-
-
-                    .presupuesto-item input[type="number"] {
-                        width: 80px;
                     }
 
                     .btn-remove {

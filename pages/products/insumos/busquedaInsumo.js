@@ -189,20 +189,20 @@ const buscarInsumo = ({ exito, filtro, onChangeFiltro }) => {
                     </div>
                  </div>
                  <div className="form-row">
-                    <div className="form-group">
+                    <div className="form-col">
                         <label htmlFor="stock">Stock:</label>
                         <input type="number" onChange={inputChange} value={filtros.stock} name="stock" placeholder="Ingresa el stock del insumo" required></input>
                     </div>              
-                    <div className="form-group">
+                    <div className="form-col">
                         <label htmlFor="stock">Stock minimo:</label>
                         <input type="number" onChange={inputChange} value={filtros.stockMinimo} name="stockMinimo" placeholder="Ingresa el stock minimo del insumo"></input>
                     </div>            
-                    <div className="form-group">
+                    <div className="form-col">
                         <label htmlFor="precioC">Precio costo:</label>
                         <input type="number" onChange={inputChange} value={filtros.precioCosto} name="precioCosto" placeholder="Ingresa el precio costo del insumo" required></input>
                     </div>
                     
-                    <div className="form-group">
+                    <div className="form-col">
                         <label htmlFor="ganancia">% Ganancia:</label>
                         <input type="number" onChange={inputChange} value={filtros.ganancia} name="ganancia" placeholder="Ingresa la ganancia del insumo" required></input>
                     </div>
@@ -220,8 +220,9 @@ const buscarInsumo = ({ exito, filtro, onChangeFiltro }) => {
                     </div>
                 </form>
             </div>
-            <style jsx>
+           <style jsx>
                 {`
+                        
                     .box-cargar{
                         justify-content: center;
                         align-items: center;
@@ -265,7 +266,7 @@ const buscarInsumo = ({ exito, filtro, onChangeFiltro }) => {
 
                     .form-col {
                         flex: 1;
-                        min-width: 250px;
+                        max-width:200px;
                         display: flex;
                         flex-direction: column;
                     }
@@ -373,7 +374,6 @@ const buscarInsumo = ({ exito, filtro, onChangeFiltro }) => {
 
                     .form-submit {
                         justify-content: center;
-                        text-align: center;
                         margin-top: 1rem;
                     }
 

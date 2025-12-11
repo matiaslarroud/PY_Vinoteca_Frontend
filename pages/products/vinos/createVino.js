@@ -777,7 +777,21 @@ const formProducto = ({exito}) => {
                                 </div>
                                 ))}
                             </div>
-                        </div>   
+                        </div>  
+                    </div>              
+
+                        <div className="form-row">
+                            <div className="form-col">
+                                <label>Fotos del producto:</label>
+                                <input
+                                    type="file"
+                                    multiple
+                                    accept="image/*"
+                                    onChange={(e) => setImagenes([...e.target.files])}
+                                />
+                            </div>
+                        </div>
+                </form> 
 
                         <div className="form-submit">
                             <button
@@ -795,23 +809,88 @@ const formProducto = ({exito}) => {
                                 Cargar
                             </button>
                         </div>
-                    </div>              
-
-                        <div className="form-row">
-                            <div className="form-col">
-                                <label>Fotos del producto:</label>
-                                <input
-                                    type="file"
-                                    multiple
-                                    accept="image/*"
-                                    onChange={(e) => setImagenes([...e.target.files])}
-                                />
-                            </div>
-                        </div>
-                </form>
             </div>
             <style jsx>
                 {`
+                        .imagenes-actuales-container {
+                            margin-top: 20px;
+                        }
+
+                        .imagenes-grid {
+                            display: flex;
+                            flex-wrap: wrap;
+                            gap: 10px;
+                        }
+
+                        .imagen-card {
+                            width: 90px;
+                            height: 90px;
+                            background: #1e1e1e;
+                            border-radius: 6px;
+                            padding: 4px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            position: relative;
+                            transition: transform 0.15s ease-in-out;
+                        }
+
+                        .imagen-card:hover {
+                            transform: scale(1.1);
+                        }
+
+                        .imagen-card img {
+                            width: 80px;
+                            height: 80px;
+                            object-fit: cover;
+                            border-radius: 4px;
+                        }
+
+                        /* Botón eliminar pequeño */
+                        .btn-eliminar {
+                            position: absolute;
+                            top: -5px;
+                            right: -5px;
+                            background: #e74c3c;
+                            border: none;
+                            color: white;
+                            font-size: 10px;
+                            width: 16px;
+                            height: 16px;
+                            border-radius: 50%;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            transition: 0.15s ease-in-out;
+                        }
+
+                        .btn-eliminar:hover {
+                            background: #c0392b;
+                        }
+
+
+                        .preview-img {
+                            width: 100%;
+                            height: 100%;
+                            object-fit: cover;
+                            border-radius: 6px;
+                            border: 1px solid #444;
+                        }
+
+                        .btn-eliminar-img {
+                            position: absolute;
+                            top: 5px;
+                            right: 5px;
+                            background: rgba(255, 0, 0, 0.8);
+                            color: white;
+                            border: none;
+                            padding: 3px 6px;
+                            border-radius: 4px;
+                            cursor: pointer;
+                            font-size: 12px;
+                        }
+
                         .modal {
                             position: fixed;
                             top: 0;
@@ -904,28 +983,24 @@ const formProducto = ({exito}) => {
                         
 
                         .form-col-productos {
-                            flex: 8;
                             min-width: 0; /* Importante para que no desborde */
                             display: flex;
                             flex-direction: column;
                         }
                             
                         .form-col-item1 {
-                            flex: 3;
                             min-width: 0; /* Importante para que no desborde */
                             display: flex;
                             flex-direction: column;
                         }
                             
                         .form-col-item2 {
-                            flex: 2;
                             min-width: 0; /* Importante para que no desborde */
                             display: flex;
                             flex-direction: column;
                         }
 
                         .form-col-precioVenta {
-                            flex: 2;
                             min-width: 0;
                             display: flex;
                             flex-direction: column;

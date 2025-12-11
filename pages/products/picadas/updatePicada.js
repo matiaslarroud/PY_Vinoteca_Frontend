@@ -276,11 +276,7 @@ const updatePicada = ({exito , picadaID}) => {
             )}
 
             <div className="form-container">
-                <div className="form-row">
-                    <div className="form-col">
-                        <h1 className="titulo-pagina">Modificar Picada</h1>
-                    </div>
-                </div>
+                <h1 className="titulo-pagina">Modificar Picada</h1>
 
                 <form id="updatePicada" className="formulario-picada">
                     <div className="form-row">
@@ -328,12 +324,12 @@ const updatePicada = ({exito , picadaID}) => {
                                 styles={{
                                     container: (base) => ({
                                     ...base,
-                                    width: 220, // ⬅️ ancho fijo total
+                                    width: 200, // ⬅️ ancho fijo total
                                     }),
                                     control: (base) => ({
                                     ...base,
-                                    minWidth: 220,
-                                    maxWidth: 220,
+                                    minWidth: 200,
+                                    maxWidth: 200,
                                     backgroundColor: '#2c2c2c',
                                     color: 'white',
                                     border: '1px solid #444',
@@ -392,12 +388,12 @@ const updatePicada = ({exito , picadaID}) => {
                                             styles={{
                                                 container: (base) => ({
                                                 ...base,
-                                                width: 220, // ⬅️ ancho fijo total
+                                                width: 200, // ⬅️ ancho fijo total
                                                 }),
                                                 control: (base) => ({
                                                 ...base,
-                                                minWidth: 220,
-                                                maxWidth: 220,
+                                                minWidth: 200,
+                                                maxWidth: 200,
                                                 backgroundColor: '#2c2c2c',
                                                 color: 'white',
                                                 border: '1px solid #444',
@@ -468,22 +464,6 @@ const updatePicada = ({exito , picadaID}) => {
                                         disabled
                                     />
                                 </label>
-                                <div className="form-submit">
-                                    <button
-                                    type="submit"
-                                    className="submit-btn"
-                                    onClick={(e) => {
-                                        if (!puedeGuardar) {
-                                        alert("No se puede guardar una picada sin al menos un insumo con cantidad.");
-                                        e.preventDefault();
-                                        return;
-                                        }
-                                        clickChange(e);
-                                    }}
-                                    >
-                                    Guardar
-                                    </button>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -529,92 +509,28 @@ const updatePicada = ({exito , picadaID}) => {
                         </div>
                     </div>
                 </div>
-
                     
                 </form>
+                <div className="form-submit">
+                    <button
+                    type="submit"
+                    className="submit-btn"
+                    onClick={(e) => {
+                        if (!puedeGuardar) {
+                        alert("No se puede guardar una picada sin al menos un insumo con cantidad.");
+                        e.preventDefault();
+                        return;
+                        }
+                        clickChange(e);
+                    }}
+                    >
+                    Guardar
+                    </button>
+                </div>
 
             </div>
-            <style jsx>
+          <style jsx>
                 {`
-                    .imagenes-actuales-container {
-                        margin-top: 20px;
-                    }
-
-                    .imagenes-grid {
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: 10px;
-                    }
-
-                    .imagen-card {
-                        width: 90px;
-                        height: 90px;
-                        background: #1e1e1e;
-                        border-radius: 6px;
-                        padding: 4px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        position: relative;
-                        transition: transform 0.15s ease-in-out;
-                    }
-
-                    .imagen-card:hover {
-                        transform: scale(1.1);
-                    }
-
-                    .imagen-card img {
-                        width: 80px;
-                        height: 80px;
-                        object-fit: cover;
-                        border-radius: 4px;
-                    }
-
-                    /* Botón eliminar pequeño */
-                    .btn-eliminar {
-                        position: absolute;
-                        top: -5px;
-                        right: -5px;
-                        background: #e74c3c;
-                        border: none;
-                        color: white;
-                        font-size: 10px;
-                        width: 16px;
-                        height: 16px;
-                        border-radius: 50%;
-                        cursor: pointer;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        transition: 0.15s ease-in-out;
-                    }
-
-                    .btn-eliminar:hover {
-                        background: #c0392b;
-                    }
-
-
-                    .preview-img {
-                        width: 100%;
-                        height: 100%;
-                        object-fit: cover;
-                        border-radius: 6px;
-                        border: 1px solid #444;
-                    }
-
-                    .btn-eliminar-img {
-                        position: absolute;
-                        top: 5px;
-                        right: 5px;
-                        background: rgba(255, 0, 0, 0.8);
-                        color: white;
-                        border: none;
-                        padding: 3px 6px;
-                        border-radius: 4px;
-                        cursor: pointer;
-                        font-size: 12px;
-                    }
-
                     .box-cargar{
                         justify-content: center;
                         align-items: center;
@@ -657,34 +573,30 @@ const updatePicada = ({exito , picadaID}) => {
 
                     .form-col {
                         flex: 1;
-                        min-width: 250px;
+                        max-width:200px;
                         display: flex;
                         flex-direction: column;
                     }
 
                     .form-col-productos {
-                        flex: 8;
                         min-width: 0; /* Importante para que no desborde */
                         display: flex;
                         flex-direction: column;
                     }
                         
                     .form-col-item1 {
-                        flex: 3;
                         min-width: 0; /* Importante para que no desborde */
                         display: flex;
                         flex-direction: column;
                     }
                         
                     .form-col-item2 {
-                        flex: 2;
                         min-width: 0; /* Importante para que no desborde */
                         display: flex;
                         flex-direction: column;
                     }
 
                     .form-col-precioVenta {
-                        flex: 2;
                         min-width: 0;
                         display: flex;
                         flex-direction: column;
@@ -754,7 +666,7 @@ const updatePicada = ({exito , picadaID}) => {
                     }
 
                     .btn-add-insumo {
-                        background-color: #8b0000;
+                        background-color: #a30000;
                         color: white;
                         border: none;
                         padding: 0.5rem 1rem;
@@ -765,7 +677,7 @@ const updatePicada = ({exito , picadaID}) => {
                     }
 
                     .btn-add-insumo:hover {
-                        background-color: #a30000;
+                        background-color: #8b0000;
                         transform: translateY(-3px);
                     }
 
@@ -775,7 +687,7 @@ const updatePicada = ({exito , picadaID}) => {
                     }
 
                     .submit-btn {
-                        background-color: #8b0000;
+                        background-color: #a30000;
                         color: white;
                         border: none;
                         padding: 0.8rem 1.5rem;
@@ -786,7 +698,7 @@ const updatePicada = ({exito , picadaID}) => {
                     }
 
                     .submit-btn:hover {
-                        background-color: #a30000;
+                        background-color: #8b0000;
                         transform: translateY(-3px);
                     }
                         

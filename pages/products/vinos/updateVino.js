@@ -885,6 +885,7 @@ const updateProducto = ({exito,vinoID}) => {
                         </div>
                     </div>
                 </div>
+                </form>
                 
                 <div className="form-submit">
                     <button
@@ -902,7 +903,6 @@ const updateProducto = ({exito,vinoID}) => {
                         Guardar
                     </button>
                 </div>
-                </form>
             </div>
             <style jsx>
                 {`
@@ -1077,28 +1077,24 @@ const updateProducto = ({exito,vinoID}) => {
                         
 
                         .form-col-productos {
-                            flex: 8;
                             min-width: 0; /* Importante para que no desborde */
                             display: flex;
                             flex-direction: column;
                         }
                             
                         .form-col-item1 {
-                            flex: 3;
                             min-width: 0; /* Importante para que no desborde */
                             display: flex;
                             flex-direction: column;
                         }
                             
                         .form-col-item2 {
-                            flex: 2;
                             min-width: 0; /* Importante para que no desborde */
                             display: flex;
                             flex-direction: column;
                         }
 
                         .form-col-precioVenta {
-                            flex: 2;
                             min-width: 0;
                             display: flex;
                             flex-direction: column;

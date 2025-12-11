@@ -192,11 +192,7 @@ const createPresupuesto = ({exito , tipo , param}) => {
 
 
             <div className="form-container">
-                <div className="form-row">
-                    <div className="form-col">
-                        <h1 className="titulo-pagina">Cargar Solicitud de Presupuesto</h1>
-                    </div>
-                </div>
+                <h1 className="titulo-pagina">Cargar Solicitud de Presupuesto</h1>
 
                 <form id="formProducto" className="formulario-presupuesto">
                     <div className="form-row">
@@ -334,38 +330,34 @@ const createPresupuesto = ({exito , tipo , param}) => {
                                             isClearable
                                             styles={{
                                                 container: (base) => ({
-                                                ...base,
-                                                width: 120, // ⬅️ ancho fijo total
+                                                    ...base,
+                                                    width: 150,
                                                 }),
-                                                control: (base) => ({
-                                                ...base,
-                                                minWidth: 150,
-                                                maxWidth: 150,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                border: '1px solid #444',
-                                                borderRadius: 8,
-                                                }),
-                                                singleValue: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                                control: (base, state) => ({
+                                                    ...base,
+                                                    width: 150,
+                                                    backgroundColor: '#2c2c2c !important',
+                                                    borderColor: state.isFocused ? '#666' : '#444',
+                                                    borderRadius: 8,
+                                                    color: 'white',
                                                 }),
                                                 menu: (base) => ({
-                                                ...base,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
+                                                    ...base,
+                                                    backgroundColor: '#2c2c2c',
+                                                    color: 'white',
                                                 }),
                                                 option: (base, { isFocused }) => ({
-                                                ...base,
-                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                                color: 'white',
+                                                    ...base,
+                                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                                    color: 'white',
+                                                }),
+                                                singleValue: (base) => ({
+                                                    ...base,
+                                                    color: 'white !important',
                                                 }),
                                                 input: (base) => ({
-                                                ...base,
-                                                color: 'white',
+                                                    ...base,
+                                                    color: 'white !important',
                                                 }),
                                             }}
                                         />
@@ -383,38 +375,34 @@ const createPresupuesto = ({exito , tipo , param}) => {
                                             isClearable
                                             styles={{
                                                 container: (base) => ({
-                                                ...base,
-                                                width: 150, // ⬅️ ancho fijo total
+                                                    ...base,
+                                                    width: 150,
                                                 }),
-                                                control: (base) => ({
-                                                ...base,
-                                                minWidth: 150,
-                                                maxWidth: 150,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                border: '1px solid #444',
-                                                borderRadius: 8,
-                                                }),
-                                                singleValue: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                                control: (base, state) => ({
+                                                    ...base,
+                                                    width: 150,
+                                                    backgroundColor: '#2c2c2c !important',
+                                                    borderColor: state.isFocused ? '#666' : '#444',
+                                                    borderRadius: 8,
+                                                    color: 'white',
                                                 }),
                                                 menu: (base) => ({
-                                                ...base,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
+                                                    ...base,
+                                                    backgroundColor: '#2c2c2c',
+                                                    color: 'white',
                                                 }),
                                                 option: (base, { isFocused }) => ({
-                                                ...base,
-                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                                color: 'white',
+                                                    ...base,
+                                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                                    color: 'white',
+                                                }),
+                                                singleValue: (base) => ({
+                                                    ...base,
+                                                    color: 'white !important',
                                                 }),
                                                 input: (base) => ({
-                                                ...base,
-                                                color: 'white',
+                                                    ...base,
+                                                    color: 'white !important',
                                                 }),
                                             }}
                                         />
@@ -493,7 +481,16 @@ const createPresupuesto = ({exito , tipo , param}) => {
                     background-color: #a30000;
                     transform: translateY(-3px);
                     }
-
+                    
+                    .titulo-pagina {
+                        font-size: 2rem;
+                        width: 100%;
+                        color: white;
+                        text-align: center;
+                        margin-top: 2px;
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+                    }
 
                     .form-container {
                         background-color: #1f1f1f;
@@ -525,20 +522,18 @@ const createPresupuesto = ({exito , tipo , param}) => {
 
                     .form-col {
                         flex: 1;
-                        min-width: 250px;
+                        width: 100%;
                         display: flex;
                         flex-direction: column;
                     }
 
                     .form-col-productos {
-                        flex: 8;
                         min-width: 0; /* Importante para que no desborde */
                         display: flex;
                         flex-direction: column;
                     }
                         
                     .form-col-item1 {
-                        flex: 3;
                         min-width: 0; /* Importante para que no desborde */
                         display: flex;
                         flex-direction: column;
@@ -552,7 +547,6 @@ const createPresupuesto = ({exito , tipo , param}) => {
                     }
 
                     .form-col-precioVenta {
-                        flex: 2;
                         min-width: 0;
                         display: flex;
                         flex-direction: column;

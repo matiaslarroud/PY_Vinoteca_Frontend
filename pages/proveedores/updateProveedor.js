@@ -202,9 +202,7 @@ const fetchPaises = () => {
                                 onChange={(e) => inputChange(e)}
                                 
                             />
-                        </div>                 
-                    </div>
-                    <div className="form-row">
+                        </div>         
                         <div className="form-col">
                             <label>
                                 Cuit:
@@ -479,8 +477,6 @@ const fetchPaises = () => {
                                 }}
                             />
                         </div>               
-                    </div>
-                    <div className="form-row">
 
                         <div className="form-col">
                             <label>

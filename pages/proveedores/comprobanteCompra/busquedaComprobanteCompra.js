@@ -405,38 +405,34 @@ const newComprobanteCompra = ({ exito, filtro, onChangeFiltro , filtroDetalle , 
                                             isClearable
                                             styles={{
                                                 container: (base) => ({
-                                                ...base,
-                                                width: 120, // ⬅️ ancho fijo total
+                                                    ...base,
+                                                    width: 150,
                                                 }),
-                                                control: (base) => ({
-                                                ...base,
-                                                minWidth: 150,
-                                                maxWidth: 150,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                border: '1px solid #444',
-                                                borderRadius: 8,
-                                                }),
-                                                singleValue: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                                control: (base, state) => ({
+                                                    ...base,
+                                                    width: 150,
+                                                    backgroundColor: '#2c2c2c !important',
+                                                    borderColor: state.isFocused ? '#666' : '#444',
+                                                    borderRadius: 8,
+                                                    color: 'white',
                                                 }),
                                                 menu: (base) => ({
-                                                ...base,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
+                                                    ...base,
+                                                    backgroundColor: '#2c2c2c',
+                                                    color: 'white',
                                                 }),
                                                 option: (base, { isFocused }) => ({
-                                                ...base,
-                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                                color: 'white',
+                                                    ...base,
+                                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                                    color: 'white',
+                                                }),
+                                                singleValue: (base) => ({
+                                                    ...base,
+                                                    color: 'white !important',
                                                 }),
                                                 input: (base) => ({
-                                                ...base,
-                                                color: 'white',
+                                                    ...base,
+                                                    color: 'white !important',
                                                 }),
                                             }}
                                         />
@@ -454,38 +450,34 @@ const newComprobanteCompra = ({ exito, filtro, onChangeFiltro , filtroDetalle , 
                                             isClearable
                                             styles={{
                                                 container: (base) => ({
-                                                ...base,
-                                                width: 150, // ⬅️ ancho fijo total
+                                                    ...base,
+                                                    width: 150,
                                                 }),
-                                                control: (base) => ({
-                                                ...base,
-                                                minWidth: 150,
-                                                maxWidth: 150,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                border: '1px solid #444',
-                                                borderRadius: 8,
-                                                }),
-                                                singleValue: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                                control: (base, state) => ({
+                                                    ...base,
+                                                    width: 150,
+                                                    backgroundColor: '#2c2c2c !important',
+                                                    borderColor: state.isFocused ? '#666' : '#444',
+                                                    borderRadius: 8,
+                                                    color: 'white',
                                                 }),
                                                 menu: (base) => ({
-                                                ...base,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
+                                                    ...base,
+                                                    backgroundColor: '#2c2c2c',
+                                                    color: 'white',
                                                 }),
                                                 option: (base, { isFocused }) => ({
-                                                ...base,
-                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                                color: 'white',
+                                                    ...base,
+                                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                                    color: 'white',
+                                                }),
+                                                singleValue: (base) => ({
+                                                    ...base,
+                                                    color: 'white !important',
                                                 }),
                                                 input: (base) => ({
-                                                ...base,
-                                                color: 'white',
+                                                    ...base,
+                                                    color: 'white !important',
                                                 }),
                                             }}
                                         />
@@ -539,7 +531,7 @@ const newComprobanteCompra = ({ exito, filtro, onChangeFiltro , filtroDetalle , 
                     </div>
                 </form>
             </div>
-            <style jsx>
+           <style jsx>
                 {`
                         
                         .btn-icon {
@@ -609,21 +601,18 @@ const newComprobanteCompra = ({ exito, filtro, onChangeFiltro , filtroDetalle , 
                         }
                             
                         .form-col-item1 {
-                            flex: 3;
                             min-width: 0; /* Importante para que no desborde */
                             display: flex;
                             flex-direction: column;
                         }
                             
                         .form-col-item2 {
-                            flex: 2;
                             min-width: 0; /* Importante para que no desborde */
                             display: flex;
                             flex-direction: column;
                         }
 
                         .form-col-precioVenta {
-                            flex: 2;
                             min-width: 0;
                             display: flex;
                             flex-direction: column;
@@ -758,7 +747,6 @@ const newComprobanteCompra = ({ exito, filtro, onChangeFiltro , filtroDetalle , 
                         .form-submit {
                             justify-content: center;
                             margin-top: 1rem;
-                            text-align: center;
                         }
 
                         .submit-btn {
@@ -782,6 +770,7 @@ const newComprobanteCompra = ({ exito, filtro, onChangeFiltro , filtroDetalle , 
                             background-color: #8B0000;
                             color: #fff;
                             border: none;
+                            width: 100%;
                             border-radius: 8px;
                             font-size: 1rem;
                             font-weight: 600;

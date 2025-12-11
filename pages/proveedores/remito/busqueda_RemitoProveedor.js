@@ -634,21 +634,18 @@ const busqueda = ({ exito, filtro, onChangeFiltro , filtroDetalle , onChangeFilt
                         }
                             
                         .form-col-item1 {
-                            flex: 3;
                             min-width: 0; /* Importante para que no desborde */
                             display: flex;
                             flex-direction: column;
                         }
                             
                         .form-col-item2 {
-                            flex: 2;
                             min-width: 0; /* Importante para que no desborde */
                             display: flex;
                             flex-direction: column;
                         }
 
                         .form-col-precioVenta {
-                            flex: 2;
                             min-width: 0;
                             display: flex;
                             flex-direction: column;

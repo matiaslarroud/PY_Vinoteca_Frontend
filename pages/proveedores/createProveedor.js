@@ -168,9 +168,8 @@ const createProveedor = ({exito}) => {
                                 onChange={(e) => inputChange(e)}
                                 
                             />
-                        </div>                 
-                    </div>
-                    <div className="form-row">
+                        </div>   
+                        
                         <div className="form-col">
                             <label>
                                 Cuit:
@@ -235,7 +234,7 @@ const createProveedor = ({exito}) => {
                                     }),
                                 }}
                             />
-                        </div>
+                        </div>              
                     </div>
                     <div className="form-row">
                         <div className="form-col">
@@ -444,10 +443,7 @@ const createProveedor = ({exito}) => {
                                     }),
                                 }}
                             />
-                        </div>               
-                    </div>
-                    <div className="form-row">
-
+                        </div>  
                         <div className="form-col">
                             <label>
                                 Calle:

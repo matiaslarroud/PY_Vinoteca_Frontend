@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaShoppingCart , FaHome, FaArrowLeft, FaTrash, FaEdit , FaSearch , FaPrint } from "react-icons/fa";
+import { FaPlus, FaEye , FaShoppingCart , FaHome, FaArrowLeft, FaTrash, FaEdit , FaSearch , FaPrint } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import FormularioPresupuestoUpdate from './updatePresupuesto'
 import FormularioPresupuestoCreate from './newPresupuesto'
 import CreateNotaPedido from "../notaPedido/createNotaPedido";
 import BusquedaAvanzada from "../presupuesto/busquedaPresupuesto";
+import ViewPresupuesto from "../presupuesto/viewPresupuesto";
 
 const { default: Link } = require("next/link")
 
@@ -18,6 +19,7 @@ const indexPresupuesto = () => {
     const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
     const [mostrarPedidoCreate, setmostrarPedidoCreate] = useState(null);
     const [mostrarBusqueda, setmostrarBusqueda] = useState(null);
+    const [mostrarView, setmostrarView] = useState(null);
     
     const [filtro , setFiltro] = useState(initialState); 
     const [filtroDetalle , setFiltroDetalle] = useState([]); 
@@ -233,6 +235,23 @@ const indexPresupuesto = () => {
                 </div>
             )}
 
+            {mostrarView && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="close" onClick={() => setmostrarView(null)}>
+                            &times;
+                        </button>
+                        <ViewPresupuesto 
+                            presupuestoID={mostrarView} 
+                            exito={()=>{
+                                setmostrarView(null);
+                                fetchData();
+                            }}    
+                        />
+                    </div>
+                </div>
+            )}
+
             {mostrarPedidoCreate && (
                 <div className="modal">
                 <div className="modal-content">
@@ -304,6 +323,12 @@ const indexPresupuesto = () => {
                                         <td className="columna">${total}</td>
                                         <td className="columna">
                                             <div className="acciones">
+                                                <button onClick={() => {
+                                                    setmostrarView(_id)
+                                                    }} 
+                                                    className="btn-icon" title="Visualizar">
+                                                    <FaEye />
+                                                </button>
                                                 <button onClick={() => setmostrarPedidoCreate(_id)} className="btn-icon" title="Generar Pedido">
                                                     <FaShoppingCart />
                                                 </button>

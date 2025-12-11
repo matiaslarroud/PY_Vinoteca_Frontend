@@ -97,7 +97,6 @@ const buscarPicada = ({ exito, filtro, onChangeFiltro }) => {
         <>
             <div className="form-container">
                 <h1 className="titulo-pagina">Busqueda avanzada de picada</h1>
-                <br/> 
 
                 <form id="updatePicada" className="formulario-picada" onSubmit={handleBuscar}>
                     <div className="form-row">
@@ -157,12 +156,12 @@ const buscarPicada = ({ exito, filtro, onChangeFiltro }) => {
                                 styles={{
                                     container: (base) => ({
                                     ...base,
-                                    width: 220, // ⬅️ ancho fijo total
+                                    width: 200, // ⬅️ ancho fijo total
                                     }),
                                     control: (base) => ({
                                     ...base,
-                                    minWidth: 220,
-                                    maxWidth: 220,
+                                    minWidth: 200,
+                                    maxWidth: 200,
                                     backgroundColor: '#2c2c2c',
                                     color: 'white',
                                     border: '1px solid #444',
@@ -221,12 +220,12 @@ const buscarPicada = ({ exito, filtro, onChangeFiltro }) => {
                                             styles={{
                                                 container: (base) => ({
                                                 ...base,
-                                                width: 220, // ⬅️ ancho fijo total
+                                                width: 200, // ⬅️ ancho fijo total
                                                 }),
                                                 control: (base) => ({
                                                 ...base,
-                                                minWidth: 220,
-                                                maxWidth: 220,
+                                                minWidth: 200,
+                                                maxWidth: 200,
                                                 backgroundColor: '#2c2c2c',
                                                 color: 'white',
                                                 border: '1px solid #444',
@@ -292,8 +291,12 @@ const buscarPicada = ({ exito, filtro, onChangeFiltro }) => {
                 </form>
 
             </div>
-            <style jsx>
+             <style jsx>
                 {`
+                    .box-cargar{
+                        justify-content: center;
+                        align-items: center;
+                    }
 
                     .form-container {
                         background-color: #1f1f1f;
@@ -332,35 +335,30 @@ const buscarPicada = ({ exito, filtro, onChangeFiltro }) => {
 
                     .form-col {
                         flex: 1;
-                        min-width: 250px;
+                        max-width:200px;
                         display: flex;
                         flex-direction: column;
                     }
 
                     .form-col-productos {
-                        flex: 8;
                         min-width: 0; /* Importante para que no desborde */
                         display: flex;
                         flex-direction: column;
                     }
                         
                     .form-col-item1 {
-                        flex: 3;
                         min-width: 0; /* Importante para que no desborde */
-                        max-width: 300px;
                         display: flex;
                         flex-direction: column;
                     }
                         
                     .form-col-item2 {
-                        flex: 2;
                         min-width: 0; /* Importante para que no desborde */
                         display: flex;
                         flex-direction: column;
                     }
 
                     .form-col-precioVenta {
-                        flex: 2;
                         min-width: 0;
                         display: flex;
                         flex-direction: column;
@@ -447,7 +445,6 @@ const buscarPicada = ({ exito, filtro, onChangeFiltro }) => {
 
                     .form-submit {
                         justify-content: center;
-                        text-align: center;
                         margin-top: 1rem;
                     }
 

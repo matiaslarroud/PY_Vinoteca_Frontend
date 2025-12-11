@@ -1,10 +1,6 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';          
 import { FaTrash} from "react-icons/fa";
-import updateOrden from '@/pages/products/ordenProduccion/updateOrdenProduccion';
-// import FormularioEmpleadoCreate from '../../gestion/general/empleado/createEmpleado'
-// import FormularioClienteCreate from '../createCliente'
-// import FormularioMedioPagoCreate from '../../gestion/general/medioPago/createMedioPago'
 
 const { default: Link } = require("next/link")
 
@@ -352,48 +348,6 @@ const updateOrdenCompra = ({exito , ordenID}) => {
 
     return(
         <>
-            {mostrarModalCreate1 && (
-                <div className="modal">
-                <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate1(false)}>&times;</button>
-                    <FormularioMedioPagoCreate
-                    exito={() => {
-                        setMostrarModalCreate1(false);
-                        fetchData_MediosPago();
-                    }}
-                    />
-                </div>
-            </div>
-            )}
-            {mostrarModalCreate2 && (
-                <div className="modal">
-                <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate2(false)}>&times;</button>
-                    <FormularioEmpleadoCreate
-                    exito={() => {
-                        setMostrarModalCreate2(false);
-                        fetchData_Empleados();
-                    }}
-                    />
-                </div>
-                </div>
-            )}
-
-            {mostrarModalCreate3 && (
-                <div className="modal">
-                <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate3(false)}>&times;</button>
-                    <FormularioClienteCreate
-                    exito={() => {
-                        setMostrarModalCreate3(false);
-                        fetchData_Clientes();
-                    }}
-                    />
-                </div>
-                </div>
-            )}
-
-
             <div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
@@ -406,7 +360,6 @@ const updateOrdenCompra = ({exito , ordenID}) => {
                         <div className="form-col1">
                             <label>
                                 Proveedor:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -459,7 +412,6 @@ const updateOrdenCompra = ({exito , ordenID}) => {
                         <div className="form-col1">
                             <label>
                                 Empleado:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate2(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -564,7 +516,6 @@ const updateOrdenCompra = ({exito , ordenID}) => {
                         <div className="form-col1">
                             <label>
                                 Medio de Pago:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate1(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -637,38 +588,34 @@ const updateOrdenCompra = ({exito , ordenID}) => {
                                             isDisabled={true}
                                             styles={{
                                                 container: (base) => ({
-                                                ...base,
-                                                width: 120, // ⬅️ ancho fijo total
+                                                    ...base,
+                                                    width: 150,
                                                 }),
-                                                control: (base) => ({
-                                                ...base,
-                                                minWidth: 150,
-                                                maxWidth: 150,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                border: '1px solid #444',
-                                                borderRadius: 8,
-                                                }),
-                                                singleValue: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                                control: (base, state) => ({
+                                                    ...base,
+                                                    width: 150,
+                                                    backgroundColor: '#2c2c2c !important',
+                                                    borderColor: state.isFocused ? '#666' : '#444',
+                                                    borderRadius: 8,
+                                                    color: 'white',
                                                 }),
                                                 menu: (base) => ({
-                                                ...base,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
+                                                    ...base,
+                                                    backgroundColor: '#2c2c2c',
+                                                    color: 'white',
                                                 }),
                                                 option: (base, { isFocused }) => ({
-                                                ...base,
-                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                                color: 'white',
+                                                    ...base,
+                                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                                    color: 'white',
+                                                }),
+                                                singleValue: (base) => ({
+                                                    ...base,
+                                                    color: 'white !important',
                                                 }),
                                                 input: (base) => ({
-                                                ...base,
-                                                color: 'white',
+                                                    ...base,
+                                                    color: 'white !important',
                                                 }),
                                             }}
                                         />
@@ -687,38 +634,34 @@ const updateOrdenCompra = ({exito , ordenID}) => {
                                             isDisabled={true}
                                             styles={{
                                                 container: (base) => ({
-                                                ...base,
-                                                width: 150, // ⬅️ ancho fijo total
+                                                    ...base,
+                                                    width: 150,
                                                 }),
-                                                control: (base) => ({
-                                                ...base,
-                                                minWidth: 150,
-                                                maxWidth: 150,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                border: '1px solid #444',
-                                                borderRadius: 8,
-                                                }),
-                                                singleValue: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                                control: (base, state) => ({
+                                                    ...base,
+                                                    width: 150,
+                                                    backgroundColor: '#2c2c2c !important',
+                                                    borderColor: state.isFocused ? '#666' : '#444',
+                                                    borderRadius: 8,
+                                                    color: 'white',
                                                 }),
                                                 menu: (base) => ({
-                                                ...base,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
+                                                    ...base,
+                                                    backgroundColor: '#2c2c2c',
+                                                    color: 'white',
                                                 }),
                                                 option: (base, { isFocused }) => ({
-                                                ...base,
-                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                                color: 'white',
+                                                    ...base,
+                                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                                    color: 'white',
+                                                }),
+                                                singleValue: (base) => ({
+                                                    ...base,
+                                                    color: 'white !important',
                                                 }),
                                                 input: (base) => ({
-                                                ...base,
-                                                color: 'white',
+                                                    ...base,
+                                                    color: 'white !important',
                                                 }),
                                             }}
                                         />
@@ -811,8 +754,25 @@ const updateOrdenCompra = ({exito , ordenID}) => {
                             justify-content: center;
                             align-items: center;
                             z-index: 1000;
+                        }   
+
+                        button.submit-btn {
+                            padding: 0.75rem 1rem;
+                            background-color: #8B0000;
+                            color: #fff;
+                            border: none;
+                            border-radius: 8px;
+                            font-size: 1rem;
+                            font-weight: 600;
+                            cursor: pointer;
+                            width: 100%;
+                            transition: background-color 0.3s ease;
                         }
-                        
+
+                        button.submit-btn:hover {
+                            background-color: rgb(115, 8, 8);
+                            transform: translateY(-3px);
+                        }                   
 
 
                         .close {
@@ -887,9 +847,7 @@ const updateOrdenCompra = ({exito , ordenID}) => {
                             display: flex;
                             flex-wrap: wrap;
                             gap: 1.5rem;
-                        }
-
-                        
+                        }                        
 
                         .form-col-productos {
                             flex: 8;
@@ -899,7 +857,6 @@ const updateOrdenCompra = ({exito , ordenID}) => {
                         }
                             
                         .form-col-item1 {
-                            flex: 3;
                             min-width: 0; /* Importante para que no desborde */
                             display: flex;
                             flex-direction: column;
@@ -913,7 +870,6 @@ const updateOrdenCompra = ({exito , ordenID}) => {
                         }
 
                         .form-col-precioVenta {
-                            flex: 2;
                             min-width: 0;
                             display: flex;
                             flex-direction: column;
@@ -960,7 +916,7 @@ const updateOrdenCompra = ({exito , ordenID}) => {
                             display: flex;
                             flex-direction: column;
                             gap: 1rem;
-                            height: 160px;
+                            height: 100%;
                             overflow-y: auto;
                             padding-right: 8px;
                         }
@@ -1030,7 +986,7 @@ const updateOrdenCompra = ({exito , ordenID}) => {
                         }
 
                         .btn-add-producto {
-                            background-color: #651616ff;
+                            background-color: #8B0000;
                             color: white;
                             border: none;
                             padding: 0.5rem 1rem;
@@ -1045,41 +1001,28 @@ const updateOrdenCompra = ({exito , ordenID}) => {
                             transform: translateY(-3px);
                         }
 
-                        .form-submit {
-                            justify-content: center;
-                            margin-top: 1rem;
+                        .input-secondary {
+                            padding: 0.65rem 1rem;
+                            font-size: 1rem;
+                            border-radius: 8px;
+                            border: 1px solid #ccc;
+                            background-color: #f9f9f9;
+                            color: #333;
+                            transition: border-color 0.3s, box-shadow 0.3s;
                         }
 
                         .submit-btn {
-                            background-color: #651616ff;
+                            background-color: #8B0000;;
                             color: white;
-                            border: none;
-                            padding: 0.8rem 1.5rem;
+                            padding: 0.65rem 1rem;
                             font-size: 1rem;
                             border-radius: 10px;
                             cursor: pointer;
-                            transition: background-color 0.2s ease-in-out;
+                            transition: border-color 0.3s, box-shadow 0.3s;
                         }
 
                         .submit-btn:hover {
                             background-color: #571212ff;
-                            transform: translateY(-3px);
-                        }
-
-                        button.submit-btn {
-                            padding: 0.75rem 1rem;
-                            background-color: #8B0000;
-                            color: #fff;
-                            border: none;
-                            border-radius: 8px;
-                            font-size: 1rem;
-                            font-weight: 600;
-                            cursor: pointer;
-                            transition: background-color 0.3s ease;
-                        }
-
-                        button.submit-btn:hover {
-                            background-color: rgb(115, 8, 8);
                             transform: translateY(-3px);
                         }
                         
@@ -1108,7 +1051,7 @@ const updateOrdenCompra = ({exito , ordenID}) => {
                         .form-secondary {
                             display: flex;
                             flex-direction: column;
-                            gap: 0.75rem;
+                            gap: 0.5rem;
                             padding: 1rem;
                             background-color: #1e1e1e;
                             border-radius: 12px;
@@ -1130,22 +1073,6 @@ const updateOrdenCompra = ({exito , ordenID}) => {
                             width: 18px;
                             height: 18px;
                             accent-color: #8B0000; /* color vino para el checkbox */
-                        }
-
-                        .input-secondary {
-                            padding: 0.65rem 1rem;
-                            font-size: 1rem;
-                            border-radius: 8px;
-                            border: 1px solid #ccc;
-                            background-color: #f9f9f9;
-                            color: #333;
-                            transition: border-color 0.3s, box-shadow 0.3s;
-                        }
-
-                        .input-secondary:focus {
-                            border-color: #8B0000;
-                            box-shadow: 0 0 5px rgba(139, 0, 0, 0.6);
-                            outline: none;
                         }
 
                         .form-col label {

@@ -463,12 +463,12 @@ const viewComprobante = ({comprobanteVentaID}) => {
                                             styles={{
                                                 container: (base) => ({
                                                 ...base,
-                                                width: 120, // ⬅️ ancho fijo total
+                                                width: 220, // ⬅️ ancho fijo total
                                                 }),
                                                 control: (base) => ({
                                                 ...base,
-                                                minWidth: 150,
-                                                maxWidth: 150,
+                                                minWidth: 220,
+                                                maxWidth: 220,
                                                 backgroundColor: '#2c2c2c',
                                                 color: 'white',
                                                 border: '1px solid #444',
@@ -513,12 +513,12 @@ const viewComprobante = ({comprobanteVentaID}) => {
                                             styles={{
                                                 container: (base) => ({
                                                 ...base,
-                                                width: 150, // ⬅️ ancho fijo total
+                                                width: 220, // ⬅️ ancho fijo total
                                                 }),
                                                 control: (base) => ({
                                                 ...base,
-                                                minWidth: 150,
-                                                maxWidth: 150,
+                                                minWidth: 220,
+                                                maxWidth: 220,
                                                 backgroundColor: '#2c2c2c',
                                                 color: 'white',
                                                 border: '1px solid #444',
@@ -720,7 +720,6 @@ const viewComprobante = ({comprobanteVentaID}) => {
                         }
                             
                         .form-col-item1 {
-                            flex: 3;
                             min-width: 0; /* Importante para que no desborde */
                             display: flex;
                             flex-direction: column;
@@ -735,12 +734,14 @@ const viewComprobante = ({comprobanteVentaID}) => {
                         }
 
                         .form-col-precioVenta {
-                            flex: 2;
                             min-width: 0;
                             display: flex;
                             flex-direction: column;
                         }
 
+                        button.submit-btn {
+                            width:100%
+                        }
 
                         label {
                             font-weight: 500;

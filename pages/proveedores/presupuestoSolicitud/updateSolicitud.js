@@ -225,11 +225,7 @@ const updatePresupuesto = ({exito,solicitudID}) => {
 
 
             <div className="form-container">
-                <div className="form-row">
-                    <div className="form-col">
-                        <h1 className="titulo-pagina">Modificar Solicitud de Presupuesto</h1>
-                    </div>
-                </div>
+                <h1 className="titulo-pagina">Modificar Solicitud de Presupuesto</h1>
 
                 <form id="formProducto" className="formulario-presupuesto">
                     <div className="form-row">
@@ -366,38 +362,34 @@ const updatePresupuesto = ({exito,solicitudID}) => {
                                             isClearable
                                             styles={{
                                                 container: (base) => ({
-                                                ...base,
-                                                width: 120, // ⬅️ ancho fijo total
+                                                    ...base,
+                                                    width: 150,
                                                 }),
-                                                control: (base) => ({
-                                                ...base,
-                                                minWidth: 150,
-                                                maxWidth: 150,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                border: '1px solid #444',
-                                                borderRadius: 8,
-                                                }),
-                                                singleValue: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                                control: (base, state) => ({
+                                                    ...base,
+                                                    width: 150,
+                                                    backgroundColor: '#2c2c2c !important',
+                                                    borderColor: state.isFocused ? '#666' : '#444',
+                                                    borderRadius: 8,
+                                                    color: 'white',
                                                 }),
                                                 menu: (base) => ({
-                                                ...base,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
+                                                    ...base,
+                                                    backgroundColor: '#2c2c2c',
+                                                    color: 'white',
                                                 }),
                                                 option: (base, { isFocused }) => ({
-                                                ...base,
-                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                                color: 'white',
+                                                    ...base,
+                                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                                    color: 'white',
+                                                }),
+                                                singleValue: (base) => ({
+                                                    ...base,
+                                                    color: 'white !important',
                                                 }),
                                                 input: (base) => ({
-                                                ...base,
-                                                color: 'white',
+                                                    ...base,
+                                                    color: 'white !important',
                                                 }),
                                             }}
                                         />
@@ -415,38 +407,34 @@ const updatePresupuesto = ({exito,solicitudID}) => {
                                             isClearable
                                             styles={{
                                                 container: (base) => ({
-                                                ...base,
-                                                width: 150, // ⬅️ ancho fijo total
+                                                    ...base,
+                                                    width: 150,
                                                 }),
-                                                control: (base) => ({
-                                                ...base,
-                                                minWidth: 150,
-                                                maxWidth: 150,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                border: '1px solid #444',
-                                                borderRadius: 8,
-                                                }),
-                                                singleValue: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                                control: (base, state) => ({
+                                                    ...base,
+                                                    width: 150,
+                                                    backgroundColor: '#2c2c2c !important',
+                                                    borderColor: state.isFocused ? '#666' : '#444',
+                                                    borderRadius: 8,
+                                                    color: 'white',
                                                 }),
                                                 menu: (base) => ({
-                                                ...base,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
+                                                    ...base,
+                                                    backgroundColor: '#2c2c2c',
+                                                    color: 'white',
                                                 }),
                                                 option: (base, { isFocused }) => ({
-                                                ...base,
-                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                                color: 'white',
+                                                    ...base,
+                                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                                    color: 'white',
+                                                }),
+                                                singleValue: (base) => ({
+                                                    ...base,
+                                                    color: 'white !important',
                                                 }),
                                                 input: (base) => ({
-                                                ...base,
-                                                color: 'white',
+                                                    ...base,
+                                                    color: 'white !important',
                                                 }),
                                             }}
                                         />
@@ -505,24 +493,6 @@ const updatePresupuesto = ({exito,solicitudID}) => {
             <style jsx>
                 {`
                     
-
-                    button.submit-btn {
-                        padding: 0.75rem 1rem;
-                        background-color: #8B0000;
-                        color: #fff;
-                        border: none;
-                        border-radius: 8px;
-                        font-size: 1rem;
-                        font-weight: 600;
-                        cursor: pointer;
-                        transition: background-color 0.3s ease;
-                    }
-
-                    button.submit-btn:hover {
-                        background-color: rgb(115, 8, 8);
-                        transform: translateY(-3px);
-                    }
-                        
                     .btn-icon {
                         background-color: #8b0000;
                         color: white;
@@ -543,7 +513,16 @@ const updatePresupuesto = ({exito,solicitudID}) => {
                     background-color: #a30000;
                     transform: translateY(-3px);
                     }
-
+                    
+                    .titulo-pagina {
+                        font-size: 2rem;
+                        width: 100%;
+                        color: white;
+                        text-align: center;
+                        margin-top: 2px;
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+                    }
 
                     .form-container {
                         background-color: #1f1f1f;
@@ -575,20 +554,18 @@ const updatePresupuesto = ({exito,solicitudID}) => {
 
                     .form-col {
                         flex: 1;
-                        min-width: 250px;
+                        width: 100%;
                         display: flex;
                         flex-direction: column;
                     }
 
                     .form-col-productos {
-                        flex: 8;
                         min-width: 0; /* Importante para que no desborde */
                         display: flex;
                         flex-direction: column;
                     }
                         
                     .form-col-item1 {
-                        flex: 3;
                         min-width: 0; /* Importante para que no desborde */
                         display: flex;
                         flex-direction: column;
@@ -602,7 +579,6 @@ const updatePresupuesto = ({exito,solicitudID}) => {
                     }
 
                     .form-col-precioVenta {
-                        flex: 2;
                         min-width: 0;
                         display: flex;
                         flex-direction: column;
@@ -707,6 +683,23 @@ const updatePresupuesto = ({exito,solicitudID}) => {
                         font-size: 1rem;
                         outline: none;
                         transition: border-color 0.2s ease-in-out;
+                    }
+
+                    button.submit-btn {
+                        padding: 0.75rem 1rem;
+                        background-color: #8B0000;
+                        color: #fff;
+                        border: none;
+                        border-radius: 8px;
+                        font-size: 1rem;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: background-color 0.3s ease;
+                    }
+
+                    button.submit-btn:hover {
+                        background-color: rgb(115, 8, 8);
+                        transform: translateY(-3px);
                     }
                 `}
             </style>

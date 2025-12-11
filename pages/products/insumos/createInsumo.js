@@ -284,7 +284,7 @@ const formProducto = ({exito}) => {
                  </div> 
                 </form>
             </div>
-            <style jsx>
+             <style jsx>
                 {`
                         
                     .box-cargar{
@@ -330,7 +330,7 @@ const formProducto = ({exito}) => {
 
                     .form-col {
                         flex: 1;
-                        min-width: 250px;
+                        max-width:200px;
                         display: flex;
                         flex-direction: column;
                     }

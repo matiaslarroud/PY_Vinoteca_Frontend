@@ -1,45 +1,54 @@
 const { useState, useEffect } = require("react")
-import Select from 'react-select';          
+import Select from 'react-select';      
 import { FaTrash} from "react-icons/fa";
 import FormularioEmpleadoCreate from '../../gestion/empleado/createEmpleado'
-import FormularioClienteCreate from '../../clientes/createCliente'
+import FormularioClienteCreate from '../createCliente' 
 
 const { default: Link } = require("next/link")
 
-const initialStatePresupuesto = {presupuestoID:'' , total:'', proveedor:'', solicitudPresupuesto:'', empleado:'', medioPago:''}
-const initialDetalle = { tipoProducto: "",producto: "", cantidad: 0, precio: 0, importe: 0, presupuesto:'' };
+const initialStatePresupuesto = {total:'', cliente:'', empleado:'' }
+const initialDetalle = { tipoProducto: '', producto: "", cantidad: 0, precio: 0, importe: 0, presupuesto:'' };
 
-const busquedaProveedor = ({ exito, filtro, onChangeFiltro , filtroDetalle , onChangeFiltroDetalle }) => {
+const updatePresupuesto = ({exito,presupuestoID}) => {
     const [presupuesto , setPresupuesto] = useState(initialStatePresupuesto);
     
-    const [proveedores,setProveedores] = useState([])
+    const [clientes,setClientes] = useState([])
     const [empleados,setEmpleados] = useState([])
-    const [mediosPago,setMediosPago] = useState([])
     const [detalles,setDetalles] = useState([initialDetalle])
     const [productos,setProductos] = useState([]);
     const [tipoProductos,setTipoProductos] = useState([]);
-    const [solicitudesPresupuesto,setSolicitudesPresupuesto] = useState([]);
-                
-    const [filtros, setFiltros] = useState(filtro);
-    
-    // Sincroniza con los cambios del padre
-    useEffect(() => {
-            setFiltros(filtro);
-            setDetalles(filtroDetalle)
-    }, [filtro,filtroDetalle]);
-    
-    const borrarFiltros = () => {
-            setFiltros(initialStatePresupuesto);
-            onChangeFiltro(initialStatePresupuesto);
-            setDetalles([])
-            onChangeFiltroDetalle([]);
-    };
     
     const detallesValidos = detalles.filter(d => d.producto && d.cantidad > 0);
     const puedeGuardar = detallesValidos.length > 0;
 
-    const fetchData_Productos = () => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products`)
+    const fetchData_Presupuesto = async (presupuestoID) => {
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto/${presupuestoID}`)
+            .then((a)=>{
+                return a.json();
+            })
+                .then((s)=>{
+                    if(s.ok){
+                        setPresupuesto(s.data)
+                    }
+                })
+            .catch((err)=>{console.log("Error al cargar vinos.\nError: ",err)})
+    }
+    
+    const fetchData_PresupuestoDetalle = async (presupuestoID) => {
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuestoDetalle/presupuesto/${presupuestoID}`);
+            const s = await res.json();
+            if (s.ok) {
+                setDetalles(s.data); // guardamos directo
+            }
+        } catch (err) {
+            console.log("Error al cargar detalles.\nError: ", err);
+        }
+    };
+
+    
+    const fetchData_Productos = async() => {
+    await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products`)
         .then((a)=>{
             return a.json();
         })
@@ -48,20 +57,7 @@ const busquedaProveedor = ({ exito, filtro, onChangeFiltro , filtroDetalle , onC
                     setProductos(s.data)
                 }
             })
-        .catch((err)=>{console.log("Error al cargar productos.\nError: ",err)})
-    }
-    
-    const fetchData_MediosPago = () => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/medioPago`)
-        .then((a)=>{
-            return a.json();
-        })
-            .then((s)=>{
-                if(s.ok){
-                    setMediosPago(s.data);
-                }
-            })
-        .catch((err)=>{console.log("Error al cargar los medios de pago.\nError: ",err)})
+        .catch((err)=>{console.log("Error al cargar vinos.\nError: ",err)})
     }
     
     const fetchData_TipoProductos = () => {
@@ -77,43 +73,32 @@ const busquedaProveedor = ({ exito, filtro, onChangeFiltro , filtroDetalle , onC
         .catch((err)=>{console.log("Error al cargar tipos de productos.\nError: ",err)})
     }
     
-    const fetchData_Solicitudes = () => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuesto`)
-        .then((a)=>{
-            return a.json();
-        })
-            .then((s)=>{
-                if(s.ok){
-                    setSolicitudesPresupuesto(s.data);
-                }
-            })
-        .catch((err)=>{console.log("Error al cargar tipos de productos.\nError: ",err)})
-    }
-
-    const fetchData_Proveedores = () => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/proveedor`)
+    const fetchData_Clientes = async () => {
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente`)
             .then((a)=>{return a.json()})
                 .then((s)=>{
-                    setProveedores(s.data)
+                    setClientes(s.data)
                 })
     }
 
-    const fetchData_Empleados = () => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/empleado`)
+    const fetchData_Empleados = async () => {
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/empleado`)
             .then((a)=>{return a.json()})
                 .then((s)=>{
                     setEmpleados(s.data)
                 })
     }
 
-    useEffect(()=>{
-        fetchData_Proveedores();
+    useEffect(() => {
+        if (!presupuestoID) return;
+
+        fetchData_Clientes();
         fetchData_Empleados();
-        fetchData_Productos();
-        fetchData_MediosPago();
         fetchData_TipoProductos();
-        fetchData_Solicitudes();
-    }, [])
+        fetchData_Productos();
+        fetchData_Presupuesto(presupuestoID);
+        fetchData_PresupuestoDetalle(presupuestoID);
+    }, [presupuestoID]);
 
     useEffect(() => {
         if (!productos.length || !detalles.length) return;
@@ -133,122 +118,138 @@ const busquedaProveedor = ({ exito, filtro, onChangeFiltro , filtroDetalle , onC
         }
     }, [productos, detalles]);
 
-    
-    
-const agregarDetallePresupuesto = async (solicitudID) => {
-  try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuestoDetalle/solicitudPresupuesto/${solicitudID}`
-    );
-    const s = await res.json();
 
-    if (!s.ok) {
-      console.error("Error al cargar detalles de la solicitud:", s.message);
-      return;
+    const clickChange = async(e) => {
+         e.preventDefault();
+         const resPresupuesto = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto/${presupuestoID}`,
+            {
+                method: 'PUT',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({
+                    cliente: presupuesto.cliente,
+                    empleado: presupuesto.empleado,
+                    total: presupuesto.total,
+                })
+            }
+        )
+
+        const presupuestoCreado = await resPresupuesto.json();
+        if(!presupuestoCreado.ok) {
+            alert(presupuestoCreado.message)
+            return
+        }
+        const identificador = presupuestoCreado.data._id;
+
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuestoDetalle/${identificador}`,
+            {
+                method:'DELETE',
+                headers: {
+                    'Content-Type':'application/json',
+                }
+            }
+        ).then((a)=>{return a.json()})
+            .then((res)=>{
+                if(!res.ok){
+                    alert(res.message)
+                    return
+                }
+            })
+            .catch((err)=>{
+                console.log("❌ Error al envia Picada para su eliminación. \n Error: ",err);
+            })
+
+        // GUARDAMOS DETALLES
+        for (const detalle of detalles) {
+            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuestoDetalle`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    producto: detalle.producto,
+                    cantidad: detalle.cantidad,
+                    precio: detalle.precio,
+                    importe: detalle.importe,
+                    presupuesto: presupuestoID
+            })
+                });
+
+            const dataDetalle = await resDetalle.json();
+            if (!dataDetalle.ok) {
+                alert(dataDetalle.message);
+                return;
+            }
+        }
+        setDetalles([initialDetalle]);
+        setPresupuesto(initialStatePresupuesto);
+        alert(presupuestoCreado.message)
+        exito();
     }
 
-    // s.data es un array de detalles [{producto, cantidad}, ...]
-    const nuevosDetalles = await Promise.all(
-      s.data.map(async (detalle) => {
-        let precio = 0;
-        let importe = 0;
-        // Buscamos los datos del producto
-        const prodRes = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/${detalle.producto}`
-        );
-        const prodData = await prodRes.json();
+    const inputChange = (e) => {
+        const value = e.target.value;
+        const name = e.target.name;
+        
+        setPresupuesto({
+            ...presupuesto , 
+                [name]:value
+        })   
+    }
 
-        if (!prodData.ok) return null;
-
-
-        if(prodData.data.precioCosto){
-            ganancia = ( prodData.data.ganancia ) / 100;
-            precio = prodData.data.precioCosto + ( prodData.data.precioCosto * ganancia )
-            importe = precio * detalle.cantidad;
-        }
-
-        if(prodData.data.precioVenta){
-            precio = prodData.data.precioVenta
-            importe = ( prodData.data.precioVenta)* detalle.cantidad ;
-        }
-
-        return {
-          tipoProducto: prodData.data.tipo || "",
-          producto: detalle.producto,
-          cantidad: detalle.cantidad,
-          precio,
-          importe
-        };
-      })
-    );
-
-    // Filtramos por si alguno vino como null
-    const filtrados = nuevosDetalles.filter((d) => d !== null);
-
-    // Actualizamos el estado con todos los detalles nuevos
-    setDetalles((prev) => [...prev, ...filtrados]);
-
-  } catch (error) {
-    console.error("Error de red al cargar detalles del presupuesto:", error);
-  }
-};
 
     const handleDetalleChange = (index, field, value) => {
         const nuevosDetalles = [...detalles];
-        nuevosDetalles[index][field] = value;
+        nuevosDetalles[index][field] = field === "cantidad" ? parseFloat(value) : value;
+        
+        const prod = productos.find(p => p._id === nuevosDetalles[index].producto);
+
+        if (prod) {
+            if(prod.precioCosto){
+                const ganancia = prod.ganancia;
+                const precio = prod.precioCosto + ((prod.precioCosto * ganancia) / 100);
+
+                nuevosDetalles[index].precio = precio;
+                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
+            }
+            if(!prod.precioCosto && prod.precioVenta){
+                const precio = prod.precioVenta;
+
+                nuevosDetalles[index].precio = precio;
+                nuevosDetalles[index].importe = precio * nuevosDetalles[index].cantidad;
+            }
+
+        } else {
+            nuevosDetalles[index].precio = 0;
+            nuevosDetalles[index].importe = 0;
+        }
 
         setDetalles(nuevosDetalles);
-        onChangeFiltroDetalle(nuevosDetalles)
-    };
-    
-    const handleBuscar = async (e) => {
-        e.preventDefault();
-
-        // Armamos el cuerpo a enviar
-        const body = {
-            ...filtros,
-            detalles: detalles.map(d => ({
-                tipoProducto: d.tipoProducto,
-                producto: d.producto
-            }))
-        };
-
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuesto/buscar`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-        });
-
-        const data = await res.json();
-        if (data.ok){
-            exito(data.data);
-        } else {
-            exito({})
-        }
+        calcularTotal(nuevosDetalles);
     };
     
     const selectChange = (selectedOption, actionMeta) => {
         const name = actionMeta.name;
         const value = selectedOption ? selectedOption.value : "";
-        
-        const nuevosFiltros = { ...filtros, [name]: value };
 
-        setFiltros(nuevosFiltros);
-        onChangeFiltro(nuevosFiltros); 
-    }
-
-    const inputChange = (e) => {
-        const { name, value } = e.target;
-        const nuevosFiltros = { ...filtros, [name]: value };
-        setFiltros(nuevosFiltros);
-        onChangeFiltro(nuevosFiltros); 
+        setPresupuesto({
+            ...presupuesto,
+            [name]: value,
+        });
     };
 
     const agregarDetalle = () => {
-        setDetalles([...detalles, { ...{tipoProducto:"",producto: "", cantidad: 0, precio: 0, importe: 0 } }]);
+        setDetalles([...detalles, { ...{tipoProducto:"", producto: "", cantidad: 0, precio: 0, importe: 0 } }]);
     };
+    
+    const calcularTotal = (detalles) => {
+        const totalPresupuesto = Array.isArray(detalles) && detalles.length > 0
+            ? detalles.reduce((acc, d) => acc + (d.importe || 0), 0)
+                : 0;
+        setPresupuesto((prev) => ({ ...prev, total:totalPresupuesto }));
+    };
+    
+    const [mostrarModalCreate2, setMostrarModalCreate2] = useState(false);
+    const [mostrarModalCreate3, setMostrarModalCreate3] = useState(false);
 
-    const opciones_tipoProductos = tipoProductos.map(v => ({
+     const opciones_tipoProductos = tipoProductos.map(v => ({
         value: v,
         label: v === "ProductoVino" ? "Vino" :
                 v === "ProductoPicada" ? "Picada" :
@@ -261,24 +262,45 @@ const agregarDetallePresupuesto = async (solicitudID) => {
             stock: v.stock,
             tipoProducto: v.tipoProducto
         }));
-    const opciones_empleados = empleados.map(v => ({ value: v._id,label: `${v._id} - ${v.name}` }));
-    const opciones_proveedores = proveedores.map(v => ({ value: v._id,label: `${v._id} - ${v.name}` }));
-    const opciones_mediosPago = mediosPago.map(v => ({ value: v._id,label: `${v.name}` }));
-    const opciones_solicitudes = solicitudesPresupuesto.filter((s)=>{return s.proveedor === filtros.proveedor })
-        .map(v => {
-            return {
-                value: v._id,
-                label: `${v._id}`
-            };
-        }
-    );
+    const opciones_empleados = empleados.map(v => ({ value: v._id,label: v.name }));
+    const opciones_clientes = clientes.map(v => ({ value: v._id,label: v.name }));
+
 
     return(
         <>
-                <div className="form-container">
+            {mostrarModalCreate2 && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalCreate2(false)}>&times;</button>
+                    <FormularioEmpleadoCreate
+                    exito={() => {
+                        setMostrarModalCreate2(false);
+                        fetchData_Empleados();
+                    }}
+                    />
+                </div>
+                </div>
+            )}
+
+            {mostrarModalCreate3 && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalCreate3(false)}>&times;</button>
+                    <FormularioClienteCreate
+                    exito={() => {
+                        setMostrarModalCreate3(false);
+                        fetchData_Clientes();
+                    }}
+                    />
+                </div>
+                </div>
+            )}
+
+
+            <div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
-                        <h1 className="titulo-pagina">Busqueda Avanzada de Presupuesto</h1>
+                        <h1 className="titulo-pagina">Visualización de Presupuesto</h1>
                     </div>
                 </div>
 
@@ -286,81 +308,18 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                     <div className="form-row">
                         <div className="form-col">
                             <label>
-                                Presupuesto N° :
-                            </label>
-                            <input
-                                type="number"
-                                className="input-secondary"
-                                value={filtros.presupuestoID}
-                                name="presupuestoID"
-                                onChange={inputChange}
-                                />
-                        </div>
-                        <div className="form-col">
-                            <label>
-                                Proveedor:
+                                Cliente:
                             </label>
                             <Select
                                 className="form-select-react"
                                 classNamePrefix="rs"
-                                options={opciones_proveedores}
-                                value={opciones_proveedores.find(op => op.value === filtros.proveedor) || null}
+                                options={opciones_clientes}
+                                value={opciones_clientes.find(op => op.value === presupuesto.cliente) || null}
                                 onChange={selectChange}
-                                name='proveedor'
-                                placeholder="Proveedor..."
+                                name='cliente'
+                                placeholder="Cliente..."
                                 isClearable
-                                styles={{
-                                    container: (base) => ({
-                                    ...base,
-                                    width: 220, // ⬅️ ancho fijo total
-                                    }),
-                                    control: (base) => ({
-                                    ...base,
-                                    minWidth: 220,
-                                    maxWidth: 220,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    border: '1px solid #444',
-                                    borderRadius: 8,
-                                    }),
-                                    singleValue: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                    }),
-                                    menu: (base) => ({
-                                    ...base,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    option: (base, { isFocused }) => ({
-                                    ...base,
-                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    input: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    }),
-                                }}
-                            />
-                        </div>
-
-                        <div className="form-col">
-                            <label>
-                                Solicitud de Presupuesto:
-                            </label>
-                            <Select
-                                className="form-select-react"
-                                classNamePrefix="rs"
-                                options={opciones_solicitudes}
-                                value={opciones_solicitudes.find(op => op.value === filtros.solicitudPresupuesto) || null}
-                                onChange={selectChange}
-                                name='solicitudPresupuesto'
-                                placeholder="Solicitud de presupuesto..."
-                                isClearable
+                                isDisabled={true}
                                 styles={{
                                     container: (base) => ({
                                     ...base,
@@ -403,16 +362,17 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                         <div className="form-col">
                             <label>
                                 Empleado:
-                            </label>
+                             </label>
                             <Select
                                 className="form-select-react"
                                 classNamePrefix="rs"
                                 options={opciones_empleados}
-                                value={opciones_empleados.find(op => op.value === filtros.empleado) || null}
+                                value={opciones_empleados.find(op => op.value === presupuesto.empleado) || null}
                                 onChange={selectChange}
                                 name='empleado'
                                 placeholder="Empleado..."
                                 isClearable
+                                isDisabled={true}
                                 styles={{
                                     container: (base) => ({
                                     ...base,
@@ -452,72 +412,16 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                             />
                         </div>
 
-                        <div className="form-col">
-                            <label>
-                                Medio de Pago:
-                            </label>
-                            <Select
-                                className="form-select-react"
-                                classNamePrefix="rs"
-                                options={opciones_mediosPago}
-                                value={opciones_mediosPago.find(op => op.value === filtros.medioPago) || null}
-                                onChange={selectChange}
-                                name='medioPago'
-                                placeholder="Medio de Pago..."
-                                isClearable
-                                styles={{
-                                    container: (base) => ({
-                                    ...base,
-                                    width: 220, // ⬅️ ancho fijo total
-                                    }),
-                                    control: (base) => ({
-                                    ...base,
-                                    minWidth: 220,
-                                    maxWidth: 220,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    border: '1px solid #444',
-                                    borderRadius: 8,
-                                    }),
-                                    singleValue: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                    }),
-                                    menu: (base) => ({
-                                    ...base,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    option: (base, { isFocused }) => ({
-                                    ...base,
-                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    input: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    }),
-                                }}
-                            />
-                        </div>
-                        
                     </div>
                     <div className="form-row">
                         <div className="form-col-productos">
                             <label>
                                     Productos:
-                                    <button type="button" className="btn-add-producto" onClick={agregarDetalle}>
-                                        + Agregar Producto
-                                    </button>
                             </label>
                             <div className="form-group-presupuesto">
                                 
-                                {detalles.map((d, i) => {
-
-                                return <div key={i} className="presupuesto-item">
+                                {detalles.map((d, i) => (
+                                <div key={i} className="presupuesto-item">
                                     <div className='form-col-item1'>
                                         <Select
                                             className="form-select-react"
@@ -529,36 +433,41 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                                             }
                                             placeholder="Tipo de Producto..."
                                             isClearable
+                                            isDisabled={true}
                                             styles={{
                                                 container: (base) => ({
-                                                    ...base,
-                                                    width: 150,
+                                                ...base,
+                                                width: 120, // ⬅️ ancho fijo total
                                                 }),
-                                                control: (base, state) => ({
-                                                    ...base,
-                                                    width: 150,
-                                                    backgroundColor: '#2c2c2c !important',
-                                                    borderColor: state.isFocused ? '#666' : '#444',
-                                                    borderRadius: 8,
-                                                    color: 'white',
-                                                }),
-                                                menu: (base) => ({
-                                                    ...base,
-                                                    backgroundColor: '#2c2c2c',
-                                                    color: 'white',
-                                                }),
-                                                option: (base, { isFocused }) => ({
-                                                    ...base,
-                                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                                    color: 'white',
+                                                control: (base) => ({
+                                                ...base,
+                                                minWidth: 150,
+                                                maxWidth: 150,
+                                                backgroundColor: '#2c2c2c',
+                                                color: 'white',
+                                                border: '1px solid #444',
+                                                borderRadius: 8,
                                                 }),
                                                 singleValue: (base) => ({
-                                                    ...base,
-                                                    color: 'white !important',
+                                                ...base,
+                                                color: 'white',
+                                                whiteSpace: 'nowrap',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                                }),
+                                                menu: (base) => ({
+                                                ...base,
+                                                backgroundColor: '#2c2c2c',
+                                                color: 'white',
+                                                }),
+                                                option: (base, { isFocused }) => ({
+                                                ...base,
+                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                                color: 'white',
                                                 }),
                                                 input: (base) => ({
-                                                    ...base,
-                                                    color: 'white !important',
+                                                ...base,
+                                                color: 'white',
                                                 }),
                                             }}
                                         />
@@ -574,55 +483,64 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                                             }
                                             placeholder="Producto..."
                                             isClearable
+                                            isDisabled={true}
                                             styles={{
                                                 container: (base) => ({
-                                                    ...base,
-                                                    width: 150,
+                                                ...base,
+                                                width: 150, // ⬅️ ancho fijo total
                                                 }),
-                                                control: (base, state) => ({
-                                                    ...base,
-                                                    width: 150,
-                                                    backgroundColor: '#2c2c2c !important',
-                                                    borderColor: state.isFocused ? '#666' : '#444',
-                                                    borderRadius: 8,
-                                                    color: 'white',
-                                                }),
-                                                menu: (base) => ({
-                                                    ...base,
-                                                    backgroundColor: '#2c2c2c',
-                                                    color: 'white',
-                                                }),
-                                                option: (base, { isFocused }) => ({
-                                                    ...base,
-                                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                                    color: 'white',
+                                                control: (base) => ({
+                                                ...base,
+                                                minWidth: 150,
+                                                maxWidth: 150,
+                                                backgroundColor: '#2c2c2c',
+                                                color: 'white',
+                                                border: '1px solid #444',
+                                                borderRadius: 8,
                                                 }),
                                                 singleValue: (base) => ({
-                                                    ...base,
-                                                    color: 'white !important',
+                                                ...base,
+                                                color: 'white',
+                                                whiteSpace: 'nowrap',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                                }),
+                                                menu: (base) => ({
+                                                ...base,
+                                                backgroundColor: '#2c2c2c',
+                                                color: 'white',
+                                                }),
+                                                option: (base, { isFocused }) => ({
+                                                ...base,
+                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                                color: 'white',
                                                 }),
                                                 input: (base) => ({
-                                                    ...base,
-                                                    color: 'white !important',
+                                                ...base,
+                                                color: 'white',
                                                 }),
                                             }}
                                         />
                                     </div>
+                                    
+                                    <div className='form-col-item1'>
+                                        <input
+                                            type="number"
+                                            placeholder="Cantidad"
+                                            min={1}
+                                            max={opciones_productos.find((p) => p.value === d.producto)?.stock || 0}
+                                            value={d.cantidad}
+                                            onChange={(e) => handleDetalleChange(i, "cantidad", e.target.value)}
+                                            required
+                                            disabled
+                                        />
+                                    </div>
 
                                     <div className='form-col-item2'>
-                                        <button
-                                            type="button"
-                                            className="btn-icon"
-                                            onClick={() => {
-                                                const productos = detalles.filter((_, index) => index !== i);
-                                                setDetalles(productos);
-                                            }}
-                                            >                                    
-                                            <FaTrash />
-                                        </button>
+                                        <span>Importe: ${d.importe.toFixed(2)}</span>
                                     </div>
                                 </div>
-                                })}
+                                ))}
                             </div>
                         </div> 
                         <div className="form-col-precioVenta">
@@ -632,29 +550,17 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                                         type="number"
                                         className='precio-venta'
                                         onChange={inputChange}
-                                        value={filtros.total}
+                                        value={presupuesto.total}
                                         name="total"
+                                        disabled
                                     />
                                 </label>
                             </div>
                         </div>
                     </div>
-                    
-                        
-                    <div className="form-submit">
-                        <button type="submit" className="submit-btn" onClick={handleBuscar}>Buscar</button>
-                        <button
-                            type="button"
-                            className="submit-btn"
-                            style={{ backgroundColor: "#444", marginLeft: "1rem" }}
-                            onClick={borrarFiltros}
-                            >
-                            Borrar filtros
-                        </button>
-                    </div>
                 </form>
             </div>
-           <style jsx>
+            <style jsx>
                 {`
                     .modal {
                         position: fixed;
@@ -668,18 +574,20 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                         align-items: center;
                         z-index: 1000;
                     }
-                    
 
-
-                    .close {
-                        position: absolute;
-                        top: 1rem;
-                        right: 1.5rem;
-                        font-size: 1.5rem;
-                        background: transparent;
-                        border: none;
-                        cursor: pointer;
+                    .modal-content {
+                        background-color: #121212;
+                        padding: 40px;
+                        border-radius: 12px;
+                        width: 90%;
+                        height:80%;
+                        max-width: 500px;
+                        max-height: 800px;
+                        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                        position: relative;
+                        margin: 20px;
                     }
+                        
                     .btn-icon {
                         background-color: #8b0000;
                         color: white;
@@ -701,18 +609,6 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                     transform: translateY(-3px);
                     }
 
-                    .modal-content {
-                        background-color: #121212;
-                        padding: 40px;
-                        border-radius: 12px;
-                        width: 90%;
-                        height:80%;
-                        max-width: 500px;
-                        max-height: 800px;
-                        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                        position: relative;
-                        margin: 20px;
-                    }
 
                     .form-container {
                         background-color: #1f1f1f;
@@ -752,16 +648,38 @@ const agregarDetallePresupuesto = async (solicitudID) => {
 
                     .form-col {
                         flex: 1;
+                        min-width: 250px;
                         display: flex;
                         flex-direction: column;
                     }
 
                     .form-col-productos {
+                        flex: 8;
+                        min-width: 0; /* Importante para que no desborde */
+                        display: flex;
+                        flex-direction: column;
+                    }
+                        
+                    .form-col-item1 {
+                        flex: 3;
+                        min-width: 0; /* Importante para que no desborde */
+                        display: flex;
+                        flex-direction: column;
+                    }
+                        
+                    .form-col-item2 {
+                        flex: 2;
                         min-width: 0; /* Importante para que no desborde */
                         display: flex;
                         flex-direction: column;
                     }
 
+                    .form-col-precioVenta {
+                        flex: 2;
+                        min-width: 0;
+                        display: flex;
+                        flex-direction: column;
+                    }
 
                     label {
                         font-weight: 500;
@@ -786,7 +704,7 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                         flex: 1;
                     }
 
-                        .btn-plus {
+                    .btn-plus {
                         background-color: transparent;
                         color: #651616ff;
                         border: none;
@@ -808,6 +726,7 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                         padding-right: 8px;
                     }
 
+
                     .presupuesto-item {
                         display: flex;
                         align-items: center;
@@ -816,34 +735,7 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                     }
 
                     .presupuesto-item input[type="number"] {
-                        width: 80px;
-                    }
-                        
-                    .form-col-item1 {
-                        min-width: 0; /* Importante para que no desborde */
-                        display: flex;
-                        flex-direction: column;
-                    }
-
-                        
-                    .form-col-item2 {
-                        flex: 2;
-                        min-width: 0; /* Importante para que no desborde */
-                        display: flex;
-                        flex-direction: column;
-                    }
-
-                    .form-col-precioVenta {
-                        min-width: 0;
-                        display: flex;
-                        flex-direction: column;
-                    }
-                    
-                    .form-col-item1,
-                    {
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
+                        width: 120px;
                     }
 
                     .btn-remove {
@@ -937,4 +829,4 @@ const agregarDetallePresupuesto = async (solicitudID) => {
     )
 }
 
-export default busquedaProveedor;
+export default updatePresupuesto;
