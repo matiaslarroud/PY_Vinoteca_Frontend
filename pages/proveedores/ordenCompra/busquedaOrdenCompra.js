@@ -707,7 +707,6 @@ const busquedaOrdenCompra = ({ exito, filtro, onChangeFiltro , filtroDetalle , o
                         }                        
 
                         .form-col-productos {
-                            flex: 8;
                             min-width: 0; /* Importante para que no desborde */
                             display: flex;
                             flex-direction: column;

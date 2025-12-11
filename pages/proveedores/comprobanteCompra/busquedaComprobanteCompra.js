@@ -594,7 +594,6 @@ const newComprobanteCompra = ({ exito, filtro, onChangeFiltro , filtroDetalle , 
                         
 
                         .form-col-productos {
-                            flex: 8;
                             min-width: 0; /* Importante para que no desborde */
                             display: flex;
                             flex-direction: column;
