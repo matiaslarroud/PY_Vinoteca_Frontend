@@ -532,6 +532,84 @@ const updatePicada = ({exito , picadaID}) => {
             </div>
           <style jsx>
                 {`
+                        .imagenes-actuales-container {
+                            margin-top: 20px;
+                        }
+
+                        .imagenes-grid {
+                            display: flex;
+                            flex-wrap: wrap;
+                            gap: 10px;
+                        }
+
+                        .imagen-card {
+                            width: 90px;
+                            height: 90px;
+                            background: #1e1e1e;
+                            border-radius: 6px;
+                            padding: 4px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            position: relative;
+                            transition: transform 0.15s ease-in-out;
+                        }
+
+                        .imagen-card:hover {
+                            transform: scale(1.1);
+                        }
+
+                        .imagen-card img {
+                            width: 80px;
+                            height: 80px;
+                            object-fit: cover;
+                            border-radius: 4px;
+                        }
+
+                        /* Botón eliminar pequeño */
+                        .btn-eliminar {
+                            position: absolute;
+                            top: -5px;
+                            right: -5px;
+                            background: #e74c3c;
+                            border: none;
+                            color: white;
+                            font-size: 10px;
+                            width: 16px;
+                            height: 16px;
+                            border-radius: 50%;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            transition: 0.15s ease-in-out;
+                        }
+
+                        .btn-eliminar:hover {
+                            background: #c0392b;
+                        }
+
+
+                        .preview-img {
+                            width: 100%;
+                            height: 100%;
+                            object-fit: cover;
+                            border-radius: 6px;
+                            border: 1px solid #444;
+                        }
+
+                        .btn-eliminar-img {
+                            position: absolute;
+                            top: 5px;
+                            right: 5px;
+                            background: rgba(255, 0, 0, 0.8);
+                            color: white;
+                            border: none;
+                            padding: 3px 6px;
+                            border-radius: 4px;
+                            cursor: pointer;
+                            font-size: 12px;
+                        }     
                     .box-cargar{
                         justify-content: center;
                         align-items: center;
