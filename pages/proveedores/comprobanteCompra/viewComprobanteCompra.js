@@ -568,19 +568,6 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
                         transform: translateY(-3px);
                         }
 
-                        .modal-content {
-                            background-color: #121212;
-                            padding: 40px;
-                            border-radius: 12px;
-                            width: 90%;
-                            height:80%;
-                            max-width: 500px;
-                            max-height: 800px;
-                            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                            position: relative;
-                            margin: 20px;
-                        }
-
                         .form-container {
                             background-color: #1f1f1f;
                             color: #fff;

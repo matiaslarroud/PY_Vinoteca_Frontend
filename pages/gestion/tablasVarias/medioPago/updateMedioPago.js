@@ -2,7 +2,7 @@ const { useState, useEffect } = require("react")
 const { default: Link } = require("next/link")
 
 
-const initialState = {name:'', interes:0}   
+const initialState = {name:''}   
 
 const updateMedioPago = ({medioPagoID, exito}) => {
     const [medioPago, setMedioPago] = useState(initialState);

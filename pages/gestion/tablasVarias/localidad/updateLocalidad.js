@@ -1,4 +1,7 @@
 const { useState, useEffect } = require("react")
+import Select from 'react-select';     
+
+import FormularioCreateProvincia from "../provincia/createProvincia";
 
 const { default: Link } = require("next/link")
 const initialState = {name:'', provincia:''}                  
@@ -6,6 +9,8 @@ const initialState = {name:'', provincia:''}
 const updateLocalidad = ({localidadID , exito}) => {
     const [localidad , setLocalidad] = useState(initialState);
     const [provincias,setProvincias] = useState([]);
+
+    const [mostrarModalProvincia,setMostrarModalProvincia] = useState(false);
     
     const fetchDataLocalidad = async(localidadID) => {
             await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/localidad/${localidadID}`)
@@ -44,6 +49,15 @@ const updateLocalidad = ({localidadID , exito}) => {
                 [name]:value
         })   
     }
+    const selectChange = (selectedOption, actionMeta) => {
+        const name = actionMeta.name;
+        const value = selectedOption ? selectedOption.value : "";
+
+        setLocalidad({
+            ...localidad,
+            [name]: value,
+        });
+    };
 
     const clickChange = async (e) => {
         e.preventDefault();
@@ -68,34 +82,96 @@ const updateLocalidad = ({localidadID , exito}) => {
                  })
 
     }
+    
+    const opciones_provincias  = provincias.map(v => ({ value: v._id,label: v.name}))
 
     return(
          <>
+
+            {mostrarModalProvincia && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => 
+                        {
+                            setMostrarModalProvincia(null)
+                        }
+                    }>
+                        &times;
+                    </button>
+                    <FormularioCreateProvincia
+                        exito={() => 
+                            {
+                                setMostrarModalProvincia(false)
+                                fetchDataProvincias()
+                            }}
+                    />
+                </div>
+                </div>
+            )}
+            
             <div className="form-container">
                 <h1 className="titulo-pagina">Modificar Localidad</h1>
                 <form id="formC">
-                    <fieldset className="grid-container">
                     <div className="form-group input-centered">
                         <label htmlFor="nombre">Nombre:</label>
                         <input type="text" onChange={inputChange} value={localidad.name} name="name" placeholder="Ingresa el nombre de la localidad" required></input>
-                    </div>
+                    </div>                    
+                                        
                     
-                    <div className="form-group">
-                        <label htmlFor="nombre">Provincia:</label>
-                        <select name="provinciaID" onChange={inputChange} value={localidad.provincia}>
-                            <option value=''>Seleccione una provincia...</option>
-                            {
-                                provincias.map(({_id,name}) => 
-                                    (
-                                        <option key={_id} value={_id}>
-                                            {name}
-                                        </option>                                        
-                                    )
-                                )
-                            }
-                        </select>
+                    <div className="form-group input-centered">
+                      <label>
+                       Provincia: 
+                        <button type="button" className="btn-plus" onClick={() => setMostrarModalProvincia(true)}>+</button>
+                      </label>
+                      <Select
+                        className="form-select-react"
+                        classNamePrefix="rs"
+                        options={opciones_provincias}
+                        value={opciones_provincias.find(op => op.value === localidad.provincia) || null}
+                        onChange={selectChange}
+                        name='provincia'
+                        placeholder="Provincia..."
+                        isClearable
+                        styles={{
+                              container: (base) => ({
+                              ...base,
+                              width: 220, // ⬅️ ancho fijo total
+                              }),
+                              control: (base) => ({
+                              ...base,
+                              minWidth: 220,
+                              maxWidth: 220,
+                              backgroundColor: '#2c2c2c',
+                              color: 'white',
+                              border: '1px solid #444',
+                              borderRadius: 8,
+                              }),
+                              singleValue: (base) => ({
+                              ...base,
+                              color: 'white',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                              }),
+                              menu: (base) => ({
+                              ...base,
+                              backgroundColor: '#2c2c2c',
+                              color: 'white',
+                              }),
+                              option: (base, { isFocused }) => ({
+                              ...base,
+                              backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                              color: 'white',
+                              }),
+                              input: (base) => ({
+                              ...base,
+                              color: 'white',
+                              }),
+                        }}
+                      />
                     </div>
-                    </fieldset>
+
+                    
                     <div className="button-area">
                         <button type="submit" className="submit-btn" onClick={clickChange}>
                         Guardar
@@ -201,6 +277,19 @@ const updateLocalidad = ({localidadID , exito}) => {
       width: 100%;
     }
   }
+
+  .btn-plus {
+      background-color: transparent;
+      color: #651616ff;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+  }
+
+  .btn-plus:hover {
+      color: #571212ff;
+      transform: translateY(-3px);
+    }
 `}</style>
         </>
     )

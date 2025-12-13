@@ -571,7 +571,8 @@ const busquedaComprobanteVenta = ({exito, filtro, onChangeFiltro , filtroDetalle
                             </div>
                         </div>
                     </div>
-                    <div className="form-submit">
+                    
+                     <div className="form-submit">
                         <button type="submit" className="submit-btn" onClick={handleBuscar}>Buscar</button>
                         <button
                         type="button"
@@ -710,10 +711,6 @@ const busquedaComprobanteVenta = ({exito, filtro, onChangeFiltro , filtroDetalle
                             flex-direction: column;
                         }
 
-                        button.submit-btn {
-                            width:100%
-                        }
-
                         label {
                             font-weight: 500;
                             margin-bottom: 0.5rem;
@@ -798,6 +795,7 @@ const busquedaComprobanteVenta = ({exito, filtro, onChangeFiltro , filtroDetalle
 
                         .form-submit {
                             justify-content: center;
+                            text-align: center;
                             margin-top: 1rem;
                         }
 

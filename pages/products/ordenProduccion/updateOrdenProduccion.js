@@ -1,8 +1,9 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';
 import { FaTrash} from "react-icons/fa";
-import FormularioTipoVinoCreate from '../../gestion/tablasVarias/vino_tipo/createVinoTipo'
-import FormularioDepositoCreate from '../../gestion/deposito/createDeposito'
+
+import FormularioCreatePicada from '../picadas/createPicada'
+import FormularioCreateEmpleado from '../../gestion/empleado/createEmpleado'
 
 
 const initialState = {fechaElaboracion:'' , fechaEntrega:'' , empleado:''}
@@ -188,36 +189,36 @@ const updateOrden = ({exito , ordenID}) => {
         setDetalles([...detalles, { ...{ordenProduccion:'',picada:'', cantidad:0} }]);
     };
 
-    const [mostrarModalCreate1, setMostrarModalCreate1] = useState(false);
-    const [mostrarModalCreate2, setMostrarModalCreate2] = useState(false);
+    const [mostrarModalPicada, setMostrarModalPicada] = useState(false);
+    const [mostrarModalEmpleado, setMostrarModalEmpleado] = useState(false);
 
     const opciones_empleados = empleados.map(v => ({ value: v._id,label: v.name }));
     const opciones_picadas = picadas.map(v => ({ value: v._id,label: v.name , stock:v.stock }));
 
     return(
         <>
-            {mostrarModalCreate1 && (
+            {mostrarModalEmpleado && (
                 <div className="modal">
                 <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate1(false)}>&times;</button>
-                    <FormularioTipoVinoCreate
+                    <button className="close" onClick={() => setMostrarModalEmpleado(false)}>&times;</button>
+                    <FormularioCreateEmpleado
                     exito={() => {
-                        setMostrarModalCreate1(false);
-                        fetch_tiposVino();
+                        setMostrarModalEmpleado(false);
+                        fetch_Empleados();
                     }}
                     />
                 </div>
                 </div>
             )}
 
-            {mostrarModalCreate2 && (
+            {mostrarModalPicada && (
                 <div className="modal">
                 <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate2(false)}>&times;</button>
-                    <FormularioDepositoCreate
+                    <button className="close" onClick={() => setMostrarModalPicada(false)}>&times;</button>
+                    <FormularioCreatePicada
                     exito={() => {
-                        setMostrarModalCreate2(false);
-                        fetch_Depositos();
+                        setMostrarModalPicada(false);
+                        fetch_Picadas();
                     }}
                     />
                 </div>
@@ -225,11 +226,7 @@ const updateOrden = ({exito , ordenID}) => {
             )}
 
             <div className="form-container">
-                <div className="form-row">
-                    <div className="form-col">
-                        <h1 className="titulo-pagina">Cargar Orden de Produccion</h1>
-                    </div>
-                </div>
+                <h1 className="titulo-pagina">Cargar Orden de Produccion</h1>
 
                 <form id="updatePicada" className="formulario-picada">
                     <div className="form-row">
@@ -248,7 +245,7 @@ const updateOrden = ({exito , ordenID}) => {
                         <div className="form-col">
                             <label>
                                 Empleado:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate1(true)}>+</button>
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalEmpleado(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -303,6 +300,9 @@ const updateOrden = ({exito , ordenID}) => {
                         <div className="form-col-productos">
                             <label>
                                     Picadas:
+                                    <button type="button" className="btn-plus" onClick={() => setMostrarModalPicada(true)}>+</button>
+                            </label>
+                            <label>
                                     <button type="button" className="btn-add-insumo" onClick={agregarDetalle}>
                                         + Agregar Picada
                                     </button>
@@ -392,32 +392,25 @@ const updateOrden = ({exito , ordenID}) => {
                                 ))}
                             </div>
                         </div>
-                        <div className="form-col-precioVenta">
-                            <div className="box-cargar" >
-                                
-                                <div className="form-submit">
-                                    <button
-                                    type="submit"
-                                    className="submit-btn"
-                                    onClick={(e) => {
-                                        if (!puedeGuardar) {
-                                        alert("❌ No se puede guardar una orden de produccion sin al menos una picada.");
-                                        e.preventDefault();
-                                        return;
-                                        }
-                                        clickChange(e);
-                                    }}
-                                    >
-                                    Guardar
-                                    </button>
-                                </div>
-                            </div>
+                    </div>
+                    <div className="form-row">
+                        <div className="form-submit">
+                            <button
+                            type="submit"
+                            className="submit-btn"
+                            onClick={(e) => {
+                                if (!puedeGuardar) {
+                                alert("❌ No se puede guardar una orden de produccion sin al menos una picada.");
+                                e.preventDefault();
+                                return;
+                                }
+                                clickChange(e);
+                            }}
+                            >
+                            Guardar
+                            </button>
                         </div>
                     </div>
-
-                    
-
-                    
                 </form>
 
             </div>
@@ -443,14 +436,6 @@ const updateOrden = ({exito , ordenID}) => {
                         max-width: 100px;
                     }
 
-                    .titulo-pagina {
-                        text-align: center;
-                        font-size: 2rem;
-                        margin-bottom: 1.5rem;
-                        font-weight: bold;
-                        color: #f5f5f5;
-                    }
-
                     .formulario-picada {
                         display: flex;
                         flex-direction: column;
@@ -464,7 +449,6 @@ const updateOrden = ({exito , ordenID}) => {
                     }
 
                     .form-col {
-                        flex: 1;
                         display: flex;
                         flex-direction: column;
                     }
@@ -592,32 +576,6 @@ const updateOrden = ({exito , ordenID}) => {
                         background-color: #8b0000;
                         transform: translateY(-3px);
                     }
-                        
-                    .modal {
-                        position: fixed;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: rgba(0,0,0,0.5); /* oscurece fondo */
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        z-index: 1000;
-                    }
-
-                    .modal-content {
-                        background-color: #121212;
-                        padding: 40px;
-                        border-radius: 12px;
-                        width: 90%;
-                        height:80%;
-                        max-width: 500px;
-                        max-height: 800px;
-                        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                        position: relative;
-                        margin: 20px;
-                    }
 
                     .close {
                         position: absolute;
@@ -648,6 +606,39 @@ const updateOrden = ({exito , ordenID}) => {
                     .btn-icon:hover {
                         background-color: #a30000;
                         transform: translateY(-3px);
+                    }
+                        
+                    .formulario-picada input[type="date"] {
+                        background-color: #2c2c2c;
+                        color: #ffffff;
+                        border: 1px solid #444;
+                        border-radius: 10px;
+                        padding: 0.6rem 0.8rem;
+                        font-size: 1rem;
+                        outline: none;
+                        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+                    }
+
+                    /* Hover */
+                    .formulario-picada input[type="date"]:hover {
+                        border-color: #666;
+                    }
+
+                    /* Focus */
+                    .formulario-picada input[type="date"]:focus {
+                        border-color: #8b5cf6; /* violeta moderno */
+                        box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.25);
+                    }
+
+                    /* Ícono del calendario (Chrome / Edge) */
+                    .formulario-picada input[type="date"]::-webkit-calendar-picker-indicator {
+                        filter: invert(1);
+                        cursor: pointer;
+                    }
+
+                    /* Placeholder / texto vacío */
+                    .formulario-picada input[type="date"]:not(:focus):invalid {
+                        color: #aaa;
                     }
                 `}
             </style>

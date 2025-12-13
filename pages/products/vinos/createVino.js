@@ -2,6 +2,16 @@ const { useState, useEffect } = require("react")
 import { FaTrash } from "react-icons/fa";
 import Select from 'react-select';    
 
+import FormularioCreateTipoVino from "../../gestion/tablasVarias/vino_tipo/createVinoTipo"
+import FormularioCreateCrianzaVino from "../../gestion/tablasVarias/vino_crianza/createCrianza"
+import FormularioCreateUvaVino from "../../gestion/tablasVarias/vino_uva/createUva"
+import FormularioCreateVarietalVino from "../../gestion/tablasVarias/vino_varietal/createVarietal"
+import FormularioCreateVolumenVino from "../../gestion/tablasVarias/vino_volumen/createVolumen"
+import FormularioCreateProveedor from "../../proveedores/createProveedor"
+import FormularioCreateBodega from "../../gestion/tablasVarias/bodega/createBodega"
+import FormularioCreateParaje from "../../gestion/tablasVarias/bodega_paraje/createParaje"
+import FormularioCreateDeposito from "../../gestion/deposito/createDeposito"
+
 const { default: Link } = require("next/link")
 
 const initialState = {name:'',stock:0 , stockMinimo:'', proveedor:'' , bodega:'' , paraje:'' , crianza : '' , precioCosto:0 , ganancia:0 , tipo:'', uva:'' , varietal:'' , volumen:'' , deposito:''}
@@ -233,6 +243,15 @@ const formProducto = ({exito}) => {
         exito();
     }
 
+    const [mostrarModalProveedor , setMostrarModalProveedor] = useState(false)
+    const [mostrarModalBodega , setMostrarModalBodega] = useState(false)
+    const [mostrarModalParaje , setMostrarModalParaje] = useState(false)
+    const [mostrarModalTipoVino , setMostrarModalTipoVino] = useState(false)
+    const [mostrarModalUva , setMostrarModalUva] = useState(false)
+    const [mostrarModalCrianza , setMostrarModalCrianza] = useState(false)
+    const [mostrarModalVarietal , setMostrarModalVarietal] = useState(false)
+    const [mostrarModalVolumen , setMostrarModalVolumen] = useState(false)
+    const [mostrarModalDeposito , setMostrarModalDeposito] = useState(false)
     
     const opciones_tipoVino = tiposVino.map(v => ({ value: v._id,label: v.name }));
     const opciones_varietales = varietales.map(v => ({ value: v._id,label: v.name }));
@@ -246,6 +265,132 @@ const formProducto = ({exito}) => {
 
     return(
         <>
+
+            {mostrarModalDeposito && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalDeposito(false)}>&times;</button>
+                    <FormularioCreateDeposito
+                    exito={() => {
+                        setMostrarModalDeposito(false);
+                        fetchDepositos();
+                    }}
+                    />
+                </div>
+                </div>
+            )}
+
+            {mostrarModalVolumen && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalVolumen(false)}>&times;</button>
+                    <FormularioCreateVolumenVino
+                    exito={() => {
+                        setMostrarModalVolumen(false);
+                        fetchVolumenes();
+                    }}
+                    />
+                </div>
+                </div>
+            )}
+
+            {mostrarModalVarietal && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalVarietal(false)}>&times;</button>
+                    <FormularioCreateVarietalVino
+                    exito={() => {
+                        setMostrarModalVarietal(false);
+                        fetchVarietales();
+                    }}
+                    />
+                </div>
+                </div>
+            )}
+
+            {mostrarModalCrianza && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalCrianza(false)}>&times;</button>
+                    <FormularioCreateCrianzaVino
+                    exito={() => {
+                        setMostrarModalCrianza(false);
+                        fetchCrianzas();
+                    }}
+                    />
+                </div>
+                </div>
+            )}
+
+            {mostrarModalUva && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalUva(false)}>&times;</button>
+                    <FormularioCreateUvaVino
+                    exito={() => {
+                        setMostrarModalUva(false);
+                        fetchTiposUva();
+                    }}
+                    />
+                </div>
+                </div>
+            )}
+
+            {mostrarModalTipoVino && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalTipoVino(false)}>&times;</button>
+                    <FormularioCreateTipoVino
+                    exito={() => {
+                        setMostrarModalTipoVino(false);
+                        fetchTiposVino();
+                    }}
+                    />
+                </div>
+                </div>
+            )}
+
+            {mostrarModalParaje && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalParaje(false)}>&times;</button>
+                    <FormularioCreateParaje
+                    exito={() => {
+                        setMostrarModalParaje(false);
+                        fetchParajes();
+                    }}
+                    />
+                </div>
+                </div>
+            )}
+
+            {mostrarModalBodega && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalBodega(false)}>&times;</button>
+                    <FormularioCreateBodega
+                    exito={() => {
+                        setMostrarModalBodega(false);
+                        fetchBodegas();
+                    }}
+                    />
+                </div>
+                </div>
+            )}
+
+            {mostrarModalProveedor && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalProveedor(false)}>&times;</button>
+                    <FormularioCreateProveedor
+                    exito={() => {
+                        setMostrarModalProveedor(false);
+                        fetchProveedores();
+                    }}
+                    />
+                </div>
+                </div>
+            )}
             <div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
@@ -264,6 +409,7 @@ const formProducto = ({exito}) => {
                         <div className="form-col1">
                             <label>
                                 Tipo de Vino:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalTipoVino(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -316,6 +462,7 @@ const formProducto = ({exito}) => {
                         <div className="form-col1">
                             <label>
                                 Proveedor:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalProveedor(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -368,6 +515,7 @@ const formProducto = ({exito}) => {
                         <div className="form-col1">
                             <label>
                                 Varietal:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalVarietal(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -420,6 +568,7 @@ const formProducto = ({exito}) => {
                         <div className="form-col1">
                             <label>
                                 Crianza:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCrianza(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -472,6 +621,7 @@ const formProducto = ({exito}) => {
                         <div className="form-col1">
                             <label>
                                 Volumen:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalVolumen(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -524,6 +674,7 @@ const formProducto = ({exito}) => {
                         <div className="form-col1">
                             <label>
                                 Bodega:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalBodega(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -576,6 +727,7 @@ const formProducto = ({exito}) => {
                         <div className="form-col1">
                             <label>
                                 Paraje:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalParaje(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -628,6 +780,7 @@ const formProducto = ({exito}) => {
                         <div className="form-col1">
                             <label>
                                 Deposito:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalDeposito(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -704,9 +857,13 @@ const formProducto = ({exito}) => {
                     <div className="form-row">
                         <div className="form-col-productos">
                             <label>
-                                    Uvas:<button type="button" className="btn-add-producto" onClick={agregarDetalle}>
-                                        + Agregar Uva
-                                    </button>
+                                    Uvas:
+                                    <button type="button" className="btn-plus" onClick={() => setMostrarModalUva(true)}>+</button>
+                            </label>
+                            <label>
+                                <button type="button" className="btn-add-producto" onClick={agregarDetalle}>
+                                    + Agregar Uva
+                                </button>
                             </label>
                             <div className="form-group-presupuesto">
                                 
@@ -891,21 +1048,6 @@ const formProducto = ({exito}) => {
                             font-size: 12px;
                         }
 
-                        .modal {
-                            position: fixed;
-                            top: 0;
-                            left: 0;
-                            width: 100%;
-                            height: 100%;
-                            background-color: rgba(0,0,0,0.5); /* oscurece fondo */
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            z-index: 1000;
-                        }
-                        
-
-
                         .close {
                             position: absolute;
                             top: 1rem;
@@ -934,19 +1076,6 @@ const formProducto = ({exito}) => {
                         .btn-icon:hover {
                         background-color: #a30000;
                         transform: translateY(-3px);
-                        }
-
-                        .modal-content {
-                            background-color: #121212;
-                            padding: 40px;
-                            border-radius: 12px;
-                            width: 90%;
-                            height:80%;
-                            max-width: 500px;
-                            max-height: 800px;
-                            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                            position: relative;
-                            margin: 20px;
                         }
 
                         .form-container {

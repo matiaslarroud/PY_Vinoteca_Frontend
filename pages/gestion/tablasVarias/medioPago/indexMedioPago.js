@@ -132,7 +132,7 @@ const indexMedioPago = () => {
                     </div>
                 </div>
             )}
-            <h1 className="titulo-pagina">Medio de Pago</h1>
+            <h1 className="titulo-index">Medio de Pago</h1>
             
             <div className="botonera">
                 <button className="btn-icon" onClick={() => router.back()} title="Volver atrás">

@@ -127,7 +127,7 @@ const indexUva = () => {
                     </div>
                 </div>
             )}
-            <h1 className="titulo-pagina">Tipo de Uva</h1>
+            <h1 className="titulo-index">Tipo de Uva</h1>
             
             <div className="botonera">
                     <button className="btn-icon" onClick={() => router.back()} title="Volver atrás">

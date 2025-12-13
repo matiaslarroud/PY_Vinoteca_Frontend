@@ -4,7 +4,7 @@ import { FaHome } from "react-icons/fa";
 export default function indexGestion() {
   return (
   <>
-  <h1 className="titulo-pagina">Gestion</h1>
+  <h1 className="titulo-index">Gestion</h1>
    <div className="botonera">
     <button className="btn-icon" title="Volver al menú">
         <Link href="/" >

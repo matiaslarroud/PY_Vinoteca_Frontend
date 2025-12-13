@@ -1,6 +1,8 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';     
 
+import FormularioCreateTransporte from "../../gestion/transporte/createTransporte"
+
 const { default: Link } = require("next/link")
 
 const initialState = {proveedor:'',totalPrecio:0, totalBultos:0 , comprobanteCompra:'', transporte:''}
@@ -236,6 +238,8 @@ const createRemito = ({exito , param , tipo}) => {
         }
     }, [productos, detalles]);
 
+    const [mostrarModalTransporte , setMostrarModalTransporte] = useState(false)
+
     const opciones_tipoProductos = tipoProductos.map(v => ({
         value: v,
         label: v === "ProductoVino" ? "Vino" :
@@ -264,29 +268,7 @@ const createRemito = ({exito , param , tipo}) => {
         value: v._id, label: v.name
     }));
    
-
-    return(
-        <>
-            <div className="form-container">
-                <h1 className="titulo-pagina">Cargar Remito</h1>
-                <form id="formProducto" className="formulario-presupuesto">
-                    <div className="form-row">
-                        <div className="form-col">
-                            <label>
-                                Proveedor:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
-                            </label>
-                            <Select
-                                className="form-select-react"
-                                classNamePrefix="rs"
-                                options={opciones_proveedores}
-                                value={opciones_proveedores.find(op => op.value === remito.proveedor) || null}
-                                onChange={selectChange}
-                                name='proveedor'
-                                placeholder="Proveedor..."
-                                isClearable
-                                isDisabled={true}
-                                styles={{
+    const customStyle = {
                                     container: (base) => ({
                                     ...base,
                                     width: 220, // ⬅️ ancho fijo total
@@ -321,7 +303,50 @@ const createRemito = ({exito , param , tipo}) => {
                                     ...base,
                                     color: 'white',
                                     }),
+                                }
+
+    return(
+        <>
+            
+            {mostrarModalTransporte && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="close" onClick={() => 
+                            {
+                                setMostrarModalTransporte(false)
+                            }
+                        }>
+                            &times;
+                        </button>
+                        <FormularioCreateTransporte
+                            exito={() => 
+                                {
+                                    setMostrarModalTransporte(false)
+                                    fetchData_Transporte()
                                 }}
+                        />
+                    </div>
+                </div>
+            )}
+            <div className="form-container">
+                <h1 className="titulo-pagina">Cargar Remito</h1>
+                <form id="formProducto" className="formulario-presupuesto">
+                    <div className="form-row">
+                        <div className="form-col">
+                            <label>
+                                Proveedor:
+                            </label>
+                            <Select
+                                className="form-select-react"
+                                classNamePrefix="rs"
+                                options={opciones_proveedores}
+                                value={opciones_proveedores.find(op => op.value === remito.proveedor) || null}
+                                onChange={selectChange}
+                                name='proveedor'
+                                placeholder="Proveedor..."
+                                isClearable
+                                isDisabled={true}
+                                styles={customStyle}
                             />
                         </div>
 
@@ -339,48 +364,14 @@ const createRemito = ({exito , param , tipo}) => {
                                 placeholder="Comprobante de compra..."
                                 isClearable
                                 isDisabled={true}
-                                styles={{
-                                    container: (base) => ({
-                                    ...base,
-                                    width: 220, // ⬅️ ancho fijo total
-                                    }),
-                                    control: (base) => ({
-                                    ...base,
-                                    minWidth: 220,
-                                    maxWidth: 220,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    border: '1px solid #444',
-                                    borderRadius: 8,
-                                    }),
-                                    singleValue: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                    }),
-                                    menu: (base) => ({
-                                    ...base,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    option: (base, { isFocused }) => ({
-                                    ...base,
-                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    input: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    }),
-                                }}
+                                styles={customStyle}
                             />
                         </div>
 
                         <div className="form-col">
                             <label>
                                 Transporte:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalTransporte(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -391,42 +382,7 @@ const createRemito = ({exito , param , tipo}) => {
                                 name='transporte'
                                 placeholder="Transporte..."
                                 isClearable
-                                styles={{
-                                    container: (base) => ({
-                                    ...base,
-                                    width: 220, // ⬅️ ancho fijo total
-                                    }),
-                                    control: (base) => ({
-                                    ...base,
-                                    minWidth: 220,
-                                    maxWidth: 220,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    border: '1px solid #444',
-                                    borderRadius: 8,
-                                    }),
-                                    singleValue: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                    }),
-                                    menu: (base) => ({
-                                    ...base,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    option: (base, { isFocused }) => ({
-                                    ...base,
-                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    input: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    }),
-                                }}
+                                styles={customStyle}
                             />
                         </div>
                         
@@ -450,42 +406,7 @@ const createRemito = ({exito , param , tipo}) => {
                                             placeholder="Tipo de Producto..."
                                             isClearable
                                             isDisabled={true}
-                                            styles={{
-                                                container: (base) => ({
-                                                ...base,
-                                                width: 120, // ⬅️ ancho fijo total
-                                                }),
-                                                control: (base) => ({
-                                                ...base,
-                                                minWidth: 150,
-                                                maxWidth: 150,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                border: '1px solid #444',
-                                                borderRadius: 8,
-                                                }),
-                                                singleValue: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                                }),
-                                                menu: (base) => ({
-                                                ...base,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                }),
-                                                option: (base, { isFocused }) => ({
-                                                ...base,
-                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                                color: 'white',
-                                                }),
-                                                input: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                }),
-                                            }}
+                                            styles={customStyle}
                                         />
                                     </div>
                                     <div className='form-col-item1'>
@@ -497,42 +418,7 @@ const createRemito = ({exito , param , tipo}) => {
                                             placeholder="Producto..."
                                             isClearable
                                             isDisabled={true}
-                                            styles={{
-                                                container: (base) => ({
-                                                ...base,
-                                                width: 150, // ⬅️ ancho fijo total
-                                                }),
-                                                control: (base) => ({
-                                                ...base,
-                                                minWidth: 150,
-                                                maxWidth: 150,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                border: '1px solid #444',
-                                                borderRadius: 8,
-                                                }),
-                                                singleValue: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                                }),
-                                                menu: (base) => ({
-                                                ...base,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                }),
-                                                option: (base, { isFocused }) => ({
-                                                ...base,
-                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                                color: 'white',
-                                                }),
-                                                input: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                }),
-                                            }}
+                                            styles={customStyle}
                                         />
                                     </div>
                                     
@@ -592,21 +478,6 @@ const createRemito = ({exito , param , tipo}) => {
             </div>
             <style jsx>
                 {`
-                        .modal {
-                            position: fixed;
-                            top: 0;
-                            left: 0;
-                            width: 100%;
-                            height: 100%;
-                            background-color: rgba(0,0,0,0.5); /* oscurece fondo */
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            z-index: 1000;
-                        }
-                        
-
-
                         .close {
                             position: absolute;
                             top: 1rem;
@@ -635,19 +506,6 @@ const createRemito = ({exito , param , tipo}) => {
                         .btn-icon:hover {
                         background-color: #a30000;
                         transform: translateY(-3px);
-                        }
-
-                        .modal-content {
-                            background-color: #121212;
-                            padding: 40px;
-                            border-radius: 12px;
-                            width: 90%;
-                            height:80%;
-                            max-width: 500px;
-                            max-height: 800px;
-                            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                            position: relative;
-                            margin: 20px;
                         }
 
                         .form-container {

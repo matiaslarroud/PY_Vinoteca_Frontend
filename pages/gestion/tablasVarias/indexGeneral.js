@@ -6,7 +6,7 @@ export default function indexUbicaciones() {
   const router = useRouter();
   return (
   <>
-  <h1 className="titulo-pagina">Gestion General</h1>
+  <h1 className="titulo-index">Gestion General</h1>
    <div className="botonera">
     <button className="btn-icon" onClick={() => router.back()} title="Volver atrás">
         <FaArrowLeft />
@@ -47,9 +47,6 @@ export default function indexUbicaciones() {
       </Link>
       <Link href="bodega_paraje/indexParaje" className="boton-acceso">
         <span>Parajes</span>
-      </Link>
-      <Link href="barrio/indexBarrio" className="boton-acceso">
-        <span>Barrios</span>
       </Link>
       <Link href="vino_crianza/indexCrianza" className="boton-acceso">
         <span>Crianzas de Vino</span>

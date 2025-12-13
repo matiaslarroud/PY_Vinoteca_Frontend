@@ -157,7 +157,7 @@ const indexTipo = () => {
                     </div>
                 </div>
             )}
-            <h1 className="titulo-pagina">Tipo de Comprobante</h1>
+            <h1 className="titulo-index">Tipo de Comprobante</h1>
             
             <div className="botonera">
                 <button className="btn-icon" onClick={() => router.back()}>

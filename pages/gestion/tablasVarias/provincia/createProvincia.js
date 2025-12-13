@@ -1,20 +1,25 @@
 const { useState, useEffect } = require("react")
+import Select from 'react-select';     
 
 const { default: Link } = require("next/link")
+
+import FormularioCreatePais from "../pais/createPais"
 
 const initialState = {name:'', pais:''}
 const formPais = ({exito}) => {
     const [provincia , setProvincia] = useState(initialState);
     const [paises,setPaises] = useState([]);
-    
-    useEffect( () => {
-        const paisesData = async() => {
+
+    const [mostrarModalPais,setMostrarModalPais] = useState(false);
+    const paisesData = async() => {
             await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/pais`)
             .then((a)=>{return a.json()})
                 .then((s)=>{
                     setPaises(s.data)
                 })
         }
+
+    useEffect( () => {
         paisesData();
     } , []);
     
@@ -27,6 +32,15 @@ const formPais = ({exito}) => {
                 [name]:value
         })   
     }
+    const selectChange = (selectedOption, actionMeta) => {
+        const name = actionMeta.name;
+        const value = selectedOption ? selectedOption.value : "";
+
+        setProvincia({
+            ...provincia,
+            [name]: value,
+        });
+    };
 
     const clickChange = (e) => {
         e.preventDefault();
@@ -53,34 +67,94 @@ const formPais = ({exito}) => {
                         })
                 .catch((err) => {console.log('❌ Error al enviar datos. \n Error: ',err)})
     }
+    
+    const opciones_paises  = paises.map(v => ({ value: v._id,label: v.name}))
 
     return(
         <>
+
+            {mostrarModalPais && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => 
+                        {
+                            setMostrarModalPais(null)
+                        }
+                    }>
+                        &times;
+                    </button>
+                    <FormularioCreatePais
+                        exito={() => 
+                            {
+                                setMostrarModalPais(false)
+                                paisesData()
+                            }}
+                    />
+                </div>
+                </div>
+            )}
+            
             <div className="form-container">
                 <h1 className="titulo-pagina">Cargar Provincia</h1>
                 <form id="formC">
-                    <fieldset className="grid-container">
+
                     <div className="form-group input-centered">
                         <label htmlFor="nombre">Nombre:</label>
                         <input type="text" onChange={inputChange} value={provincia.name} name="name" placeholder="Ingresa el nombre de la provincia" required></input>
                     </div>
-                    
-                    <div className="form-group">
-                        <label htmlFor="nombre">Pais:</label>
-                        <select name="pais" onChange={inputChange} value={provincia.pais}>
-                            <option value=''>Seleccione un pais...</option>
-                            {
-                                paises.map(({_id,name}) => 
-                                    (
-                                        <option key={_id} value={_id}>
-                                            {name}
-                                        </option>                                        
-                                    )
-                                )
-                            }
-                        </select>
+                    <div className="form-group input-centered">
+                      <label>
+                       Pais: 
+                        <button type="button" className="btn-plus" onClick={() => setMostrarModalPais(true)}>+</button>
+                      </label>
+                      <Select
+                        className="form-select-react"
+                        classNamePrefix="rs"
+                        options={opciones_paises}
+                        value={opciones_paises.find(op => op.value === provincia.pais) || null}
+                        onChange={selectChange}
+                        name='pais'
+                        placeholder="Pais..."
+                        isClearable
+                        styles={{
+                              container: (base) => ({
+                              ...base,
+                              width: 220, // ⬅️ ancho fijo total
+                              }),
+                              control: (base) => ({
+                              ...base,
+                              minWidth: 220,
+                              maxWidth: 220,
+                              backgroundColor: '#2c2c2c',
+                              color: 'white',
+                              border: '1px solid #444',
+                              borderRadius: 8,
+                              }),
+                              singleValue: (base) => ({
+                              ...base,
+                              color: 'white',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                              }),
+                              menu: (base) => ({
+                              ...base,
+                              backgroundColor: '#2c2c2c',
+                              color: 'white',
+                              }),
+                              option: (base, { isFocused }) => ({
+                              ...base,
+                              backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                              color: 'white',
+                              }),
+                              input: (base) => ({
+                              ...base,
+                              color: 'white',
+                              }),
+                        }}
+                      />
                     </div>
-                    </fieldset>
+                    
                     <div className="button-area">
                         <button type="submit" className="submit-btn" onClick={clickChange}>
                         Cargar
@@ -185,6 +259,19 @@ const formPais = ({exito}) => {
     .form-group select {
       width: 100%;
     }
+  }
+
+  .btn-plus {
+      background-color: transparent;
+      color: #651616ff;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+  }
+
+  .btn-plus:hover {
+      color: #571212ff;
+      transform: translateY(-3px);
   }
 `}</style>
         </>

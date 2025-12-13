@@ -229,7 +229,7 @@ const indexPedido = () => {
             )}
 
 
-            <h1 className="titulo-pagina">Recibos de Pago</h1>
+            <h1 className="titulo-index">Recibos de Pago</h1>
             
             <div className="botonera">
                 <button className="btn-icon" onClick={() => router.back()} title="Volver atrás">

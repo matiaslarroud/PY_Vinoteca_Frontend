@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaHome , FaSearch , FaArrowLeft, FaTrash ,FaPrint  } from "react-icons/fa";
+import { FaPlus, FaHome , FaSearch , FaArrowLeft, FaEye ,FaPrint  } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import FormularioRemitoCreate from './new_RemitoCliente'
 import BusquedaAvanzada from "../remito/busquedaRemitoCliente";
+import FormularioRemitoView from './view_RemitoCliente'
 
 const { default: Link } = require("next/link")
 
@@ -15,7 +16,7 @@ const indexRemitoCliente = () => {
     const [comprobantesVenta,setComprobantesVenta] = useState([]);
     
     const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
-    const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
+    const [mostrarModalView, setMostrarModalView] = useState(null);
     const [mostrarBusqueda, setmostrarBusqueda] = useState(null);
     
     const [filtro , setFiltro] = useState(initialState); 
@@ -189,18 +190,14 @@ const indexRemitoCliente = () => {
                 </div>
             )}
 
-            {mostrarModalUpdate && (
+            {mostrarModalView && (
                 <div className="modal">
                     <div className="modal-content">
-                        <button className="close" onClick={() => setMostrarModalUpdate(null)}>
+                        <button className="close" onClick={() => setMostrarModalView(null)}>
                             &times;
                         </button>
-                        <FormularioComprobanteVentaUpdate 
-                            comprobanteVentaID={mostrarModalUpdate} 
-                            exito={()=>{
-                                setMostrarModalUpdate(null);
-                                fetchData();
-                            }}    
+                        <FormularioRemitoView 
+                            remitoID={mostrarModalView} 
                         />
                     </div>
                 </div>
@@ -235,7 +232,7 @@ const indexRemitoCliente = () => {
                 </div>
             </div>
             )}
-            <h1 className="titulo-pagina">Remitos</h1>
+            <h1 className="titulo-index">Remitos</h1>
             
             <div className="botonera">
                 <button className="btn-icon" onClick={() => router.back()} title="Volver atrás">
@@ -291,12 +288,12 @@ const indexRemitoCliente = () => {
                                         <td className="columna">{totalBultos}</td>
                                         <td className="columna">
                                             <div className="acciones">
+                                                <button onClick={() => setMostrarModalView(_id)}  className="btn-icon" title="Visualización">
+                                                    <FaEye />
+                                                </button>
                                                 <button onClick={() => imprimirRemito(_id)}  className="btn-icon" title="Imprimir">
                                                     <FaPrint />
                                                 </button>
-                                                {/* <button onClick={() => deleteRemito(_id)}  className="btn-icon" title="Eliminar">
-                                                    <FaTrash />
-                                                </button> */}
                                             </div>
                                         </td>
                                     </tr>

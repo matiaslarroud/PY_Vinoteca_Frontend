@@ -188,7 +188,7 @@ const indexOrdenProduccion = () => {
             </div>
           </div>
         )}
-        <h1 className="titulo-pagina">Ordenes de Produccion</h1>
+        <h1 className="titulo-index">Ordenes de Produccion</h1>
 
         <div className="botonera">
           <button className="btn-icon" onClick={() => router.back()} title="Volver atrás">

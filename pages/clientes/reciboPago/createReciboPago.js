@@ -137,7 +137,6 @@ const newReciboPago = ({exito , param , tipo}) => {
                         <div className="form-col1">
                             <label>
                                 Cliente:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"

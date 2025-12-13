@@ -1,6 +1,7 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';      
 import { FaTrash} from "react-icons/fa";
+
 import FormularioEmpleadoCreate from '../../gestion/empleado/createEmpleado'
 import FormularioClienteCreate from '../../clientes/createCliente' 
 
@@ -236,7 +237,7 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
     };
 
     const agregarDetalle = () => {
-        setDetalles([...detalles, { ...{tipoProducto:"", producto: "", cantidad: 0, precio: 0, importe: 0 } }]);
+        setDetalles([...detalles, { ...{tipoProducto:"", producto: "", precio: 0, importe: 0 } }]);
     };
     
     const calcularTotal = (detalles) => {
@@ -246,8 +247,8 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
         setPresupuesto((prev) => ({ ...prev, total:totalPresupuesto }));
     };
     
-    const [mostrarModalCreate2, setMostrarModalCreate2] = useState(false);
-    const [mostrarModalCreate3, setMostrarModalCreate3] = useState(false);
+    const [mostrarModalEmpleado, setMostrarModalEmpleado] = useState(false);
+    const [mostrarModalCliente, setMostrarModalCliente] = useState(false);
 
      const opciones_tipoProductos = tipoProductos.map(v => ({
         value: v,
@@ -265,17 +266,48 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
     const opciones_empleados = empleados.map(v => ({ value: v._id,label: v.name }));
     const opciones_clientes = clientes.map(v => ({ value: v._id,label: v.name }));
 
-
+    const customStyle = {
+        container: (base) => ({
+            ...base,
+            width: 180,
+        }),
+        control: (base, state) => ({
+            ...base,
+            width: 180,
+            backgroundColor: '#2c2c2c !important',
+            borderColor: state.isFocused ? '#666' : '#444',
+            borderRadius: 8,
+            color: 'white',
+        }),
+        menu: (base) => ({
+            ...base,
+            backgroundColor: '#2c2c2c',
+            color: 'white',
+        }),
+        option: (base, { isFocused }) => ({
+            ...base,
+            backgroundColor: isFocused ? '#444' : '#2c2c2c',
+            color: 'white',
+        }),
+        singleValue: (base) => ({
+            ...base,
+            color: 'white !important',
+        }),
+        input: (base) => ({
+            ...base,
+            color: 'white !important',
+        }),
+    }
     return(
         <>
            
-            {mostrarModalCreate2 && (
+            {mostrarModalEmpleado && (
                 <div className="modal">
                 <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate2(false)}>&times;</button>
+                    <button className="close" onClick={() => setMostrarModalEmpleado(false)}>&times;</button>
                     <FormularioEmpleadoCreate
                     exito={() => {
-                        setMostrarModalCreate2(false);
+                        setMostrarModalEmpleado(false);
                         fetchData_Empleados();
                     }}
                     />
@@ -283,13 +315,13 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                 </div>
             )}
 
-            {mostrarModalCreate3 && (
+            {mostrarModalCliente && (
                 <div className="modal">
                 <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate3(false)}>&times;</button>
+                    <button className="close" onClick={() => setMostrarModalCliente(false)}>&times;</button>
                     <FormularioClienteCreate
                     exito={() => {
-                        setMostrarModalCreate3(false);
+                        setMostrarModalCliente(false);
                         fetchData_Clientes();
                     }}
                     />
@@ -310,7 +342,7 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                         <div className="form-col">
                             <label>
                                 Cliente:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCliente(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -321,49 +353,14 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                                 name='cliente'
                                 placeholder="Cliente..."
                                 isClearable
-                                styles={{
-                                    container: (base) => ({
-                                    ...base,
-                                    width: 220, // ⬅️ ancho fijo total
-                                    }),
-                                    control: (base) => ({
-                                    ...base,
-                                    minWidth: 220,
-                                    maxWidth: 220,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    border: '1px solid #444',
-                                    borderRadius: 8,
-                                    }),
-                                    singleValue: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                    }),
-                                    menu: (base) => ({
-                                    ...base,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    option: (base, { isFocused }) => ({
-                                    ...base,
-                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    input: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    }),
-                                }}
+                                styles={customStyle}
                             />
                         </div>
 
                         <div className="form-col">
                             <label>
                                 Empleado:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate2(true)}>+</button>
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalEmpleado(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -374,42 +371,7 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                                 name='empleado'
                                 placeholder="Empleado..."
                                 isClearable
-                                styles={{
-                                    container: (base) => ({
-                                    ...base,
-                                    width: 220, // ⬅️ ancho fijo total
-                                    }),
-                                    control: (base) => ({
-                                    ...base,
-                                    minWidth: 220,
-                                    maxWidth: 220,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    border: '1px solid #444',
-                                    borderRadius: 8,
-                                    }),
-                                    singleValue: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                    }),
-                                    menu: (base) => ({
-                                    ...base,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    option: (base, { isFocused }) => ({
-                                    ...base,
-                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    input: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    }),
-                                }}
+                                styles={customStyle}
                             />
                         </div>
 
@@ -439,38 +401,7 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                                             }
                                             placeholder="Tipo de Producto..."
                                             isClearable
-                                            styles={{
-                                                container: (base) => ({
-                                                    ...base,
-                                                    width: 150,
-                                                }),
-                                                control: (base, state) => ({
-                                                    ...base,
-                                                    width: 150,
-                                                    backgroundColor: '#2c2c2c !important',
-                                                    borderColor: state.isFocused ? '#666' : '#444',
-                                                    borderRadius: 8,
-                                                    color: 'white',
-                                                }),
-                                                menu: (base) => ({
-                                                    ...base,
-                                                    backgroundColor: '#2c2c2c',
-                                                    color: 'white',
-                                                }),
-                                                option: (base, { isFocused }) => ({
-                                                    ...base,
-                                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                                    color: 'white',
-                                                }),
-                                                singleValue: (base) => ({
-                                                    ...base,
-                                                    color: 'white !important',
-                                                }),
-                                                input: (base) => ({
-                                                    ...base,
-                                                    color: 'white !important',
-                                                }),
-                                            }}
+                                            styles={customStyle}
                                         />
                                     </div>
                                     <div className='form-col-item1'>
@@ -484,38 +415,7 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                                             }
                                             placeholder="Producto..."
                                             isClearable
-                                            styles={{
-                                                container: (base) => ({
-                                                    ...base,
-                                                    width: 180,
-                                                }),
-                                                control: (base, state) => ({
-                                                    ...base,
-                                                    width: 180,
-                                                    backgroundColor: '#2c2c2c !important',
-                                                    borderColor: state.isFocused ? '#666' : '#444',
-                                                    borderRadius: 8,
-                                                    color: 'white',
-                                                }),
-                                                menu: (base) => ({
-                                                    ...base,
-                                                    backgroundColor: '#2c2c2c',
-                                                    color: 'white',
-                                                }),
-                                                option: (base, { isFocused }) => ({
-                                                    ...base,
-                                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                                    color: 'white',
-                                                }),
-                                                singleValue: (base) => ({
-                                                    ...base,
-                                                    color: 'white !important',
-                                                }),
-                                                input: (base) => ({
-                                                    ...base,
-                                                    color: 'white !important',
-                                                }),
-                                            }}
+                                            styles={customStyle}
                                         />
                                     </div>
                                     
@@ -552,54 +452,40 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                                 })}
                             </div>
                         </div>
-                            <div className="form-secondary">
-                                <label htmlFor="precioVenta" className="label-box">
-                                    Total:
-                                </label>
-                                <input
-                                    type="number"
-                                    className="input-secondary"
-                                    value={presupuesto.total}
-                                    name="total"
-                                    disabled
-                                    />
-
-                                <button
-                                    type="submit"
-                                    className="submit-btn"
-                                    onClick={(e) => {
-                                        if (!puedeGuardar) {
-                                        alert("❌ No se puede guardar un presupuesto sin al menos un producto con cantidad.");
-                                        e.preventDefault();
-                                        return;
-                                        }
-                                        clickChange(e);
-                                    }}
-                                    >
-                                    Guardar
-                                    </button>
-                            </div>
                     </div> 
+                    <div className='form-row'>
+                        <div className="form-secondary">
+                            <label htmlFor="precioVenta" className="label-box">
+                                Total:
+                            </label>
+                            <input
+                                type="number"
+                                className="input-secondary"
+                                value={presupuesto.total}
+                                name="total"
+                                disabled
+                                />
+                            <button
+                                type="submit"
+                                className="submit-btn"
+                                onClick={(e) => {
+                                    if (!puedeGuardar) {
+                                    alert("❌ No se puede guardar un presupuesto sin al menos un producto con cantidad.");
+                                    e.preventDefault();
+                                    return;
+                                    }
+                                    clickChange(e);
+                                }}
+                                >
+                                Guardar
+                                </button>
+                        </div>
+                    </div>
                         
                 </form>
             </div>
             <style jsx>
-                {`
-                    .modal {
-                        position: fixed;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: rgba(0,0,0,0.5); /* oscurece fondo */
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        z-index: 1000;
-                    }
-                    
-
-
+                {`                  
                     .close {
                         position: absolute;
                         top: 1rem;
@@ -628,19 +514,6 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                     .btn-icon:hover {
                     background-color: #a30000;
                     transform: translateY(-3px);
-                    }
-
-                    .modal-content {
-                        background-color: #121212;
-                        padding: 40px;
-                        border-radius: 12px;
-                        width: 90%;
-                        height:80%;
-                        max-width: 500px;
-                        max-height: 800px;
-                        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                        position: relative;
-                        margin: 20px;
                     }
 
                     .form-container {
@@ -683,7 +556,6 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                     }
 
                     .form-col-productos {
-                        flex: 8;
                         min-width: 0; /* Importante para que no desborde */
                         display: flex;
                         flex-direction: column;
@@ -899,7 +771,6 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                         min-width: 150px;
                         max-width: 180px;
                     }
-
                 `}
             </style>
         </>

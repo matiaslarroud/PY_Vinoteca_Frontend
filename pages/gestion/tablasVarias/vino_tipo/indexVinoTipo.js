@@ -124,7 +124,7 @@ const indexVinoTipo = () => {
                     </div>
                 </div>
             )}
-            <h1 className="titulo-pagina">Tipo de Vino</h1>
+            <h1 className="titulo-index">Tipo de Vino</h1>
             
             <div className="botonera">
                     <button className="btn-icon" onClick={() => router.back()} title="Volver atrás">

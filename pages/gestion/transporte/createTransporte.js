@@ -2,6 +2,13 @@ const { useState, useEffect } = require("react")
 import Select from 'react-select';
 import { FaTrash} from "react-icons/fa";
 
+import Formulario_Pais from '../tablasVarias/pais/createPais'
+import Formulario_Provincia from '../tablasVarias/provincia/createProvincia'
+import Formulario_Localidad from '../tablasVarias/localidad/createLocalidad'
+import Formulario_Barrio from '../tablasVarias/barrio/createBarrio'
+import Formulario_Calle from '../tablasVarias/calle/createCalle'
+import Formulario_CondicionIva from '../tablasVarias/iva/createCondicionIva'
+
 const initialState = {name:'',telefono:'', email:'', cuit:'', pais:'', provincia:'', localidad:'', barrio:'', calle:'', condicionIva:''}
 
 const formTransporte = ({exito}) => {
@@ -12,6 +19,13 @@ const formTransporte = ({exito}) => {
     const [barrios, setBarrios] = useState([]); 
     const [calles, setCalles] = useState([]);
     const [condicionesIva, setCondicionesIva] = useState([]);
+
+    const [mostrarPais , setMostrarPais] = useState(false)
+    const [mostrarProvincia , setMostrarProvincia] = useState(false)
+    const [mostrarLocalidad , setMostrarLocalidad] = useState(false)
+    const [mostrarBarrio , setMostrarBarrio] = useState(false)
+    const [mostrarCalle , setMostrarCalle] = useState(false)
+    const [mostrarCondicionIva , setMostrarCondicionIva] = useState(false)
     
     const fetchData_Paises = async () => {
         const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/pais`);
@@ -120,7 +134,8 @@ const formTransporte = ({exito}) => {
                     localidad: transporte.localidad,
                     barrio: transporte.barrio,
                     calle: transporte.calle,
-                    condicionIva: transporte.condicionIva
+                    condicionIva: transporte.condicionIva ,
+                    altura: Number(transporte.altura),
                 })
             })
             .then((s) => s.json())
@@ -182,8 +197,133 @@ const formTransporte = ({exito}) => {
 
     return(
         <>
-            
-
+                            {mostrarPais && (
+                                <div className="modal">
+                                <div className="modal-content">
+                                    <button className="close" onClick={() => 
+                                        {
+                                            setMostrarPais(null)
+                                        }
+                                    }>
+                                        &times;
+                                    </button>
+                                    <Formulario_Pais
+                                        exito={() => 
+                                            {
+                                                setMostrarPais(false)
+                                                fetchData_Paises();
+                                            }}
+                                    />
+                                </div>
+                                </div>
+                            )}
+                            {mostrarProvincia && (
+                                <div className="modal">
+                                <div className="modal-content">
+                                    <button className="close" onClick={() => 
+                                        {
+                                            setMostrarProvincia(null)
+                                        }
+                                    }>
+                                        &times;
+                                    </button>
+                                    <Formulario_Provincia
+                                        exito={() => 
+                                            {
+                                                setMostrarProvincia(false)
+                                                fetchData_Provincias()
+                                            }}
+                                    />
+                                </div>
+                                </div>
+                            )}
+                
+                            {mostrarLocalidad && (
+                                <div className="modal">
+                                <div className="modal-content">
+                                    <button className="close" onClick={() => 
+                                        {
+                                            setMostrarLocalidad(null)
+                                        }
+                                    }>
+                                        &times;
+                                    </button>
+                                    <Formulario_Localidad
+                                        exito={() => 
+                                            {
+                                                setMostrarLocalidad(false)
+                                                fetchData_Localidades()
+                                            }}
+                                    />
+                                </div>
+                                </div>
+                            )}
+                
+                            {mostrarBarrio && (
+                                <div className="modal">
+                                <div className="modal-content">
+                                    <button className="close" onClick={() => 
+                                        {
+                                            setMostrarBarrio(null)
+                                        }
+                                    }>
+                                        &times;
+                                    </button>
+                                    <Formulario_Barrio
+                                        exito={() => 
+                                            {
+                                                setMostrarBarrio(false)
+                                                fetchData_Barrios()
+                                            }}
+                                    />
+                                </div>
+                                </div>
+                            )}
+                
+                            {mostrarCalle && (
+                                <div className="modal">
+                                <div className="modal-content">
+                                    <button className="close" onClick={() => 
+                                        {
+                                            setMostrarCalle(null)
+                                        }
+                                    }>
+                                        &times;
+                                    </button>
+                                    <Formulario_Calle
+                                        exito={() => 
+                                            {
+                                                setMostrarCalle(false)
+                                                fetchData_Calles()
+                                            }}
+                                    />
+                                </div>
+                                </div>
+                            )}
+                
+                            {mostrarCondicionIva && (
+                                <div className="modal">
+                                <div className="modal-content">
+                                    <button className="close" onClick={() => 
+                                        {
+                                            setMostrarCondicionIva(null)
+                                        }
+                                    }>
+                                        &times;
+                                    </button>
+                                    <Formulario_CondicionIva
+                                        exito={() => 
+                                            {
+                                                setMostrarCondicionIva(false)
+                                                fetchData_CondicionesIva()
+                                            }}
+                                    />
+                                </div>
+                                </div>
+                            )}
+                
+                            
+                    
             <div className="form-container">
                 <div className="form-row">
                     <h1 className="titulo-pagina">Cargar Transporte</h1>
@@ -253,6 +393,7 @@ const formTransporte = ({exito}) => {
                          <div className="form-col">
                             <label >
                                 Condicion de IVA:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarCondicionIva(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -273,6 +414,7 @@ const formTransporte = ({exito}) => {
                         <div className="form-col">
                             <label >
                                 Pais
+                                <button type="button" className="btn-plus" onClick={() => setMostrarPais(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -290,6 +432,7 @@ const formTransporte = ({exito}) => {
                         <div className="form-col">
                             <label >
                                 Provincia
+                                <button type="button" className="btn-plus" onClick={() => setMostrarProvincia(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -307,6 +450,7 @@ const formTransporte = ({exito}) => {
                         <div className="form-col">
                             <label >
                                 Localidad
+                                <button type="button" className="btn-plus" onClick={() => setMostrarLocalidad(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -326,6 +470,7 @@ const formTransporte = ({exito}) => {
                         <div className="form-col">
                             <label >
                                 Barrio
+                                <button type="button" className="btn-plus" onClick={() => setMostrarBarrio(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -343,6 +488,7 @@ const formTransporte = ({exito}) => {
                         <div className="form-col">
                             <label >
                                 Calle
+                                <button type="button" className="btn-plus" onClick={() => setMostrarCalle(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -355,6 +501,19 @@ const formTransporte = ({exito}) => {
                                 required={true}
                                 isClearable
                                 styles={customStyle}
+                            />
+                        </div>
+                        
+                        <div className="form-col">
+                            <label>
+                                Altura:
+                            </label>
+                            <input
+                                type="number"
+                                name="altura"
+                                placeholder="Altura"
+                                value={transporte.altura}
+                                onChange={inputChange}                                
                             />
                         </div>
                     </div>
@@ -375,19 +534,6 @@ const formTransporte = ({exito}) => {
             </div>
             <style jsx>
                 {`
-                    .modal {
-                        position: fixed;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: rgba(0,0,0,0.5); /* oscurece fondo */
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        z-index: 1000;
-                    }
-                    
                     .checkbox-modern {
                         display: flex;
                         align-items: center;
@@ -486,19 +632,6 @@ const formTransporte = ({exito}) => {
                     .btn-icon:hover {
                     background-color: #a30000;
                     transform: translateY(-3px);
-                    }
-
-                    .modal-content {
-                        background-color: #121212;
-                        padding: 40px;
-                        border-radius: 12px;
-                        width: 90%;
-                        height:80%;
-                        max-width: 500px;
-                        max-height: 800px;
-                        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                        position: relative;
-                        margin: 20px;
                     }
 
                     .form-container {

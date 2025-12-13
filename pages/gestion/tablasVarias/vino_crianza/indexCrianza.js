@@ -125,7 +125,7 @@ const indexCrianza = () => {
                     </div>
                 </div>
             )}
-            <h1 className="titulo-pagina">Crianza</h1>
+            <h1 className="titulo-index">Crianza</h1>
             
             <div className="botonera">
                     <button className="btn-icon" onClick={() => router.back()} title="Volver atrás">

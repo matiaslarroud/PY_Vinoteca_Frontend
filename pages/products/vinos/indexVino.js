@@ -176,7 +176,7 @@ const vinosFiltrados = vinos
                     </div>
                 </div>
             )}
-            <h1 className="titulo-pagina">Vinos</h1>
+            <h1 className="titulo-index">Vinos</h1>
             
             <div className="botonera">
                     <button className="btn-icon" onClick={() => router.back()} title="Volver atrás">

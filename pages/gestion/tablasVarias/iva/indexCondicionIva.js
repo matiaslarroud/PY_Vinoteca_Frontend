@@ -131,7 +131,7 @@ const indexCondicionIva = () => {
                     </div>
                 </div>
             )}
-            <h1 className="titulo-pagina">Condicion de IVA</h1>
+            <h1 className="titulo-index">Condicion de IVA</h1>
             
             <div className="botonera">
                 <button className="btn-icon" onClick={() => router.back()}>

@@ -328,9 +328,6 @@ const agregarDetallePresupuesto = async (solicitudID) => {
         setPresupuesto((prev) => ({ ...prev, total:totalPresupuesto }));
     };
 
-    const [mostrarModalCreate2, setMostrarModalCreate2] = useState(false);
-    const [mostrarModalCreate3, setMostrarModalCreate3] = useState(false);
-
     const opciones_tipoProductos = tipoProductos.map(v => ({
         value: v,
         label: v === "ProductoVino" ? "Vino" :
@@ -734,21 +731,6 @@ const agregarDetallePresupuesto = async (solicitudID) => {
             </div>
             <style jsx>
                 {`
-                    .modal {
-                        position: fixed;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: rgba(0,0,0,0.5); /* oscurece fondo */
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        z-index: 1000;
-                    }
-                    
-
-
                     .close {
                         position: absolute;
                         top: 1rem;
@@ -777,19 +759,6 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                     .btn-icon:hover {
                     background-color: #a30000;
                     transform: translateY(-3px);
-                    }
-
-                    .modal-content {
-                        background-color: #121212;
-                        padding: 40px;
-                        border-radius: 12px;
-                        width: 90%;
-                        height:80%;
-                        max-width: 500px;
-                        max-height: 800px;
-                        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                        position: relative;
-                        margin: 20px;
                     }
 
                     .form-container {

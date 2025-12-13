@@ -1,6 +1,9 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';     
 
+import FormularioCreateProveedor from "../../proveedores/createProveedor"
+import FormularioCreateDeposito from "../../gestion/deposito/createDeposito"
+
 const { default: Link } = require("next/link")
 
 const initialState = {name:'',stock:0, stockMinimo:'' , precioCosto:0 , ganancia:0 , deposito:'' , proveedor:''}
@@ -126,18 +129,58 @@ const formProducto = ({exito}) => {
         }
     };
 
+    const [mostrarModalProveedor,setMostrarModalProveedor] = useState(false)
+    const [mostrarModalDeposito,setMostrarModalDeposito] = useState(false)
 
     const opciones_proveedores = proveedores.map(v => ({ value: v._id,label: v.name }))
     const opciones_depositos = depositos.map(v => ({ value: v._id,label: v.name }))
 
     return(
         <>
-            <div className="form-container">
-                <div className="form-row">
-                    <div className="form-col">
-                        <h1 className="titulo-pagina">Cargar Insumo</h1>
+
+            {mostrarModalProveedor && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="close" onClick={() => 
+                            {
+                                setMostrarModalProveedor(false)
+                            }
+                        }>
+                            &times;
+                        </button>
+                        <FormularioCreateProveedor
+                            exito={() => 
+                                {
+                                    setMostrarModalProveedor(false)
+                                    fetch_Proveedores()
+                                }}
+                        />
                     </div>
                 </div>
+            )}
+
+            {mostrarModalDeposito && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="close" onClick={() => 
+                            {
+                                setMostrarModalDeposito(null)
+                            }
+                        }>
+                            &times;
+                        </button>
+                        <FormularioCreateDeposito
+                            exito={() => 
+                                {
+                                    setMostrarModalDeposito(false)
+                                    fetch_Depositos()
+                                }}
+                        />
+                    </div>
+                </div>
+            )}
+            <div className="form-container">
+                <h1 className="titulo-pagina">Cargar Insumo</h1>
                 
                 <form className="formulario-picada">
                  <div className="form-row">
@@ -147,7 +190,10 @@ const formProducto = ({exito}) => {
                     </div>
                     
                     <div className="form-col1">
-                        <label htmlFor="deposito">Proveedor:</label>
+                        <label htmlFor="deposito">
+                            Proveedor:
+                            <button type="button" className="btn-plus" onClick={() => setMostrarModalProveedor(true)}>+</button>
+                        </label>
                         <Select
                             className="form-select-react" // Clase contenedora, podés usarla para aplicar un margen por ejemplo
                             classNamePrefix="rs"
@@ -196,7 +242,10 @@ const formProducto = ({exito}) => {
                         />
                     </div>
                     <div className="form-col1">
-                        <label htmlFor="deposito">Deposito:</label>
+                        <label htmlFor="deposito">
+                            Deposito:
+                            <button type="button" className="btn-plus" onClick={() => setMostrarModalDeposito(true)}>+</button>
+                        </label>
                         <Select
                             className="form-select-react" // Clase contenedora, podés usarla para aplicar un margen por ejemplo
                             classNamePrefix="rs"
@@ -305,14 +354,6 @@ const formProducto = ({exito}) => {
 
                     .precio-venta {
                         max-width: 100px;
-                    }
-
-                    .titulo-pagina {
-                        text-align: center;
-                        font-size: 2rem;
-                        margin-bottom: 1.5rem;
-                        font-weight: bold;
-                        color: #f5f5f5;
                     }
 
                     .formulario-picada {
@@ -455,32 +496,6 @@ const formProducto = ({exito}) => {
                     .submit-btn:hover {
                         background-color: #a30000;
                         transform: translateY(-3px);
-                    }
-                        
-                    .modal {
-                        position: fixed;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: rgba(0,0,0,0.5); /* oscurece fondo */
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        z-index: 1000;
-                    }
-
-                    .modal-content {
-                        background-color: #121212;
-                        padding: 40px;
-                        border-radius: 12px;
-                        width: 90%;
-                        height:80%;
-                        max-width: 500px;
-                        max-height: 800px;
-                        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                        position: relative;
-                        margin: 20px;
                     }
 
                     .close {

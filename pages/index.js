@@ -57,7 +57,7 @@ export default function Home() {
         <h1>Bienvenido, {usuario.usuario}</h1>
       </div>
 
-      <h2 className="titulo-pagina">Entusiasmo por el Vino</h2>
+      <h2 className="titulo-index">Entusiasmo por el Vino</h2>
       <br/>
       <div className="menu-grid">
         {/* 🔒 Solo administrador puede ver proveedores */}

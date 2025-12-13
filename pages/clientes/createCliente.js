@@ -13,7 +13,7 @@ const { default: Link } = require("next/link")
 const initialState = {
     name:'', lastname:'', fechaNacimiento:'', telefono:'', email:'', cuit:'',
     pais:'', provincia:'', localidad:'', barrio:'', calle:'', condicionIva:'', cuentaCorriente:false,
-    altura:0, deptoNumero:0, deptoLetra:'', saldoCuentaCorriente:''
+    saldoCuentaCorriente:''
 }
 const createCliente = ({exito}) => {
     const [cliente , setCliente] = useState(initialState);
@@ -450,7 +450,7 @@ const createCliente = ({exito}) => {
                         <div className="form-col">
                             <label>
                                 Pais:
-                                {/* <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button> */}
+                                <button type="button" className="btn-plus" onClick={() => setMostrarPais(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -503,7 +503,7 @@ const createCliente = ({exito}) => {
                         <div className="form-col">
                             <label>
                                 Provincia:
-                                {/* <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate2(true)}>+</button> */}
+                                <button type="button" className="btn-plus" onClick={() => setMostrarProvincia(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -556,7 +556,7 @@ const createCliente = ({exito}) => {
                         <div className="form-col">
                             <label>
                                 Localidad:
-                                {/* <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate2(true)}>+</button> */}
+                                <button type="button" className="btn-plus" onClick={() => setMostrarLocalidad(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -609,7 +609,7 @@ const createCliente = ({exito}) => {
                         <div className="form-col">
                             <label>
                                 Barrio:
-                                {/* <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate2(true)}>+</button> */}
+                                <button type="button" className="btn-plus" onClick={() => setMostrarBarrio(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -664,7 +664,7 @@ const createCliente = ({exito}) => {
                         <div className="form-col">
                             <label>
                                 Calle:
-                                {/* <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate2(true)}>+</button> */}
+                                <button type="button" className="btn-plus" onClick={() => setMostrarCalle(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -1090,47 +1090,6 @@ const createCliente = ({exito}) => {
                     /* Efecto al hacer focus */
                     .input-date:focus {
                         border-color: rgb(115, 8, 8);
-                    }
-  
-                    .modal {
-                        position: fixed;
-                        inset: 0;
-                        background-color: rgba(0, 0, 0, 0.5);
-                        z-index: 1000;
-
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-
-                        padding: 1rem;
-                        overflow-y: auto;
-                    }
-
-                    .modal-content {
-                        background-color: #121212;
-                        padding: 2rem;
-                        border-radius: 12px;
-
-                        /* ⭐ ANCHO PROPORCIONAL */
-                        width: auto;            /* ocupa 90% de la pantalla */
-                        max-width: 1200px;     /* pero nunca más grande que 1200px */
-                        min-width: 280px;      /* evita romperse en celulares muy chicos */
-
-                        /* ⭐ ALTO PROPORCIONAL */
-                        max-height: 90vh;      /* hasta 90% de la altura total */
-                        height: auto;
-
-                        overflow-y: auto;
-                        position: relative;
-                    }
-
-                    /* ⭐ Ajustes especiales para pantallas muy pequeñas (celulares) */
-                    @media (max-width: 600px) {
-                        .modal-content {
-                            width: 95%;       /* casi todo el ancho */
-                            padding: 1.2rem;  /* menos padding para no comer espacio */
-                            border-radius: 10px;
-                        }
                     }
 
                 `}

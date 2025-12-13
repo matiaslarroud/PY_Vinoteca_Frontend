@@ -1,9 +1,9 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';          
 import { FaTrash} from "react-icons/fa";
+
 import FormularioEmpleadoCreate from '../../gestion/empleado/createEmpleado'
 import FormularioClienteCreate from '../createCliente'
-import FormularioMedioPagoCreate from '../../gestion/tablasVarias/medioPago/createMedioPago'
 
 const { default: Link } = require("next/link")
 
@@ -217,7 +217,7 @@ const createpresupuesto = ({exito , param , tipo}) => {
     }
 
     const agregarDetalle = () => {
-        setDetalles([...detalles, { ...{tipoProducto:"" , producto: "", cantidad: 0, precio: 0, importe: 0 } }]);
+        setDetalles([...detalles, { ...{tipoProducto:"" , producto: "", precio: 0, importe: 0 } }]);
     };
     
     const agregarDetallePresupuesto = async (presupuestoID) => {
@@ -243,9 +243,8 @@ const createpresupuesto = ({exito , param , tipo}) => {
         setPresupuesto((prev) => ({ ...prev, total:totalPedido }));
     };
 
-    const [mostrarModalCreate1, setMostrarModalCreate1] = useState(false);
-    const [mostrarModalCreate2, setMostrarModalCreate2] = useState(false);
-    const [mostrarModalCreate3, setMostrarModalCreate3] = useState(false);
+    const [mostrarModalEmpleado, setMostrarModalEmpleado] = useState(false);
+    const [mostrarModalCliente, setMostrarModalCliente] = useState(false);
 
     const opciones_tipoProductos = tipoProductos.map(v => ({
         value: v,
@@ -266,13 +265,13 @@ const createpresupuesto = ({exito , param , tipo}) => {
     return(
         <>
            
-            {mostrarModalCreate2 && (
+            {mostrarModalEmpleado && (
                 <div className="modal">
                 <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate2(false)}>&times;</button>
+                    <button className="close" onClick={() => setMostrarModalEmpleado(false)}>&times;</button>
                     <FormularioEmpleadoCreate
                     exito={() => {
-                        setMostrarModalCreate2(false);
+                        setMostrarModalEmpleado(false);
                         fetchData_Empleados();
                     }}
                     />
@@ -280,13 +279,13 @@ const createpresupuesto = ({exito , param , tipo}) => {
                 </div>
             )}
 
-            {mostrarModalCreate3 && (
+            {mostrarModalCliente && (
                 <div className="modal">
                 <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate3(false)}>&times;</button>
+                    <button className="close" onClick={() => setMostrarModalCliente(false)}>&times;</button>
                     <FormularioClienteCreate
                     exito={() => {
-                        setMostrarModalCreate3(false);
+                        setMostrarModalCliente(false);
                         fetchData_Clientes();
                     }}
                     />
@@ -307,7 +306,6 @@ const createpresupuesto = ({exito , param , tipo}) => {
                         <div className="form-col">
                             <label>
                                 Cliente:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -318,6 +316,7 @@ const createpresupuesto = ({exito , param , tipo}) => {
                                 name='cliente'
                                 placeholder="Cliente..."
                                 isClearable
+                                isDisabled={true}
                                 styles={{
                                     container: (base) => ({
                                     ...base,
@@ -360,7 +359,7 @@ const createpresupuesto = ({exito , param , tipo}) => {
                         <div className="form-col">
                             <label>
                                 Empleado:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate2(true)}>+</button>
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalEmpleado(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -548,7 +547,9 @@ const createpresupuesto = ({exito , param , tipo}) => {
                                 </div>
                                 })}
                             </div>
-                        </div> 
+                        </div>                         
+                    </div> 
+                    <div className='form-row'>
                         <div className="form-secondary">
                             <label htmlFor="precioVenta" className="label-box">
                                 Total:
@@ -575,29 +576,14 @@ const createpresupuesto = ({exito , param , tipo}) => {
                                 Cargar
                                 </button>
                         </div>
-                    </div> 
+                    </div>
                     
                         
                 </form>
             </div>
             <style jsx>
                 {`
-                    .modal {
-                        position: fixed;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: rgba(0,0,0,0.5); /* oscurece fondo */
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        z-index: 1000;
-                    }
-                    
-
-
-                    .close {
+                .close {
                         position: absolute;
                         top: 1rem;
                         right: 1.5rem;
@@ -625,19 +611,6 @@ const createpresupuesto = ({exito , param , tipo}) => {
                     .btn-icon:hover {
                     background-color: #a30000;
                     transform: translateY(-3px);
-                    }
-
-                    .modal-content {
-                        background-color: #121212;
-                        padding: 40px;
-                        border-radius: 12px;
-                        width: 90%;
-                        height:80%;
-                        max-width: 500px;
-                        max-height: 800px;
-                        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                        position: relative;
-                        margin: 20px;
                     }
 
                     .form-container {
@@ -680,7 +653,6 @@ const createpresupuesto = ({exito , param , tipo}) => {
                     }
 
                     .form-col-productos {
-                        flex: 8;
                         min-width: 0; /* Importante para que no desborde */
                         display: flex;
                         flex-direction: column;
@@ -896,7 +868,6 @@ const createpresupuesto = ({exito , param , tipo}) => {
                         min-width: 150px;
                         max-width: 180px;
                     }
-
                 `}
             </style>
         </>

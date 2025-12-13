@@ -1,6 +1,10 @@
 const { useState, useEffect, use } = require("react")
 import Select from 'react-select';     
 
+import FormularioCreateProveedor from "../createProveedor"
+import FormularioCreateComprobanteCompra from "../comprobanteCompra/newComprobanteCompra"
+import FormularioCreateTransporte from "../../gestion/transporte/createTransporte"
+
 const { default: Link } = require("next/link")
 
 const initialState = {proveedor:'',totalPrecio:0, totalBultos:0 , comprobanteCompra:'', transporte:''}
@@ -30,6 +34,18 @@ const newRemito = ({exito}) => {
             ? detalles.reduce((acc, d) => acc + (d.cantidad || 0), 0)
             : 0;
         setRemito((prev) => ({ ...prev, totalBultos: totalPedido }));
+    };
+
+    const fetchData_ComprobantesCompra = async () => {
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompra`);
+            const s = await res.json();
+            if (s.ok) {
+                setComprobantesCompra(s.data || [])
+            }
+        } catch (err) {
+            console.log("Error al cargar detalle de comprobante de compra.\nError: ", err);
+        }
     };
 
     const fetchData_ComprobanteCompraDetalle = async (comprobanteID) => {
@@ -200,6 +216,10 @@ const newRemito = ({exito}) => {
         }
     }, [productos, detalles]);
 
+    const [mostrarModalProveedor , setMostrarModalProveedor] = useState(false)
+    const [mostrarModalComprobanteCompra , setMostrarModalComprobanteCompra] = useState(false)
+    const [mostrarModalTransporte , setMostrarModalTransporte] = useState(false)
+
     const opciones_tipoProductos = tipoProductos.map(v => ({
         value: v,
         label: v === "ProductoVino" ? "Vino" :
@@ -228,9 +248,108 @@ const newRemito = ({exito}) => {
         value: v._id, label: v.name
     }));
    
+    const customStyle = {
+                                    container: (base) => ({
+                                    ...base,
+                                    width: 220, // ⬅️ ancho fijo total
+                                    }),
+                                    control: (base) => ({
+                                    ...base,
+                                    minWidth: 220,
+                                    maxWidth: 220,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    border: '1px solid #444',
+                                    borderRadius: 8,
+                                    }),
+                                    singleValue: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                    }),
+                                    menu: (base) => ({
+                                    ...base,
+                                    backgroundColor: '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    option: (base, { isFocused }) => ({
+                                    ...base,
+                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                    color: 'white',
+                                    }),
+                                    input: (base) => ({
+                                    ...base,
+                                    color: 'white',
+                                    }),
+                                }
 
     return(
         <>
+
+            {mostrarModalProveedor && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="close" onClick={() => 
+                            {
+                                setMostrarModalProveedor(false)
+                            }
+                        }>
+                            &times;
+                        </button>
+                        <FormularioCreateProveedor
+                            exito={() => 
+                                {
+                                    setMostrarModalProveedor(false)
+                                    fetchData_Proveedores()
+                                }}
+                        />
+                    </div>
+                </div>
+            )}
+            
+            {mostrarModalComprobanteCompra && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="close" onClick={() => 
+                            {
+                                setMostrarModalComprobanteCompra(false)
+                            }
+                        }>
+                            &times;
+                        </button>
+                        <FormularioCreateComprobanteCompra
+                            exito={() => 
+                                {
+                                    setMostrarModalComprobanteCompra(false)
+                                    fetchData_ComprobantesCompra()
+                                }}
+                        />
+                    </div>
+                </div>
+            )}
+            
+            {mostrarModalTransporte && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="close" onClick={() => 
+                            {
+                                setMostrarModalTransporte(false)
+                            }
+                        }>
+                            &times;
+                        </button>
+                        <FormularioCreateTransporte
+                            exito={() => 
+                                {
+                                    setMostrarModalTransporte(false)
+                                    fetchData_Transporte()
+                                }}
+                        />
+                    </div>
+                </div>
+            )}
             <div className="form-container">
                 <h1 className="titulo-pagina">Cargar Remito</h1>
                 <form id="formProducto" className="formulario-presupuesto">
@@ -238,7 +357,7 @@ const newRemito = ({exito}) => {
                         <div className="form-col">
                             <label>
                                 Proveedor:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalProveedor(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -249,48 +368,14 @@ const newRemito = ({exito}) => {
                                 name='proveedor'
                                 placeholder="Proveedor..."
                                 isClearable
-                                styles={{
-                                    container: (base) => ({
-                                    ...base,
-                                    width: 220, // ⬅️ ancho fijo total
-                                    }),
-                                    control: (base) => ({
-                                    ...base,
-                                    minWidth: 220,
-                                    maxWidth: 220,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    border: '1px solid #444',
-                                    borderRadius: 8,
-                                    }),
-                                    singleValue: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                    }),
-                                    menu: (base) => ({
-                                    ...base,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    option: (base, { isFocused }) => ({
-                                    ...base,
-                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    input: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    }),
-                                }}
+                                styles={customStyle}
                             />
                         </div>
 
                         <div className="form-col">
                             <label>
                                 Comprobante de Compra:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalComprobanteCompra(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -301,48 +386,14 @@ const newRemito = ({exito}) => {
                                 name='comprobanteCompra'
                                 placeholder="Comprobante de compra..."
                                 isClearable
-                                styles={{
-                                    container: (base) => ({
-                                    ...base,
-                                    width: 220, // ⬅️ ancho fijo total
-                                    }),
-                                    control: (base) => ({
-                                    ...base,
-                                    minWidth: 220,
-                                    maxWidth: 220,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    border: '1px solid #444',
-                                    borderRadius: 8,
-                                    }),
-                                    singleValue: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                    }),
-                                    menu: (base) => ({
-                                    ...base,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    option: (base, { isFocused }) => ({
-                                    ...base,
-                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    input: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    }),
-                                }}
+                                styles={customStyle}
                             />
                         </div>
 
                         <div className="form-col">
                             <label>
                                 Transporte:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalTransporte(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -353,42 +404,7 @@ const newRemito = ({exito}) => {
                                 name='transporte'
                                 placeholder="Transporte..."
                                 isClearable
-                                styles={{
-                                    container: (base) => ({
-                                    ...base,
-                                    width: 220, // ⬅️ ancho fijo total
-                                    }),
-                                    control: (base) => ({
-                                    ...base,
-                                    minWidth: 220,
-                                    maxWidth: 220,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    border: '1px solid #444',
-                                    borderRadius: 8,
-                                    }),
-                                    singleValue: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                    }),
-                                    menu: (base) => ({
-                                    ...base,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    option: (base, { isFocused }) => ({
-                                    ...base,
-                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    input: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    }),
-                                }}
+                                styles={customStyle}
                             />
                         </div>
                         
@@ -412,42 +428,7 @@ const newRemito = ({exito}) => {
                                             placeholder="Tipo de Producto..."
                                             isClearable
                                             isDisabled={true}
-                                            styles={{
-                                                container: (base) => ({
-                                                ...base,
-                                                width: 120, // ⬅️ ancho fijo total
-                                                }),
-                                                control: (base) => ({
-                                                ...base,
-                                                minWidth: 150,
-                                                maxWidth: 150,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                border: '1px solid #444',
-                                                borderRadius: 8,
-                                                }),
-                                                singleValue: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                                }),
-                                                menu: (base) => ({
-                                                ...base,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                }),
-                                                option: (base, { isFocused }) => ({
-                                                ...base,
-                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                                color: 'white',
-                                                }),
-                                                input: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                }),
-                                            }}
+                                            styles={customStyle}
                                         />
                                     </div>
                                     <div className='form-col-item1'>
@@ -459,42 +440,7 @@ const newRemito = ({exito}) => {
                                             placeholder="Producto..."
                                             isClearable
                                             isDisabled={true}
-                                            styles={{
-                                                container: (base) => ({
-                                                ...base,
-                                                width: 150, // ⬅️ ancho fijo total
-                                                }),
-                                                control: (base) => ({
-                                                ...base,
-                                                minWidth: 150,
-                                                maxWidth: 150,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                border: '1px solid #444',
-                                                borderRadius: 8,
-                                                }),
-                                                singleValue: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                                }),
-                                                menu: (base) => ({
-                                                ...base,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                }),
-                                                option: (base, { isFocused }) => ({
-                                                ...base,
-                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                                color: 'white',
-                                                }),
-                                                input: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                }),
-                                            }}
+                                            styles={customStyle}
                                         />
                                     </div>
                                     
@@ -554,21 +500,6 @@ const newRemito = ({exito}) => {
             </div>
             <style jsx>
                 {`
-                        .modal {
-                            position: fixed;
-                            top: 0;
-                            left: 0;
-                            width: 100%;
-                            height: 100%;
-                            background-color: rgba(0,0,0,0.5); /* oscurece fondo */
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            z-index: 1000;
-                        }
-                        
-
-
                         .close {
                             position: absolute;
                             top: 1rem;
@@ -597,19 +528,6 @@ const newRemito = ({exito}) => {
                         .btn-icon:hover {
                         background-color: #a30000;
                         transform: translateY(-3px);
-                        }
-
-                        .modal-content {
-                            background-color: #121212;
-                            padding: 40px;
-                            border-radius: 12px;
-                            width: 90%;
-                            height:80%;
-                            max-width: 500px;
-                            max-height: 800px;
-                            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                            position: relative;
-                            margin: 20px;
                         }
 
                         .form-container {

@@ -1,9 +1,9 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';          
 import { FaTrash} from "react-icons/fa";
-import FormularioEmpleadoCreate from '../../gestion/empleado/createEmpleado'
-import FormularioClienteCreate from '../../clientes/createCliente'
-import FormularioMedioPagoCreate from '../../gestion/tablasVarias/medioPago/createMedioPago'
+
+import FormularioCreateProveedor from "../createProveedor"
+import FormularioCreateOrdenCompra from "../ordenCompra/newOrdenCompra"
 
 const { default: Link } = require("next/link")
 
@@ -245,9 +245,8 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
         setComprobanteCompra((prev) => ({ ...prev, total:totalPedido }));
     };
 
-    const [mostrarModalCreate1, setMostrarModalCreate1] = useState(false);
-    const [mostrarModalCreate2, setMostrarModalCreate2] = useState(false);
-    const [mostrarModalCreate3, setMostrarModalCreate3] = useState(false);
+    const [mostrarModalProveedor, setMostrarModalProveedor] = useState(false);
+    const [mostrarModalOrdenCompra, setMostrarModalOrdenCompra] = useState(false);
 
     const opciones_tipoProductos = tipoProductos.map(v => ({
         value: v,
@@ -276,27 +275,27 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
 
     return(
         <>
-            {mostrarModalCreate1 && (
+            {mostrarModalProveedor && (
                 <div className="modal">
                 <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate1(false)}>&times;</button>
-                    <FormularioMedioPagoCreate
+                    <button className="close" onClick={() => setMostrarModalProveedor(false)}>&times;</button>
+                    <FormularioCreateProveedor
                     exito={() => {
-                        setMostrarModalCreate1(false);
-                        fetchData_MediosPago();
+                        setMostrarModalProveedor(false);
+                        fetchData_Proveedores();
                     }}
                     />
                 </div>
             </div>
             )}
-            {mostrarModalCreate2 && (
+            {mostrarModalOrdenCompra && (
                 <div className="modal">
                 <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate2(false)}>&times;</button>
-                    <FormularioEmpleadoCreate
+                    <button className="close" onClick={() => setMostrarModalOrdenCompra(false)}>&times;</button>
+                    <FormularioCreateOrdenCompra
                     exito={() => {
-                        setMostrarModalCreate2(false);
-                        fetchData_Empleados();
+                        setMostrarModalOrdenCompra(false);
+                        fetchData_Ordenes();
                     }}
                     />
                 </div>
@@ -315,7 +314,7 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
                         <div className="form-col1">
                             <label>
                                 Proveedor:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalProveedor(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -326,7 +325,6 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
                                 name='proveedor'
                                 placeholder="Proveedor..."
                                 isClearable
-                                isDisabled={true}
                                 styles={{
                                     container: (base) => ({
                                     ...base,
@@ -369,6 +367,7 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
                         <div className="form-col1">
                             <label>
                                 Orden de Compra:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalOrdenCompra(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -379,7 +378,6 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
                                 name='ordenCompra'
                                 placeholder="Orden de compra..."
                                 isClearable
-                                isDisabled={true}
                                 styles={{
                                     container: (base) => ({
                                     ...base,
@@ -611,19 +609,6 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
                         .btn-icon:hover {
                         background-color: #a30000;
                         transform: translateY(-3px);
-                        }
-
-                        .modal-content {
-                            background-color: #121212;
-                            padding: 40px;
-                            border-radius: 12px;
-                            width: 90%;
-                            height:80%;
-                            max-width: 500px;
-                            max-height: 800px;
-                            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                            position: relative;
-                            margin: 20px;
                         }
 
                         .form-container {

@@ -234,7 +234,7 @@ const deleteProveedor = async(proveedorID) => {
     </div>
   )}
 
-  <h1 className="titulo-pagina">Proveedores</h1>
+  <h1 className="titulo-index">Proveedores</h1>
   <div className="botonera">
         <button className="btn-icon" onClick={() => router.back()} title="Volver atrás">
             <FaArrowLeft />

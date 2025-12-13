@@ -134,7 +134,7 @@ const deleteUsuario = async(usuarioID) => {
   )}
 
 
-  <h1 className="titulo-pagina">Usuarios</h1>
+  <h1 className="titulo-index">Usuarios</h1>
   <div className="botonera">
     <button className="btn-icon" onClick={() => router.back()} title="Volver atrás">
         <FaArrowLeft />

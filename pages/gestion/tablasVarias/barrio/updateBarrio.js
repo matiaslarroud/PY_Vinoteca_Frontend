@@ -1,4 +1,7 @@
 const { useState, useEffect } = require("react")
+import Select from 'react-select';     
+
+import FormularioCreateLocalidad from "../localidad/createLocalidad";
 
 const { default: Link } = require("next/link")
 const initialState = {name:'', localidad:''}                  
@@ -6,6 +9,8 @@ const initialState = {name:'', localidad:''}
 const updateBarrio = ({barrioID,exito}) => {
     const [barrio , setBarrio] = useState(initialState);
     const [localidades,setLocalidades] = useState([]);
+
+    const [mostrarModalLocalidad,setMostrarModalLocalidad] = useState(false);
     
     const fetchDataBarrio = async(barrioID) => {
             await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/barrio/${barrioID}`)
@@ -44,6 +49,15 @@ const updateBarrio = ({barrioID,exito}) => {
                 [name]:value
         })   
     }
+    const selectChange = (selectedOption, actionMeta) => {
+        const name = actionMeta.name;
+        const value = selectedOption ? selectedOption.value : "";
+
+        setBarrio({
+            ...barrio,
+            [name]: value,
+        });
+    };
 
     const clickChange = async (e) => {
         e.preventDefault();
@@ -68,14 +82,37 @@ const updateBarrio = ({barrioID,exito}) => {
                  })
 
     }
+    
+    const opciones_localidades  = localidades.map(v => ({ value: v._id,label: v.name}))
 
     return(
        <>
+
+            {mostrarModalLocalidad && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => 
+                        {
+                            setMostrarModalLocalidad(null)
+                        }
+                    }>
+                        &times;
+                    </button>
+                    <FormularioCreateLocalidad
+                        exito={() => 
+                            {
+                                setMostrarModalLocalidad(false)
+                                fetchDataLocalidades()
+                            }}
+                    />
+                </div>
+                </div>
+            )}
+            
   <div className="form-container">
     <h1 className="titulo-pagina">Modificar Barrio</h1>
 
     <form id="formC">
-      <fieldset className="grid-container">
 
         <div className="form-group input-centered">
           <label htmlFor="nombre">Nombre:</label>
@@ -89,23 +126,61 @@ const updateBarrio = ({barrioID,exito}) => {
           />
         </div>
 
-        <div className="form-group">
-          <label htmlFor="localidad">Localidad:</label>
-          <select
-            name="localidad"
-            onChange={inputChange}
-            value={barrio.localidad}
-          >
-            <option value="">Seleccione una localidad...</option>
-            {localidades.map(({ _id, name }) => (
-              <option key={_id} value={_id}>
-                {name}
-              </option>
-            ))}
-          </select>
-        </div>
+        
 
-      </fieldset>
+        
+                    <div className="form-group input-centered">
+                      <label>
+                       Localidad: 
+                        <button type="button" className="btn-plus" onClick={() => setMostrarModalLocalidad(true)}>+</button>
+                      </label>
+                      <Select
+                        className="form-select-react"
+                        classNamePrefix="rs"
+                        options={opciones_localidades}
+                        value={opciones_localidades.find(op => op.value === barrio.localidad) || null}
+                        onChange={selectChange}
+                        name='localidad'
+                        placeholder="Localidad..."
+                        isClearable
+                        styles={{
+                              container: (base) => ({
+                              ...base,
+                              width: 220, // ⬅️ ancho fijo total
+                              }),
+                              control: (base) => ({
+                              ...base,
+                              minWidth: 220,
+                              maxWidth: 220,
+                              backgroundColor: '#2c2c2c',
+                              color: 'white',
+                              border: '1px solid #444',
+                              borderRadius: 8,
+                              }),
+                              singleValue: (base) => ({
+                              ...base,
+                              color: 'white',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                              }),
+                              menu: (base) => ({
+                              ...base,
+                              backgroundColor: '#2c2c2c',
+                              color: 'white',
+                              }),
+                              option: (base, { isFocused }) => ({
+                              ...base,
+                              backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                              color: 'white',
+                              }),
+                              input: (base) => ({
+                              ...base,
+                              color: 'white',
+                              }),
+                        }}
+                      />
+                    </div>
 
       <div className="button-area">
         <button type="submit" className="submit-btn" onClick={clickChange}>
@@ -214,6 +289,19 @@ const updateBarrio = ({barrioID,exito}) => {
         width: 100%;
       }
     }
+
+  .btn-plus {
+      background-color: transparent;
+      color: #651616ff;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+  }
+
+  .btn-plus:hover {
+      color: #571212ff;
+      transform: translateY(-3px);
+  }
   `}</style>
 </>
 

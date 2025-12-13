@@ -1,8 +1,11 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';          
 import { FaTrash} from "react-icons/fa";
-import FormularioEmpleadoCreate from '../../gestion/empleado/createEmpleado'
-import FormularioClienteCreate from '../../clientes/createCliente'
+
+import FormularioCreateProveedor from "../createProveedor"
+import FormularioCreateSolicitudPresupuesto from "../presupuestoSolicitud/newSolicitud"
+import FormularioCreateEmpleado from "../../gestion/empleado/createEmpleado"
+import FormularioCreateMedioPago from "../../gestion/tablasVarias/medioPago/createMedioPago"
 
 const { default: Link } = require("next/link")
 
@@ -323,8 +326,10 @@ const agregarDetallePresupuesto = async (solicitudID) => {
         setPresupuesto((prev) => ({ ...prev, total:totalPresupuesto }));
     };
 
-    const [mostrarModalCreate2, setMostrarModalCreate2] = useState(false);
-    const [mostrarModalCreate3, setMostrarModalCreate3] = useState(false);
+    const [mostrarModalEmpleado, setMostrarModalEmpleado] = useState(false);
+    const [mostrarModalProveedor, setMostrarModalProveedor] = useState(false);
+    const [mostrarModalSolicitudPresupuesto, setMostrarModalSolicitudPresupuesto] = useState(false);
+    const [mostrarModalMedioPago, setMostrarModalMedioPago] = useState(false);
 
     const opciones_tipoProductos = tipoProductos.map(v => ({
         value: v,
@@ -354,13 +359,41 @@ const agregarDetallePresupuesto = async (solicitudID) => {
     return(
         <>
            
-            {mostrarModalCreate2 && (
+            {mostrarModalProveedor && (
                 <div className="modal">
                 <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate2(false)}>&times;</button>
-                    <FormularioEmpleadoCreate
+                    <button className="close" onClick={() => setMostrarModalProveedor(false)}>&times;</button>
+                    <FormularioCreateProveedor
                     exito={() => {
-                        setMostrarModalCreate2(false);
+                        setMostrarModalProveedor(false);
+                        fetchData_Proveedores();
+                    }}
+                    />
+                </div>
+                </div>
+            )}
+
+            {mostrarModalSolicitudPresupuesto && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalSolicitudPresupuesto(false)}>&times;</button>
+                    <FormularioCreateSolicitudPresupuesto
+                    exito={() => {
+                        setMostrarModalSolicitudPresupuesto(false);
+                        fetchData_Solicitudes();
+                    }}
+                    />
+                </div>
+                </div>
+            )}
+
+            {mostrarModalEmpleado && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalEmpleado(false)}>&times;</button>
+                    <FormularioCreateEmpleado
+                    exito={() => {
+                        setMostrarModalEmpleado(false);
                         fetchData_Empleados();
                     }}
                     />
@@ -368,14 +401,14 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                 </div>
             )}
 
-            {mostrarModalCreate3 && (
+            {mostrarModalMedioPago && (
                 <div className="modal">
                 <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate3(false)}>&times;</button>
-                    <FormularioClienteCreate
+                    <button className="close" onClick={() => setMostrarModalMedioPago(false)}>&times;</button>
+                    <FormularioCreateMedioPago
                     exito={() => {
-                        setMostrarModalCreate3(false);
-                        fetchData_Clientes();
+                        setMostrarModalMedioPago(false);
+                        fetchData_MediosPago();
                     }}
                     />
                 </div>
@@ -395,7 +428,6 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                         <div className="form-col">
                             <label>
                                 Proveedor:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -449,7 +481,7 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                         <div className="form-col">
                             <label>
                                 Solicitud de Presupuesto:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate2(true)}>+</button>
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalSolicitudPresupuesto(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -503,7 +535,7 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                         <div className="form-col">
                             <label>
                                 Empleado:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate2(true)}>+</button>
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalEmpleado(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -556,7 +588,7 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                         <div className="form-col">
                             <label>
                                 Medio de Pago:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate2(true)}>+</button>
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalMedioPago(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -789,21 +821,6 @@ const agregarDetallePresupuesto = async (solicitudID) => {
             </div>
             <style jsx>
                 {`
-                    .modal {
-                        position: fixed;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: rgba(0,0,0,0.5); /* oscurece fondo */
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        z-index: 1000;
-                    }
-                    
-
-
                     .close {
                         position: absolute;
                         top: 1rem;
@@ -832,19 +849,6 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                     .btn-icon:hover {
                     background-color: #a30000;
                     transform: translateY(-3px);
-                    }
-
-                    .modal-content {
-                        background-color: #121212;
-                        padding: 40px;
-                        border-radius: 12px;
-                        width: 90%;
-                        height:80%;
-                        max-width: 500px;
-                        max-height: 800px;
-                        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                        position: relative;
-                        margin: 20px;
                     }
 
                     .form-container {

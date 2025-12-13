@@ -119,6 +119,13 @@ tr:hover {
 }
 
 .titulo-pagina {
+  font-size: 2rem;
+  color: white;
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.titulo-index {
   font-size: 3rem;
   color: white;
   text-align: center;

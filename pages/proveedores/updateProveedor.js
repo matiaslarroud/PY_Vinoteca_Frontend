@@ -2,6 +2,12 @@ const { useState, useEffect } = require("react")
 import Select from "react-select";
 const { default: Link } = require("next/link")
 
+import FormularioCreateCondicionIva from "../gestion/tablasVarias/iva/createCondicionIva"
+import FormularioCreatePais from "../gestion/tablasVarias/pais/createPais"
+import FormularioCreateProvincia from "../gestion/tablasVarias/provincia/createProvincia"
+import FormularioCreateLocalidad from "../gestion/tablasVarias/localidad/createLocalidad"
+import FormularioCreateBarrio from "../gestion/tablasVarias/barrio/createBarrio"
+import FormularioCreateCalle from "../gestion/tablasVarias/calle/createCalle"
 
 const initialState = {
     name:'', telefono:'', email:'', cuit:'',
@@ -150,6 +156,13 @@ const fetchPaises = () => {
         });
     };
 
+    const [mostrarModalCondicionIva , setMostrarModalCondicionIva] = useState(null)
+    const [mostrarModalPais , setMostrarModalPais] = useState(null)
+    const [mostrarModalProvincia , setMostrarModalProvincia] = useState(null)
+    const [mostrarModalLocalidad , setMostrarModalLocalidad] = useState(null)
+    const [mostrarModalBarrio , setMostrarModalBarrio] = useState(null)
+    const [mostrarModalCalle , setMostrarModalCalle] = useState(null)
+
     const opciones_paises = paises.map(v => ({ value: v._id,label: v.name }));
     const opciones_provincias = provincias.filter(a => a.pais === proveedor.pais).map(v => ({ value: v._id,label: v.name }));
     const opciones_localidades = localidades.filter(a => a.provincia === proveedor.provincia).map(v => ({ value: v._id,label: v.name }));
@@ -160,6 +173,132 @@ const fetchPaises = () => {
 
     return(
         <>
+
+            {mostrarModalCondicionIva && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="close" onClick={() => 
+                            {
+                                setMostrarModalCondicionIva(null)
+                            }
+                        }>
+                            &times;
+                        </button>
+                        <FormularioCreateCondicionIva
+                            exito={() => 
+                                {
+                                    setMostrarModalCondicionIva(null)
+                                    fetchCondicionesIVA()
+                                }}
+                        />
+                    </div>
+                </div>
+            )}
+            
+            {mostrarModalPais && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="close" onClick={() => 
+                            {
+                                setMostrarModalPais(null)
+                            }
+                        }>
+                            &times;
+                        </button>
+                        <FormularioCreatePais
+                            exito={() => 
+                                {
+                                    setMostrarModalPais(null)
+                                    fetchPaises()
+                                }}
+                        />
+                    </div>
+                </div>
+            )}
+            
+            {mostrarModalProvincia && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="close" onClick={() => 
+                            {
+                                setMostrarModalProvincia(null)
+                            }
+                        }>
+                            &times;
+                        </button>
+                        <FormularioCreateProvincia
+                            exito={() => 
+                                {
+                                    setMostrarModalProvincia(null)
+                                    fetchProvincias()
+                                }}
+                        />
+                    </div>
+                </div>
+            )}
+            
+            {mostrarModalLocalidad && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="close" onClick={() => 
+                            {
+                                setMostrarModalLocalidad(null)
+                            }
+                        }>
+                            &times;
+                        </button>
+                        <FormularioCreateLocalidad
+                            exito={() => 
+                                {
+                                    setMostrarModalLocalidad(null)
+                                    fetchLocalidades()
+                                }}
+                        />
+                    </div>
+                </div>
+            )}
+            
+            {mostrarModalBarrio && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="close" onClick={() => 
+                            {
+                                setMostrarModalBarrio(null)
+                            }
+                        }>
+                            &times;
+                        </button>
+                        <FormularioCreateBarrio
+                            exito={() => 
+                                {
+                                    setMostrarModalBarrio(null)
+                                    fetchBarrios()
+                                }}
+                        />
+                    </div>
+                </div>
+            )}
+            
+            {mostrarModalCalle && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="close" onClick={() => 
+                            {
+                                setMostrarModalCalle(null)
+                            }
+                        }>
+                            &times;
+                        </button>
+                        <FormularioCreateCalle
+                            exito={() => 
+                                {
+                                    setMostrarModalCalle(null)
+                                    fetchCalles()
+                                }}
+                        />
+                    </div>
+                </div>
+            )}
             <div className="form-container">
                 <h1 className="titulo-pagina">Modificar Proveedor</h1>
                 <form id="formProducto" className="formulario-presupuesto"  onSubmit={clickChange}>
@@ -220,6 +359,7 @@ const fetchPaises = () => {
                         <div className="form-col">
                             <label>
                                 Condicion de Iva:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCondicionIva(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -273,6 +413,7 @@ const fetchPaises = () => {
                         <div className="form-col">
                             <label>
                                 Pais:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalPais(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -325,6 +466,7 @@ const fetchPaises = () => {
                         <div className="form-col">
                             <label>
                                 Provincia:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalProvincia(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -377,6 +519,7 @@ const fetchPaises = () => {
                         <div className="form-col">
                             <label>
                                 Localidad:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalLocalidad(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -429,6 +572,7 @@ const fetchPaises = () => {
                         <div className="form-col">
                             <label>
                                 Barrio:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalBarrio(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -481,6 +625,7 @@ const fetchPaises = () => {
                         <div className="form-col">
                             <label>
                                 Calle:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCalle(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -554,18 +699,6 @@ const fetchPaises = () => {
             
             <style jsx>
                 {`
-                    .modal {
-                        position: fixed;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: rgba(0,0,0,0.5); /* oscurece fondo */
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        z-index: 1000;
-                    }
                     
                     .checkbox-modern {
                         display: flex;
@@ -665,19 +798,6 @@ const fetchPaises = () => {
                     .btn-icon:hover {
                     background-color: #a30000;
                     transform: translateY(-3px);
-                    }
-
-                    .modal-content {
-                        background-color: #121212;
-                        padding: 40px;
-                        border-radius: 12px;
-                        width: 90%;
-                        height:80%;
-                        max-width: 500px;
-                        max-height: 800px;
-                        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                        position: relative;
-                        margin: 20px;
                     }
 
                     .form-container {

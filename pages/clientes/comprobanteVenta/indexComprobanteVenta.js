@@ -263,7 +263,7 @@ const indexComprobantesVenta = () => {
                 </div>
             </div>
             )}
-            <h1 className="titulo-pagina">Comprobante de Venta</h1>
+            <h1 className="titulo-index">Comprobante de Venta</h1>
             
             <div className="botonera">
                 <button className="btn-icon" onClick={() => router.back()} title="Volver atrás">

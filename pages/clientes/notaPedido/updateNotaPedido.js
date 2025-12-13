@@ -1,16 +1,21 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';      
 import { FaTrash} from "react-icons/fa";
+
 import FormularioEmpleadoCreate from '../../gestion/empleado/createEmpleado'
-import FormularioClienteCreate from '../../clientes/createCliente'
-import FormularioMedioPagoCreate from '../../gestion/tablasVarias/medioPago/createMedioPago'    
+import FormularioClienteCreate from '../createCliente'
+import FormularioMedioPagoCreate from '../../gestion/tablasVarias/medioPago/createMedioPago'  
+import FormularioProvinciaCreate from "../../gestion/tablasVarias/provincia/createProvincia"
+import FormularioLocalidadCreate from "../../gestion/tablasVarias/localidad/createLocalidad"
+import FormularioBarrioCreate from "../../gestion/tablasVarias/barrio/createBarrio"
+import FormularioCalleCreate from "../../gestion/tablasVarias/calle/createCalle" 
 
 const { default: Link } = require("next/link")
 
 const initialStateNotaPedido = {
         total:0, fecha:'', fechaEntrega:'', cliente:'', empleado:'',
-        envio:false, presupuesto:'', medioPago:'', descuento:0 , descuentoBandera:false,
-        provincia:0 , localidad:0 , barrio:0, calle:0,altura:0,deptoNumero:0,deptoLetra:0
+        envio:false, presupuesto:'', medioPago:'' , descuentoBandera:false,
+        provincia:0 , localidad:0 , barrio:0, calle:0
     }
 const initialDetalle = { 
         tipoProducto: '', producto: "", cantidad: 0, precio: 0, importe: 0, notaPedido:'' ,
@@ -470,7 +475,7 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
     };
 
     const agregarDetalle = () => {
-        setDetalles([...detalles, { ...{tipoProducto:"", producto: "", cantidad: 0, precio: 0, importe: 0 } }]);
+        setDetalles([...detalles, { ...{tipoProducto:"", producto: "", precio: 0, importe: 0 } }]);
     };
     
     const calcularTotal = (detalles) => {
@@ -478,9 +483,13 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
         setNotaPedido((prev) => ({ ...prev, total:totalNotaPedido }));
     };
 
-    const [mostrarModalCreate1, setMostrarModalCreate1] = useState(false);
-    const [mostrarModalCreate2, setMostrarModalCreate2] = useState(false);
-    const [mostrarModalCreate3, setMostrarModalCreate3] = useState(false);
+    const [mostrarModalEmpleado, setMostrarModalEmpleado] = useState(false);
+    const [mostrarModalCliente, setMostrarModalCliente] = useState(false);
+    const [mostrarModalMedioPago, setMostrarModalMedioPago] = useState(false);
+    const [mostrarModalProvincia, setMostrarModalProvincia] = useState(false);
+    const [mostrarModalLocalidad, setMostrarModalLocalidad] = useState(false);
+    const [mostrarModalBarrio, setMostrarModalBarrio] = useState(false);
+    const [mostrarModalCalle, setMostrarModalCalle] = useState(false);
 
     const opciones_tipoProductos = tipoProductos.map(v => ({
         value: v,
@@ -522,29 +531,115 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
         .filter((s)=>{return s.barrio === Number(notaPedido.barrio)})
         .map(v => ({ value: v._id,label: v.name }));
     
-
+    const customStyle = {
+        container: base => ({
+        ...base,
+        width: "100%",
+        }),
+        control: base => ({
+        ...base,
+        width: "100%",
+        backgroundColor: "#2c2c2c",
+        color: "white",
+        border: "1px solid #444",
+        borderRadius: 8,
+        }),
+        singleValue: base => ({
+        ...base,
+        color: "white",
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        }),
+        menu: base => ({
+        ...base,
+        backgroundColor: "#2c2c2c",
+        color: "white",
+        }),
+        option: (base, { isFocused }) => ({
+        ...base,
+        backgroundColor: isFocused ? "#444" : "#2c2c2c",
+        color: "white",
+        }),
+        input: base => ({
+        ...base,
+        color: "white",
+        }),
+    }
     return(
         <>
-            {mostrarModalCreate1 && (
+            {mostrarModalProvincia && (
                 <div className="modal">
                 <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate1(false)}>&times;</button>
+                    <button className="close" onClick={() => setMostrarModalProvincia(false)}>&times;</button>
+                    <FormularioProvinciaCreate
+                    exito={() => {
+                        setMostrarModalProvincia(false);
+                        fetchData_Provincias();
+                    }}
+                    />
+                </div>
+            </div>
+            )}
+            {mostrarModalLocalidad && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalLocalidad(false)}>&times;</button>
+                    <FormularioLocalidadCreate
+                    exito={() => {
+                        setMostrarModalLocalidad(false);
+                        fetchData_Localidades();
+                    }}
+                    />
+                </div>
+            </div>
+            )}
+            {mostrarModalBarrio && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalBarrio(false)}>&times;</button>
+                    <FormularioBarrioCreate
+                    exito={() => {
+                        setMostrarModalBarrio(false);
+                        fetchData_Barrios();
+                    }}
+                    />
+                </div>
+            </div>
+            )}
+            {mostrarModalCalle && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalCalle(false)}>&times;</button>
+                    <FormularioCalleCreate
+                    exito={() => {
+                        setMostrarModalCalle(false);
+                        fetchData_Calles();
+                    }}
+                    />
+                </div>
+            </div>
+            )}
+            {mostrarModalMedioPago && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalMedioPago(false)}>&times;</button>
                     <FormularioMedioPagoCreate
                     exito={() => {
-                        setMostrarModalCreate1(false);
+                        setMostrarModalMedioPago(false);
                         fetchData_MediosPago();
                     }}
                     />
                 </div>
             </div>
             )}
-            {mostrarModalCreate2 && (
+            {mostrarModalEmpleado && (
                 <div className="modal">
                 <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate2(false)}>&times;</button>
+                    <button className="close" onClick={() => setMostrarModalEmpleado(false)}>&times;</button>
                     <FormularioEmpleadoCreate
                     exito={() => {
-                        setMostrarModalCreate2(false);
+                        setMostrarModalEmpleado(false);
                         fetchData_Empleados();
                     }}
                     />
@@ -552,13 +647,13 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                 </div>
             )}
 
-            {mostrarModalCreate3 && (
+            {mostrarModalCliente && (
                 <div className="modal">
                 <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate3(false)}>&times;</button>
+                    <button className="close" onClick={() => setMostrarModalCliente(false)}>&times;</button>
                     <FormularioClienteCreate
                     exito={() => {
-                        setMostrarModalCreate3(false);
+                        setMostrarModalCliente(false);
                         fetchData_Clientes();
                     }}
                     />
@@ -579,7 +674,7 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                         <div className="form-col1">
                             <label>
                                 Cliente:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCliente(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -590,49 +685,14 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                                 name='cliente'
                                 placeholder="Cliente..."
                                 isClearable
-                                styles={{
-                                    container: (base) => ({
-                                    ...base,
-                                    width: 220, // ⬅️ ancho fijo total
-                                    }),
-                                    control: (base) => ({
-                                    ...base,
-                                    minWidth: 220,
-                                    maxWidth: 220,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    border: '1px solid #444',
-                                    borderRadius: 8,
-                                    }),
-                                    singleValue: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                    }),
-                                    menu: (base) => ({
-                                    ...base,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    option: (base, { isFocused }) => ({
-                                    ...base,
-                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    input: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    }),
-                                }}
+                                styles={customStyle}
                             />
                         </div>
 
                         <div className="form-col1">
                             <label>
                                 Empleado:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate2(true)}>+</button>
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalEmpleado(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -643,42 +703,7 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                                 name='empleado'
                                 placeholder="Empleado..."
                                 isClearable
-                                styles={{
-                                    container: (base) => ({
-                                    ...base,
-                                    width: 220, // ⬅️ ancho fijo total
-                                    }),
-                                    control: (base) => ({
-                                    ...base,
-                                    minWidth: 220,
-                                    maxWidth: 220,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    border: '1px solid #444',
-                                    borderRadius: 8,
-                                    }),
-                                    singleValue: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                    }),
-                                    menu: (base) => ({
-                                    ...base,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    option: (base, { isFocused }) => ({
-                                    ...base,
-                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    input: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    }),
-                                }}
+                                styles={customStyle}
                             />
                         </div>
 
@@ -695,49 +720,14 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                                 name='presupuesto'
                                 placeholder="Presupuesto..."
                                 isClearable
-                                styles={{
-                                    container: (base) => ({
-                                    ...base,
-                                    width: 220, // ⬅️ ancho fijo total
-                                    }),
-                                    control: (base) => ({
-                                    ...base,
-                                    minWidth: 220,
-                                    maxWidth: 220,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    border: '1px solid #444',
-                                    borderRadius: 8,
-                                    }),
-                                    singleValue: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                    }),
-                                    menu: (base) => ({
-                                    ...base,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    option: (base, { isFocused }) => ({
-                                    ...base,
-                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    input: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    }),
-                                }}
+                                styles={customStyle}
                             />
                         </div>
 
                         <div className="form-col1">
                             <label>
                                 Medio de Pago:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate1(true)}>+</button>
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalMedioPago(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -748,45 +738,139 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                                 name='medioPago'
                                 placeholder="Medio de Pago..."
                                 isClearable
-                                styles={{
-                                    container: (base) => ({
-                                    ...base,
-                                    width: 220, // ⬅️ ancho fijo total
-                                    }),
-                                    control: (base) => ({
-                                    ...base,
-                                    minWidth: 220,
-                                    maxWidth: 220,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    border: '1px solid #444',
-                                    borderRadius: 8,
-                                    }),
-                                    singleValue: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
-                                    }),
-                                    menu: (base) => ({
-                                    ...base,
-                                    backgroundColor: '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    option: (base, { isFocused }) => ({
-                                    ...base,
-                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                    color: 'white',
-                                    }),
-                                    input: (base) => ({
-                                    ...base,
-                                    color: 'white',
-                                    }),
-                                }}
+                                styles={customStyle}
                             />
                         </div>
                     </div>
+                            
+                            
+                    <label className="label-box">
+                        <input type="checkbox" checked={habilitado} onChange={handleCheckboxChange} className="checkbox-envio" /> ¿Envío?
+                    </label>
+
+                    <div className='form-row'>
+
+                            {habilitado && (
+                                <>
+                                <div className="form-col1">
+                                    <label>
+                                        Provincia:
+                                        <button type="button" className="btn-plus" onClick={() => setMostrarModalProvincia(true)}>+</button>
+                                    </label>
+                                    <Select
+                                    className="form-select-react"
+                                    classNamePrefix="rs"
+                                    options={opciones_provincias}
+                                    value={
+                                        opciones_provincias.find(op => op.value === notaPedido.provincia) ||
+                                        null
+                                    }
+                                    onChange={selectChange}
+                                    name="provincia"
+                                    placeholder="Provincia..."
+                                    isClearable
+                                    styles={customStyle}
+                                    />
+                                </div>
+
+                                <div className="form-col1">
+                                    <label>
+                                        Localidad:
+                                        <button type="button" className="btn-plus" onClick={() => setMostrarModalLocalidad(true)}>+</button>
+                                    </label>
+                                    <Select
+                                    className="form-select-react"
+                                    classNamePrefix="rs"
+                                    options={opciones_localidades}
+                                    value={
+                                        opciones_localidades.find(op => op.value === notaPedido.localidad) ||
+                                        null
+                                    }
+                                    onChange={selectChange}
+                                    name="localidad"
+                                    placeholder="Localidad..."
+                                    isClearable
+                                    styles={customStyle}
+                                    />
+                                </div>
+
+                                <div className="form-col1">
+                                    <label>
+                                        Barrio:
+                                        <button type="button" className="btn-plus" onClick={() => setMostrarModalBarrio(true)}>+</button>
+                                    </label>
+                                    <Select
+                                    className="form-select-react"
+                                    classNamePrefix="rs"
+                                    options={opciones_barrios}
+                                    value={
+                                        opciones_barrios.find(op => op.value === notaPedido.barrio) || null
+                                    }
+                                    onChange={selectChange}
+                                    name="barrio"
+                                    placeholder="Barrio..."
+                                    isClearable
+                                    styles={customStyle}
+                                    />
+                                </div>
+
+                                <div className="form-col1">
+                                    <label>
+                                        Calle:
+                                        <button type="button" className="btn-plus" onClick={() => setMostrarModalCalle(true)}>+</button>
+                                    </label>
+                                    <Select
+                                    className="form-select-react"
+                                    classNamePrefix="rs"
+                                    options={opciones_calles}
+                                    value={
+                                        opciones_calles.find(op => op.value === notaPedido.calle) || null
+                                    }
+                                    onChange={selectChange}
+                                    name="calle"
+                                    placeholder="Calle..."
+                                    isClearable
+                                    styles={customStyle}
+                                    />
+                                </div>
+
+                                <div className="form-col1">
+                                    <label>Altura:</label>
+                                    <input
+                                    type="number"
+                                    onChange={inputChange}
+                                    value={notaPedido.altura}
+                                    name="altura"
+                                    placeholder="Altura"
+                                    required
+                                    />
+                                </div>
+
+                                <div className="form-col1">
+                                    <label>Depto. N°:</label>
+                                    <input
+                                    type="number"
+                                    onChange={inputChange}
+                                    value={notaPedido.deptoNumero}
+                                    name="deptoNumero"
+                                    placeholder="Depto. N°"
+                                    />
+                                </div>
+
+                                <div className="form-col1">
+                                    <label>Depto. Letra:</label>
+                                    <input
+                                    type="text"
+                                    onChange={inputChange}
+                                    value={notaPedido.deptoLetra}
+                                    name="deptoLetra"
+                                    placeholder="Depto. Letra"
+                                    />
+                                </div>
+                                </>
+                            )}
+                    </div>
+
                     <div className="form-row">
                         <div className="form-col-productos">
                             <label>
@@ -811,38 +895,7 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                                             }
                                             placeholder="Tipo de Producto..."
                                             isClearable
-                                            styles={{
-                                                container: (base) => ({
-                                                    ...base,
-                                                    width: 150,
-                                                }),
-                                                control: (base, state) => ({
-                                                    ...base,
-                                                    width: 150,
-                                                    backgroundColor: '#2c2c2c !important',
-                                                    borderColor: state.isFocused ? '#666' : '#444',
-                                                    borderRadius: 8,
-                                                    color: 'white',
-                                                }),
-                                                menu: (base) => ({
-                                                    ...base,
-                                                    backgroundColor: '#2c2c2c',
-                                                    color: 'white',
-                                                }),
-                                                option: (base, { isFocused }) => ({
-                                                    ...base,
-                                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                                    color: 'white',
-                                                }),
-                                                singleValue: (base) => ({
-                                                    ...base,
-                                                    color: 'white !important',
-                                                }),
-                                                input: (base) => ({
-                                                    ...base,
-                                                    color: 'white !important',
-                                                }),
-                                            }}
+                                            styles={customStyle}
                                         />
                                     </div>
                                     <div className='form-col-item1'>
@@ -856,48 +909,18 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                                             }
                                             placeholder="Producto..."
                                             isClearable
-                                            styles={{
-                                                container: (base) => ({
-                                                    ...base,
-                                                    width: 150,
-                                                }),
-                                                control: (base, state) => ({
-                                                    ...base,
-                                                    width: 150,
-                                                    backgroundColor: '#2c2c2c !important',
-                                                    borderColor: state.isFocused ? '#666' : '#444',
-                                                    borderRadius: 8,
-                                                    color: 'white',
-                                                }),
-                                                menu: (base) => ({
-                                                    ...base,
-                                                    backgroundColor: '#2c2c2c',
-                                                    color: 'white',
-                                                }),
-                                                option: (base, { isFocused }) => ({
-                                                    ...base,
-                                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                                    color: 'white',
-                                                }),
-                                                singleValue: (base) => ({
-                                                    ...base,
-                                                    color: 'white !important',
-                                                }),
-                                                input: (base) => ({
-                                                    ...base,
-                                                    color: 'white !important',
-                                                }),
-                                            }}
+                                            styles={customStyle}
                                         />
                                     </div>
                                     
                                     <div className='form-col-item1'>
                                         <input
                                             type="number"
+                                            title='Cantidad'
                                             placeholder="Cantidad"
                                             min={1}
                                             max={opciones_productos.find((p) => p.value === d.producto)?.stock || 0}
-                                            value={d.cantidad ?? 0}
+                                            value={d.cantidad}
                                             onChange={(e) => handleDetalleChange(i, "cantidad", e.target.value)}
                                             required
                                         />
@@ -923,273 +946,18 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                                 </div>
                                 ))}
                             </div>
-                        </div> 
+                        </div>
+                    </div>
 
 
-                        <div className="form-col-precioVenta">
+                    <div className="form-row">                                                      
                             <div className="form-secondary">
                                 <label>
                                     Fecha de Entrega:
                                 </label>
                                 <input type="date" onChange={inputChange} value={notaPedido.fechaEntrega} name="fechaEntrega" required />
                             </div>
-                            
-                            <div className="form-secondary">
-                                
-                            <label className="label-box">
-                                <input
-                                type="checkbox"
-                                checked={habilitado}
-                                onChange={handleCheckboxChange}
-                                className="checkbox-envio"
-                                />
-                                ¿Envío?
-                            </label>
 
-                            {habilitado && (
-                                <>
-                                <div className="form-col">
-                                    <label>Provincia:</label>
-                                    <Select
-                                    className="form-select-react"
-                                    classNamePrefix="rs"
-                                    options={opciones_provincias}
-                                    value={
-                                        opciones_provincias.find(op => op.value === notaPedido.provincia) ||
-                                        null
-                                    }
-                                    onChange={selectChange}
-                                    name="provincia"
-                                    placeholder="Provincia..."
-                                    isClearable
-                                    styles={{
-                                        container: base => ({
-                                        ...base,
-                                        width: "100%", // ⬅️ ocupa todo el ancho
-                                        }),
-                                        control: base => ({
-                                        ...base,
-                                        width: "100%",
-                                        backgroundColor: "#2c2c2c",
-                                        color: "white",
-                                        border: "1px solid #444",
-                                        borderRadius: 8,
-                                        }),
-                                        singleValue: base => ({
-                                        ...base,
-                                        color: "white",
-                                        whiteSpace: "nowrap",
-                                        overflow: "hidden",
-                                        textOverflow: "ellipsis",
-                                        }),
-                                        menu: base => ({
-                                        ...base,
-                                        backgroundColor: "#2c2c2c",
-                                        color: "white",
-                                        }),
-                                        option: (base, { isFocused }) => ({
-                                        ...base,
-                                        backgroundColor: isFocused ? "#444" : "#2c2c2c",
-                                        color: "white",
-                                        }),
-                                        input: base => ({
-                                        ...base,
-                                        color: "white",
-                                        }),
-                                    }}
-                                    />
-                                </div>
-
-                                <div className="form-col">
-                                    <label>Localidad:</label>
-                                    <Select
-                                    className="form-select-react"
-                                    classNamePrefix="rs"
-                                    options={opciones_localidades}
-                                    value={
-                                        opciones_localidades.find(op => op.value === notaPedido.localidad) ||
-                                        null
-                                    }
-                                    onChange={selectChange}
-                                    name="localidad"
-                                    placeholder="Localidad..."
-                                    isClearable
-                                    styles={{
-                                        container: base => ({
-                                        ...base,
-                                        width: "100%",
-                                        }),
-                                        control: base => ({
-                                        ...base,
-                                        width: "100%",
-                                        backgroundColor: "#2c2c2c",
-                                        color: "white",
-                                        border: "1px solid #444",
-                                        borderRadius: 8,
-                                        }),
-                                        singleValue: base => ({
-                                        ...base,
-                                        color: "white",
-                                        whiteSpace: "nowrap",
-                                        overflow: "hidden",
-                                        textOverflow: "ellipsis",
-                                        }),
-                                        menu: base => ({
-                                        ...base,
-                                        backgroundColor: "#2c2c2c",
-                                        color: "white",
-                                        }),
-                                        option: (base, { isFocused }) => ({
-                                        ...base,
-                                        backgroundColor: isFocused ? "#444" : "#2c2c2c",
-                                        color: "white",
-                                        }),
-                                        input: base => ({
-                                        ...base,
-                                        color: "white",
-                                        }),
-                                    }}
-                                    />
-                                </div>
-
-                                <div className="form-col">
-                                    <label>Barrio:</label>
-                                    <Select
-                                    className="form-select-react"
-                                    classNamePrefix="rs"
-                                    options={opciones_barrios}
-                                    value={
-                                        opciones_barrios.find(op => op.value === notaPedido.barrio) || null
-                                    }
-                                    onChange={selectChange}
-                                    name="barrio"
-                                    placeholder="Barrio..."
-                                    isClearable
-                                    styles={{
-                                        container: base => ({
-                                        ...base,
-                                        width: "100%",
-                                        }),
-                                        control: base => ({
-                                        ...base,
-                                        width: "100%",
-                                        backgroundColor: "#2c2c2c",
-                                        color: "white",
-                                        border: "1px solid #444",
-                                        borderRadius: 8,
-                                        }),
-                                        singleValue: base => ({
-                                        ...base,
-                                        color: "white",
-                                        whiteSpace: "nowrap",
-                                        overflow: "hidden",
-                                        textOverflow: "ellipsis",
-                                        }),
-                                        menu: base => ({
-                                        ...base,
-                                        backgroundColor: "#2c2c2c",
-                                        color: "white",
-                                        }),
-                                        option: (base, { isFocused }) => ({
-                                        ...base,
-                                        backgroundColor: isFocused ? "#444" : "#2c2c2c",
-                                        color: "white",
-                                        }),
-                                        input: base => ({
-                                        ...base,
-                                        color: "white",
-                                        }),
-                                    }}
-                                    />
-                                </div>
-
-                                <div className="form-col">
-                                    <label>Calle:</label>
-                                    <Select
-                                    className="form-select-react"
-                                    classNamePrefix="rs"
-                                    options={opciones_calles}
-                                    value={
-                                        opciones_calles.find(op => op.value === notaPedido.calle) || null
-                                    }
-                                    onChange={selectChange}
-                                    name="calle"
-                                    placeholder="Calle..."
-                                    isClearable
-                                    styles={{
-                                        container: base => ({
-                                        ...base,
-                                        width: "100%",
-                                        }),
-                                        control: base => ({
-                                        ...base,
-                                        width: "100%",
-                                        backgroundColor: "#2c2c2c",
-                                        color: "white",
-                                        border: "1px solid #444",
-                                        borderRadius: 8,
-                                        }),
-                                        singleValue: base => ({
-                                        ...base,
-                                        color: "white",
-                                        whiteSpace: "nowrap",
-                                        overflow: "hidden",
-                                        textOverflow: "ellipsis",
-                                        }),
-                                        menu: base => ({
-                                        ...base,
-                                        backgroundColor: "#2c2c2c",
-                                        color: "white",
-                                        }),
-                                        option: (base, { isFocused }) => ({
-                                        ...base,
-                                        backgroundColor: isFocused ? "#444" : "#2c2c2c",
-                                        color: "white",
-                                        }),
-                                        input: base => ({
-                                        ...base,
-                                        color: "white",
-                                        }),
-                                    }}
-                                    />
-                                </div>
-
-                                <div className="form-col">
-                                    <label>Altura:</label>
-                                    <input
-                                    type="number"
-                                    onChange={inputChange}
-                                    value={notaPedido.altura}
-                                    name="altura"
-                                    placeholder="Altura"
-                                    required
-                                    />
-                                </div>
-
-                                <div className="form-col">
-                                    <label>Depto. N°:</label>
-                                    <input
-                                    type="number"
-                                    onChange={inputChange}
-                                    value={notaPedido.deptoNumero}
-                                    name="deptoNumero"
-                                    placeholder="Depto. N°"
-                                    />
-                                </div>
-
-                                <div className="form-col">
-                                    <label>Depto. Letra:</label>
-                                    <input
-                                    type="text"
-                                    onChange={inputChange}
-                                    value={notaPedido.deptoLetra}
-                                    name="deptoLetra"
-                                    placeholder="Depto. Letra"
-                                    />
-                                </div>
-                                </>
-                            )}
-                            </div>
                             <div className="form-secondary">
                                     <label className="label-box">
                                         <input
@@ -1207,7 +975,7 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                                         onChange={inputChange}
                                         name='descuento'
                                         value={notaPedido.descuento}
-                                        placeholder="Escriba aquí el descuento ..."
+                                        placeholder="% de descuento ..."
                                         className="input-secondary"
                                         />
                                     )}
@@ -1221,9 +989,9 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                                     name="total"
                                     disabled
                                     />
+                                    
 
-                                <div className="form-submit">
-                                    <button
+                                <button
                                     type="submit"
                                     className="submit-btn"
                                     onClick={(e) => {
@@ -1236,28 +1004,33 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                                     }}
                                     >
                                     Guardar
-                                    </button>
-                                </div>
+                                </button>
                             </div>
-                        </div>
+                          
+                        
                     </div>
                 </form>
             </div>
-             <style jsx>
-                {`
-                        .modal {
-                            position: fixed;
-                            top: 0;
-                            left: 0;
+            <style jsx>
+                {` 
+
+                        button.submit-btn {
+                            padding: 0.75rem 1rem;
+                            background-color: #8B0000;
+                            color: #fff;
+                            border: none;
+                            border-radius: 8px;
+                            font-size: 1rem;
+                            font-weight: 600;
+                            cursor: pointer;
                             width: 100%;
-                            height: 100%;
-                            background-color: rgba(0,0,0,0.5); /* oscurece fondo */
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            z-index: 1000;
+                            transition: background-color 0.3s ease;
                         }
-                        
+
+                        button.submit-btn:hover {
+                            background-color: rgb(115, 8, 8);
+                            transform: translateY(-3px);
+                        }                   
 
 
                         .close {
@@ -1290,19 +1063,6 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                         transform: translateY(-3px);
                         }
 
-                        .modal-content {
-                            background-color: #121212;
-                            padding: 40px;
-                            border-radius: 12px;
-                            width: 90%;
-                            height:80%;
-                            max-width: 500px;
-                            max-height: 800px;
-                            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                            position: relative;
-                            margin: 20px;
-                        }
-
                         .form-container {
                             background-color: #1f1f1f;
                             color: #fff;
@@ -1332,15 +1092,13 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                             display: flex;
                             flex-wrap: wrap;
                             gap: 1.5rem;
-                        }
-
-                        
+                        }                        
 
                         .form-col-productos {
-                            flex: 8;
                             min-width: 0; /* Importante para que no desborde */
                             display: flex;
                             flex-direction: column;
+                            width: 100%;
                         }
                             
                         .form-col-item1 {
@@ -1404,27 +1162,37 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                             flex-direction: column;
                             gap: 1rem;
                             height: 100%;
-                            overflow-y: auto;
                             padding-right: 8px;
                         }
 
                         .presupuesto-item {
-                            display: flex;
-                            align-items: center;
-                            gap: 1rem;
-                            flex-wrap: wrap;
-                        }
+                        display: flex;
+                        align-items: center;
+                        gap: 1rem;
+                        flex-wrap: wrap;
+
+                        width: 80%;        /* ← NUEVO */
+                        margin: 0 auto;    /* ← Centra el bloque */
+                    }
+
 
                         .presupuesto-item input[type="number"] {
                             width: 80px;
                         }
 
                         .form-secondary {
-                            display: grid;
-                            grid-template-columns: repeat(2, 1fr); /* 2 columnas */
-                            gap: 16px;
-                            margin-top: 12px;
+                                display: grid;
+                                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                                gap: 1rem;
+                                padding: 1rem;
+                                background-color: #1e1e1e;
+                                border-radius: 12px;
+                                box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+                                font-family: 'Segoe UI', sans-serif;
+                                color: #f0f0f0;
+                                width: 100%;
                             }
+
 
                             .form-col,
                             .form-group {
@@ -1437,7 +1205,7 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                             .form-group {
                             display: flex;
                             flex-direction: column;
-                            width: 250;
+                            max-width: 200;
                             }
 
                             .form-col label,
@@ -1473,7 +1241,7 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                         }
 
                         .btn-add-producto {
-                            background-color: #651616ff;
+                            background-color: #8B0000;
                             color: white;
                             border: none;
                             padding: 0.5rem 1rem;
@@ -1488,41 +1256,28 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                             transform: translateY(-3px);
                         }
 
-                        .form-submit {
-                            justify-content: center;
-                            margin-top: 1rem;
+                        .input-secondary {
+                            padding: 0.65rem 1rem;
+                            font-size: 1rem;
+                            border-radius: 8px;
+                            border: 1px solid #ccc;
+                            background-color: #f9f9f9;
+                            color: #333;
+                            transition: border-color 0.3s, box-shadow 0.3s;
                         }
 
                         .submit-btn {
-                            background-color: #651616ff;
+                            background-color: #8B0000;;
                             color: white;
-                            border: none;
-                            padding: 0.8rem 1.5rem;
+                            padding: 0.65rem 1rem;
                             font-size: 1rem;
                             border-radius: 10px;
                             cursor: pointer;
-                            transition: background-color 0.2s ease-in-out;
+                            transition: border-color 0.3s, box-shadow 0.3s;
                         }
 
                         .submit-btn:hover {
                             background-color: #571212ff;
-                            transform: translateY(-3px);
-                        }
-
-                        button.submit-btn {
-                            padding: 0.75rem 1rem;
-                            background-color: #8B0000;
-                            color: #fff;
-                            border: none;
-                            border-radius: 8px;
-                            font-size: 1rem;
-                            font-weight: 600;
-                            cursor: pointer;
-                            transition: background-color 0.3s ease;
-                        }
-
-                        button.submit-btn:hover {
-                            background-color: rgb(115, 8, 8);
                             transform: translateY(-3px);
                         }
                         
@@ -1551,7 +1306,7 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                         .form-secondary {
                             display: flex;
                             flex-direction: column;
-                            gap: 0.75rem;
+                            gap: 0.5rem;
                             padding: 1rem;
                             background-color: #1e1e1e;
                             border-radius: 12px;
@@ -1573,22 +1328,6 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                             width: 18px;
                             height: 18px;
                             accent-color: #8B0000; /* color vino para el checkbox */
-                        }
-
-                        .input-secondary {
-                            padding: 0.65rem 1rem;
-                            font-size: 1rem;
-                            border-radius: 8px;
-                            border: 1px solid #ccc;
-                            background-color: #f9f9f9;
-                            color: #333;
-                            transition: border-color 0.3s, box-shadow 0.3s;
-                        }
-
-                        .input-secondary:focus {
-                            border-color: #8B0000;
-                            box-shadow: 0 0 5px rgba(139, 0, 0, 0.6);
-                            outline: none;
                         }
 
                         .form-col label {
@@ -1613,8 +1352,6 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                         .form-col input[type="date"]::-webkit-calendar-picker-indicator {
                             filter: invert(1); /* icono blanco en navegadores webkit */
                         }
-
-
                 `}
             </style>
         </>

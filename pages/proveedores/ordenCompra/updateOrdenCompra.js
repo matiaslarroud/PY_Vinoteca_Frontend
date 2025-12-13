@@ -2,6 +2,11 @@ const { useState, useEffect } = require("react")
 import Select from 'react-select';          
 import { FaTrash} from "react-icons/fa";
 
+import FormularioCreateProvedor from "../createProveedor"
+import FormularioCreateEmpleado from "../../gestion/empleado/createEmpleado"
+import FormularioCreatePresupuesto from "../presupuesto/newPresupuesto"
+import FormularioCreateMedioPago from "../../gestion/tablasVarias/medioPago/createMedioPago"
+
 const { default: Link } = require("next/link")
 
 const initialStateOrdenCompra = {
@@ -315,9 +320,10 @@ const updateOrdenCompra = ({exito , ordenID}) => {
         setOrdenCompra((prev) => ({ ...prev, total:totalPedido }));
     };
 
-    const [mostrarModalCreate1, setMostrarModalCreate1] = useState(false);
-    const [mostrarModalCreate2, setMostrarModalCreate2] = useState(false);
-    const [mostrarModalCreate3, setMostrarModalCreate3] = useState(false);
+    const [mostrarModalProveedor, setMostrarModalProveedor] = useState(false);
+    const [mostrarModalEmpleado, setMostrarModalEmpleado] = useState(false);
+    const [mostrarModalPresupuesto, setMostrarModalPresupuesto] = useState(false);
+    const [mostrarModalMedioPago, setMostrarModalMedioPago] = useState(false);
 
     const opciones_tipoProductos = tipoProductos.map(v => ({
         value: v,
@@ -348,6 +354,62 @@ const updateOrdenCompra = ({exito , ordenID}) => {
 
     return(
         <>
+            {mostrarModalProveedor && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalProveedor(false)}>&times;</button>
+                    <FormularioCreateProvedor
+                    exito={() => {
+                        setMostrarModalProveedor(false);
+                        fetchData_Proveedores();
+                    }}
+                    />
+                </div>
+                </div>
+            )}
+
+            {mostrarModalEmpleado && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalEmpleado(false)}>&times;</button>
+                    <FormularioCreateEmpleado
+                    exito={() => {
+                        setMostrarModalEmpleado(false);
+                        fetchData_Empleados();
+                    }}
+                    />
+                </div>
+                </div>
+            )}
+
+            {mostrarModalPresupuesto && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalPresupuesto(false)}>&times;</button>
+                    <FormularioCreatePresupuesto
+                    exito={() => {
+                        setMostrarModalPresupuesto(false);
+                        fetchData_Presupuestos();
+                    }}
+                    />
+                </div>
+                </div>
+            )}
+
+            {mostrarModalMedioPago && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalMedioPago(false)}>&times;</button>
+                    <FormularioCreateMedioPago
+                    exito={() => {
+                        setMostrarModalMedioPago(false);
+                        fetchData_MediosPago();
+                    }}
+                    />
+                </div>
+                </div>
+            )}
+            
             <div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
@@ -360,6 +422,7 @@ const updateOrdenCompra = ({exito , ordenID}) => {
                         <div className="form-col1">
                             <label>
                                 Proveedor:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalProveedor(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -412,6 +475,7 @@ const updateOrdenCompra = ({exito , ordenID}) => {
                         <div className="form-col1">
                             <label>
                                 Empleado:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalEmpleado(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -464,6 +528,7 @@ const updateOrdenCompra = ({exito , ordenID}) => {
                         <div className="form-col1">
                             <label>
                                 Presupuesto:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalPresupuesto(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -516,6 +581,7 @@ const updateOrdenCompra = ({exito , ordenID}) => {
                         <div className="form-col1">
                             <label>
                                 Medio de Pago:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalMedioPago(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -699,9 +765,8 @@ const updateOrdenCompra = ({exito , ordenID}) => {
                                 ))}
                             </div>
                         </div> 
-
-
-                        <div className="form-col-precioVenta">
+                    </div>
+                    <div className="form-row">
                             <div className="form-secondary">
                                 <label>
                                     Fecha de Entrega:
@@ -738,24 +803,10 @@ const updateOrdenCompra = ({exito , ordenID}) => {
                                 </div>
                             </div>
                         </div>
-                    </div>
                 </form>
             </div>
             <style jsx>
                 {`
-                        .modal {
-                            position: fixed;
-                            top: 0;
-                            left: 0;
-                            width: 100%;
-                            height: 100%;
-                            background-color: rgba(0,0,0,0.5); /* oscurece fondo */
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            z-index: 1000;
-                        }   
-
                         button.submit-btn {
                             padding: 0.75rem 1rem;
                             background-color: #8B0000;
@@ -803,19 +854,6 @@ const updateOrdenCompra = ({exito , ordenID}) => {
                         .btn-icon:hover {
                         background-color: #a30000;
                         transform: translateY(-3px);
-                        }
-
-                        .modal-content {
-                            background-color: #121212;
-                            padding: 40px;
-                            border-radius: 12px;
-                            width: 90%;
-                            height:80%;
-                            max-width: 500px;
-                            max-height: 800px;
-                            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                            position: relative;
-                            margin: 20px;
                         }
 
                         .form-container {

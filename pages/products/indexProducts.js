@@ -4,7 +4,7 @@ import { FaHome } from "react-icons/fa";
 export default function indexGestion() {
   return (
   <>
-  <h1 className="titulo-pagina">Productos</h1>
+  <h1 className="titulo-index">Productos</h1>
   <div className="botonera">
     <button className="btn-icon"title="Volver al menú">
       <Link href="/" >
@@ -63,15 +63,6 @@ export default function indexGestion() {
     .btn-icon:hover {
       background-color: #a30000;
       transform: translateY(-3px);
-    }
-
-    .titulo-pagina {
-      font-size: 3rem;
-      color: white;
-      text-align: center;
-      margin-top: 60px;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);
     }
     .menu-grid {
       display: grid;

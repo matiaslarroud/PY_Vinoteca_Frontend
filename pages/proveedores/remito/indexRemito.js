@@ -195,7 +195,7 @@ const indexRemito = () => {
                 </div>
             )}
 
-            <h1 className="titulo-pagina">Remito</h1>
+            <h1 className="titulo-index">Remito</h1>
             
             <div className="botonera">
                 <button className="btn-icon" onClick={() => router.back()} title="Volver atrás">

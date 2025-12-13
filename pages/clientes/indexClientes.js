@@ -265,7 +265,7 @@ const deleteCliente = async (clienteID) => {
     </div>
   )}
 
-  <h1 className="titulo-pagina">Clientes</h1>
+  <h1 className="titulo-index">Clientes</h1>
   <div className="botonera">
         <button className="btn-icon" onClick={() => router.back()} title="Volver atrás">
             <FaArrowLeft />
@@ -294,18 +294,20 @@ const deleteCliente = async (clienteID) => {
                   <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
                   <th onClick={() => toggleOrden('name')}>Nombre ⬍</th>
                   <th onClick={() => toggleOrden('cuentaCorriente')}>Cuenta Corriente ⬍</th>
+                  <th onClick={() => toggleOrden('saldoActual')}>Saldo Actual ⬍</th>
                   <th onClick={() => toggleOrden('localidad')}>Localidad ⬍</th>
                   <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {
-                clientesFiltrados.map(({_id,name , cuentaCorriente, localidad}) => {
+                clientesFiltrados.map(({_id,name , cuentaCorriente, localidad, saldoActualCuentaCorriente}) => {
                   const localidadEncontrada = localidades.find((p)=>{return p._id === localidad })
                   return <tr key={_id}>
                       <td className="columna">{_id}</td>
                       <td className="columna">{name}</td>
                       <td className="columna">{cuentaCorriente ? "SI" : "NO"}</td>
+                      <td className="columna">{saldoActualCuentaCorriente ? saldoActualCuentaCorriente : "-"}</td>
                       <td className="columna">{localidadEncontrada?.name}</td>
                       <td className="columna">
                         <div className="acciones">

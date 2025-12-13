@@ -1,6 +1,7 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';
 import { FaTrash} from "react-icons/fa";
+
 import FormularioDepositoCreate from '../../gestion/deposito/createDeposito'
 import FormularioInsumoCreate from '../../products/insumos/createInsumo'
 
@@ -167,21 +168,21 @@ const formProducto = ({exito}) => {
         setDetalles([...detalles, { ...{picada:'',insumo:'', cantidad:0} }]);
     };
 
-    const [mostrarModalCreate2, setMostrarModalCreate2] = useState(false);
-    const [mostrarModalCreate3, setMostrarModalCreate3] = useState(false);
+    const [mostrarModalInsumo, setMostrarModalInsumo] = useState(false);
+    const [mostrarModalDeposito, setMostrarModalDeposito] = useState(false);
 
     const opciones_insumos = insumos.map(v => ({ value: v._id,label: v.name , stock: v.stock }));
     const opciones_depositos = depositos.map(v => ({ value: v._id,label: v.name }));
 
     return(
         <>
-            {mostrarModalCreate2 && (
+            {mostrarModalDeposito && (
                 <div className="modal">
                 <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate2(false)}>&times;</button>
+                    <button className="close" onClick={() => setMostrarModalDeposito(false)}>&times;</button>
                     <FormularioDepositoCreate
                     exito={() => {
-                        setMostrarModalCreate2(false);
+                        setMostrarModalDeposito(false);
                         fetch_Depositos();
                     }}
                     />
@@ -189,13 +190,13 @@ const formProducto = ({exito}) => {
                 </div>
             )}
 
-            {mostrarModalCreate3 && (
+            {mostrarModalInsumo && (
                 <div className="modal">
                 <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate3(false)}>&times;</button>
+                    <button className="close" onClick={() => setMostrarModalInsumo(false)}>&times;</button>
                     <FormularioInsumoCreate
                     exito={() => {
-                        setMostrarModalCreate3(false);
+                        setMostrarModalInsumo(false);
                         fetch_Insumos();
                     }}
                     />
@@ -238,7 +239,7 @@ const formProducto = ({exito}) => {
                         <div className="form-col">
                             <label>
                                 Depósito:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate2(true)}>+</button>
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalDeposito(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -293,10 +294,12 @@ const formProducto = ({exito}) => {
                         <div className="form-col-productos">
                             <label>
                                     Insumos:
-                                    <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
-                                    <button type="button" className="btn-add-insumo" onClick={agregarDetalle}>
-                                        + Agregar Insumo
-                                    </button>
+                                    <button type="button" className="btn-plus" onClick={() => setMostrarModalInsumo(true)}>+</button>
+                            </label>
+                            <label>
+                                <button type="button" className="btn-add-insumo" onClick={agregarDetalle}>
+                                    + Agregar Insumo
+                                </button>
                             </label>
                          <div className="form-group-insumos">
                                 
@@ -380,8 +383,10 @@ const formProducto = ({exito}) => {
                                 ))}
                             </div>
                         </div>
-                        <div className="form-col-precioVenta">
-                            <div className="box-cargar" >
+                    </div>                  
+
+                    <div className="form-row">
+                        <div className="form-col">
                                 <label htmlFor="precioVenta">Precio venta:
                                     <input
                                         type="number"
@@ -392,11 +397,7 @@ const formProducto = ({exito}) => {
                                         disabled
                                     />
                                 </label>
-                            </div>
                         </div>
-                    </div>                  
-
-                    <div className="form-row">
                         <div className="form-col">
                             <label>Fotos del producto:</label>
                             <input
@@ -596,32 +597,6 @@ const formProducto = ({exito}) => {
                     .submit-btn:hover {
                         background-color: #8b0000;
                         transform: translateY(-3px);
-                    }
-                        
-                    .modal {
-                        position: fixed;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: rgba(0,0,0,0.5); /* oscurece fondo */
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        z-index: 1000;
-                    }
-
-                    .modal-content {
-                        background-color: #121212;
-                        padding: 40px;
-                        border-radius: 12px;
-                        width: 90%;
-                        height:80%;
-                        max-width: 500px;
-                        max-height: 800px;
-                        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                        position: relative;
-                        margin: 20px;
                     }
 
                     .close {

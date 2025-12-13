@@ -1,12 +1,16 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';     
 
+import FormularioCreateCondicionIva from "../iva/createCondicionIva"
+
 const { default: Link } = require("next/link")
 
 const initialState = {name:'', tipoIva:''}
 const createTipo = ({exito}) => {
     const [tipo , setTipo] = useState(initialState);
     const [ivas, setIvas] = useState([]);
+
+    const [mostrarModalCondicionIva , setMostrarModalCondicionIva] = useState(false)
     
     const inputChange = (e) => {
         const value = e.target.value;
@@ -74,6 +78,32 @@ const createTipo = ({exito}) => {
     const opciones_tiposIva  = ivas.map(v => ({ value: v._id,label: v.name}))
     return(
         <>
+
+            {mostrarModalCondicionIva && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => 
+                        {
+                            setMostrarModalCondicionIva(null)
+                        }
+                    }>
+                        &times;
+                    </button>
+                    <FormularioCreateCondicionIva
+                        exito={() => 
+                            {
+                                setMostrarModalCondicionIva(false)
+                                fetchData_Iva()
+                            }}
+                    />
+                </div>
+                </div>
+            )}
+
+
+            
+            
+            
             <div className="form-container">
                 <h1 className="titulo-pagina">Cargar Tipo de Comprobante</h1>
                 <form id="formC">
@@ -90,7 +120,10 @@ const createTipo = ({exito}) => {
                       />
                     </div>
                     <div className="form-group input-centered">
-                      <label htmlFor="nombre">Tipo de Iva:</label>
+                      <label>
+                        Tipo de Iva: 
+                        <button type="button" className="btn-plus" onClick={() => setMostrarModalCondicionIva(true)}>+</button>
+                      </label>
                       <Select
                         className="form-select-react"
                         classNamePrefix="rs"
@@ -244,6 +277,19 @@ const createTipo = ({exito}) => {
     .form-group select {
       width: 100%;
     }
+  }
+
+  .btn-plus {
+      background-color: transparent;
+      color: #651616ff;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+  }
+
+  .btn-plus:hover {
+      color: #571212ff;
+      transform: translateY(-3px);
   }
 `}</style>
 

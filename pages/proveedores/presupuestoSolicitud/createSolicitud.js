@@ -2,6 +2,9 @@ const { useState, useEffect } = require("react")
 import Select from 'react-select';          
 import { FaTrash} from "react-icons/fa";
 
+import FormularioCreateProveedor from "../createProveedor"
+import FormularioCreateEmpleado from "../../gestion/empleado/createEmpleado"
+
 const { default: Link } = require("next/link")
 
 const initialStatePresupuesto = {proveedor:'', empleado:''}
@@ -169,6 +172,9 @@ const createPresupuesto = ({exito , tipo , param}) => {
     const agregarDetalle = () => {
         setDetalles([...detalles, { ...{tipoProducto:"",producto: "", cantidad: 0 } }]);
     };
+
+    const [mostrarModalProveedor, setMostrarModalCreateProveedor] = useState(false)
+    const [mostrarModalEmpleado, setMostrarModalCreateEmpleado] = useState(false)
     
 
     const opciones_tipoProductos = tipoProductos.map(v => ({
@@ -189,7 +195,50 @@ const createPresupuesto = ({exito , tipo , param}) => {
 
     return(
         <>
+            
+            {mostrarModalEmpleado && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="close" onClick={() => 
+                            {
+                                setMostrarModalCreateEmpleado(false)
+                            }
+                        }>
+                            &times;
+                        </button>
+                        <FormularioCreateEmpleado
+                            exito={() => 
+                                {
+                                    setMostrarModalCreateEmpleado(null)
+                                    fetchData_Empleados()
+                                }}
+                        />
+                    </div>
+                </div>
+            )}
+            
+            {mostrarModalProveedor && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="close" onClick={() => 
+                            {
+                                setMostrarModalCreateProveedor(false)
+                            }
+                        }>
+                            &times;
+                        </button>
+                        <FormularioCreateProveedor
+                            exito={() => 
+                                {
+                                    setMostrarModalCreateProveedor(null)
+                                    fetchData_Proveedores()
+                                }}
+                        />
+                    </div>
+                </div>
+            )}
 
+            
 
             <div className="form-container">
                 <h1 className="titulo-pagina">Cargar Solicitud de Presupuesto</h1>
@@ -199,7 +248,6 @@ const createPresupuesto = ({exito , tipo , param}) => {
                         <div className="form-col">
                             <label>
                                 Proveedor:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -253,7 +301,7 @@ const createPresupuesto = ({exito , tipo , param}) => {
                         <div className="form-col">
                             <label>
                                 Empleado:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate2(true)}>+</button>
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreateEmpleado(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"

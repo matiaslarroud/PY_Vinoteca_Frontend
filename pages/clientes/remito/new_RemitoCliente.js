@@ -1,6 +1,8 @@
 const { useState, useEffect, use } = require("react")
 import Select from 'react-select';     
 
+import FormularioCreateTransporte from "../../gestion/transporte/createTransporte"
+
 const { default: Link } = require("next/link")
 
 const initialState = {cliente:'',totalPrecio:0, totalBultos:0, fecha:'', comprobanteVentaID:'', transporteID:'', entregado:false}
@@ -278,9 +280,24 @@ const newRemitoCliente = ({exito}) => {
         value: v._id, label: v.name
     }));
    
+    const [mostrarModalTransporteCreate , setMostrarModalTransporteCreate] = useState(false)
 
     return(
         <>
+            {mostrarModalTransporteCreate && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalTransporteCreate(false)}>&times;</button>
+                    <FormularioCreateTransporte
+                    exito={() => {
+                        setMostrarModalTransporteCreate(false);
+                        fetchData_Transporte();
+                    }}
+                    />
+                </div>
+                </div>
+            )}
+
             <div className="form-container">
                 <h1 className="titulo-pagina">Cargar Remito</h1>
                 <form id="formProducto" className="formulario-presupuesto">
@@ -392,6 +409,7 @@ const newRemitoCliente = ({exito}) => {
                         <div className="form-col">
                             <label>
                                 Transporte:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalTransporteCreate(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -609,19 +627,6 @@ const newRemitoCliente = ({exito}) => {
             </div>
             <style jsx>
                 {`
-                        .modal {
-                            position: fixed;
-                            top: 0;
-                            left: 0;
-                            width: 100%;
-                            height: 100%;
-                            background-color: rgba(0,0,0,0.5); /* oscurece fondo */
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            z-index: 1000;
-                        }
-
                         button.submit-btn {
                             width:100%
                         }
@@ -654,19 +659,6 @@ const newRemitoCliente = ({exito}) => {
                         .btn-icon:hover {
                         background-color: #a30000;
                         transform: translateY(-3px);
-                        }
-
-                        .modal-content {
-                            background-color: #121212;
-                            padding: 40px;
-                            border-radius: 12px;
-                            width: 90%;
-                            height:80%;
-                            max-width: 500px;
-                            max-height: 800px;
-                            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                            position: relative;
-                            margin: 20px;
                         }
 
                         .form-container {

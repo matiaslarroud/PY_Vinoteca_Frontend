@@ -142,7 +142,6 @@ const buscarPicada = ({ exito, filtro, onChangeFiltro }) => {
                         <div className="form-col">
                             <label>
                                 Depósito:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate2(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -197,7 +196,6 @@ const buscarPicada = ({ exito, filtro, onChangeFiltro }) => {
                         <div className="form-col-productos">
                             <label>
                                     Insumos:
-                                    <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
                                     <button type="button" className="btn-add-insumo" onClick={agregarDetalle}>
                                         + Agregar Insumo
                                     </button>

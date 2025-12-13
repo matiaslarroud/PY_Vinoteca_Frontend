@@ -1,9 +1,6 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';          
 import { FaTrash} from "react-icons/fa";
-// import FormularioEmpleadoCreate from '../../gestion/general/empleado/createEmpleado'
-// import FormularioClienteCreate from '../createCliente'
-// import FormularioMedioPagoCreate from '../../gestion/general/medioPago/createMedioPago'
 
 const { default: Link } = require("next/link")
 
@@ -259,10 +256,6 @@ const createComprobanteCompra = ({exito , ordenID}) => {
         setComprobanteCompra((prev) => ({ ...prev, total:totalPedido }));
     };
 
-    const [mostrarModalCreate1, setMostrarModalCreate1] = useState(false);
-    const [mostrarModalCreate2, setMostrarModalCreate2] = useState(false);
-    const [mostrarModalCreate3, setMostrarModalCreate3] = useState(false);
-
     const opciones_tipoProductos = tipoProductos.map(v => ({
         value: v,
         label: v === "ProductoVino" ? "Vino" :
@@ -289,50 +282,7 @@ const createComprobanteCompra = ({exito , ordenID}) => {
     );
 
     return(
-        <>
-            {mostrarModalCreate1 && (
-                <div className="modal">
-                <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate1(false)}>&times;</button>
-                    <FormularioMedioPagoCreate
-                    exito={() => {
-                        setMostrarModalCreate1(false);
-                        fetchData_MediosPago();
-                    }}
-                    />
-                </div>
-            </div>
-            )}
-            {mostrarModalCreate2 && (
-                <div className="modal">
-                <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate2(false)}>&times;</button>
-                    <FormularioEmpleadoCreate
-                    exito={() => {
-                        setMostrarModalCreate2(false);
-                        fetchData_Empleados();
-                    }}
-                    />
-                </div>
-                </div>
-            )}
-
-            {/* {mostrarModalCreate3 && (
-                <div className="modal">
-                <div className="modal-content">
-                    <button className="close" onClick={() => setMostrarModalCreate3(false)}>&times;</button>
-                    <FormularioClienteCreate
-                    exito={() => {
-                        setMostrarModalCreate3(false);
-                        fetchData_Clientes();
-                    }}
-                    />
-                </div>
-                </div>
-            )} */}
-
-
-            <div className="form-container">
+        <><div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
                         <h1 className="titulo-pagina">Cargar Comprobante de Compra</h1>
@@ -344,7 +294,6 @@ const createComprobanteCompra = ({exito , ordenID}) => {
                         <div className="form-col1">
                             <label>
                                 Proveedor:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"

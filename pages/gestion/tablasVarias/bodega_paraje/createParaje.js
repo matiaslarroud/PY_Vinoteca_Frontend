@@ -1,9 +1,16 @@
 const { useState, useEffect } = require("react")
 import Select from "react-select";
 
+import Formulario_Pais from '../pais/createPais'
+import Formulario_Provincia from '../provincia/createProvincia'
+import Formulario_Localidad from '../localidad/createLocalidad'
+import Formulario_Barrio from '../barrio/createBarrio'
+import Formulario_Calle from '../calle/createCalle'
+import Formulario_Bodega from '../bodega/createBodega'
+
 const { default: Link } = require("next/link")
 
-const initialState = {name:'', bodega:0, pais:0, provincia:0,localidad:0,barrio:0,calle:0, altura:0}
+const initialState = {name:'', bodega:0, pais:0, provincia:0,localidad:0,barrio:0,calle:0}
 const formParaje = ({exito}) => {
     const [paraje , setParaje] = useState(initialState);
     const [bodegas,setBodegas] = useState([]);
@@ -117,6 +124,13 @@ const formParaje = ({exito}) => {
                 .catch((err) => {console.log('❌ Error al enviar datos. \n Error: ',err)})
     }
 
+    const [mostrarPais , setMostrarPais] = useState(false)
+    const [mostrarProvincia , setMostrarProvincia] = useState(false)
+    const [mostrarLocalidad , setMostrarLocalidad] = useState(false)
+    const [mostrarBarrio , setMostrarBarrio] = useState(false)
+    const [mostrarCalle , setMostrarCalle] = useState(false)
+    const [mostrarBodega , setMostrarBodega] = useState(false)
+
     const opciones_paises = paises.map(v => ({ value: v._id,label: v.name }));
     const opciones_provincias = provincias.filter(a => a.pais === paraje.pais).map(v => ({ value: v._id,label: v.name }));
     const opciones_localidades = localidades.filter(a => a.provincia === paraje.provincia).map(v => ({ value: v._id,label: v.name }));
@@ -163,6 +177,134 @@ const formParaje = ({exito}) => {
 
     return(
        <>
+                            {mostrarPais && (
+                                <div className="modal">
+                                <div className="modal-content">
+                                    <button className="close" onClick={() => 
+                                        {
+                                            setMostrarPais(false)
+                                        }
+                                    }>
+                                        &times;
+                                    </button>
+                                    <Formulario_Pais
+                                        exito={() => 
+                                            {
+                                                setMostrarPais(false)
+                                                paisesData();
+                                            }}
+                                    />
+                                </div>
+                                </div>
+                            )}
+                            {mostrarProvincia && (
+                                <div className="modal">
+                                <div className="modal-content">
+                                    <button className="close" onClick={() => 
+                                        {
+                                            setMostrarProvincia(false)
+                                        }
+                                    }>
+                                        &times;
+                                    </button>
+                                    <Formulario_Provincia
+                                        exito={() => 
+                                            {
+                                                setMostrarProvincia(false)
+                                                provinciasData()
+                                            }}
+                                    />
+                                </div>
+                                </div>
+                            )}
+                
+                            {mostrarLocalidad && (
+                                <div className="modal">
+                                <div className="modal-content">
+                                    <button className="close" onClick={() => 
+                                        {
+                                            setMostrarLocalidad(false)
+                                        }
+                                    }>
+                                        &times;
+                                    </button>
+                                    <Formulario_Localidad
+                                        exito={() => 
+                                            {
+                                                setMostrarLocalidad(false)
+                                                localidadesData()
+                                            }}
+                                    />
+                                </div>
+                                </div>
+                            )}
+                
+                            {mostrarBarrio && (
+                                <div className="modal">
+                                <div className="modal-content">
+                                    <button className="close" onClick={() => 
+                                        {
+                                            setMostrarBarrio(false)
+                                        }
+                                    }>
+                                        &times;
+                                    </button>
+                                    <Formulario_Barrio
+                                        exito={() => 
+                                            {
+                                                setMostrarBarrio(false)
+                                                barriosData()
+                                            }}
+                                    />
+                                </div>
+                                </div>
+                            )}
+                
+                            {mostrarCalle && (
+                                <div className="modal">
+                                <div className="modal-content">
+                                    <button className="close" onClick={() => 
+                                        {
+                                            setMostrarCalle(false)
+                                        }
+                                    }>
+                                        &times;
+                                    </button>
+                                    <Formulario_Calle
+                                        exito={() => 
+                                            {
+                                                setMostrarCalle(false)
+                                                callesData()
+                                            }}
+                                    />
+                                </div>
+                                </div>
+                            )}
+                
+                            {mostrarBodega && (
+                                <div className="modal">
+                                <div className="modal-content">
+                                    <button className="close" onClick={() => 
+                                        {
+                                            setMostrarBodega(false)
+                                        }
+                                    }>
+                                        &times;
+                                    </button>
+                                    <Formulario_Bodega
+                                        exito={() => 
+                                            {
+                                                setMostrarBodega(false)
+                                                bodegasData()
+                                            }}
+                                    />
+                                </div>
+                                </div>
+                            )}
+                
+                            
+                    
+            
     <div className="form-container">
         <h1 className="titulo-pagina">Cargar Paraje</h1>
 
@@ -184,7 +326,10 @@ const formParaje = ({exito}) => {
 
                 {/* BODEGA */}
                 <div className="form-col">
-                    <label>Bodega:</label>
+                    <label>
+                        Bodega:
+                        <button type="button" className="btn-plus" onClick={() => setMostrarBodega(true)}>+</button>
+                    </label>
                     <Select
                         className="form-select-react"
                         classNamePrefix="rs"
@@ -208,7 +353,10 @@ const formParaje = ({exito}) => {
 
                 {/* PAIS */}
                 <div className="form-col">
-                    <label>Pais:</label>
+                    <label>
+                        Pais:
+                        <button type="button" className="btn-plus" onClick={() => setMostrarPais(true)}>+</button>
+                        </label>
                     <Select
                         className="form-select-react"
                         classNamePrefix="rs"
@@ -225,7 +373,10 @@ const formParaje = ({exito}) => {
 
                 {/* PROVINCIA */}
                 <div className="form-col">
-                    <label>Provincia:</label>
+                    <label>
+                        Provincia:
+                        <button type="button" className="btn-plus" onClick={() => setMostrarProvincia(true)}>+</button>
+                        </label>
                     <Select
                         className="form-select-react"
                         classNamePrefix="rs"
@@ -242,7 +393,10 @@ const formParaje = ({exito}) => {
 
                 {/* LOCALIDAD */}
                 <div className="form-col">
-                    <label>Localidad:</label>
+                    <label>
+                        Localidad:
+                        <button type="button" className="btn-plus" onClick={() => setMostrarLocalidad(true)}>+</button>
+                        </label>
                     <Select
                         className="form-select-react"
                         classNamePrefix="rs"
@@ -261,7 +415,10 @@ const formParaje = ({exito}) => {
             <div className="form-row">
                 {/* BARRIO */}
                 <div className="form-col">
-                    <label>Barrio:</label>
+                    <label>
+                        Barrio:
+                        <button type="button" className="btn-plus" onClick={() => setMostrarBarrio(true)}>+</button>
+                        </label>
                     <Select
                         className="form-select-react"
                         classNamePrefix="rs"
@@ -278,7 +435,10 @@ const formParaje = ({exito}) => {
 
                 {/* CALLE */}
                 <div className="form-col">
-                    <label>Calle:</label>
+                    <label>
+                        Calle:
+                        <button type="button" className="btn-plus" onClick={() => setMostrarCalle(true)}>+</button>
+                        </label>
                     <Select
                         className="form-select-react"
                         classNamePrefix="rs"
@@ -402,6 +562,19 @@ const formParaje = ({exito}) => {
             background-color: #a30000;
             transform: translateY(-3px);
         }
+
+    .btn-plus {
+        background-color: transparent;
+        color: #651616ff;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+    }
+
+    .btn-plus:hover {
+        color: #571212ff;
+        transform: translateY(-3px);
+    }
     `}</style>
 </>
 

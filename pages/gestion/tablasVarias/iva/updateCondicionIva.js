@@ -151,12 +151,6 @@ const updateCondicionIva = ({condicionIvaID, exito}) => {
     transition: border-color 0.2s ease-in-out;
   }
 
-  .form-group input:focus,
-  .form-group select:focus {
-    border-color: rgb(115, 8, 8);
-    outline: none;
-  }
-
   button.submit-btn {
     padding: 0.75rem 2rem;
     background-color: #8b0000;

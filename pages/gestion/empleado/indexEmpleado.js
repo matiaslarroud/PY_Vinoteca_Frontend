@@ -134,7 +134,7 @@ const deleteEmpleado = async(empleadoID) => {
   )}
 
 
-  <h1 className="titulo-pagina">Empleados</h1>
+  <h1 className="titulo-index">Empleados</h1>
   <div className="botonera">
     <button className="btn-icon" onClick={() => router.back()} title="Volver atrás">
         <FaArrowLeft />

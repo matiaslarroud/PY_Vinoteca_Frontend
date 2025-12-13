@@ -181,7 +181,7 @@ const indexPicada = () => {
         </div>
         )}
 
-        <h1 className="titulo-pagina">Picadas</h1>
+        <h1 className="titulo-index">Picadas</h1>
 
         <div className="botonera">
           <button className="btn-icon" onClick={() => router.back()} title="Volver atrás">
