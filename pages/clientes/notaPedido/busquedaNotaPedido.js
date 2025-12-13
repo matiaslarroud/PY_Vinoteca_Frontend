@@ -1308,8 +1308,45 @@ const busquedaNotaPedido = ({ exito, filtro, onChangeFiltro , filtroDetalle , on
                         .form-col input[type="date"]::-webkit-calendar-picker-indicator {
                             filter: invert(1); /* icono blanco en navegadores webkit */
                         }
+                            
+                        input[type="date"] {
+                            background-color: #2c2c2c;
+                            color: white;
+                            border: 1px solid #444;
+                            border-radius: 10px;
+                            padding: 0.6rem 0.8rem;
+                            font-size: 1rem;
+                            outline: none;
+                            transition: all 0.25s ease-in-out;
+                            width: 100%;
+                            cursor: pointer;
+                        }
 
+                        /* Ícono del calendario */
+                        input[type="date"]::-webkit-calendar-picker-indicator {
+                            filter: invert(1);
+                            cursor: pointer;
+                            opacity: 0.8;
+                        }
 
+                        input[type="date"]:hover {
+                            border-color: #666;
+                        }
+
+                        input[type="date"]:focus {
+                            border-color: #a56cc1;
+                            box-shadow: 0 0 0 2px rgba(165, 108, 193, 0.3);
+                        }
+
+                        /* Placeholder (algunos navegadores) */
+                        input[type="date"]::-webkit-datetime-edit {
+                            color: #bbb;
+                        }
+
+                        /* Cuando hay valor seleccionado */
+                        input[type="date"]:valid::-webkit-datetime-edit {
+                            color: white;
+                        }
                 `}
             </style>
         </>

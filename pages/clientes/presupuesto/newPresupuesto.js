@@ -658,7 +658,7 @@ const createPresupuesto = ({exito}) => {
                         display: flex;
                         flex-direction: column;
                         gap: 1rem;
-                        height: 100%;
+                        height: 160px;
                         overflow-y: auto;
                         padding-right: 8px;
                     }
