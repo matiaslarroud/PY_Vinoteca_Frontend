@@ -1332,11 +1332,6 @@ const createNotaPedido = ({exito , param , tipo}) => {
                             border-color: #666;
                         }
 
-                        input[type="date"]:focus {
-                            border-color: #a56cc1;
-                            box-shadow: 0 0 0 2px rgba(165, 108, 193, 0.3);
-                        }
-
                         /* Placeholder (algunos navegadores) */
                         input[type="date"]::-webkit-datetime-edit {
                             color: #bbb;

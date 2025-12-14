@@ -1,6 +1,6 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';          
-import { FaTrash} from "react-icons/fa";
+import { FaTrash , FaSearch} from "react-icons/fa";
 
 import FormularioEmpleadoCreate from '../../gestion/empleado/createEmpleado'
 import FormularioClienteCreate from '../createCliente'
@@ -9,6 +9,7 @@ import FormularioProvinciaCreate from "../../gestion/tablasVarias/provincia/crea
 import FormularioLocalidadCreate from "../../gestion/tablasVarias/localidad/createLocalidad"
 import FormularioBarrioCreate from "../../gestion/tablasVarias/barrio/createBarrio"
 import FormularioCalleCreate from "../../gestion/tablasVarias/calle/createCalle"
+import FormularioBusqueedaCliente from "../busquedaCliente"
 
 const { default: Link } = require("next/link")
 
@@ -37,6 +38,7 @@ const newNotaPedido = ({exito}) => {
     const [localidades,setLocalidades] = useState([])
     const [barrios,setBarrios] = useState([])
     const [calles,setCalles] = useState([])
+    const [filtro , setFiltro] = useState(); 
     
     const detallesValidos = detalles.filter(d => d.producto && d.cantidad > 0);
     const puedeGuardar = detallesValidos.length > 0;
@@ -387,6 +389,7 @@ const newNotaPedido = ({exito}) => {
     const [mostrarModalLocalidad, setMostrarModalLocalidad] = useState(false);
     const [mostrarModalBarrio, setMostrarModalBarrio] = useState(false);
     const [mostrarModalCalle, setMostrarModalCalle] = useState(false);
+    const [mostrarModalBusquedaCliente, setMostrarModalBusquedaCliente] = useState(false);
 
     const opciones_tipoProductos = tipoProductos.map(v => ({
         value: v,
@@ -555,6 +558,26 @@ const newNotaPedido = ({exito}) => {
             </div>
             )}
 
+            {mostrarModalBusquedaCliente && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalBusquedaCliente(false)}>&times;</button>
+                    <FormularioBusqueedaCliente
+                    filtro={filtro} 
+                    exito={(resultados) => {
+                    if (resultados.length > 0) {
+                        setClientes(resultados);
+                        setMostrarModalBusquedaCliente(false);
+                    } else {
+                        alert("❌ No se encontraron resultados");
+                    }
+                    }}
+                    onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)}
+                    />
+                </div>
+                </div>
+            )}
+
 
             <div className="form-container">
                 <div className="form-row">
@@ -569,6 +592,7 @@ const newNotaPedido = ({exito}) => {
                             <label>
                                 Cliente:
                                 <button type="button" className="btn-plus" onClick={() => setMostrarModalCliente(true)}>+</button>
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalBusquedaCliente(true)}><FaSearch/></button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -990,6 +1014,7 @@ const newNotaPedido = ({exito}) => {
                         background-color: #a30000;
                         transform: translateY(-3px);
                         }
+                        
 
                         .form-container {
                             background-color: #1f1f1f;
@@ -1303,11 +1328,6 @@ const newNotaPedido = ({exito}) => {
 
                         input[type="date"]:hover {
                             border-color: #666;
-                        }
-
-                        input[type="date"]:focus {
-                            border-color: #a56cc1;
-                            box-shadow: 0 0 0 2px rgba(165, 108, 193, 0.3);
                         }
 
                         /* Placeholder (algunos navegadores) */

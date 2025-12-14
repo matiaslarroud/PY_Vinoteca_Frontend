@@ -1,10 +1,11 @@
 const { useState, useEffect } = require("react")
-import Select from 'react-select';          
-import { FaTrash} from "react-icons/fa";
+import Select from 'react-select';     
+import { FaSearch} from "react-icons/fa";
 
 import FormularioCreateProveedor from "../createProveedor"
 import FormularioCreateComprobanteCompra from "../comprobanteCompra/newComprobanteCompra"
 import FormularioCreateMedioPago from "../../gestion/tablasVarias/medioPago/createMedioPago"
+import FormularioBusquedaProveedor from "../busquedaProveedor"
 
 const { default: Link } = require("next/link")
 
@@ -18,6 +19,9 @@ const newComprobantepago = ({exito}) => {
     const [ordenesCompra , setOrdenesCompra] = useState([])
     const [proveedores,setProveedores] = useState([])
     const [mediosPago,setMediosPago] = useState([])
+
+    const [mostrarModalBusquedaProveedor , setMostrarModalBusquedaProveedor] = useState(false)
+    const [filtro , setFiltro] = useState(false) 
 
     const fetchData_Proveedores = () => {
         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/proveedor`)
@@ -137,6 +141,26 @@ const newComprobantepago = ({exito}) => {
 
     return(
         <>
+
+            {mostrarModalBusquedaProveedor && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalBusquedaProveedor(false)}>&times;</button>
+                    <FormularioBusquedaProveedor
+                    filtro={filtro} 
+                    exito={(resultados) => {
+                    if (resultados.length > 0) {
+                        setProveedores(resultados);
+                        setMostrarModalBusquedaProveedor(false);
+                    } else {
+                        alert("❌ No se encontraron resultados");
+                    }
+                    }}
+                    onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)}
+                    />
+                </div>
+                </div>
+            )}
             {mostrarModalProveedor && (
                 <div className="modal">
                 <div className="modal-content">
@@ -190,6 +214,7 @@ const newComprobantepago = ({exito}) => {
                             <label>
                                 Proveedor:
                                 <button type="button" className="btn-plus" onClick={() => setMostrarModalProveedor(true)}>+</button>
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalBusquedaProveedor(true)}><FaSearch/></button>
                             </label>
                             <Select
                                 className="form-select-react"

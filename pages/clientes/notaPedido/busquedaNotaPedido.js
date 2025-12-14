@@ -1,6 +1,7 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';          
-import { FaTrash} from "react-icons/fa";
+import { FaTrash , FaSearch} from "react-icons/fa";
+import FormularioBusqueedaCliente from "../busquedaCliente"
 
 const { default: Link } = require("next/link")
 
@@ -270,6 +271,7 @@ const busquedaNotaPedido = ({ exito, filtro, onChangeFiltro , filtroDetalle , on
         console.error('Error de red al cargar detalles del presupuesto:', error);
     }
 };
+    const [mostrarModalBusquedaCliente, setMostrarModalBusquedaCliente] = useState(false);
 
     
     const calcularTotal = (detalles) => {
@@ -319,7 +321,8 @@ const busquedaNotaPedido = ({ exito, filtro, onChangeFiltro , filtroDetalle , on
 
     return(
         <>
-            <div className="form-container">
+
+           <div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
                         <h1 className="titulo-pagina">Busqueda Avanzada de Nota Pedido</h1>
@@ -1331,11 +1334,6 @@ const busquedaNotaPedido = ({ exito, filtro, onChangeFiltro , filtroDetalle , on
 
                         input[type="date"]:hover {
                             border-color: #666;
-                        }
-
-                        input[type="date"]:focus {
-                            border-color: #a56cc1;
-                            box-shadow: 0 0 0 2px rgba(165, 108, 193, 0.3);
                         }
 
                         /* Placeholder (algunos navegadores) */

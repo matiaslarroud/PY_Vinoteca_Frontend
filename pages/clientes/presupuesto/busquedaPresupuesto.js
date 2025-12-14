@@ -1,6 +1,7 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';          
-import { FaTrash} from "react-icons/fa";
+import { FaTrash , FaSearch} from "react-icons/fa";
+import FormularioBusqueedaCliente from "../busquedaCliente"
 
 const { default: Link } = require("next/link")
 
@@ -14,6 +15,8 @@ const busquedaPresupuesto = ({ exito, filtro, onChangeFiltro , filtroDetalle , o
     const [detalles,setDetalles] = useState([])
     const [productos,setProductos] = useState([]);
     const [tipoProductos,setTipoProductos] = useState([]);
+    
+    const [mostrarModalBusquedaCliente, setMostrarModalBusquedaCliente] = useState(false);
         
     const [filtros, setFiltros] = useState(filtro);
     
@@ -151,7 +154,8 @@ const busquedaPresupuesto = ({ exito, filtro, onChangeFiltro , filtroDetalle , o
 
     return(
         <>
-        <div className="form-container">
+
+            <div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
                         <h1 className="titulo-pagina">Busqueda Avanzada de Presupuesto</h1>

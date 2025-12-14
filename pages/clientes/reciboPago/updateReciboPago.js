@@ -1,9 +1,10 @@
 const { useState, useEffect } = require("react")
-import Select from 'react-select';          
-import { FaTrash} from "react-icons/fa";
+import Select from 'react-select';    
+import { FaTrash , FaSearch} from "react-icons/fa";
 import FormularioEmpleadoCreate from '../../gestion/empleado/createEmpleado'
 import FormularioClienteCreate from '../createCliente'
 import FormularioMedioPagoCreate from '../../gestion/tablasVarias/medioPago/createMedioPago'
+import FormularioBusqueedaCliente from "../busquedaCliente"
 
 const { default: Link } = require("next/link")
 
@@ -16,6 +17,8 @@ const updateReciboPago = ({exito , reciboPagoID}) => {
     
     const [clientes,setClientes] = useState([])
     const [mediosPago,setMediosPago] = useState([])
+    const [filtro , setFiltro] = useState(); 
+    const [mostrarModalBusquedaCliente, setMostrarModalBusquedaCliente] = useState(false);
 
     const fetchData_Clientes = () => {
         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente`)
@@ -129,6 +132,29 @@ const updateReciboPago = ({exito , reciboPagoID}) => {
                 </div>
             )}
 
+            {mostrarModalBusquedaCliente && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalBusquedaCliente(false)}>&times;</button>
+                    <FormularioBusqueedaCliente
+                    filtro={filtro} 
+                    exito={(resultados) => {
+                    if (resultados.length > 0) {
+                        setClientes(resultados);
+                        setMostrarModalBusquedaCliente(false);
+                    } else {
+                        alert("❌ No se encontraron resultados");
+                    }
+                    }}
+                    onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)}
+                    />
+                </div>
+                </div>
+            )}
+
+
+            
+
 
             <div className="form-container">
                 
@@ -140,6 +166,7 @@ const updateReciboPago = ({exito , reciboPagoID}) => {
                             <label>
                                 Cliente:
                                 <button type="button" className="btn-plus" onClick={() => setMostrarModalCreate3(true)}>+</button>
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalBusquedaCliente(true)}><FaSearch/></button>
                             </label>
                             <Select
                                 className="form-select-react"

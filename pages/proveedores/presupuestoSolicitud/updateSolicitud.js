@@ -1,8 +1,10 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';      
 import { FaTrash} from "react-icons/fa";
+import { FaSearch} from "react-icons/fa";
 
 import FormularioCreateProveedor from "../createProveedor"
+import FormularioBusquedaProveedor from "../busquedaProveedor"
 import FormularioCreateEmpleado from "../../gestion/empleado/createEmpleado"
 
 const { default: Link } = require("next/link")
@@ -18,6 +20,9 @@ const updatePresupuesto = ({exito,solicitudID}) => {
     const [detalles,setDetalles] = useState([initialDetalle])
     const [productos,setProductos] = useState([]);
     const [tipoProductos,setTipoProductos] = useState([]);
+
+    const [mostrarModalBusquedaProveedor , setMostrarModalBusquedaProveedor] = useState(false)
+    const [filtro , setFiltro] = useState(false) 
     
     const detallesValidos = detalles.filter(d => d.producto && d.cantidad > 0);
     const puedeGuardar = detallesValidos.length > 0;
@@ -228,6 +233,26 @@ const updatePresupuesto = ({exito,solicitudID}) => {
 
     return(
         <>
+
+            {mostrarModalBusquedaProveedor && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalBusquedaProveedor(false)}>&times;</button>
+                    <FormularioBusquedaProveedor
+                    filtro={filtro} 
+                    exito={(resultados) => {
+                    if (resultados.length > 0) {
+                        setProveedores(resultados);
+                        setMostrarModalBusquedaProveedor(false);
+                    } else {
+                        alert("❌ No se encontraron resultados");
+                    }
+                    }}
+                    onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)}
+                    />
+                </div>
+                </div>
+            )}
             
             {mostrarModalEmpleado && (
                 <div className="modal">
@@ -283,6 +308,7 @@ const updatePresupuesto = ({exito,solicitudID}) => {
                             <label>
                                 Proveedor:
                                 <button type="button" className="btn-plus" onClick={() => setMostrarModalCreateProveedor(true)}>+</button>
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalBusquedaProveedor(true)}><FaSearch/></button>
                             </label>
                             <Select
                                 className="form-select-react"

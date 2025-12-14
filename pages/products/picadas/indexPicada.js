@@ -195,35 +195,12 @@ const indexPicada = () => {
           <button className="btn-icon" onClick={() => setMostrarModalCreate(true)} title="Agregar Picada">
             <FaPlus />
           </button>
+          <button className="btn-icon" onClick={() => setMostrarModalBuscar(true)} title="Busqueda avanzada de picada">
+            <FaSearch />
+          </button>
         </div>
 
         <div className="contenedor-tabla">
-          <div className="filtros">
-            <button onClick={() => 
-                    setMostrarModalBuscar(true)
-                }            
-                className="btn-icon" title="Busqueda avanzada de picada">
-                <FaSearch />
-            </button>  
-            <input
-              type="text"
-              placeholder="Filtrar por nombre..."
-              value={filtroNombre}
-              onChange={(e) => setFiltroNombre(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Filtrar por depósito..."
-              value={filtroDeposito}
-              onChange={(e) => setFiltroDeposito(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Filtrar por precio..."
-              value={filtroPrecio}
-              onChange={(e) => setFiltroPrecio(e.target.value)}
-            />
-          </div>
 
           <div className="tabla-scroll">
             <table>

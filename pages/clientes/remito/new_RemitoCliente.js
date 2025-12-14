@@ -1,7 +1,9 @@
 const { useState, useEffect, use } = require("react")
 import Select from 'react-select';     
+import {  FaSearch} from "react-icons/fa";
 
 import FormularioCreateTransporte from "../../gestion/transporte/createTransporte"
+import FormularioBusqueedaCliente from "../busquedaCliente"
 
 const { default: Link } = require("next/link")
 
@@ -18,6 +20,9 @@ const newRemitoCliente = ({exito}) => {
     const [detalles, setDetalles] = useState([]);
     const [comprobantesVenta, setComprobantesVenta] = useState([]);
     const [tipoProductos,setTipoProductos] = useState([]);
+    const [filtro , setFiltro] = useState(); 
+
+    const [mostrarModalBusquedaCliente, setMostrarModalBusquedaCliente] = useState(false);
 
     const handleDetalleChange = (index, field, value) => {
         const nuevosDetalles = [...detalles];
@@ -298,6 +303,29 @@ const newRemitoCliente = ({exito}) => {
                 </div>
             )}
 
+            {mostrarModalBusquedaCliente && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalBusquedaCliente(false)}>&times;</button>
+                    <FormularioBusqueedaCliente
+                    filtro={filtro} 
+                    exito={(resultados) => {
+                    if (resultados.length > 0) {
+                        setClientes(resultados);
+                        setMostrarModalBusquedaCliente(false);
+                    } else {
+                        alert("❌ No se encontraron resultados");
+                    }
+                    }}
+                    onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)}
+                    />
+                </div>
+                </div>
+            )}
+
+
+            
+
             <div className="form-container">
                 <h1 className="titulo-pagina">Cargar Remito</h1>
                 <form id="formProducto" className="formulario-presupuesto">
@@ -305,6 +333,7 @@ const newRemitoCliente = ({exito}) => {
                         <div className="form-col">
                             <label>
                                 Cliente:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalBusquedaCliente(true)}><FaSearch/></button>
                              </label>
                             <Select
                                 className="form-select-react"

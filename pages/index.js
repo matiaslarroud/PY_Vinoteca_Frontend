@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { FaWineGlassAlt, FaUserFriends, FaTruck } from "react-icons/fa";
+import { FaBox , FaUserFriends, FaTruck } from "react-icons/fa";
 import LowStockGrid from "@/components/lowStock-grid";
 
 export default function Home() {
@@ -64,7 +64,7 @@ export default function Home() {
         {usuario.rol === "administrador" && (
           <div className="boton-acceso">
             <Link href="/products/indexProducts">
-              <FaTruck className="icono" />
+              <FaBox  className="icono" /><br/>
               <span>Productos</span>
             </Link>
           </div>
@@ -72,7 +72,7 @@ export default function Home() {
 
         <div className="boton-acceso">
           <Link href="/clientes/indexClientes">
-            <FaUserFriends className="icono" />
+            <FaUserFriends className="icono" /><br/>
             <span>Clientes</span>
           </Link>
         </div>
@@ -81,7 +81,7 @@ export default function Home() {
         {usuario.rol === "administrador" && (
           <div className="boton-acceso">
             <Link href="/proveedores/indexProveedor">
-              <FaTruck className="icono" />
+              <FaTruck className="icono" /><br/>
               <span>Proveedores</span>
             </Link>
           </div>

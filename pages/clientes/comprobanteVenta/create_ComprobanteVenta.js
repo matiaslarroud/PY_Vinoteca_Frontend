@@ -1,7 +1,10 @@
 const { useState , useEffect } = require("react")
-import Select from 'react-select';          
-import { FaTrash} from "react-icons/fa";
+import Select from 'react-select';        
+import { FaTrash , FaSearch} from "react-icons/fa";
+
 import FormularioClienteCreate from '../../clientes/createCliente'
+import FormularioBusqueedaCliente from "../busquedaCliente"
+
 const { default: Link } = require("next/link")
 
 const initialStateComprobanteVenta = {
@@ -20,6 +23,7 @@ const createComprobanteVenta = ({exito , pedidoID}) => {
     const [productos, setProductos] = useState([]);
     const [tipoComprobante, setTiposComprobante] = useState([]);
     const [tipoProductos,setTipoProductos] = useState([]);
+    const [filtro , setFiltro] = useState(); 
 
     const inputChange = (e) => {
         const value = e.target.value;
@@ -236,6 +240,7 @@ const createComprobanteVenta = ({exito , pedidoID}) => {
 
     const [mostrarModalCreate1, setMostrarModalCreate1] = useState(false);
     const [mostrarModalCreate3, setMostrarModalCreate3] = useState(false);
+    const [mostrarModalBusquedaCliente, setMostrarModalBusquedaCliente] = useState(false);
 
     
      const opciones_tipoProductos = tipoProductos.map(v => ({
@@ -288,6 +293,29 @@ const createComprobanteVenta = ({exito , pedidoID}) => {
         
     return(
         <>
+        
+                    {mostrarModalBusquedaCliente && (
+                        <div className="modal">
+                        <div className="modal-content">
+                            <button className="close" onClick={() => setMostrarModalBusquedaCliente(false)}>&times;</button>
+                            <FormularioBusqueedaCliente
+                            filtro={filtro} 
+                            exito={(resultados) => {
+                            if (resultados.length > 0) {
+                                setClientes(resultados);
+                                setMostrarModalBusquedaCliente(false);
+                            } else {
+                                alert("❌ No se encontraron resultados");
+                            }
+                            }}
+                            onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)}
+                            />
+                        </div>
+                        </div>
+                    )}
+        
+        
+                    
             {mostrarModalCreate1 && (
                 <div className="modal">
                 <div className="modal-content">
@@ -329,6 +357,7 @@ const createComprobanteVenta = ({exito , pedidoID}) => {
                         <div className="form-col">
                             <label>
                                 Cliente:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalBusquedaCliente(true)}><FaSearch/></button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -673,21 +702,7 @@ const createComprobanteVenta = ({exito , pedidoID}) => {
             </div>
             <style jsx>
                 {`
-                        .modal {
-                            position: fixed;
-                            top: 0;
-                            left: 0;
-                            width: 100%;
-                            height: 100%;
-                            background-color: rgba(0,0,0,0.5); /* oscurece fondo */
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            z-index: 1000;
-                        }
-                        
-
-                        button.submit-btn {
+                         button.submit-btn {
                             width:100%
                         }
 
@@ -720,19 +735,6 @@ const createComprobanteVenta = ({exito , pedidoID}) => {
                         .btn-icon:hover {
                         background-color: #a30000;
                         transform: translateY(-3px);
-                        }
-
-                        .modal-content {
-                            background-color: #121212;
-                            padding: 40px;
-                            border-radius: 12px;
-                            width: 90%;
-                            height:80%;
-                            max-width: 500px;
-                            max-height: 800px;
-                            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                            position: relative;
-                            margin: 20px;
                         }
 
                         .form-container {

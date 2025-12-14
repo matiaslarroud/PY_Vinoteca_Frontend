@@ -1,7 +1,9 @@
 const { useState, useEffect, use } = require("react")
-import Select from 'react-select';     
+import Select from 'react-select';    
+import {  FaSearch} from "react-icons/fa"; 
 
 const { default: Link } = require("next/link")
+import FormularioBusqueedaCliente from "../busquedaCliente"
 
 
 const busquedaRemitoCliente = ({exito, filtro, onChangeFiltro , filtroDetalle , onChangeFiltroDetalle }) => {
@@ -18,6 +20,7 @@ const busquedaRemitoCliente = ({exito, filtro, onChangeFiltro , filtroDetalle , 
     const [tipoProductos,setTipoProductos] = useState([]);
             
     const [filtros, setFiltros] = useState(filtro);
+    const [mostrarModalBusquedaCliente, setMostrarModalBusquedaCliente] = useState(false);
         
     // Sincroniza con los cambios del padre
     useEffect(() => {
@@ -263,6 +266,7 @@ const busquedaRemitoCliente = ({exito, filtro, onChangeFiltro , filtroDetalle , 
 
     return(
         <>
+
             <div className="form-container">
                 <h1 className="titulo-pagina">Busqueda Avanzada de Remito</h1>
                 <form id="formProducto" className="formulario-presupuesto">
@@ -622,18 +626,6 @@ const busquedaRemitoCliente = ({exito, filtro, onChangeFiltro , filtroDetalle , 
                             background-color: rgb(115, 8, 8);
                             transform: translateY(-3px);
                         }
-                        .modal {
-                            position: fixed;
-                            top: 0;
-                            left: 0;
-                            width: 100%;
-                            height: 100%;
-                            background-color: rgba(0,0,0,0.5); /* oscurece fondo */
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            z-index: 1000;
-                        }
                         
 
 
@@ -665,19 +657,6 @@ const busquedaRemitoCliente = ({exito, filtro, onChangeFiltro , filtroDetalle , 
                         .btn-icon:hover {
                         background-color: #a30000;
                         transform: translateY(-3px);
-                        }
-
-                        .modal-content {
-                            background-color: #121212;
-                            padding: 40px;
-                            border-radius: 12px;
-                            width: 90%;
-                            height:80%;
-                            max-width: 500px;
-                            max-height: 800px;
-                            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                            position: relative;
-                            margin: 20px;
                         }
 
                         .form-container {

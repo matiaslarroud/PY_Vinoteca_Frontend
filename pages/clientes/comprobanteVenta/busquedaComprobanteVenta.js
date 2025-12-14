@@ -1,6 +1,8 @@
 const { useState , useEffect } = require("react")
 import Select from 'react-select';        
 const { default: Link } = require("next/link")
+import {  FaSearch} from "react-icons/fa";
+import FormularioBusqueedaCliente from "../busquedaCliente"
 
 const initialStateComprobanteVenta = {
     comprobanteVentaID:'' , tipoComprobante:'', fecha:'' , descuentoBandera:'' , descuento:0 ,total:0, notaPedido:'', cliente:''
@@ -18,6 +20,8 @@ const busquedaComprobanteVenta = ({exito, filtro, onChangeFiltro , filtroDetalle
     const [productos, setProductos] = useState([]);
     const [tiposComprobante, setTiposComprobante] = useState([]);
     const [tipoProductos,setTipoProductos] = useState([]);
+
+    const [mostrarModalBusquedaCliente, setMostrarModalBusquedaCliente] = useState(false);
             
     const [filtros, setFiltros] = useState(filtro);
         
@@ -240,6 +244,7 @@ const busquedaComprobanteVenta = ({exito, filtro, onChangeFiltro , filtroDetalle
         
     return(
         <>
+
             <div className="form-container">
                 <div className="form-row">
                     <div className="form-col">
@@ -588,19 +593,6 @@ const busquedaComprobanteVenta = ({exito, filtro, onChangeFiltro , filtroDetalle
             </div>
             <style jsx>
                 {`
-                        .modal {
-                            position: fixed;
-                            top: 0;
-                            left: 0;
-                            width: 100%;
-                            height: 100%;
-                            background-color: rgba(0,0,0,0.5); /* oscurece fondo */
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            z-index: 1000;
-                        }
-                        
 
 
                         .close {
@@ -632,20 +624,6 @@ const busquedaComprobanteVenta = ({exito, filtro, onChangeFiltro , filtroDetalle
                         background-color: #a30000;
                         transform: translateY(-3px);
                         }
-
-                        .modal-content {
-                            background-color: #121212;
-                            padding: 40px;
-                            border-radius: 12px;
-                            width: 90%;
-                            height:80%;
-                            max-width: 500px;
-                            max-height: 800px;
-                            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                            position: relative;
-                            margin: 20px;
-                        }
-
                         .form-container {
                             background-color: #1f1f1f;
                             color: #fff;

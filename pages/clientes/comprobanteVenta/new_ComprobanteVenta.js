@@ -1,7 +1,9 @@
 const { useState , useEffect } = require("react")
 import Select from 'react-select';        
+import { FaSearch} from "react-icons/fa";
 
 import FormularioCreateNotaPedidoCliente from "../notaPedido/newNotaPedido"
+import FormularioBusqueedaCliente from "../busquedaCliente"
 
 const { default: Link } = require("next/link")
 
@@ -22,6 +24,7 @@ const createComprobanteVenta = ({exito}) => {
     const [productos, setProductos] = useState([]);
     const [tiposComprobante, setTiposComprobante] = useState([]);
     const [tipoProductos,setTipoProductos] = useState([]);
+    const [filtro , setFiltro] = useState(); 
     
     const inputChange = (e) => {
         const value = e.target.value;
@@ -264,6 +267,7 @@ const createComprobanteVenta = ({exito}) => {
     }
 
     const [mostrarModalNotaPedido, setMostrarModalNotaPedido] = useState(false);
+    const [mostrarModalBusquedaCliente, setMostrarModalBusquedaCliente] = useState(false);
 
      const opciones_tipoProductos = tipoProductos.map(v => ({
         value: v,
@@ -330,6 +334,29 @@ const createComprobanteVenta = ({exito}) => {
         
     return(
         <>
+        
+                    {mostrarModalBusquedaCliente && (
+                        <div className="modal">
+                        <div className="modal-content">
+                            <button className="close" onClick={() => setMostrarModalBusquedaCliente(false)}>&times;</button>
+                            <FormularioBusqueedaCliente
+                            filtro={filtro} 
+                            exito={(resultados) => {
+                            if (resultados.length > 0) {
+                                setClientes(resultados);
+                                setMostrarModalBusquedaCliente(false);
+                            } else {
+                                alert("❌ No se encontraron resultados");
+                            }
+                            }}
+                            onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)}
+                            />
+                        </div>
+                        </div>
+                    )}
+        
+        
+                    
             {mostrarModalNotaPedido && (
                 <div className="modal">
                 <div className="modal-content">
@@ -357,6 +384,7 @@ const createComprobanteVenta = ({exito}) => {
                         <div className="form-col">
                             <label>
                                 Cliente:
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalBusquedaCliente(true)}><FaSearch/></button>
                             </label>
                             <Select
                                 className="form-select-react"

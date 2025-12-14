@@ -1,11 +1,13 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';          
 import { FaTrash} from "react-icons/fa";
+import { FaSearch} from "react-icons/fa";
 
 import FormularioCreateProveedor from "../createProveedor"
 import FormularioCreateSolicitudPresupuesto from "../presupuestoSolicitud/newSolicitud"
 import FormularioCreateEmpleado from "../../gestion/empleado/createEmpleado"
 import FormularioCreateMedioPago from "../../gestion/tablasVarias/medioPago/createMedioPago"
+import FormularioBusquedaProveedor from "../busquedaProveedor"
 
 const { default: Link } = require("next/link")
 
@@ -22,6 +24,9 @@ const createPresupuesto = ({exito}) => {
     const [productos,setProductos] = useState([]);
     const [tipoProductos,setTipoProductos] = useState([]);
     const [solicitudesPresupuesto,setSolicitudesPresupuesto] = useState([]);
+
+    const [mostrarModalBusquedaProveedor , setMostrarModalBusquedaProveedor] = useState(false)
+    const [filtro , setFiltro] = useState(false) 
     
     const detallesValidos = detalles.filter(d => d.producto && d.cantidad > 0);
     const puedeGuardar = detallesValidos.length > 0;
@@ -334,6 +339,26 @@ const agregarDetallePresupuesto = async (solicitudID) => {
 
     return(
         <>
+
+            {mostrarModalBusquedaProveedor && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalBusquedaProveedor(false)}>&times;</button>
+                    <FormularioBusquedaProveedor
+                    filtro={filtro} 
+                    exito={(resultados) => {
+                    if (resultados.length > 0) {
+                        setProveedores(resultados);
+                        setMostrarModalBusquedaProveedor(false);
+                    } else {
+                        alert("❌ No se encontraron resultados");
+                    }
+                    }}
+                    onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)}
+                    />
+                </div>
+                </div>
+            )}
            
             {mostrarModalProveedor && (
                 <div className="modal">
@@ -405,6 +430,7 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                             <label>
                                 Proveedor:
                                 <button type="button" className="btn-plus" onClick={() => setMostrarModalProveedor(true)}>+</button>
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalBusquedaProveedor(true)}><FaSearch/></button>
                             </label>
                             <Select
                                 className="form-select-react"

@@ -1,9 +1,11 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';          
 import { FaTrash} from "react-icons/fa";
+import { FaSearch} from "react-icons/fa";
 
 import FormularioCreateProveedor from "../createProveedor"
 import FormularioCreateEmpleado from "../../gestion/empleado/createEmpleado"
+import FormularioBusquedaProveedor from "../busquedaProveedor"
 
 const { default: Link } = require("next/link")
 
@@ -18,6 +20,9 @@ const createPresupuesto = ({exito}) => {
     const [detalles,setDetalles] = useState([initialDetalle])
     const [productos,setProductos] = useState([]);
     const [tipoProductos,setTipoProductos] = useState([]);
+
+    const [mostrarModalBusquedaProveedor , setMostrarModalBusquedaProveedor] = useState(false)
+    const [filtro , setFiltro] = useState(false) 
     
     const detallesValidos = detalles.filter(d => d.producto && d.cantidad > 0);
     const puedeGuardar = detallesValidos.length > 0;
@@ -206,6 +211,26 @@ const fetchData_LowStockByProveedor = (proveedor) => {
 
     return(
         <>
+
+            {mostrarModalBusquedaProveedor && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalBusquedaProveedor(false)}>&times;</button>
+                    <FormularioBusquedaProveedor
+                    filtro={filtro} 
+                    exito={(resultados) => {
+                    if (resultados.length > 0) {
+                        setProveedores(resultados);
+                        setMostrarModalBusquedaProveedor(false);
+                    } else {
+                        alert("❌ No se encontraron resultados");
+                    }
+                    }}
+                    onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)}
+                    />
+                </div>
+                </div>
+            )}
             
             {mostrarModalEmpleado && (
                 <div className="modal">
@@ -258,6 +283,7 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                             <label>
                                 Proveedor:
                                 <button type="button" className="btn-plus" onClick={() => setMostrarModalCreateProveedor(true)}>+</button>
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalBusquedaProveedor(true)}><FaSearch/></button>
                             </label>
                             <Select
                                 className="form-select-react"

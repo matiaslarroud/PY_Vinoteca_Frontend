@@ -1,9 +1,11 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';          
 import { FaTrash} from "react-icons/fa";
+import { FaSearch} from "react-icons/fa";
 
 import FormularioCreateProveedor from "../createProveedor"
 import FormularioCreateOrdenCompra from "../ordenCompra/newOrdenCompra"
+import FormularioBusquedaProveedor from "../busquedaProveedor"
 
 const { default: Link } = require("next/link")
 
@@ -22,6 +24,9 @@ const newComprobanteCompra = ({exito}) => {
     const [detalles,setDetalles] = useState([initialDetalle])
     const [productos,setProductos] = useState([]);
     const [tipoProductos,setTipoProductos] = useState([]);
+
+    const [mostrarModalBusquedaProveedor , setMostrarModalBusquedaProveedor] = useState(false)
+    const [filtro , setFiltro] = useState(false) 
     
     const detallesValidos = detalles.filter(d => d.producto && d.cantidad > 0);
     const puedeGuardar = detallesValidos.length > 0;
@@ -274,6 +279,26 @@ const clickChange = async(e) => {
 
     return(
         <>
+
+            {mostrarModalBusquedaProveedor && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalBusquedaProveedor(false)}>&times;</button>
+                    <FormularioBusquedaProveedor
+                    filtro={filtro} 
+                    exito={(resultados) => {
+                    if (resultados.length > 0) {
+                        setProveedores(resultados);
+                        setMostrarModalBusquedaProveedor(false);
+                    } else {
+                        alert("❌ No se encontraron resultados");
+                    }
+                    }}
+                    onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)}
+                    />
+                </div>
+                </div>
+            )}
             {mostrarModalProveedor && (
                 <div className="modal">
                 <div className="modal-content">
@@ -314,6 +339,7 @@ const clickChange = async(e) => {
                             <label>
                                 Proveedor:
                                 <button type="button" className="btn-plus" onClick={() => setMostrarModalProveedor(true)}>+</button>
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalBusquedaProveedor(true)}><FaSearch/></button>
                             </label>
                             <Select
                                 className="form-select-react"

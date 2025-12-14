@@ -1,11 +1,13 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';          
+import { FaSearch} from "react-icons/fa";
 import { FaTrash} from "react-icons/fa";
 
 import FormularioCreateProvedor from "../createProveedor"
 import FormularioCreateEmpleado from "../../gestion/empleado/createEmpleado"
 import FormularioCreatePresupuesto from "../presupuesto/newPresupuesto"
 import FormularioCreateMedioPago from "../../gestion/tablasVarias/medioPago/createMedioPago"
+import FormularioBusquedaProveedor from "../busquedaProveedor"
 
 const { default: Link } = require("next/link")
 
@@ -27,6 +29,9 @@ const updateOrdenCompra = ({exito , ordenID}) => {
     const [detalles,setDetalles] = useState([initialDetalle])
     const [productos,setProductos] = useState([]);
     const [tipoProductos,setTipoProductos] = useState([]);
+
+    const [mostrarModalBusquedaProveedor , setMostrarModalBusquedaProveedor] = useState(false)
+    const [filtro , setFiltro] = useState(false) 
     
     const detallesValidos = detalles.filter(d => d.producto && d.cantidad > 0);
     const puedeGuardar = detallesValidos.length > 0;
@@ -354,6 +359,26 @@ const updateOrdenCompra = ({exito , ordenID}) => {
 
     return(
         <>
+
+            {mostrarModalBusquedaProveedor && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalBusquedaProveedor(false)}>&times;</button>
+                    <FormularioBusquedaProveedor
+                    filtro={filtro} 
+                    exito={(resultados) => {
+                    if (resultados.length > 0) {
+                        setProveedores(resultados);
+                        setMostrarModalBusquedaProveedor(false);
+                    } else {
+                        alert("❌ No se encontraron resultados");
+                    }
+                    }}
+                    onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)}
+                    />
+                </div>
+                </div>
+            )}
             {mostrarModalProveedor && (
                 <div className="modal">
                 <div className="modal-content">
@@ -423,6 +448,7 @@ const updateOrdenCompra = ({exito , ordenID}) => {
                             <label>
                                 Proveedor:
                                 <button type="button" className="btn-plus" onClick={() => setMostrarModalProveedor(true)}>+</button>
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalBusquedaProveedor(true)}><FaSearch/></button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -1133,6 +1159,74 @@ const updateOrdenCompra = ({exito , ordenID}) => {
 
                         .form-col input[type="date"]::-webkit-calendar-picker-indicator {
                             filter: invert(1); /* icono blanco en navegadores webkit */
+                        }
+
+                        
+
+                        .form-col input[type="date"] {
+                            width: 220px;
+                            background-color: #2c2c2c;
+                            color: white;
+                            border: 1px solid #444;
+                            border-radius: 8px;
+                            padding: 0.4rem 0.6rem;
+                            font-size: 1rem;
+                            outline: none;
+                        }
+
+                        .form-col input[type="date"]::-webkit-calendar-picker-indicator {
+                            filter: invert(1); /* icono blanco en navegadores webkit */
+                        }
+
+                        
+
+                        .form-col input[type="date"] {
+                            width: 220px;
+                            background-color: #2c2c2c;
+                            color: white;
+                            border: 1px solid #444;
+                            border-radius: 8px;
+                            padding: 0.4rem 0.6rem;
+                            font-size: 1rem;
+                            outline: none;
+                        }
+
+                        .form-col input[type="date"]::-webkit-calendar-picker-indicator {
+                            filter: invert(1); /* icono blanco en navegadores webkit */
+                        }
+                            
+                        input[type="date"] {
+                            background-color: #2c2c2c;
+                            color: white;
+                            border: 1px solid #444;
+                            border-radius: 10px;
+                            padding: 0.6rem 0.8rem;
+                            font-size: 1rem;
+                            outline: none;
+                            transition: all 0.25s ease-in-out;
+                            width: 100%;
+                            cursor: pointer;
+                        }
+
+                        /* Ícono del calendario */
+                        input[type="date"]::-webkit-calendar-picker-indicator {
+                            filter: invert(1);
+                            cursor: pointer;
+                            opacity: 0.8;
+                        }
+
+                        input[type="date"]:hover {
+                            border-color: #666;
+                        }
+
+                        /* Placeholder (algunos navegadores) */
+                        input[type="date"]::-webkit-datetime-edit {
+                            color: #bbb;
+                        }
+
+                        /* Cuando hay valor seleccionado */
+                        input[type="date"]:valid::-webkit-datetime-edit {
+                            color: white;
                         }
 
 

@@ -108,19 +108,19 @@ const buscarProveedor = ({exito, filtro, onChangeFiltro}) => {
         const name = actionMeta.name;
         const value = selectedOption ? selectedOption.value : "";
 
-        setFiltros({
-            ...filtros,
-            [name]: value,
-        });
+        const nuevosFiltros = { ...filtros, [name]: value };
+
+        setFiltros(nuevosFiltros);
+        onChangeFiltro(nuevosFiltros);
     };
 
 
     
     const opciones_paises = paises.map(v => ({ value: v._id,label: v.name }));
-    const opciones_provincias = provincias.filter(a => a.pais === filtros.pais).map(v => ({ value: v._id,label: v.name }));
-    const opciones_localidades = localidades.filter(a => a.provincia === filtros.provincia).map(v => ({ value: v._id,label: v.name }));
-    const opciones_barrios = barrios.filter(a => a.localidad === filtros.localidad).map(v => ({ value: v._id,label: v.name }));
-    const opciones_calles = calles.filter(a => a.barrio === filtros.barrio).map(v => ({ value: v._id,label: v.name }));
+    const opciones_provincias = provincias.map(v => ({ value: v._id,label: v.name }));
+    const opciones_localidades = localidades.map(v => ({ value: v._id,label: v.name }));
+    const opciones_barrios = barrios.map(v => ({ value: v._id,label: v.name }));
+    const opciones_calles = calles.map(v => ({ value: v._id,label: v.name }));
     const opciones_iva = condicionesIva.map(v => ({ value: v._id,label: v.name }));
 
     return(

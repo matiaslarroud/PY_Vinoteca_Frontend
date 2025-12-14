@@ -1,9 +1,10 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';      
-import { FaTrash} from "react-icons/fa";
+import { FaTrash , FaSearch} from "react-icons/fa";
 
 import FormularioEmpleadoCreate from '../../gestion/empleado/createEmpleado'
 import FormularioClienteCreate from '../../clientes/createCliente' 
+import FormularioBusqueedaCliente from "../busquedaCliente"
 
 const { default: Link } = require("next/link")
 
@@ -18,6 +19,7 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
     const [detalles,setDetalles] = useState([initialDetalle])
     const [productos,setProductos] = useState([]);
     const [tipoProductos,setTipoProductos] = useState([]);
+    const [filtro , setFiltro] = useState(); 
     
     const detallesValidos = detalles.filter(d => d.producto && d.cantidad > 0);
     const puedeGuardar = detallesValidos.length > 0;
@@ -249,6 +251,7 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
     
     const [mostrarModalEmpleado, setMostrarModalEmpleado] = useState(false);
     const [mostrarModalCliente, setMostrarModalCliente] = useState(false);
+    const [mostrarModalBusquedaCliente, setMostrarModalBusquedaCliente] = useState(false);
 
      const opciones_tipoProductos = tipoProductos.map(v => ({
         value: v,
@@ -300,6 +303,29 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
     }
     return(
         <>
+
+            {mostrarModalBusquedaCliente && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalBusquedaCliente(false)}>&times;</button>
+                    <FormularioBusqueedaCliente
+                    filtro={filtro} 
+                    exito={(resultados) => {
+                    if (resultados.length > 0) {
+                        setClientes(resultados);
+                        setMostrarModalBusquedaCliente(false);
+                    } else {
+                        alert("❌ No se encontraron resultados");
+                    }
+                    }}
+                    onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)}
+                    />
+                </div>
+                </div>
+            )}
+
+
+            
            
             {mostrarModalEmpleado && (
                 <div className="modal">
@@ -343,6 +369,7 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                             <label>
                                 Cliente:
                                 <button type="button" className="btn-plus" onClick={() => setMostrarModalCliente(true)}>+</button>
+                                <button type="button" className="btn-plus" onClick={() => setMostrarModalBusquedaCliente(true)}><FaSearch/></button>
                             </label>
                             <Select
                                 className="form-select-react"

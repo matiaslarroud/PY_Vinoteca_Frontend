@@ -1,6 +1,7 @@
 const { useState, useEffect } = require("react")
-import Select from 'react-select';          
-import { FaTrash} from "react-icons/fa";
+import Select from 'react-select';     
+import { FaTrash , FaSearch} from "react-icons/fa";
+import FormularioBusqueedaCliente from "../busquedaCliente"
 
 const { default: Link } = require("next/link")
 
@@ -79,6 +80,7 @@ const busquedaReciboPago = ({ exito, filtro, onChangeFiltro }) => {
         setFiltros(nuevosFiltros);
         onChangeFiltro(nuevosFiltros); 
     };
+    const [mostrarModalBusquedaCliente, setMostrarModalBusquedaCliente] = useState(false);
 
 
     const opciones_clientes = clientes.map(v => ({ value: v._id,label: v.name }));
