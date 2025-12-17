@@ -4,7 +4,7 @@ import { FaTrash} from "react-icons/fa";
 
 const { default: Link } = require("next/link")
 
-const initialState = {name:'',stock:0, stockMinimo:'' , precioVenta:0 , deposito:''}
+const initialState = {picadaID:'', name:'',stock:0, stockMinimo:'' , precioVenta:0 , deposito:''}
 const initialStateDetalle = {picada:'',insumo:'', cantidad:0}
 
 const buscarPicada = ({ exito, filtro, onChangeFiltro }) => {
@@ -100,6 +100,12 @@ const buscarPicada = ({ exito, filtro, onChangeFiltro }) => {
 
                 <form id="updatePicada" className="formulario-picada" onSubmit={handleBuscar}>
                     <div className="form-row">
+                        <div className="form-col1">
+                            <label>
+                                Picada N°:
+                            </label>
+                            <input type='text' onChange={inputChange}  name='picadaID' value={filtros.picadaID} placeholder='Escriba aqui el id...' />
+                        </div>
                         <div className="form-col">
                         <label htmlFor="nombre">
                             Nombre:

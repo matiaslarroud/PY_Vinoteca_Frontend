@@ -198,28 +198,11 @@ const indexInsumo = () => {
           <button className="btn-icon" onClick={() => setMostrarModalCreate(true)} title="Agregar Insumo">
             <FaPlus />
           </button>
+          <button className="btn-icon" onClick={() => setMostrarModalBuscar(true)} title="Busqueda avanzada de insumo">
+            <FaSearch />
+          </button>
         </div>
             <div className="contenedor-tabla">
-                <div className="filtros">
-                    <button onClick={() => 
-                            setMostrarModalBuscar(true)
-                        }            
-                        className="btn-icon" title="Busqueda avanzada de insumo">
-                        <FaSearch />
-                    </button>  
-                    <input
-                    type="text"
-                    placeholder="Filtrar por nombre..."
-                    value={filtroNombre}
-                    onChange={(e) => setFiltroNombre(e.target.value)}
-                    />
-                    <input
-                    type="text"
-                    placeholder="Filtrar por depósito..."
-                    value={filtroDeposito}
-                    onChange={(e) => setFiltroDeposito(e.target.value)}
-                    />
-                </div>
 
                 <div className="tabla-scroll">
                     <table id="tablaInsumos">

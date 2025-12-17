@@ -278,7 +278,6 @@ const busquedaNotaPedido = ({ exito, filtro, onChangeFiltro , filtroDetalle , on
         const totalPedido = Array.isArray(detalles) && detalles.length > 0
             ? detalles.reduce((acc, d) => acc + (d.importe || 0), 0)
                 : 0;
-        setNotaPedido((prev) => ({ ...prev, total:totalPedido }));
     };
 
     const opciones_tipoProductos = tipoProductos.map(v => ({

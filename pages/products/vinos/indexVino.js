@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit , FaFileInvoiceDollar, FaFileAlt, FaReceipt, FaTruck  } from "react-icons/fa";
+import { FaPlus, FaHome, FaArrowLeft, FaTrash, FaEdit , FaSearch } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import FormularioVinoCreate from './createVino';
 import FormularioVinoUpdate from './updateVino';
+import FormularioBusquedaAvanzada from './busquedaVino'
 
 
 const { default: Link } = require("next/link")
 
 const indexVino = () => {
+    const initialState = {name:'',stock:0 , stockMinimo:'', proveedor:'' , bodega:'' , paraje:'' , crianza : '' , precioCosto:0 , ganancia:0 , tipo:'' , varietal:'' , volumen:'' , deposito:''}
+    
     const router = useRouter();
 
     const [vinos,setVinos] = useState([]);
@@ -16,67 +19,57 @@ const indexVino = () => {
 
     const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
     const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
+    const [mostrarBusqueda, setmostrarBusqueda] = useState(null);
+    
+    const [filtro , setFiltro] = useState(initialState); 
+    const [filtroDetalle , setFiltroDetalle] = useState([]);  
+    const [orden, setOrden] = useState({ campo: '', asc: true });
 
-const [filtroVinoNombre, setfiltroVinoNombre] = useState('');
-const [filtroVinoTipo, setfiltroVinoTipo] = useState('');  
-const [filtroVinoBodega, setfiltroVinoBodega] = useState('');  
-const [orden, setOrden] = useState({ campo: '', asc: true });
+    const toggleOrden = (campo) => {
+        setOrden((prev) => ({
+            campo,
+            asc: prev.campo === campo ? !prev.asc : true 
+        }));
+    };
 
-const toggleOrden = (campo) => {
-  setOrden((prev) => ({
-    campo,
-    asc: prev.campo === campo ? !prev.asc : true 
-  }));
-};
-
-const vinosFiltrados = vinos
-  .filter(c => {
-    const tipoVino = tiposV.find(loc => loc._id === c.tipo)?.name || '';
-    const bodegaVino = bodegas.find(loc => loc._id === c.bodega)?.name || '';
-
-    const coincideNombre = c.name.toLowerCase().includes(filtroVinoNombre.toLowerCase());
-    const coincideTipo = tipoVino.toLowerCase().includes(filtroVinoTipo.toLowerCase());
-    const coincideBodega = bodegaVino.toLowerCase().includes(filtroVinoBodega.toLowerCase());
-
-    return coincideNombre && coincideTipo && coincideBodega;
-  })
+    const vinosFiltrados = vinos
     .sort((a, b) => {
-  const campo = orden.campo;
-  if (!campo) return 0;
+        const campo = orden.campo;
+        if (!campo) return 0;
 
-  let aVal, bVal;
-    if (campo === 'codigo') {
-        aVal = a._id;
-        bVal = b._id;
-    } 
-  if (campo === 'price') {
-    aVal = a.precioCosto + (a.precioCosto * a.ganancia) / 100;
-    bVal = b.precioCosto + (b.precioCosto * b.ganancia) / 100;
-  } else if (campo === 'bodega') {
-    aVal = bodegas.find(loc => loc._id === a.bodega)?.name || '';
-    bVal = bodegas.find(loc => loc._id === b.bodega)?.name || '';
-  } else if (campo === 'tipo') {
-    aVal = tiposV.find(loc => loc._id === a.tipo)?.name || '';
-    bVal = tiposV.find(loc => loc._id === b.tipo)?.name || '';
-  } else {
-    aVal = a[campo];
-    bVal = b[campo];
-  }
+        let aVal, bVal;
+            if (campo === 'codigo') {
+                aVal = a._id;
+                bVal = b._id;
+            } 
+        if (campo === 'price') {
+            aVal = a.precioCosto + (a.precioCosto * a.ganancia) / 100;
+            bVal = b.precioCosto + (b.precioCosto * b.ganancia) / 100;
+        } else if (campo === 'bodega') {
+            aVal = bodegas.find(loc => loc._id === a.bodega)?.name || '';
+            bVal = bodegas.find(loc => loc._id === b.bodega)?.name || '';
+        } else if (campo === 'tipo') {
+            aVal = tiposV.find(loc => loc._id === a.tipo)?.name || '';
+            bVal = tiposV.find(loc => loc._id === b.tipo)?.name || '';
+        } else {
+            aVal = a[campo];
+            bVal = b[campo];
+        }
 
-  // Normalización para strings
-  if (typeof aVal === 'string') aVal = aVal.toLowerCase();
-  if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+        // Normalización para strings
+        if (typeof aVal === 'string') aVal = aVal.toLowerCase();
+        if (typeof bVal === 'string') bVal = bVal.toLowerCase();
 
-  // Conversión numérica si aplica
-  if (!isNaN(aVal) && !isNaN(bVal)) {
-    aVal = Number(aVal);
-    bVal = Number(bVal);
-  }
+        // Conversión numérica si aplica
+        if (!isNaN(aVal) && !isNaN(bVal)) {
+            aVal = Number(aVal);
+            bVal = Number(bVal);
+        }
 
-  if (aVal < bVal) return orden.asc ? -1 : 1;
-  if (aVal > bVal) return orden.asc ? 1 : -1;
-  return 0;
-});
+        if (aVal < bVal) return orden.asc ? -1 : 1;
+        if (aVal > bVal) return orden.asc ? 1 : -1;
+        return 0;
+    });
 
     
     const fetchData = async() => {
@@ -176,6 +169,36 @@ const vinosFiltrados = vinos
                     </div>
                 </div>
             )}
+  
+            {mostrarBusqueda && (
+            <div className="modal">
+                <div className="modal-content">
+                <button
+                    className="close"
+                    onClick={() => {
+                    setmostrarBusqueda(null);
+                    }}
+                >
+                    &times;
+                </button>
+
+                <FormularioBusquedaAvanzada
+                    filtro={filtro} // ✅ le pasamos el estado actual
+                    filtroDetalle={filtroDetalle}
+                    exito={(resultados) => {
+                    if (resultados.length > 0) {
+                        setVinos(resultados);
+                        setmostrarBusqueda(false);
+                    } else {
+                        alert("❌ No se encontraron resultados");
+                    }
+                    }}
+                    onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)} // ✅ manejamos los cambios desde el hijo
+                    onChangeFiltroDetalle={(nuevoFiltroDetalle) => setFiltroDetalle(nuevoFiltroDetalle)}
+                />
+                </div>
+            </div>
+            )}
             <h1 className="titulo-index">Vinos</h1>
             
             <div className="botonera">
@@ -189,32 +212,13 @@ const vinosFiltrados = vinos
                     </button>
                     <button className="btn-icon" onClick={() => setMostrarModalCreate(true)} title="Agregar Presupuesto">
                         <FaPlus />
-                    </button>               
+                    </button>        
+                    <button className="btn-icon" onClick={() => setmostrarBusqueda(true)} title="Busqueda avanzada de vino">
+                        <FaSearch />
+                    </button>            
             </div>
 
             <div className="contenedor-tabla">
-                <div className="filtros">
-                    <input
-                        type="text"
-                        placeholder="Filtrar por vino..."
-                        value={filtroVinoNombre}
-                        onChange={(e) => setfiltroVinoNombre(e.target.value)}
-                    />
-                    <input
-                        type="text"
-                        placeholder="Filtrar por tipo..."
-                        value={filtroVinoTipo}
-                        onChange={(e) => setfiltroVinoTipo(e.target.value)}
-                    />
-                    <input
-                        type="text"
-                        placeholder="Filtrar por bodega..."
-                        value={filtroVinoBodega}
-                        onChange={(e) => setfiltroVinoBodega(e.target.value)}
-                    />
-
-                </div>
-
                 <div className="tabla-scroll">
                     <table id="tablaVinos">
                         <thead>

@@ -3,7 +3,7 @@ import Select from 'react-select';
 
 const { default: Link } = require("next/link")
 
-const initialState = {name:'',stock:0, stockMinimo:'' , precioCosto:0 , ganancia:0 , deposito:'' , proveedor:''}
+const initialState = {insumoID:'' , name:'',stock:0, stockMinimo:'' , precioCosto:0 , ganancia:0 , deposito:'' , proveedor:''}
 
 const buscarInsumo = ({ exito, filtro, onChangeFiltro }) => {
     const [depositos, setDepositos] = useState([]);
@@ -85,8 +85,12 @@ const buscarInsumo = ({ exito, filtro, onChangeFiltro }) => {
                 <form className="formulario-picada" onSubmit={handleBuscar}>
                  <div className="form-row">
                     <div className="form-group">
+                        <label htmlFor="nombre">Insumo N°:</label>
+                        <input type="text" onChange={inputChange} value={filtros.insumoID} name="insumoID" placeholder="Ingresa el id del insumo" ></input>
+                    </div>
+                    <div className="form-group">
                         <label htmlFor="nombre">Nombre:</label>
-                        <input type="text" onChange={inputChange} value={filtros.name} name="name" placeholder="Ingresa el nombre del insumo" required></input>
+                        <input type="text" onChange={inputChange} value={filtros.name} name="name" placeholder="Ingresa el nombre del insumo" ></input>
                     </div>
                     
                     <div className="form-group">
@@ -191,7 +195,7 @@ const buscarInsumo = ({ exito, filtro, onChangeFiltro }) => {
                  <div className="form-row">
                     <div className="form-col">
                         <label htmlFor="stock">Stock:</label>
-                        <input type="number" onChange={inputChange} value={filtros.stock} name="stock" placeholder="Ingresa el stock del insumo" required></input>
+                        <input type="number" onChange={inputChange} value={filtros.stock} name="stock" placeholder="Ingresa el stock del insumo" ></input>
                     </div>              
                     <div className="form-col">
                         <label htmlFor="stock">Stock minimo:</label>
@@ -199,12 +203,12 @@ const buscarInsumo = ({ exito, filtro, onChangeFiltro }) => {
                     </div>            
                     <div className="form-col">
                         <label htmlFor="precioC">Precio costo:</label>
-                        <input type="number" onChange={inputChange} value={filtros.precioCosto} name="precioCosto" placeholder="Ingresa el precio costo del insumo" required></input>
+                        <input type="number" onChange={inputChange} value={filtros.precioCosto} name="precioCosto" placeholder="Ingresa el precio costo del insumo" ></input>
                     </div>
                     
                     <div className="form-col">
                         <label htmlFor="ganancia">% Ganancia:</label>
-                        <input type="number" onChange={inputChange} value={filtros.ganancia} name="ganancia" placeholder="Ingresa la ganancia del insumo" required></input>
+                        <input type="number" onChange={inputChange} value={filtros.ganancia} name="ganancia" placeholder="Ingresa la ganancia del insumo" ></input>
                     </div>
                  </div>
                     <div className="form-submit">
