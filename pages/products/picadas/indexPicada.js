@@ -15,15 +15,13 @@ const indexPicada = () => {
   const [depositos, setDepositos] = useState([]);
   const initialState = {name:'',stock:0, stockMinimo:'' , precioVenta:0 , deposito:''}
   const initialStateDetalle = {picada:'',insumo:'', cantidad:0}
-    const [filtro , setFiltro] = useState(initialState);
+  
+  const [filtro , setFiltro] = useState(initialState);
+  const [filtroDetalle , setFiltroDetalle] = useState([]);
 
   const [mostrarModalCreate, setMostrarModalCreate] = useState(false);
   const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
   const [mostrarModalBuscar, setMostrarModalBuscar] = useState(null);
-
-  const [filtroNombre, setFiltroNombre] = useState('');
-  const [filtroDeposito, setFiltroDeposito] = useState('');
-  const [filtroPrecio, setFiltroPrecio] = useState('');
   const [orden, setOrden] = useState({ campo: '', asc: true });
 
   const fetchData = async () => {
@@ -80,14 +78,6 @@ const indexPicada = () => {
   };
 
   const picadasFiltradas = picadas
-    .filter(p => {
-      const depositoNombre = depositos.find(d => d._id === p.deposito)?.name || '';
-      return (
-        p.name.toLowerCase().includes(filtroNombre.toLowerCase()) &&
-        depositoNombre.toLowerCase().includes(filtroDeposito.toLowerCase()) &&
-        (filtroPrecio === '' || p.precioVenta.toString().includes(filtroPrecio))
-      );
-    })
     .sort((a, b) => {
     const campo = orden.campo;
     if (!campo) return 0;
@@ -160,13 +150,13 @@ const indexPicada = () => {
                 className="close"
                 onClick={() => {
                 setMostrarModalBuscar(null);
-                fetchData();
                 }}
             >
                 &times;
             </button>
             <BusquedaAvanzadaPicadas
                 filtro={filtro} // ✅ le pasamos el estado actual
+                filtroDetalle={filtroDetalle}
                 exito={(resultados) => {
                 if (resultados && resultados.length > 0) {
                     setPicadas(resultados);
@@ -176,6 +166,7 @@ const indexPicada = () => {
                 }
                 }}
                 onChangeFiltro={(nuevoFiltro) => setFiltro(nuevoFiltro)} // ✅ manejamos los cambios desde el hijo
+                onChangeFiltroDetalle={(nuevoFiltroDetalle) => setFiltroDetalle(nuevoFiltroDetalle)}
             />
             </div>
         </div>

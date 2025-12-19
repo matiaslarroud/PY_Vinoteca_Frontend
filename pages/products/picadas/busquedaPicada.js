@@ -7,7 +7,7 @@ const { default: Link } = require("next/link")
 const initialState = {picadaID:'', name:'',stock:0, stockMinimo:'' , precioVenta:0 , deposito:''}
 const initialStateDetalle = {picada:'',insumo:'', cantidad:0}
 
-const buscarPicada = ({ exito, filtro, onChangeFiltro }) => {
+const buscarPicada = ({ exito, filtro, onChangeFiltro , filtroDetalle , onChangeFiltroDetalle }) => {
     const [depositos, setDepositos] = useState([]);
     const [insumos, setInsumos] = useState([]);
     const [detalles, setDetalles] = useState([initialStateDetalle]);
@@ -16,19 +16,23 @@ const buscarPicada = ({ exito, filtro, onChangeFiltro }) => {
     
         // Sincroniza con los cambios del padre
         useEffect(() => {
-            setFiltros(filtro || {});
-        }, [filtro]);
+                setFiltros(filtro);
+                setDetalles(filtroDetalle)
+        }, [filtro,filtroDetalle]);
     
-         const inputChange = (e) => {
+        const inputChange = (e) => {
             const { name, value } = e.target;
             const nuevosFiltros = { ...filtros, [name]: value };
             setFiltros(nuevosFiltros);
             onChangeFiltro(nuevosFiltros); 
+            onChangeFiltroDetalle(detalles); 
         };
     
         const borrarFiltros = () => {
             setFiltros(initialState);
-            onChangeFiltro(initialState);
+            onChangeFiltro(initialStateDetalle);
+            setDetalles([])
+            onChangeFiltroDetalle([]);
         };
     
     
@@ -55,24 +59,37 @@ const buscarPicada = ({ exito, filtro, onChangeFiltro }) => {
         fetch_Insumos()
     } , [])
 
-     const handleBuscar = async (e) => {
+    const handleBuscar = async (e) => {
         e.preventDefault();
+
+        // Armamos el cuerpo a enviar
+        const body = {
+            ...filtros,
+            detalles: detalles.map(d => ({
+                insumo: d.insumo,
+            }))
+        };
+
         const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productPicada/buscar`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(filtros),
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
         });
+
         const data = await res.json();
-        if (data.ok) {exito(data.data)};
-    }; 
+        if (data.ok){
+            exito(data.data);
+        } else {
+            exito({})
+        }
+    };
 
     const handleDetalleChange = (index, field, value) => {
         const nuevosDetalles = [...detalles];
-        nuevosDetalles[index][field] = field === "cantidad" ? parseFloat(value) : value;
-        
-        const prod = insumos.find(p => p._id === nuevosDetalles[index].insumo);
-        
+        nuevosDetalles[index][field] = value;
+
         setDetalles(nuevosDetalles);
+        onChangeFiltroDetalle(nuevosDetalles)
     };
 
 
@@ -83,11 +100,11 @@ const buscarPicada = ({ exito, filtro, onChangeFiltro }) => {
     const selectChange = (selectedOption, actionMeta) => {
         const name = actionMeta.name;
         const value = selectedOption ? selectedOption.value : "";
-
-        setFiltros({
-            ...filtros,
-            [name]: value,
-        });
+        
+        const nuevosFiltros = { ...filtros, [name]: value };
+        setFiltros(nuevosFiltros);
+        onChangeFiltro(nuevosFiltros); 
+        onChangeFiltroDetalle(detalles);
     };
 
     const opciones_insumos = insumos.map(v => ({ value: v._id,label: v.name }))
