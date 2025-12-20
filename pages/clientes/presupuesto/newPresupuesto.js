@@ -537,29 +537,31 @@ const createPresupuesto = ({exito}) => {
                                         />
                                     </div>
                                     
-                                    {d.tipoProducto && (
-                                       <button
-                                                type="button"
-                                                className="btn-plus"
-                                                onClick={() => {
-                                                    if (d.tipoProducto === 'ProductoInsumo') {
-                                                        setDetalleActivo(i);
-                                                        setMostrarModalBuscarInsumo(true);
-                                                    } 
-                                                    else if (d.tipoProducto === 'ProductoPicada') {
-                                                        setDetalleActivo(i);
-                                                        setMostrarModalBuscarPicada(true);
-                                                    } 
-                                                    else if (d.tipoProducto === 'ProductoVino') {
-                                                        setDetalleActivo(i);
-                                                        setMostrarModalBuscarVino(true);
-                                                    }
-                                                }}
-                                                title="Búsqueda avanzada"
-                                            >
-                                                <FaSearch />
-                                        </button>
-                                    )}     
+                                    <div className='form-col-item1'>
+                                        {d.tipoProducto && (
+                                        <button
+                                                    type="button"
+                                                    className="btn-plus"
+                                                    onClick={() => {
+                                                        if (d.tipoProducto === 'ProductoInsumo') {
+                                                            setDetalleActivo(i);
+                                                            setMostrarModalBuscarInsumo(true);
+                                                        } 
+                                                        else if (d.tipoProducto === 'ProductoPicada') {
+                                                            setDetalleActivo(i);
+                                                            setMostrarModalBuscarPicada(true);
+                                                        } 
+                                                        else if (d.tipoProducto === 'ProductoVino') {
+                                                            setDetalleActivo(i);
+                                                            setMostrarModalBuscarVino(true);
+                                                        }
+                                                    }}
+                                                    title="Búsqueda avanzada"
+                                                >
+                                                    <FaSearch />
+                                            </button>
+                                        )}
+                                    </div>   
 
                                     <div className='form-col-item1'>
                                         <Select
