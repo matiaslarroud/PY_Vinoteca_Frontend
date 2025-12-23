@@ -279,23 +279,7 @@ const createNotaPedido = ({exito , param , tipo}) => {
             return
         }
 
-        for (const detalle of detalles) {
-            const resStock = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/stock/${detalle.producto}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        cantidadVendida: detalle.cantidad 
-                })
-            });
-
-            if (!resStock.ok) {
-                const errorData = await resStock.json();
-                alert(errorData.message); 
-                return;
-            }
-            
-        }
-
+        // ENVIA NOTA DE PEDIDO
         const resNotaPedido = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -311,6 +295,8 @@ const createNotaPedido = ({exito , param , tipo}) => {
 
         // GUARDAMOS DETALLES
         for (const detalle of detalles) {
+
+            // ENVIA DETALLE
             const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedidoDetalle`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -328,6 +314,21 @@ const createNotaPedido = ({exito , param , tipo}) => {
                 const errorData = await resDetalle.json();
                 alert(errorData.message)
                 return
+            }
+
+            // ACTUALIZA STOCK
+            const resStock = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/stock/${detalle.producto}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        cantidadVendida: detalle.cantidad 
+                })
+            });
+
+            if (!resStock.ok) {
+                const errorData = await resStock.json();
+                alert(errorData.message); 
+                return;
             }
         }
             

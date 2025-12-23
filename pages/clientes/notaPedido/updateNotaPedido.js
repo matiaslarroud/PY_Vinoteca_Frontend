@@ -366,23 +366,9 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
             alert("❌ Faltan completar algunos campos obligatorios.")
             return
         }
-        for (const detalle of detalles) {
-            const resStock = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/stock/${detalle.producto}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        cantidadVendida: detalle.cantidad 
-                })
-            });
-            
-            if (!resStock.ok) {
-                const errData = await resStock.json();
-                alert(errData.message)
-                return
-            }
-        }
 
-         const resNotaPedido = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido/${notaPedidoID}`,
+        // ACTUALIZA PEDIDO
+        const resNotaPedido = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido/${notaPedidoID}`,
             {
                 method: 'PUT',
                 headers: {'Content-Type':'application/json'},
@@ -397,6 +383,7 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
         }
         const identificador = notaPedidoCreado.data._id;
 
+        // ELIMINA DETALLES ANTERIORES DE PEDIDO
         await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedidoDetalle/${identificador}`,
             {
                 method:'DELETE',
@@ -417,6 +404,8 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
 
         // GUARDAMOS DETALLES
         for (const detalle of detalles) {
+
+            // ENVIA DETALLES
             const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedidoDetalle`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -430,6 +419,21 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
                 });
             if (!resDetalle.ok) {
                 const errData = await resDetalle.json();
+                alert(errData.message)
+                return
+            }
+
+            // ACTUALIZA STOCK
+            const resStock = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/stock/${detalle.producto}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        cantidadVendida: detalle.cantidad 
+                })
+            });
+            
+            if (!resStock.ok) {
+                const errData = await resStock.json();
                 alert(errData.message)
                 return
             }
