@@ -1,14 +1,30 @@
 const { useState, useEffect } = require("react")
-import Select from 'react-select';          
-import { FaTrash} from "react-icons/fa";
+import Select from 'react-select';        
+import { FaTrash , FaSearch} from "react-icons/fa";
 
 import FormularioCreateProveedor from "../createProveedor"
 import FormularioCreateEmpleado from "../../gestion/empleado/createEmpleado"
 
+import FormularioBusquedaInsumo from '../../products/insumos/busquedaInsumo'
+import FormularioBusquedaVino from '../../products/vinos/busquedaVino'
+import FormularioBusquedaPicada from '../../products/picadas/busquedaPicada'
+
 const { default: Link } = require("next/link")
 
 const initialStatePresupuesto = {proveedor:'', empleado:''}
-const initialDetalle = { tipoProducto: "",producto: "", cantidad: 0, solicitudPresupuesto:'' };
+const initialDetalle = {
+    tipoProducto: "",
+    producto: "",
+    cantidad: 0,
+    precio: 0,
+    presupuesto:"",
+    importe: 0,
+    productos: []
+};
+
+const initialStateVino = {name:'',stock:0 , stockMinimo:'', proveedor:'' , bodega:'' , paraje:'' , crianza : '' , precioCosto:0 , ganancia:0 , tipo:'' , varietal:'' , volumen:'' , deposito:''}
+const initialStateInsumo = {name:'',stock:0, stockMinimo:'' , precioCosto:0 , ganancia:0 , deposito:'' , proveedor:''}
+const initialStatePicada = {name:'',stock:0, stockMinimo:'' , precioVenta:0 , deposito:''}
 
 const createPresupuesto = ({exito , tipo , param}) => {
     const [presupuesto , setPresupuesto] = useState(initialStatePresupuesto);
@@ -18,6 +34,19 @@ const createPresupuesto = ({exito , tipo , param}) => {
     const [detalles,setDetalles] = useState([])
     const [productos,setProductos] = useState([]);
     const [tipoProductos,setTipoProductos] = useState([]);
+        
+    const [productosBase, setProductosBase] = useState([]);
+
+    const [detalleActivo, setDetalleActivo] = useState(null);
+    
+    const limpiarFiltros = () => {
+        setProductos(productosBase);
+    };
+    
+    const [filtroVino , setFiltroVino] = useState(initialStateVino); 
+    const [filtroPicada , setFiltroPicada] = useState(initialStatePicada); 
+    const [filtroInsumo , setFiltroInsumo] = useState(initialStateInsumo); 
+    const [filtroDetalle , setFiltroDetalle] = useState([]);            
     
     const detallesValidos = detalles.filter(d => d.producto && d.cantidad > 0);
     const puedeGuardar = detallesValidos.length > 0;
@@ -30,6 +59,7 @@ const createPresupuesto = ({exito , tipo , param}) => {
             .then((s)=>{
                 if(s.ok){
                     setProductos(s.data)
+                    setProductosBase(s.data)
                 }
             })
         .catch((err)=>{console.log("Error al cargar productos.\nError: ",err)})
@@ -171,11 +201,15 @@ const createPresupuesto = ({exito , tipo , param}) => {
 
     const agregarDetalle = () => {
         setDetalles([...detalles, { ...{tipoProducto:"",producto: "", cantidad: 0 } }]);
+        limpiarFiltros();
     };
 
     const [mostrarModalProveedor, setMostrarModalCreateProveedor] = useState(false)
     const [mostrarModalEmpleado, setMostrarModalCreateEmpleado] = useState(false)
-    
+
+    const [mostrarModalBuscarInsumo, setMostrarModalBuscarInsumo] = useState(false);
+    const [mostrarModalBuscarPicada, setMostrarModalBuscarPicada] = useState(false);
+    const [mostrarModalBuscarVino, setMostrarModalBuscarVino] = useState(false);
 
     const opciones_tipoProductos = tipoProductos.map(v => ({
         value: v,
@@ -183,13 +217,6 @@ const createPresupuesto = ({exito , tipo , param}) => {
                 v === "ProductoPicada" ? "Picada" :
                 v === "ProductoInsumo" ? "Insumo" : v
     }));
-    const opciones_productos = productos
-        .map(v => ({
-            value: v._id,
-            label: v.name,
-            stock: v.stock,
-            tipoProducto: v.tipoProducto
-        }));
     const opciones_empleados = empleados.map(v => ({ value: v._id,label: `${v._id} - ${v.name}` }));
     const opciones_proveedores = proveedores.map(v => ({ value: v._id,label: `${v._id} - ${v.name}` }));
 
@@ -237,8 +264,74 @@ const createPresupuesto = ({exito , tipo , param}) => {
                     </div>
                 </div>
             )}
+           
+            {mostrarModalBuscarInsumo && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalBuscarInsumo(false)}>&times;</button>
+                    <FormularioBusquedaInsumo
+                    filtro={filtroInsumo} 
+                    exito={(resultados) => {
+                        if (resultados.length > 0) {
+                            const copia = [...detalles];
+                            copia[detalleActivo].productos = resultados;
+                            setDetalles(copia);
+                            setMostrarModalBuscarInsumo(false);
+                        }
+                    }}
 
-            
+                    onChangeFiltro={(nuevoFiltro) => setFiltroInsumo(nuevoFiltro)}
+                    />
+                </div>
+                </div>
+            )}
+           
+            {mostrarModalBuscarPicada && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalBuscarPicada(false)}>&times;</button>
+                    <FormularioBusquedaPicada
+                        filtro={filtroPicada} // ✅ le pasamos el estado actual
+                        filtroDetalle={filtroDetalle}
+                        exito={(resultados) => {
+                            if (resultados.length > 0) {
+                                const copia = [...detalles];
+                                copia[detalleActivo].productos = resultados;
+                                setDetalles(copia);
+                                setMostrarModalBuscarPicada(false);
+                            }
+                        }}
+
+                        onChangeFiltro={(nuevoFiltro) => setFiltroPicada(nuevoFiltro)} // ✅ manejamos los cambios desde el hijo
+                        onChangeFiltroDetalle={(nuevoFiltroDetalle) => setFiltroDetalle(nuevoFiltroDetalle)}
+                    />
+                </div>
+                </div>
+            )}
+           
+            {mostrarModalBuscarVino && (
+                <div className="modal">
+                <div className="modal-content">
+                    <button className="close" onClick={() => setMostrarModalBuscarVino(false)}>&times;</button>
+                    <FormularioBusquedaVino
+                        filtro={filtroVino} // ✅ le pasamos el estado actual
+                        filtroDetalle={filtroDetalle}
+                        exito={(resultados) => {
+                            if (resultados.length > 0) {
+                                const copia = [...detalles];
+                                copia[detalleActivo].productos = resultados;
+                                setDetalles(copia);
+                                setMostrarModalBuscarVino(false);
+                            }
+                        }}
+
+                        onChangeFiltro={(nuevoFiltro) => setFiltroVino(nuevoFiltro)} // ✅ manejamos los cambios desde el hijo
+                        onChangeFiltroDetalle={(nuevoFiltroDetalle) => setFiltroDetalle(nuevoFiltroDetalle)}
+                    />
+                </div>
+                </div>
+            )}
+
 
             <div className="form-container">
                 <h1 className="titulo-pagina">Cargar Solicitud de Presupuesto</h1>
@@ -363,6 +456,18 @@ const createPresupuesto = ({exito , tipo , param}) => {
                             <div className="form-group-presupuesto">
                                 
                                 {detalles.map((d, i) => {
+                                                                
+                                    const opciones_productos = (
+                                            d.productos && d.productos.length > 0
+                                                ? d.productos        // ← filtrados SOLO de este detalle
+                                                : productosBase      // ← base completa
+                                        ).map(v => ({
+                                            value: v._id,
+                                            label: v.name,
+                                            stock: v.stock,
+                                            tipoProducto: v.tipoProducto
+                                        }));
+
 
                                 return <div key={i} className="presupuesto-item">
                                     <div className='form-col-item1'>
@@ -410,6 +515,33 @@ const createPresupuesto = ({exito , tipo , param}) => {
                                             }}
                                         />
                                     </div>
+                                    
+                                    <div className='form-col-item1'>
+                                        {d.tipoProducto && (
+                                        <button
+                                                    type="button"
+                                                    className="btn-plus"
+                                                    onClick={() => {
+                                                        if (d.tipoProducto === 'ProductoInsumo') {
+                                                            setDetalleActivo(i);
+                                                            setMostrarModalBuscarInsumo(true);
+                                                        } 
+                                                        else if (d.tipoProducto === 'ProductoPicada') {
+                                                            setDetalleActivo(i);
+                                                            setMostrarModalBuscarPicada(true);
+                                                        } 
+                                                        else if (d.tipoProducto === 'ProductoVino') {
+                                                            setDetalleActivo(i);
+                                                            setMostrarModalBuscarVino(true);
+                                                        }
+                                                    }}
+                                                    title="Búsqueda avanzada"
+                                                >
+                                                    <FaSearch />
+                                            </button>
+                                        )}
+                                    </div>   
+                                    
                                     <div className='form-col-item1'>
                                         <Select
                                             className="form-select-react"
