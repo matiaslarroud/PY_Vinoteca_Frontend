@@ -151,9 +151,9 @@ const fetchPaises = () => {
             altura: Number(cliente.altura), deptoNumero: cliente.deptoNumero, deptoLetra: cliente.deptoLetra 
         };
 
-        if (cliente.cuentaCorriente) {
-            bodyData.saldoCuentaCorriente = cliente.saldoCuentaCorriente;
-        }
+        bodyData.saldoCuentaCorriente = cliente.cuentaCorriente
+        ? Number(cliente.saldoCuentaCorriente || 0)
+        : 0;
 
         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente/${clienteID}`,
             {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { FaBox , FaUserFriends, FaTruck } from "react-icons/fa";
+import { FaBox , FaUserFriends, FaTruck , FaCashRegister  } from "react-icons/fa";
 import LowStockGrid from "@/components/lowStock-grid";
 
 export default function Home() {
@@ -83,6 +83,16 @@ export default function Home() {
             <Link href="/proveedores/indexProveedor">
               <FaTruck className="icono" /><br/>
               <span>Proveedores</span>
+            </Link>
+          </div>
+        )}
+
+        {/* 🔒 Solo administrador puede ver caja */}
+        {usuario.rol === "administrador" && (
+          <div className="boton-acceso">
+            <Link href="/gestion/caja/indexCaja">
+              <FaCashRegister  className="icono" /><br/>
+              <span>Caja</span>
             </Link>
           </div>
         )}

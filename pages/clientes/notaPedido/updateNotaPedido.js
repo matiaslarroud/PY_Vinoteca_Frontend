@@ -333,16 +333,21 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
 
 
     const clickChange = async(e) => {
-
-         e.preventDefault();
-         const bodyData = {
+        e.preventDefault();
+        const bodyData = {
             total: notaPedido.total,
             cliente: notaPedido.cliente,
             empleado: notaPedido.empleado,
             medioPago: notaPedido.medioPago,
-            fechaEntrega: notaPedido.fechaEntrega.split("T")[0],
+            fechaEntrega: notaPedido.fechaEntrega,
             envio: notaPedido.envio,
+            descuento: notaPedido.descuento,
+            detalles: detalles
         };
+
+        if (notaPedido.presupuesto) {
+            bodyData.presupuesto = notaPedido.presupuesto;
+        }
         
         if(notaPedido.envio){
             bodyData.provincia = notaPedido.provincia;
@@ -354,92 +359,24 @@ const updateNotaPedido = ({exito,notaPedidoID}) => {
             bodyData.deptoLetra = notaPedido.deptoLetra;
         }
 
-        if (notaPedido.presupuesto) {
-            bodyData.presupuesto = notaPedido.presupuesto;
-        }
-
-        if (notaPedido.descuento) {
-            bodyData.descuento = notaPedido.descuento;
-        }
-
         if(notaPedido.fechaEntrega===""){
             alert("❌ Faltan completar algunos campos obligatorios.")
             return
         }
 
-        // ACTUALIZA PEDIDO
-        const resNotaPedido = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido/${notaPedidoID}`,
-            {
-                method: 'PUT',
-                headers: {'Content-Type':'application/json'},
-                body: JSON.stringify(bodyData)
-            }
-        )
+        // ENVIA NOTA DE PEDIDO
+        const resNotaPedido = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedido/${notaPedidoID}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bodyData)
+        })
 
         const notaPedidoCreado = await resNotaPedido.json();
-        if(!notaPedidoCreado.ok) {
-            alert(notaPedidoCreado.message)
+        if(!notaPedidoCreado.ok){
+            alert(notaPedidoCreado.message);
             return
-        }
-        const identificador = notaPedidoCreado.data._id;
-
-        // ELIMINA DETALLES ANTERIORES DE PEDIDO
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedidoDetalle/${identificador}`,
-            {
-                method:'DELETE',
-                headers: {
-                    'Content-Type':'application/json',
-                }
-            }
-        ).then((a)=>{return a.json()})
-            .then((res)=>{
-                if(!res.ok){
-                    alert(res.message)
-                    return
-                }
-            })
-            .catch((err)=>{
-                console.log("❌ Error al enviar producto para su eliminación. \n Error: ",err);
-            })
-
-        // GUARDAMOS DETALLES
-        for (const detalle of detalles) {
-
-            // ENVIA DETALLES
-            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedidoDetalle`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    producto: detalle.producto,
-                    precio: detalle.precio,
-                    cantidad: detalle.cantidad,
-                    importe: detalle.importe,
-                    notaPedido: notaPedidoID
-            })
-                });
-            if (!resDetalle.ok) {
-                const errData = await resDetalle.json();
-                alert(errData.message)
-                return
-            }
-
-            // ACTUALIZA STOCK
-            const resStock = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/stock/${detalle.producto}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        cantidadVendida: detalle.cantidad 
-                })
-            });
+        }            
             
-            if (!resStock.ok) {
-                const errData = await resStock.json();
-                alert(errData.message)
-                return
-            }
-        }
-       
-        
         setDetalles([initialDetalle]);
         setNotaPedido(initialStateNotaPedido);
         alert(notaPedidoCreado.message)

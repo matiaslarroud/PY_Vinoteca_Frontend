@@ -258,6 +258,7 @@ const createNotaPedido = ({exito , param , tipo}) => {
             fechaEntrega: notaPedido.fechaEntrega,
             envio: notaPedido.envio,
             descuento: notaPedido.descuento,
+            detalles: detalles
         };
 
         if (notaPedido.presupuesto) {
@@ -287,50 +288,10 @@ const createNotaPedido = ({exito , param , tipo}) => {
         })
 
         const notaPedidoCreado = await resNotaPedido.json();
-        if(!notaPedidoCreado.ok) {
-            alert(notaPedidoCreado.message)
+        if(!notaPedidoCreado.ok){
+            alert(notaPedidoCreado.message);
             return
-        }
-        const notaPedidoID = notaPedidoCreado.data._id;
-
-        // GUARDAMOS DETALLES
-        for (const detalle of detalles) {
-
-            // ENVIA DETALLE
-            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/notaPedidoDetalle`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    producto: detalle.producto,
-                    precio: detalle.precio,
-                    cantidad: detalle.cantidad,
-                    importe: detalle.importe,
-                    notaPedido: notaPedidoID
-            })
-            
-            
-            });
-            if (!resDetalle.ok) {
-                const errorData = await resDetalle.json();
-                alert(errorData.message)
-                return
-            }
-
-            // ACTUALIZA STOCK
-            const resStock = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/stock/${detalle.producto}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        cantidadVendida: detalle.cantidad 
-                })
-            });
-
-            if (!resStock.ok) {
-                const errorData = await resStock.json();
-                alert(errorData.message); 
-                return;
-            }
-        }
+        }            
             
         setDetalles([initialDetalle]);
         setNotaPedido(initialStateNotaPedido);

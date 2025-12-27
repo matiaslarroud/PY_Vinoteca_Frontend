@@ -161,6 +161,7 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                     cliente: presupuesto.cliente,
                     empleado: presupuesto.empleado,
                     total: presupuesto.total,
+                    detalles:detalles
                 })
             }
         )
@@ -170,46 +171,7 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
             alert(presupuestoCreado.message)
             return
         }
-        const identificador = presupuestoCreado.data._id;
-
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuestoDetalle/${identificador}`,
-            {
-                method:'DELETE',
-                headers: {
-                    'Content-Type':'application/json',
-                }
-            }
-        ).then((a)=>{return a.json()})
-            .then((res)=>{
-                if(!res.ok){
-                    alert(res.message)
-                    return
-                }
-            })
-            .catch((err)=>{
-                console.log("❌ Error al envia Picada para su eliminación. \n Error: ",err);
-            })
-
-        // GUARDAMOS DETALLES
-        for (const detalle of detalles) {
-            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuestoDetalle`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    producto: detalle.producto,
-                    cantidad: detalle.cantidad,
-                    precio: detalle.precio,
-                    importe: detalle.importe,
-                    presupuesto: presupuestoID
-            })
-                });
-
-            const dataDetalle = await resDetalle.json();
-            if (!dataDetalle.ok) {
-                alert(dataDetalle.message);
-                return;
-            }
-        }
+        
         setDetalles([initialDetalle]);
         setPresupuesto(initialStatePresupuesto);
         alert(presupuestoCreado.message)

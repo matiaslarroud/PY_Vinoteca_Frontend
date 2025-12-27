@@ -13,7 +13,7 @@ const { default: Link } = require("next/link")
 const initialState = {
     name:'', lastname:'', fechaNacimiento:'', telefono:'', email:'', cuit:'',
     pais:'', provincia:'', localidad:'', barrio:'', calle:'', condicionIva:'', cuentaCorriente:false,
-    saldoCuentaCorriente:''
+    saldoCuentaCorriente:0
 }
 const createCliente = ({exito}) => {
     const [cliente , setCliente] = useState(initialState);
@@ -104,9 +104,10 @@ const createCliente = ({exito}) => {
             altura: Number(cliente.altura), deptoNumero: cliente.deptoNumero, deptoLetra: cliente.deptoLetra 
         };
 
-        if (cliente.cuentaCorriente) {
-            bodyData.saldoCuentaCorriente = cliente.saldoCuentaCorriente;
-        }
+        bodyData.saldoCuentaCorriente = cliente.cuentaCorriente
+        ? Number(cliente.saldoCuentaCorriente || 0)
+        : 0;
+
          fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente`,
             {
                 method: 'POST',

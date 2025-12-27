@@ -141,6 +141,14 @@ export default function Navbar({ usuario }) {
                     </div>
                   )}
                 </div>
+
+                <Link
+                  href="/gestion/caja/indexCaja"
+                  onClick={handleLinkClick}
+                  className={isActive("/gestion/caja/indexCaja") ? styles.active : ""}
+                >
+                  Caja
+                </Link>
               
           </>
         )}

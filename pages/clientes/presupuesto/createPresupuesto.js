@@ -150,6 +150,7 @@ const createpresupuesto = ({exito , param , tipo}) => {
             total: presupuesto.total,
             cliente: presupuesto.cliente,
             empleado: presupuesto.empleado,
+            detalles:detalles
         };
 
         const respresupuesto = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuesto`, {
@@ -163,35 +164,11 @@ const createpresupuesto = ({exito , param , tipo}) => {
             alert(presupuestoCreado.message)
             return
         }
-        const presupuestoID = presupuestoCreado.data._id;
-
-        // GUARDAMOS DETALLES
-        for (const detalle of detalles) {
-            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/presupuestoDetalle`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    producto: detalle.producto,
-                    precio: detalle.precio,
-                    cantidad: detalle.cantidad,
-                    importe: detalle.importe,
-                    presupuesto: presupuestoID
-            })
             
-            
-            });
-
-            const dataDetalle = await resDetalle.json();
-            if (!dataDetalle.ok) {
-                alert(dataDetalle.message);
-                return;
-            }
-        }
-            
-            setDetalles([initialDetalle]);
-            setPresupuesto(initialStatePresupuesto);
-            alert(presupuestoCreado.message)
-            exito();
+        setDetalles([initialDetalle]);
+        setPresupuesto(initialStatePresupuesto);
+        alert(presupuestoCreado.message)
+        exito();
     }
   
 
