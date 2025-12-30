@@ -1,9 +1,9 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';
 
-import Formulario_MedioPago from '../tablasVarias/medioPago/createMedioPago'
+import Formulario_MedioPago from '../../tablasVarias/medioPago/createMedioPago'
 
-const initialState = {referencia:'',persona:'', total:'', tipo:null, medioPago:''}
+const initialState = {referencia:'',persona:'', total:'', tipo:'', medioPago:''}
 
 const formCaja = ({exito}) => {
     const [movimiento, setMovimiento] = useState(initialState);
@@ -75,8 +75,9 @@ const formCaja = ({exito}) => {
 
     const opciones_mediosPago = mediosPago.map(p => ({ value: p._id, label: p.name }));
     const opcionesTipoMovimiento = [
-        { value: true, label: "ENTRADA" },
-        { value: false, label: "SALIDA" },
+        { value: "ENTRADA" , label: "ENTRADA" },
+        { value: "SALIDA", label: "SALIDA" },
+        { value: "CUENTA_CORRIENTE", label: "CUENTA_CORRIENTE" },
     ];
 
 
@@ -168,7 +169,7 @@ const formCaja = ({exito}) => {
                                 className="form-select-react"
                                 classNamePrefix="rs"
                                 options={opcionesTipoMovimiento}
-                                value={opcionesTipoMovimiento.find(op => op.value === movimiento.tipo) || null}
+                                value={opcionesTipoMovimiento.find(op => op.value === movimiento.tipo) || ''}
                                 onChange={selectChange}
                                 name='tipo'
                                 placeholder="Tipo de movimiento..."

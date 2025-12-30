@@ -90,9 +90,9 @@ export default function Home() {
         {/* 🔒 Solo administrador puede ver caja */}
         {usuario.rol === "administrador" && (
           <div className="boton-acceso">
-            <Link href="/gestion/caja/indexCaja">
+            <Link href="/gestion/informes/indexInformes">
               <FaCashRegister  className="icono" /><br/>
-              <span>Caja</span>
+              <span>Informes</span>
             </Link>
           </div>
         )}

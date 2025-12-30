@@ -12,6 +12,7 @@ const indexTransporte = () => {
   const router = useRouter();
 
   const [cajas, setCajas] = useState([]);
+  const [resumenCaja, setResumenCaja] = useState(null);
 
   const [mostrarModalCreate, setMostrarModalCreate] = useState(null);
   const [mostrarModalUpdate, setMostrarModalUpdate] = useState(null);
@@ -20,8 +21,9 @@ const indexTransporte = () => {
 
   const fetchData = async () => {
     const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/caja`);
-    const { data } = await res.json();
+    const { data, resumen } = await res.json();
     setCajas(data);
+    setResumenCaja(resumen);
   };
 
   useEffect(() => {
@@ -82,7 +84,8 @@ const indexTransporte = () => {
           </div>
         )}
 
-        <h1 className="titulo-index">Caja Diaria</h1>
+
+        <h1 className="titulo-index">Movimientos Totales</h1>
 
         <div className="botonera">
           <button className="btn-icon" onClick={() => router.back()} title="Volver atrás">
@@ -93,12 +96,36 @@ const indexTransporte = () => {
                   <FaHome />
               </Link>
           </button>
-          <button className="btn-icon" onClick={() => setMostrarModalCreate(true)} title="Agregar Picada">
+          <button className="btn-icon" onClick={() => setMostrarModalCreate(true)} title="Agregar Movimiento">
             <FaPlus />
           </button>
         </div>
 
         <div className="contenedor-tabla">
+          {resumenCaja && (
+            <div className="resumen-caja">
+              <div className="card-resumen ingreso">
+                <span className="titulo">Ingresos</span>
+                <span className="valor">${resumenCaja.ingresos}</span>
+              </div>
+
+              <div className="card-resumen egreso">
+                <span className="titulo">Egresos</span>
+                <span className="valor">${resumenCaja.egresos}</span>
+              </div>
+
+              <div className="card-resumen saldo">
+                <span className="titulo">Saldo Caja</span>
+                <span className="valor">${resumenCaja.saldoCaja}</span>
+              </div>
+
+              <div className="card-resumen cc">
+                <span className="titulo">Cuenta Corriente</span>
+                <span className="valor">${resumenCaja.cuentaCorriente}</span>
+              </div>
+            </div>
+          )}
+
 
           <div className="tabla-scroll">
             <table>
@@ -118,13 +145,27 @@ const indexTransporte = () => {
                 {cajas.map(({ _id, fecha , persona , referencia , tipo , medioPago , total}) => {
                   return (
                     <tr key={_id}
-                        className={!tipo ? "mov-salida" : "mov-entrada"}
+                        className={
+                          tipo === 'CUENTA_CORRIENTE'
+                            ? 'mov-cuentaCorriente'
+                            : tipo === 'SALIDA'
+                              ? 'mov-salida'
+                              : 'mov-entrada'
+                        }
+
                     >
                       <td>{_id}</td>
                       <td>{fecha.split("T")[0]}</td>
                       <td>{persona}</td>
                       <td>{referencia}</td>
-                      <td>{tipo ? "ENTRADA" : "SALIDA"}</td>
+                      <td>{
+                          tipo === 'CUENTA_CORRIENTE'
+                            ? 'CUENTA CORRIENTE'
+                            : tipo === 'ENTRADA'
+                              ? 'ENTRADA'
+                              : 'SALIDA'
+                        }
+                      </td>
                       <td>{medioPago}</td>
                       <td>{total}</td>
                       <td>
@@ -154,6 +195,53 @@ const indexTransporte = () => {
           .mov-entrada {
             color: #ffffffff;
           }
+
+          .mov-cuentaCorriente {
+            color: #6b7027ff;
+          }
+
+          .resumen-caja {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+          }
+
+          .card-resumen {
+            padding: 14px;
+            border-radius: 8px;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+          }
+
+          .card-resumen .titulo {
+            font-size: 0.8rem;
+            opacity: 0.9;
+          }
+
+          .card-resumen .valor {
+            font-size: 1.4rem;
+            font-weight: bold;
+          }
+
+          .ingreso {
+            background: #2e7d32;
+          }
+
+          .egreso {
+            background: #c62828;
+          }
+
+          .saldo {
+            background: #1565c0;
+          }
+
+          .cc {
+            background: #f9a825;
+            color: #000;
+          }
+
         `}</style>
 
       </div>

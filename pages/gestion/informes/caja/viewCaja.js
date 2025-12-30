@@ -1,15 +1,11 @@
 const { useState, useEffect } = require("react")
 import Select from 'react-select';
 
-import Formulario_MedioPago from '../tablasVarias/medioPago/createMedioPago'
-
-const initialState = {referencia:'',persona:'', total:'', tipo:null, medioPago:''}
+const initialState = {referencia:'',persona:'', total:'', tipo:'', medioPago:''}
 
 const formCaja = ({exito , movimientoID}) => {
     const [movimiento, setMovimiento] = useState(initialState);
     const [mediosPago, setMediosPago] = useState([]);
-
-    const [mostrarMedioPago , setMostrarMedioPago] = useState(false)
     
     const fetchData_MediosPago = async () => {
         const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/medioPago`);
@@ -56,36 +52,11 @@ const formCaja = ({exito , movimientoID}) => {
         });
     };
 
-    const clickChange = async(e) => {
-         e.preventDefault();
-         await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/caja/${movimientoID}`,
-            {
-                method: 'PUT',
-                headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({
-                    referencia: movimiento.referencia,
-                    total: movimiento.total,
-                    tipo: movimiento.tipo,
-                    medioPago: movimiento.medioPago
-                })
-            })
-            .then((s) => s.json())
-                .then((a) => {
-                    if(a.ok){
-                        setMovimiento(initialState);
-                        alert(a.message)                        
-                        exito();
-                    } else {
-                        alert(a.message)
-                    }
-                })
-                .catch((err) => console.error("❌ Error al modificar movimiento:", err))
-    }
-
     const opciones_mediosPago = mediosPago.map(p => ({ value: p._id, label: p.name }));
     const opcionesTipoMovimiento = [
-        { value: true, label: "ENTRADA" },
-        { value: false, label: "SALIDA" },
+        { value: "ENTRADA", label: "ENTRADA" },
+        { value: "SALIDA", label: "SALIDA" },
+        { value: "CUENTA_CORRIENTE", label: "CUENTA_CORRIENTE" },
     ];
 
 
@@ -128,30 +99,9 @@ const formCaja = ({exito , movimientoID}) => {
 
     return(
         <>
-            {mostrarMedioPago && (
-                <div className="modal">
-                <div className="modal-content">
-                    <button className="close" onClick={() => 
-                        {
-                            setMostrarMedioPago(null)
-                        }
-                    }>
-                        &times;
-                    </button>
-                    <Formulario_MedioPago
-                        exito={() => 
-                            {
-                                setMostrarMedioPago(false)
-                                fetchData_MediosPago()
-                            }}
-                    />
-                </div>
-                </div>
-            )}
-                    
             <div className="form-container">
                 <div className="form-row">
-                    <h1 className="titulo-pagina">Modificar Movimiento de Caja</h1>
+                    <h1 className="titulo-pagina">Visualizacion de Movimiento de Caja</h1>
                 </div>
 
                 <form className="formulario-presupuesto">
@@ -167,6 +117,7 @@ const formCaja = ({exito , movimientoID}) => {
                                 name="referencia"
                                 placeholder="Referencia del movimiento"
                                 required
+                                disabled
                             />
                         </div>
                          <div className="form-col">
@@ -177,19 +128,19 @@ const formCaja = ({exito , movimientoID}) => {
                                 className="form-select-react"
                                 classNamePrefix="rs"
                                 options={opcionesTipoMovimiento}
-                                value={opcionesTipoMovimiento.find(op => op.value === movimiento.tipo) || null}
+                                value={opcionesTipoMovimiento.find(op => op.value === movimiento.tipo) || ''}
                                 onChange={selectChange}
                                 name='tipo'
                                 placeholder="Tipo de movimiento..."
                                 isClearable
                                 required={true}
+                                isDisabled={true}
                                 styles={customStyle}
                             />
                         </div> 
                          <div className="form-col">
                             <label >
                                 Medio de Pago:
-                                <button type="button" className="btn-plus" onClick={() => setMostrarMedioPago(true)}>+</button>
                             </label>
                             <Select
                                 className="form-select-react"
@@ -201,6 +152,7 @@ const formCaja = ({exito , movimientoID}) => {
                                 placeholder="Medio de pago..."
                                 isClearable
                                 required={true}
+                                isDisabled={true}
                                 styles={customStyle}
                             />
                         </div> 
@@ -214,21 +166,10 @@ const formCaja = ({exito , movimientoID}) => {
                                 name="total"
                                 placeholder="Total"
                                 value={movimiento.total}
-                                onChange={inputChange}                                
+                                onChange={inputChange}
+                                disabled                              
                             />
                         </div>
-                    </div>
-
-                    <div className="form-submit">
-                       <button
-                            type="submit"
-                            className="submit-btn"
-                            onClick={(e) => {
-                                clickChange(e);
-                            }}
-                            >
-                            Guardar
-                        </button>
                     </div>
                 </form>
 

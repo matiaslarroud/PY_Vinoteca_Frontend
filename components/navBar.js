@@ -142,13 +142,49 @@ export default function Navbar({ usuario }) {
                   )}
                 </div>
 
-                <Link
-                  href="/gestion/caja/indexCaja"
-                  onClick={handleLinkClick}
-                  className={isActive("/gestion/caja/indexCaja") ? styles.active : ""}
-                >
-                  Caja
-                </Link>
+                {/* Informes */}
+                <div className={styles.dropdown}>
+                  <button
+                    className={styles.dropdownToggle}
+                    onClick={() => toggleDropdown("informes")}
+                  >
+                    Informes {openDropdown === "productos" ? "▲" : "▼"}
+                  </button>
+                  {openDropdown === "informes" && (
+                    <div className={styles.submenu}>
+                      <Link
+                        href="/gestion/informes/indexInformes"
+                        onClick={handleLinkClick}
+                        className={isActive("/gestion/informes/indexInformes") ? styles.active : ""}
+                      >
+                        Listado
+                      </Link>
+                      <Link
+                        href="/gestion/informes/caja/indexCaja"
+                        onClick={handleLinkClick}
+                        className={isActive("/gestion/informes/caja/indexCaja") ? styles.active : ""}
+                      >
+                        Movimientos totales
+                      </Link>
+                      <Link
+                        href="/gestion/informes/registroVenta/indexRegistroVenta"
+                        onClick={handleLinkClick}
+                        className={isActive("/gestion/informes/registroVenta/indexRegistroVenta") ? styles.active : ""}
+                      >
+                        Registro de ventas
+                      </Link>
+                      <Link
+                        href="/gestion/informes/registroCuentaCorriente/indexCuentaCorriente"
+                        onClick={handleLinkClick}
+                        className={isActive("/gestion/informes/registroCuentaCorriente/indexCuentaCorriente") ? styles.active : ""}
+                      >
+                        Registro de cuenta corriente
+                      </Link>
+                    </div>
+                  )}
+                </div>
+
+                
               
           </>
         )}
