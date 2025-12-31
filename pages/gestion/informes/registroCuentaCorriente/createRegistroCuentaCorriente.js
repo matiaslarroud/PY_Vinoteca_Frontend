@@ -6,11 +6,19 @@ import FormularioBusqueedaCliente from "../../../clientes/busquedaCliente"
 
 const { default: Link } = require("next/link");
 
-const indexCuentaCorriente = () => {
+const indexCreateRegistoCuentaCorriente = ({exito , param , tipo}) => {
   const initialState= {cliente:''}
   const router = useRouter();
   
-  const [registro , setRegistro] = useState(initialState);
+  const [registro, setRegistro] = useState(() => {
+      if (tipo === "cliente") {
+          return {
+              ...initialState,
+              cliente: param
+          }
+      }
+      return initialState
+  });
 
   const [cajas, setCajas] = useState([]);
   const [resumenCaja, setResumenCaja] = useState(null);
@@ -47,10 +55,10 @@ const indexCuentaCorriente = () => {
   }, []);
 
   useEffect(() => {
-    if (!registro.cliente) return;
+    if (!param) return;
     
-    fetchData(registro.cliente);
-  }, [registro.cliente]);
+    fetchData(param);
+  }, [param]);
 
   const limpiarFiltros = () => {
     setRegistro(initialState)
@@ -362,4 +370,4 @@ const indexCuentaCorriente = () => {
   );
 };
 
-export default indexCuentaCorriente;
+export default indexCreateRegistoCuentaCorriente;

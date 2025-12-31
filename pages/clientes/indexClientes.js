@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { FaPlus, FaShoppingCart , FaHome, FaCartArrowDown, FaArrowLeft, FaTrash, FaEdit ,FaSearch , FaReceipt } from "react-icons/fa";
+import { FaPlus, FaShoppingCart , FaHome, FaCartArrowDown, FaArrowLeft, FaTrash, FaEdit ,FaSearch, FaClipboardList , FaReceipt } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import Link from "next/link";
 import FormularioClienteUpdate from './updateCliente'
@@ -8,6 +8,7 @@ import CreateNotaPedido from "./notaPedido/createNotaPedido";
 import CreatePresupuesto from "./presupuesto/createPresupuesto";
 import BusquedaAvanzadaClientes from "./busquedaCliente";
 import FormularioReciboPago from "../clientes/reciboPago/createReciboPago";
+import FormularioCuentaCorriente from "../gestion/informes/registroCuentaCorriente/createRegistroCuentaCorriente";
 
 export default function indexClientes() {
   const router = useRouter();
@@ -19,6 +20,7 @@ export default function indexClientes() {
   const [mostrarPresupuestoCreate, setmostrarPresupuestoCreate] = useState(null);
   const [mostrarModalBuscar, setMostrarModalBuscar] = useState(null);
   const [mostrarModalReciboPago, setMostrarModalReciboPago] = useState(null);
+  const [mostrarModalCuentaCorriente, setMostrarModalCuentaCorriente] = useState(null);
   const [orden, setOrden] = useState({ campo: '', asc: true });
 
 const initialState = {
@@ -241,6 +243,28 @@ const deleteCliente = async (clienteID) => {
     </div>
   )}
 
+  {mostrarModalCuentaCorriente && (
+    <div className="modal">
+      <div className="modal-content">
+        <button className="close" onClick={() => 
+            {
+                setMostrarModalCuentaCorriente(null)
+            }
+        }>
+            &times;
+        </button>
+        <FormularioCuentaCorriente 
+            param={mostrarModalCuentaCorriente}
+            tipo="cliente"
+            exito={() => 
+                {
+                    setMostrarModalCuentaCorriente(false)
+                }}
+        />
+      </div>
+    </div>
+  )}
+
   {mostrarPresupuestoCreate && (
     <div className="modal">
       <div className="modal-content">
@@ -319,6 +343,9 @@ const deleteCliente = async (clienteID) => {
                           </button>
                           <button onClick={() => setMostrarModalReciboPago(_id)} className="btn-icon" title="Generar Recibo de Pago">
                               <FaReceipt />
+                          </button>
+                          <button onClick={() => setMostrarModalCuentaCorriente(_id)} className="btn-icon" title="Informe de Cuenta Corriente">
+                              <FaClipboardList />
                           </button>
                           <button onClick={() => setMostrarModalUpdate(_id)} className="btn-icon" title="Modificar">
                               <FaEdit />

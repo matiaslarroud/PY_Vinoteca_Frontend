@@ -381,7 +381,7 @@ const indexRegistroVenta = () => {
 
           /* Caja del select */
           .botonera2 {
-            width: 420px;
+            width: 100%;
             background: #1e1e1e;
             padding: 24px;
             margin: 10px;
