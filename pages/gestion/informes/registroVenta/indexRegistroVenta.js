@@ -1,15 +1,20 @@
 import { useEffect, useState } from "react";
-import { FaPlus, FaHome, FaArrowLeft, FaSearch, FaEdit } from "react-icons/fa";
+import { FaTrash, FaHome, FaArrowLeft, FaSearch, FaEdit } from "react-icons/fa";
 import { useRouter } from "next/router";
 import Select from 'react-select';       
 import FormularioBusqueedaCliente from "../../../clientes/busquedaCliente"
 
 const { default: Link } = require("next/link");
 
-const indexTransporte = () => {
+const indexRegistroVenta = () => {
+  const initialState= {
+    cliente:'', 
+    fechaInicio:'' , 
+    fechaFin:''
+  }
   const router = useRouter();
   
-  const [registro , setRegistro] = useState({cliente:''});
+  const [registro , setRegistro] = useState(initialState);
 
   const [cajas, setCajas] = useState([]);
   const [resumenCaja, setResumenCaja] = useState(null);
@@ -20,17 +25,86 @@ const indexTransporte = () => {
   const [filtro , setFiltro] = useState(); 
 
   const fetchData = async (param) => {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/caja/cliente/${param}`);
-    const { data , resumen } = await res.json();
-    setCajas(data);
-    setResumenCaja(resumen);
+    if (!param) return; // evita llamadas inválidas
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/caja/cliente/${encodeURIComponent(param)}`
+      );
+
+      const response = await res.json();
+
+      if (!res.ok || !response.ok) {
+        alert(response.message || '❌ Error al obtener los datos');
+        return;
+      }
+
+      setCajas(response.data);
+      setResumenCaja(response.resumen);
+
+    } catch (error) {
+      console.error(error);
+      alert('❌ Error de conexión con el servidor');
+    }
   };
 
-  const fetchData_Clientes = async () => {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente`);
-    const { data } = await res.json();
-    setClientes(data);
+
+  const fetchDataByFechas = async (paramInicio, paramFin) => {
+
+    if (!paramInicio || !paramFin) return;
+
+    try {
+      const query = new URLSearchParams({
+        fechaInicio: paramInicio,
+        fechaFin: paramFin
+      }).toString();
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/caja/por-fecha?${query}`,
+        {
+          method: 'GET'
+        }
+      );
+
+      const response = await res.json();
+
+      if (!res.ok || !response.ok) {
+        alert(response.message || '❌ Error al obtener ventas por fecha');
+        return;
+      }
+
+      setCajas(response.data);
+      setResumenCaja(response.resumen);
+
+    } catch (error) {
+      console.error(error);
+      alert('❌ Error de conexión con el servidor');
+    }
   };
+
+
+
+  const fetchData_Clientes = async () => {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente`
+      );
+
+      const response = await res.json();
+
+      if (!res.ok || !response.ok) {
+        alert(response.message || '❌ Error al obtener clientes');
+        return;
+      }
+
+      setClientes(response.data);
+
+    } catch (error) {
+      console.error(error);
+      alert('❌ Error de conexión con el servidor');
+    }
+  };
+
     
   const selectChange = (selectedOption, actionMeta) => {
       const name = actionMeta.name;
@@ -40,6 +114,22 @@ const indexTransporte = () => {
           [name]: value,
       });
   };
+    
+  const inputChange = (e) => {
+      const value = e.target.value;
+      const name = e.target.name;
+      
+      setRegistro({
+          ...registro , 
+              [name]:value
+      })   
+  }
+
+  const limpiarFiltros = () => {
+    setRegistro(initialState)
+    setCajas([])
+    setResumenCaja([])
+  }
 
   useEffect(() => {
     fetchData_Clientes();
@@ -50,6 +140,14 @@ const indexTransporte = () => {
 
     fetchData(registro.cliente);
   }, [registro.cliente]);
+
+  useEffect(() => {
+    if (!registro.fechaInicio || !registro.fechaFin) return;
+
+    fetchDataByFechas(registro.fechaInicio, registro.fechaFin);
+
+  }, [registro.fechaInicio, registro.fechaFin]);
+
 
   const toggleOrden = (campo) => {
     setOrden((prev) => ({
@@ -122,6 +220,9 @@ const indexTransporte = () => {
 
         <h1 className="titulo-index">Registro de Ventas</h1>
 
+        <div className="filtros-container">
+
+        {/* FILTRO CLIENTE */}
         <div className="cliente-container">
           <div className="botonera2">
             <label className="cliente-label">
@@ -139,7 +240,9 @@ const indexTransporte = () => {
               className="form-select-react"
               classNamePrefix="rs"
               options={opciones_clientes}
-              value={opciones_clientes.find(op => op.value === registro.cliente) || null}
+              value={
+                opciones_clientes.find(op => op.value === registro.cliente) || null
+              }
               onChange={selectChange}
               name="cliente"
               placeholder="Buscar cliente..."
@@ -149,9 +252,36 @@ const indexTransporte = () => {
           </div>
         </div>
 
+        {/* FILTRO FECHAS */}
+        <div className="cliente-container">
+          <div className="botonera2">
+            <div className="rango-fechas">
+              <div className="campo-fecha">
+                <label htmlFor="fechaInicio">Fecha de Inicio</label>
+                <input type="date" name="fechaInicio" onChange={inputChange}/>
+              </div>
+
+              <div className="campo-fecha">
+                <label htmlFor="fechaFin">Fecha de Fin</label>
+                <input type="date" name="fechaFin" onChange={inputChange} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* BORRAR FILTROS */}
+        <div className="cliente-container">
+          <button
+            type="button"
+            className="btn-plus"
+            onClick={limpiarFiltros}
+          >
+            <FaTrash />
+          </button>
+        </div>             
+      </div>
 
         <div className="contenedor-tabla">
-
 
           <div className="contenedor-tabla">
             {resumenCaja && (
@@ -190,7 +320,6 @@ const indexTransporte = () => {
                   <th onClick={() => toggleOrden('tipo')}>Tipo ⬍</th>
                   <th onClick={() => toggleOrden('medioPago')}>Medio de Pago ⬍</th>
                   <th onClick={() => toggleOrden('total')}>Total ⬍</th>
-                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -219,13 +348,6 @@ const indexTransporte = () => {
                       </td>
                       <td>{medioPago}</td>
                       <td>{total}</td>
-                      <td>
-                        <div className="acciones">
-                          <button onClick={() => setMostrarModalUpdate(_id)} className="btn-icon" title="Modificar">
-                            <FaEdit />
-                          </button>
-                        </div>
-                      </td>
                     </tr>
                   );
                 })}
@@ -262,6 +384,7 @@ const indexTransporte = () => {
             width: 420px;
             background: #1e1e1e;
             padding: 24px;
+            margin: 10px;
             border-radius: 14px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
           }
@@ -334,6 +457,75 @@ const indexTransporte = () => {
             background: #f9a825;
             color: #000;
           }
+            
+          .rango-fechas {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+          }
+
+          /* Por defecto (desktop): en línea */
+          .filtros-container {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+          }
+
+          .campo-fecha {
+            display: flex;
+            flex-direction: column;
+          }
+
+          .campo-fecha label {
+            font-size: 14px;
+            margin-bottom: 4px;
+            color: #ffffffff;
+          }
+
+          .campo-fecha input[type="date"] {
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            outline: none;
+          }
+
+          .campo-fecha input[type="date"]:focus {
+            border-color: #4f46e5; /* azul suave */
+          }
+
+          /* 📱 Ajustes para celulares */
+          @media (max-width: 768px) {
+            .filtros-container {
+              flex-direction: column;
+            }
+            /* Contenedor general */
+            .cliente-container {
+              align-items: stretch;
+            }
+
+            /* Caja de filtros ocupa todo el ancho */
+            .botonera2 {
+              width: 100%;
+            }
+
+            /* Fechas una debajo de la otra */
+            .rango-fechas {
+              flex-direction: column;
+              gap: 10px;
+            }
+
+            .campo-fecha input[type="date"] {
+              width: 100%;
+            }
+
+            /* Cards resumen en columnas */
+            .resumen-caja {
+              grid-template-columns: repeat(2, 1fr);
+            }
+          }
+
+
 
         `}</style>
 
@@ -342,4 +534,4 @@ const indexTransporte = () => {
   );
 };
 
-export default indexTransporte;
+export default indexRegistroVenta;

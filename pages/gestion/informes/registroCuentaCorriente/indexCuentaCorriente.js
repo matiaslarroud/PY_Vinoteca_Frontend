@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaPlus, FaHome, FaArrowLeft, FaSearch, FaEdit } from "react-icons/fa";
+import { FaTrash, FaHome, FaArrowLeft, FaSearch, FaEdit } from "react-icons/fa";
 import { useRouter } from "next/router";
 import Select from 'react-select';       
 import FormularioBusqueedaCliente from "../../../clientes/busquedaCliente"
@@ -7,9 +7,10 @@ import FormularioBusqueedaCliente from "../../../clientes/busquedaCliente"
 const { default: Link } = require("next/link");
 
 const indexTransporte = () => {
+  const initialState= {cliente:''}
   const router = useRouter();
   
-  const [registro , setRegistro] = useState({cliente:''});
+  const [registro , setRegistro] = useState(initialState);
 
   const [cajas, setCajas] = useState([]);
   const [resumenCaja, setResumenCaja] = useState(null);
@@ -50,6 +51,12 @@ const indexTransporte = () => {
     
     fetchData(registro.cliente);
   }, [registro.cliente]);
+
+  const limpiarFiltros = () => {
+    setRegistro(initialState)
+    setCajas([])
+    setResumenCaja([])
+  }
 
   const toggleOrden = (campo) => {
     setOrden((prev) => ({
@@ -126,6 +133,13 @@ const indexTransporte = () => {
           <div className="botonera2">
             <label className="cliente-label">
               Cliente
+                <button
+                  type="button"
+                  className="btn-plus"
+                  onClick={limpiarFiltros}
+                >
+                  <FaTrash />
+                </button>
               <button
                 type="button"
                 className="btn-plus"
@@ -147,6 +161,7 @@ const indexTransporte = () => {
               styles={customStyle}
             />
           </div>
+
         </div>
 
 
