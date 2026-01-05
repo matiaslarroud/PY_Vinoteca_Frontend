@@ -136,7 +136,8 @@ const newOrdenCompra = ({exito}) => {
             proveedor: ordenCompra.proveedor,
             empleado: ordenCompra.empleado,
             medioPago: ordenCompra.medioPago,
-            fechaEntrega: ordenCompra.fechaEntrega
+            fechaEntrega: ordenCompra.fechaEntrega,
+            detalles: detalles
         };
 
         if (ordenCompra.presupuesto) {
@@ -159,34 +160,11 @@ const newOrdenCompra = ({exito}) => {
             alert(ordenCompraCreado.message)
             return
         }
-        const ordenID = ordenCompraCreado.data._id;
-
-        // GUARDAMOS DETALLES
-        for (const detalle of detalles) {
-            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/ordenCompraDetalle`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    producto: detalle.producto,
-                    precio: detalle.precio,
-                    cantidad: detalle.cantidad,
-                    importe: detalle.importe,
-                    ordenCompra: ordenID
-            })
             
-            
-            });
-            if (!resDetalle.ok) {
-                const errorData = await resDetalle.json();
-                alert(errorData.message); 
-                return;
-            }
-        }
-            
-            setDetalles([initialDetalle]);
-            setOrdenCompra(initialStateOrdenCompra);
-            alert(ordenCompraCreado.message)
-            exito();
+        setDetalles([initialDetalle]);
+        setOrdenCompra(initialStateOrdenCompra);
+        alert(ordenCompraCreado.message)
+        exito();
     }
 
     const handleDetalleChange = (index, field, value) => {

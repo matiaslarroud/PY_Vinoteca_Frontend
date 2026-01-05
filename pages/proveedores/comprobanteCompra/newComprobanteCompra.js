@@ -112,30 +112,10 @@ const clickChange = async(e) => {
     const bodyData = {
         total: comprobanteCompra.total,
         ordenCompra: comprobanteCompra.ordenCompra,
+        detalles: detalles
     };
 
-    // 1️⃣ VALIDAMOS DETALLE POR DETALLE ANTES DE CREAR NADA
-    for (const detalle of detalles) {
-
-        const resValidacion = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompraDetalle/validar`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                ordenCompra: comprobanteCompra.ordenCompra,
-                producto: detalle.producto,
-                cantidad: detalle.cantidad
-            })
-        });
-
-        const validation = await resValidacion.json();
-        if (!validation.ok) {
-            alert(validation.message);
-            return; // ❌ aborta si un detalle no cumple
-        }
-    }
-
-    // 2️⃣ SI TODO VALIDÓ BIEN → CREAMOS EL COMPROBANTE
-    const resComprobanteCompra = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompra`, {
+   const resComprobanteCompra = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompra`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bodyData)
@@ -143,38 +123,12 @@ const clickChange = async(e) => {
 
     const comprobanteCompraCreado = await resComprobanteCompra.json();
     if (!comprobanteCompraCreado.ok) {
-        alert(comprobanteCompraCreado.message);
+        alert(comprobanteCompraCreado.error);
         return;
     }
 
-    const comprobanteID = comprobanteCompraCreado.data._id;
-
-    // 3️⃣ GUARDAMOS CADA DETALLE
-    for (const detalle of detalles) {
-
-        const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompraDetalle`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                producto: detalle.producto,
-                precio: detalle.precio,
-                cantidad: detalle.cantidad,
-                importe: detalle.importe,
-                comprobanteCompra: comprobanteID
-            })
-        });
-
-        const dataDetalle = await resDetalle.json();
-        if (!dataDetalle.ok) {
-            alert(dataDetalle.message);
-            return;
-        }
-    }
-
-    // 4️⃣ LIMPIAMOS ESTADO
     setDetalles([initialDetalle]);
     setComprobanteCompra(initialStateComprobanteCompra);
-
     alert(comprobanteCompraCreado.message);
     exito();
 };

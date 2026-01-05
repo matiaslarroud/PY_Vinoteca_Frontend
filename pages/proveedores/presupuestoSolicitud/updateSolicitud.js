@@ -172,56 +172,13 @@ const updatePresupuesto = ({exito,solicitudID}) => {
                 body: JSON.stringify({
                     proveedor: presupuesto.proveedor,
                     empleado: presupuesto.empleado,
+                    detalles: detalles
                 })
             }
         )
 
         const solicitudCreada = await resPresupuesto.json();
-        if(!solicitudCreada.ok){
-            alert(solicitudCreada.message)
-            return
-        }
-
-        const identificador = solicitudCreada.data._id;
-        if(!identificador){
-            alert("❌ Error al agregar solicitud de presupuesto.")
-            return
-        }
-
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuestoDetalle/${identificador}`,
-            {
-                method:'DELETE',
-                headers: {
-                    'Content-Type':'application/json',
-                }
-            }
-        ).then((a)=>{return a.json()})
-            .then((res)=>{
-                console.log(res.message);
-            })
-            .catch((err)=>{
-                console.log("Error al envia detalle de solicitud para su eliminación. \n Error: ",err);
-            })
-
-
-        // GUARDAMOS DETALLES
-        for (const detalle of detalles) {
-            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuestoDetalle`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    producto: detalle.producto,
-                    cantidad: detalle.cantidad,
-                    solicitudPresupuesto: identificador
-            })
-        });
-            
-            if (!resDetalle.ok) {
-                const errorData = await resDetalle.json();
-                alert(errorData.message); 
-                return;
-            }
-        }
+        
         setDetalles([initialDetalle]);
         setPresupuesto(initialStatePresupuesto);
         alert(solicitudCreada.message)

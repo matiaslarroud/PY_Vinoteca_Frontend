@@ -161,6 +161,7 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                 body: JSON.stringify({
                     proveedor: presupuesto.proveedor,
                     empleado: presupuesto.empleado,
+                    detalles: detalles
                 })
             }
         )
@@ -169,31 +170,6 @@ const fetchData_LowStockByProveedor = (proveedor) => {
         if(!solicitudCreada.ok){
             alert(solicitudCreada.message)
             return
-        }
-
-        const identificador = solicitudCreada.data._id;
-        if(!identificador){
-            alert("❌ Error al agregar solicitud de presupuesto.")
-            return
-        }
-
-        // GUARDAMOS DETALLES
-        for (const detalle of detalles) {
-            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/solicitudPresupuestoDetalle`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    producto: detalle.producto,
-                    cantidad: detalle.cantidad,
-                    solicitudPresupuesto: identificador
-            })
-        });
-            
-            if (!resDetalle.ok) {
-                const errorData = await resDetalle.json();
-                alert(errorData.message); 
-                return;
-            }
         }
 
         setDetalles([initialDetalle]);
@@ -659,7 +635,7 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                                     className="submit-btn"
                                     onClick={(e) => {
                                         if (!puedeGuardar) {
-                                        alert("No se puede guardar una solicitud presupuesto sin al menos un producto con cantidad.");
+                                        alert("❌ No se puede guardar una solicitud presupuesto sin al menos un producto con cantidad.");
                                         e.preventDefault();
                                         return;
                                         }

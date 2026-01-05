@@ -139,6 +139,7 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
         const bodyData = {
             total: comprobanteCompra.total,
             ordenCompra: comprobanteCompra.ordenCompra,
+            detalles: detalles
         };
 
         const resComprobanteCompra = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompra/${comprobanteCompraID}`, {
@@ -149,31 +150,8 @@ const updateComprobanteCompra = ({exito, comprobanteCompraID}) => {
 
         const comprobanteCompraCreado = await resComprobanteCompra.json();
         if(!comprobanteCompraCreado.ok) {
-            alert(comprobanteCompraCreado.message)
+            alert(comprobanteCompraCreado.error)
             return
-        }
-        const comprobanteID = comprobanteCompraCreado.data._id;
-
-        // GUARDAMOS DETALLES
-        for (const detalle of detalles) {
-            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/comprobanteCompraDetalle/${comprobanteID}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    producto: detalle.producto,
-                    precio: detalle.precio,
-                    cantidad: detalle.cantidad,
-                    importe: detalle.importe,
-                    comprobanteCompra: comprobanteID
-            })
-            
-            
-            });
-            if (!resDetalle.ok) {
-                const errorData = await resDetalle.json();
-                alert(errorData.message); 
-                return;
-            }
         }
             
         setDetalles([initialDetalle]);

@@ -192,7 +192,8 @@ const updatePresupuesto = ({exito, presupuestoID}) => {
             total: presupuesto.total,
             proveedor: presupuesto.proveedor,
             empleado: presupuesto.empleado,
-            medioPago: presupuesto.medioPago
+            medioPago: presupuesto.medioPago,
+            detalles : detalles
          }
 
          if(presupuesto.solicitudPresupuesto){
@@ -211,43 +212,6 @@ const updatePresupuesto = ({exito, presupuestoID}) => {
         if(!presupuestoCreado.ok){
             alert(presupuestoCreado.message)
             return
-        }
-        const identificador = presupuestoCreado.data._id;
-
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuestoDetalle/${identificador}`,
-            {
-                method:'DELETE',
-                headers: {
-                    'Content-Type':'application/json',
-                }
-            }
-        ).then((a)=>{return a.json()})
-            .then((res)=>{
-                console.log(res.message);
-            })
-            .catch((err)=>{
-                console.log("Error al enviar detalle de presupuesto para su eliminación. \n Error: ",err);
-            })
-
-        // GUARDAMOS DETALLES
-        for (const detalle of detalles) {
-            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/presupuestoDetalle`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    producto: detalle.producto,
-                    precio: detalle.precio,
-                    cantidad: detalle.cantidad,
-                    importe: detalle.importe,
-                    presupuesto: identificador
-            })
-                });
-            
-            if (!resDetalle.ok) {
-                const errorData = await resDetalle.json();
-                alert(errorData.message); 
-                return;
-            }
         }
         setDetalles([initialDetalle]);
         setPresupuesto(initialStatePresupuesto);

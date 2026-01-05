@@ -186,7 +186,8 @@ const updateOrdenCompra = ({exito , ordenID}) => {
             proveedor: ordenCompra.proveedor,
             empleado: ordenCompra.empleado,
             medioPago: ordenCompra.medioPago,
-            fechaEntrega: ordenCompra.fechaEntrega
+            fechaEntrega: ordenCompra.fechaEntrega,
+            detalles: detalles
         };
 
         if (ordenCompra.presupuesto) {
@@ -208,47 +209,6 @@ const updateOrdenCompra = ({exito , ordenID}) => {
         if(!ordenCompraCreado.ok) {
             alert(ordenCompraCreado.message)
             return
-        }
-        const identificador = ordenCompraCreado.data._id;
-
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/ordenCompraDetalle/${identificador}`,
-            {
-                method:'DELETE',
-                headers: {
-                    'Content-Type':'application/json',
-                }
-            }
-        ).then((a)=>{return a.json()})
-            .then((res)=>{
-                if(!res.ok){
-                    alert(res.message)
-                    return
-                }
-            })
-            .catch((err)=>{
-                console.log("❌ Error al enviar detalle de orden de compra para su eliminación. \n Error: ",err);
-            })
-
-        // GUARDAMOS DETALLES
-        for (const detalle of detalles) {
-            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/ordenCompraDetalle`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    producto: detalle.producto,
-                    precio: detalle.precio,
-                    cantidad: detalle.cantidad,
-                    importe: detalle.importe,
-                    ordenCompra: identificador
-            })
-            
-            
-            });
-            if (!resDetalle.ok) {
-                const errorData = await resDetalle.json();
-                alert(errorData.message); 
-                return;
-            }
         }
             
         setDetalles([initialDetalle]);
