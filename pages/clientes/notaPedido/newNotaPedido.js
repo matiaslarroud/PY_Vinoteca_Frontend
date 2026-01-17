@@ -918,38 +918,35 @@ const newNotaPedido = ({exito}) => {
                                             placeholder="Producto..."
                                             isClearable
                                             styles={{
-                                                container: base => ({
-                                                ...base,
-                                                 width: 250,
+                                                container: (base) => ({
+                                                    ...base,
+                                                    width: '100%',
                                                 }),
-                                                control: base => ({
-                                                ...base,
-                                                width: "100%",
-                                                backgroundColor: "#2c2c2c",
-                                                color: "white",
-                                                border: "1px solid #444",
-                                                borderRadius: 8,
+                                                control: (base, state) => ({
+                                                    ...base,
+                                                    width: '100%',
+                                                    backgroundColor: '#2c2c2c',
+                                                    borderColor: state.isFocused ? '#666' : '#444',
+                                                    borderRadius: 8,
+                                                    color: 'white',
                                                 }),
-                                                singleValue: base => ({
-                                                ...base,
-                                                color: "white",
-                                                whiteSpace: "nowrap",
-                                                overflow: "hidden",
-                                                textOverflow: "ellipsis",
-                                                }),
-                                                menu: base => ({
-                                                ...base,
-                                                backgroundColor: "#2c2c2c",
-                                                color: "white",
+                                                menu: (base) => ({
+                                                    ...base,
+                                                    backgroundColor: '#2c2c2c',
+                                                    color: 'white',
                                                 }),
                                                 option: (base, { isFocused }) => ({
-                                                ...base,
-                                                backgroundColor: isFocused ? "#444" : "#2c2c2c",
-                                                color: "white",
+                                                    ...base,
+                                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                                    color: 'white',
                                                 }),
-                                                input: base => ({
-                                                ...base,
-                                                color: "white",
+                                                singleValue: (base) => ({
+                                                    ...base,
+                                                    color: 'white',
+                                                }),
+                                                input: (base) => ({
+                                                    ...base,
+                                                    color: 'white',
                                                 }),
                                             }}
                                         />
@@ -1204,7 +1201,7 @@ const newNotaPedido = ({exito}) => {
                             display: flex;
                             flex-direction: column;
                             gap: 1rem;
-                            height: 100%;
+                            min-height: 200px;
                             padding-right: 8px;
                         }
 

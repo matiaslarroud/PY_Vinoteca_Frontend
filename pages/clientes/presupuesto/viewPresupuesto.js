@@ -411,7 +411,38 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                                             placeholder="Producto..."
                                             isClearable
                                             isDisabled={true}
-                                            styles={customStyle}
+                                            styles={{
+                                                container: (base) => ({
+                                                    ...base,
+                                                    width: '100%',
+                                                }),
+                                                control: (base, state) => ({
+                                                    ...base,
+                                                    width: '100%',
+                                                    backgroundColor: '#2c2c2c',
+                                                    borderColor: state.isFocused ? '#666' : '#444',
+                                                    borderRadius: 8,
+                                                    color: 'white',
+                                                }),
+                                                menu: (base) => ({
+                                                    ...base,
+                                                    backgroundColor: '#2c2c2c',
+                                                    color: 'white',
+                                                }),
+                                                option: (base, { isFocused }) => ({
+                                                    ...base,
+                                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                                    color: 'white',
+                                                }),
+                                                singleValue: (base) => ({
+                                                    ...base,
+                                                    color: 'white',
+                                                }),
+                                                input: (base) => ({
+                                                    ...base,
+                                                    color: 'white',
+                                                }),
+                                            }}
                                         />
                                     </div>
                                     
@@ -591,8 +622,7 @@ const updatePresupuesto = ({exito,presupuestoID}) => {
                         display: flex;
                         flex-direction: column;
                         gap: 1rem;
-                        height: 100%;
-                        overflow-y: auto;
+                        min-height: 200px;
                         padding-right: 8px;
                     }
 

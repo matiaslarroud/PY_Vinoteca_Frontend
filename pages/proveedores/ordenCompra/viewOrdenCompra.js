@@ -636,12 +636,12 @@ const viewOrdenCompra = ({exito , ordenID}) => {
                                             styles={{
                                                 container: (base) => ({
                                                     ...base,
-                                                    width: 150,
+                                                    width: '100%',
                                                 }),
                                                 control: (base, state) => ({
                                                     ...base,
-                                                    width: 150,
-                                                    backgroundColor: '#2c2c2c !important',
+                                                    width: '100%',
+                                                    backgroundColor: '#2c2c2c',
                                                     borderColor: state.isFocused ? '#666' : '#444',
                                                     borderRadius: 8,
                                                     color: 'white',
@@ -658,11 +658,11 @@ const viewOrdenCompra = ({exito , ordenID}) => {
                                                 }),
                                                 singleValue: (base) => ({
                                                     ...base,
-                                                    color: 'white !important',
+                                                    color: 'white',
                                                 }),
                                                 input: (base) => ({
                                                     ...base,
-                                                    color: 'white !important',
+                                                    color: 'white',
                                                 }),
                                             }}
                                         />
@@ -858,8 +858,6 @@ const viewOrdenCompra = ({exito , ordenID}) => {
                             display: flex;
                             flex-direction: column;
                             gap: 1rem;
-                            height: 100%;
-                            overflow-y: auto;
                             padding-right: 8px;
                         }
 

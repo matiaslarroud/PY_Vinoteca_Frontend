@@ -825,12 +825,12 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                                             styles={{
                                                 container: (base) => ({
                                                     ...base,
-                                                    width: 150,
+                                                    width: '100%',
                                                 }),
                                                 control: (base, state) => ({
                                                     ...base,
-                                                    width: 150,
-                                                    backgroundColor: '#2c2c2c !important',
+                                                    width: '100%',
+                                                    backgroundColor: '#2c2c2c',
                                                     borderColor: state.isFocused ? '#666' : '#444',
                                                     borderRadius: 8,
                                                     color: 'white',
@@ -847,11 +847,11 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                                                 }),
                                                 singleValue: (base) => ({
                                                     ...base,
-                                                    color: 'white !important',
+                                                    color: 'white',
                                                 }),
                                                 input: (base) => ({
                                                     ...base,
-                                                    color: 'white !important',
+                                                    color: 'white',
                                                 }),
                                             }}
                                         />
@@ -900,8 +900,9 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                                 })}
                             </div>
                         </div> 
-                        <div className="form-col-precioVenta">
-                            <div className="box-cargar" >
+                    </div>
+                    <div className='form-row'>
+                        <div className="box-cargar" >
                                 <label htmlFor="precioVenta">Total:
                                     <input
                                         type="number"
@@ -929,7 +930,6 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                                     </button>
                                 </div>
                             </div>
-                        </div>
                     </div>
                 </form>
             </div>
@@ -1055,8 +1055,6 @@ const agregarDetallePresupuesto = async (solicitudID) => {
                         display: flex;
                         flex-direction: column;
                         gap: 1rem;
-                        height: 160px;
-                        overflow-y: auto;
                         padding-right: 8px;
                     }
 

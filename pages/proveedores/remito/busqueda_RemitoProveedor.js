@@ -448,38 +448,34 @@ const busqueda = ({ exito, filtro, onChangeFiltro , filtroDetalle , onChangeFilt
                                             isClearable
                                             styles={{
                                                 container: (base) => ({
-                                                ...base,
-                                                width: 150, // ⬅️ ancho fijo total
+                                                    ...base,
+                                                    width: '100%',
                                                 }),
-                                                control: (base) => ({
-                                                ...base,
-                                                minWidth: 150,
-                                                maxWidth: 150,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
-                                                border: '1px solid #444',
-                                                borderRadius: 8,
-                                                }),
-                                                singleValue: (base) => ({
-                                                ...base,
-                                                color: 'white',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis', // ⬅️ evita que el texto se desborde
+                                                control: (base, state) => ({
+                                                    ...base,
+                                                    width: '100%',
+                                                    backgroundColor: '#2c2c2c',
+                                                    borderColor: state.isFocused ? '#666' : '#444',
+                                                    borderRadius: 8,
+                                                    color: 'white',
                                                 }),
                                                 menu: (base) => ({
-                                                ...base,
-                                                backgroundColor: '#2c2c2c',
-                                                color: 'white',
+                                                    ...base,
+                                                    backgroundColor: '#2c2c2c',
+                                                    color: 'white',
                                                 }),
                                                 option: (base, { isFocused }) => ({
-                                                ...base,
-                                                backgroundColor: isFocused ? '#444' : '#2c2c2c',
-                                                color: 'white',
+                                                    ...base,
+                                                    backgroundColor: isFocused ? '#444' : '#2c2c2c',
+                                                    color: 'white',
+                                                }),
+                                                singleValue: (base) => ({
+                                                    ...base,
+                                                    color: 'white',
                                                 }),
                                                 input: (base) => ({
-                                                ...base,
-                                                color: 'white',
+                                                    ...base,
+                                                    color: 'white',
                                                 }),
                                             }}
                                         />

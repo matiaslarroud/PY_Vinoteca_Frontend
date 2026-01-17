@@ -569,12 +569,12 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                                             styles={{
                                                 container: (base) => ({
                                                     ...base,
-                                                    width: 150,
+                                                    width: '100%',
                                                 }),
                                                 control: (base, state) => ({
                                                     ...base,
-                                                    width: 150,
-                                                    backgroundColor: '#2c2c2c !important',
+                                                    width: '100%',
+                                                    backgroundColor: '#2c2c2c',
                                                     borderColor: state.isFocused ? '#666' : '#444',
                                                     borderRadius: 8,
                                                     color: 'white',
@@ -591,11 +591,11 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                                                 }),
                                                 singleValue: (base) => ({
                                                     ...base,
-                                                    color: 'white !important',
+                                                    color: 'white',
                                                 }),
                                                 input: (base) => ({
                                                     ...base,
-                                                    color: 'white !important',
+                                                    color: 'white',
                                                 }),
                                             }}
                                         />
@@ -627,27 +627,28 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                                 })}
                             </div>
                         </div> 
-                        <div className="form-col-precioVenta">
-                            <div className="box-cargar" >
-                                <div className="form-submit">
-                                    <button
-                                    type="submit"
-                                    className="submit-btn"
-                                    onClick={(e) => {
-                                        if (!puedeGuardar) {
-                                        alert("❌ No se puede guardar una solicitud presupuesto sin al menos un producto con cantidad.");
-                                        e.preventDefault();
-                                        return;
-                                        }
-                                        clickChange(e);
-                                    }}
-                                    >
-                                    Cargar
-                                    </button>
-                                </div>
+                    </div>
+                    <div className="form-row">
+                        <div className="box-cargar" >
+                            <div className="form-submit">
+                                <button
+                                type="submit"
+                                className="submit-btn"
+                                onClick={(e) => {
+                                    if (!puedeGuardar) {
+                                    alert("❌ No se puede guardar una solicitud presupuesto sin al menos un producto con cantidad.");
+                                    e.preventDefault();
+                                    return;
+                                    }
+                                    clickChange(e);
+                                }}
+                                >
+                                Cargar
+                                </button>
                             </div>
                         </div>
                     </div>
+
                 </form>
             </div>
             <style jsx>
@@ -785,8 +786,6 @@ const fetchData_LowStockByProveedor = (proveedor) => {
                         display: flex;
                         flex-direction: column;
                         gap: 1rem;
-                        height: 160px;
-                        overflow-y: auto;
                         padding-right: 8px;
                     }
 

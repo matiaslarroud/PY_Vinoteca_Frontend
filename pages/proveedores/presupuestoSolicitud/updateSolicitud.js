@@ -575,12 +575,12 @@ const updatePresupuesto = ({exito,solicitudID}) => {
                                             styles={{
                                                 container: (base) => ({
                                                     ...base,
-                                                    width: 150,
+                                                    width: '100%',
                                                 }),
                                                 control: (base, state) => ({
                                                     ...base,
-                                                    width: 150,
-                                                    backgroundColor: '#2c2c2c !important',
+                                                    width: '100%',
+                                                    backgroundColor: '#2c2c2c',
                                                     borderColor: state.isFocused ? '#666' : '#444',
                                                     borderRadius: 8,
                                                     color: 'white',
@@ -597,11 +597,11 @@ const updatePresupuesto = ({exito,solicitudID}) => {
                                                 }),
                                                 singleValue: (base) => ({
                                                     ...base,
-                                                    color: 'white !important',
+                                                    color: 'white',
                                                 }),
                                                 input: (base) => ({
                                                     ...base,
-                                                    color: 'white !important',
+                                                    color: 'white',
                                                 }),
                                             }}
                                         />
@@ -634,24 +634,24 @@ const updatePresupuesto = ({exito,solicitudID}) => {
                                 })}
                             </div>
                         </div> 
-                        <div className="form-col-precioVenta">
-                            <div className="box-cargar" >
-                                <div className="form-submit">
-                                    <button
-                                    type="submit"
-                                    className="submit-btn"
-                                    onClick={(e) => {
-                                        if (!puedeGuardar) {
-                                        alert("❌ No se puede guardar una solicitud presupuesto sin al menos un producto con cantidad.");
-                                        e.preventDefault();
-                                        return;
-                                        }
-                                        clickChange(e);
-                                    }}
-                                    >
-                                    Guardar
-                                    </button>
-                                </div>
+                    </div>
+                    <div className='form-row'>                        
+                        <div className="box-cargar" >
+                            <div className="form-submit">
+                                <button
+                                type="submit"
+                                className="submit-btn"
+                                onClick={(e) => {
+                                    if (!puedeGuardar) {
+                                    alert("❌ No se puede guardar una solicitud presupuesto sin al menos un producto con cantidad.");
+                                    e.preventDefault();
+                                    return;
+                                    }
+                                    clickChange(e);
+                                }}
+                                >
+                                Guardar
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -792,8 +792,6 @@ const updatePresupuesto = ({exito,solicitudID}) => {
                         display: flex;
                         flex-direction: column;
                         gap: 1rem;
-                        height: 160px;
-                        overflow-y: auto;
                         padding-right: 8px;
                     }
 

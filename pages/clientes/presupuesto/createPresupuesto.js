@@ -577,12 +577,12 @@ const createpresupuesto = ({exito , param , tipo}) => {
                                             styles={{
                                                 container: (base) => ({
                                                     ...base,
-                                                    width: 180,
+                                                    width: '100%',
                                                 }),
                                                 control: (base, state) => ({
                                                     ...base,
-                                                    width: 180,
-                                                    backgroundColor: '#2c2c2c !important',
+                                                    width: '100%',
+                                                    backgroundColor: '#2c2c2c',
                                                     borderColor: state.isFocused ? '#666' : '#444',
                                                     borderRadius: 8,
                                                     color: 'white',
@@ -599,11 +599,11 @@ const createpresupuesto = ({exito , param , tipo}) => {
                                                 }),
                                                 singleValue: (base) => ({
                                                     ...base,
-                                                    color: 'white !important',
+                                                    color: 'white',
                                                 }),
                                                 input: (base) => ({
                                                     ...base,
-                                                    color: 'white !important',
+                                                    color: 'white',
                                                 }),
                                             }}
                                         />
@@ -814,8 +814,7 @@ const createpresupuesto = ({exito , param , tipo}) => {
                         display: flex;
                         flex-direction: column;
                         gap: 1rem;
-                        height: 160px;
-                        overflow-y: auto;
+                        min-height: 200px;
                         padding-right: 8px;
                     }
 

@@ -528,12 +528,12 @@ const createPresupuesto = ({exito , tipo , param}) => {
                                             styles={{
                                                 container: (base) => ({
                                                     ...base,
-                                                    width: 150,
+                                                    width: '100%',
                                                 }),
                                                 control: (base, state) => ({
                                                     ...base,
-                                                    width: 150,
-                                                    backgroundColor: '#2c2c2c !important',
+                                                    width: '100%',
+                                                    backgroundColor: '#2c2c2c',
                                                     borderColor: state.isFocused ? '#666' : '#444',
                                                     borderRadius: 8,
                                                     color: 'white',
@@ -550,11 +550,11 @@ const createPresupuesto = ({exito , tipo , param}) => {
                                                 }),
                                                 singleValue: (base) => ({
                                                     ...base,
-                                                    color: 'white !important',
+                                                    color: 'white',
                                                 }),
                                                 input: (base) => ({
                                                     ...base,
-                                                    color: 'white !important',
+                                                    color: 'white',
                                                 }),
                                             }}
                                         />
@@ -587,7 +587,8 @@ const createPresupuesto = ({exito , tipo , param}) => {
                                 })}
                             </div>
                         </div> 
-                        <div className="form-col-precioVenta">
+                    </div>
+                    <div className='form-row'>
                             <div className="box-cargar" >
                                 <div className="form-submit">
                                     <button
@@ -606,7 +607,6 @@ const createPresupuesto = ({exito , tipo , param}) => {
                                     </button>
                                 </div>
                             </div>
-                        </div>
                     </div>
                 </form>
             </div>
@@ -745,8 +745,6 @@ const createPresupuesto = ({exito , tipo , param}) => {
                         display: flex;
                         flex-direction: column;
                         gap: 1rem;
-                        height: 160px;
-                        overflow-y: auto;
                         padding-right: 8px;
                     }
 
