@@ -83,7 +83,7 @@ const busquedaReciboPago = ({ exito, filtro, onChangeFiltro }) => {
     const [mostrarModalBusquedaCliente, setMostrarModalBusquedaCliente] = useState(false);
 
 
-    const opciones_clientes = clientes.map(v => ({ value: v._id,label: v.name }));
+    const opciones_clientes = clientes.map(v => ({ value: v._id,label: `${v.name} ${v.lastname}` }));
     const opciones_mediosPago = mediosPago.map(v => ({ value: v._id,label: v.name }));
 
     return(

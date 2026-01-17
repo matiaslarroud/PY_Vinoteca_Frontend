@@ -92,7 +92,7 @@ const newReciboPago = ({exito}) => {
 
     const opciones_clientes = clientes.map(v => ({ 
         value: v._id,
-        label: v.name,
+        label: `${v.name} ${v.lastname}`,
         saldoCuentaCorriente: v.saldoCuentaCorriente ,
         saldoActualCuentaCorriente: v.saldoActualCuentaCorriente
     }));

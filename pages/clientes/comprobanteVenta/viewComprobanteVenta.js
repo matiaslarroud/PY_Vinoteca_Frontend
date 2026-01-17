@@ -214,7 +214,7 @@ const viewComprobante = ({comprobanteVentaID}) => {
             stock: v.stock,
             tipoProducto: v.tipoProducto
         }));
-    const opciones_clientes = clientes.map(v => ({ value: v._id,label: v.name }));
+    const opciones_clientes = clientes.map(v => ({ value: v._id,label: `${v.name} ${v.lastname}` }));
     const opciones_notasPedido = notaPedidos.filter((s)=>{return s.cliente === comprobanteVenta.cliente })
         .map(v => {
             return {

@@ -100,7 +100,7 @@ const updateReciboPago = ({exito , reciboPagoID}) => {
     const [mostrarModalCreate1, setMostrarModalCreate1] = useState(false);
     const [mostrarModalCreate3, setMostrarModalCreate3] = useState(false);
 
-    const opciones_clientes = clientes.map(v => ({ value: v._id,label: v.name }));
+    const opciones_clientes = clientes.map(v => ({ value: v._id,label: `${v.name} ${v.lastname}` }));
     const opciones_mediosPago = mediosPago.map(v => ({ value: v._id,label: v.name }));
 
     return(

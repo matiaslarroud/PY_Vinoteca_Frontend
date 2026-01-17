@@ -388,7 +388,7 @@ const newNotaPedido = ({exito}) => {
                 v === "ProductoInsumo" ? "Insumo" : v
     }));
     const opciones_empleados = empleados.map(v => ({ value: v._id,label: v.name }));
-    const opciones_clientes = clientes.map(v => ({ value: v._id,label: v.name }));
+    const opciones_clientes = clientes.map(v => ({ value: v._id,label: `${v.name} ${v.lastname}` }));
     const opciones_mediosPago = mediosPago.map(v => ({ value: v._id,label: v.name }));
     const opciones_presupuestos = presupuestos.filter((s)=>{return s.cliente === notaPedido.cliente })
         .map(v => {

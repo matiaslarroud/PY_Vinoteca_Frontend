@@ -155,8 +155,30 @@ const indexRegistroVenta = () => {
       asc: prev.campo === campo ? !prev.asc : true
     }));
   };
+
+
+const cajasFiltradas = cajas
+  .sort((a, b) => {
+      const campo = orden.campo;
+      if (!campo) return 0;
+
+      let aVal = a[campo];
+      let bVal = b[campo];
+      
+      if (campo === 'codigo') {
+        aVal = a._id;
+        bVal = b._id;
+      }
+
+      if (typeof aVal === 'string') aVal = aVal.toLowerCase();
+      if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+
+      if (aVal < bVal) return orden.asc ? -1 : 1;
+      if (aVal > bVal) return orden.asc ? 1 : -1;
+      return 0;
+  });
     
-  const opciones_clientes = clientes.map(v => ({ value: v._id,label: v.name }));
+  const opciones_clientes = clientes.map(v => ({ value: v._id,label: `${v._id} - ${v.name} ${v.lastname}` }));
   
   const customStyle = {
       container: base => ({
@@ -219,6 +241,16 @@ const indexRegistroVenta = () => {
         )}
 
         <h1 className="titulo-index">Registro de Ventas</h1>
+          <div className="botonera">
+                <button className="btn-icon" onClick={() => router.back()} title="Volver atrás">
+                    <FaArrowLeft />
+                </button>
+                <button className="btn-icon"title="Volver al menú">
+                    <Link href="/" >
+                        <FaHome />
+                    </Link>
+                </button>    
+          </div>
 
         <div className="filtros-container">
 
@@ -323,7 +355,7 @@ const indexRegistroVenta = () => {
                 </tr>
               </thead>
               <tbody>
-                {cajas.map(({ _id, fecha , persona , referencia , tipo , medioPago , total}) => {
+                {cajasFiltradas.map(({ _id, fecha , persona , personaNombre , referencia , tipo , medioPagoNombre , total}) => {
                   return (
                     <tr key={_id}
                         className={
@@ -336,7 +368,7 @@ const indexRegistroVenta = () => {
                     >
                       <td>{_id}</td>
                       <td>{fecha.split("T")[0]}</td>
-                      <td>{persona}</td>
+                      <td>{`${persona} - ${personaNombre}`}</td>
                       <td>{referencia}</td>
                       <td>{
                           tipo === 'CUENTA_CORRIENTE'
@@ -346,7 +378,7 @@ const indexRegistroVenta = () => {
                               : 'SALIDA'
                         }
                       </td>
-                      <td>{medioPago}</td>
+                      <td>{medioPagoNombre}</td>
                       <td>{total}</td>
                     </tr>
                   );

@@ -208,7 +208,7 @@ const createPresupuesto = ({exito}) => {
                 v === "ProductoInsumo" ? "Insumo" : v
     }));
     const opciones_empleados = empleados.map(v => ({ value: v._id,label: v.name }));
-    const opciones_clientes = clientes.map(v => ({ value: v._id,label: v.name }));
+    const opciones_clientes = clientes.map(v => ({ value: v._id,label: `${v.name} ${v.lastname}` }));
 
     return(
         <>

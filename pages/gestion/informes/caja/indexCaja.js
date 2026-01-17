@@ -37,6 +37,28 @@ const indexTransporte = () => {
     }));
   };
 
+
+  const cajasFiltradas = cajas
+    .sort((a, b) => {
+        const campo = orden.campo;
+        if (!campo) return 0;
+
+        let aVal = a[campo];
+        let bVal = b[campo];
+        
+        if (campo === 'codigo') {
+          aVal = a._id;
+          bVal = b._id;
+        }
+
+        if (typeof aVal === 'string') aVal = aVal.toLowerCase();
+        if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+
+        if (aVal < bVal) return orden.asc ? -1 : 1;
+        if (aVal > bVal) return orden.asc ? 1 : -1;
+        return 0;
+  });
+
   return (
       <>
         <div className="box">
@@ -142,7 +164,7 @@ const indexTransporte = () => {
                 </tr>
               </thead>
               <tbody>
-                {cajas.map(({ _id, fecha , persona , referencia , tipo , medioPago , total}) => {
+                {cajasFiltradas.map(({ _id, fecha , persona, personaNombre , referencia , tipo , medioPagoNombre , total}) => {
                   return (
                     <tr key={_id}
                         className={
@@ -156,7 +178,7 @@ const indexTransporte = () => {
                     >
                       <td>{_id}</td>
                       <td>{fecha.split("T")[0]}</td>
-                      <td>{persona}</td>
+                      <td>{`${persona} - ${personaNombre}`}</td>
                       <td>{referencia}</td>
                       <td>{
                           tipo === 'CUENTA_CORRIENTE'
@@ -166,7 +188,7 @@ const indexTransporte = () => {
                               : 'SALIDA'
                         }
                       </td>
-                      <td>{medioPago}</td>
+                      <td>{medioPagoNombre}</td>
                       <td>{total}</td>
                       <td>
                         <div className="acciones">

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaTrash, FaHome, FaArrowLeft, FaSearch, FaEdit } from "react-icons/fa";
+import { FaTrash, FaHome , FaArrowLeft, FaMoneyBill , FaSearch, FaEdit } from "react-icons/fa";
 import { useRouter } from "next/router";
 import Select from 'react-select';       
 import FormularioBusqueedaCliente from "../../../clientes/busquedaCliente"
@@ -13,6 +13,7 @@ const indexCuentaCorriente = () => {
   const [registro , setRegistro] = useState(initialState);
 
   const [cajas, setCajas] = useState([]);
+  const [deudas, setDeudas] = useState([]);
   const [resumenCaja, setResumenCaja] = useState(null);
 
   const [clientes, setClientes] = useState([]);
@@ -25,6 +26,12 @@ const indexCuentaCorriente = () => {
     const { data , resumen } = await res.json();
     setCajas(data);
     setResumenCaja(resumen);
+  };
+
+  const fetchDataDeudas = async (param) => {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/caja/cuentacorriente/deudas`);
+    const { data , resumen } = await res.json();
+    setDeudas(data);
   };
 
   const fetchData_Clientes = async () => {
@@ -55,6 +62,7 @@ const indexCuentaCorriente = () => {
   const limpiarFiltros = () => {
     setRegistro(initialState)
     setCajas([])
+    setDeudas([])
     setResumenCaja([])
   }
 
@@ -64,8 +72,50 @@ const indexCuentaCorriente = () => {
       asc: prev.campo === campo ? !prev.asc : true
     }));
   };
+
+
+const cajasFiltradas = cajas
+  .sort((a, b) => {
+      const campo = orden.campo;
+      if (!campo) return 0;
+
+      let aVal = a[campo];
+      let bVal = b[campo];
+      
+      if (campo === 'codigo') {
+        aVal = a._id;
+        bVal = b._id;
+      }
+
+      if (typeof aVal === 'string') aVal = aVal.toLowerCase();
+      if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+
+      if (aVal < bVal) return orden.asc ? -1 : 1;
+      if (aVal > bVal) return orden.asc ? 1 : -1;
+      return 0;
+  });
+const deudasFiltradas = deudas
+  .sort((a, b) => {
+      const campo = orden.campo;
+      if (!campo) return 0;
+
+      let aVal = a[campo];
+      let bVal = b[campo];
+      
+      if (campo === 'codigo') {
+        aVal = a._id;
+        bVal = b._id;
+      }
+
+      if (typeof aVal === 'string') aVal = aVal.toLowerCase();
+      if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+
+      if (aVal < bVal) return orden.asc ? -1 : 1;
+      if (aVal > bVal) return orden.asc ? 1 : -1;
+      return 0;
+  });
     
-  const opciones_clientes = clientes.map(v => ({ value: v._id,label: v.name }));
+  const opciones_clientes = clientes.map(v => ({ value: v._id,label: `${v._id} - ${v.name} ${v.lastname}` }));
   
   const customStyle = {
       container: base => ({
@@ -128,6 +178,19 @@ const indexCuentaCorriente = () => {
         )}
 
         <h1 className="titulo-index">Registro de Cuentas Corrientes</h1>
+          <div className="botonera">
+                <button className="btn-icon" onClick={() => router.back()} title="Volver atrás">
+                    <FaArrowLeft />
+                </button>
+                <button className="btn-icon"title="Volver al menú">
+                    <Link href="/" >
+                        <FaHome />
+                    </Link>
+                </button>    
+                <button className="btn-icon"title="Cuentas a saldar" onClick={fetchDataDeudas}>
+                    <FaMoneyBill />
+                </button>  
+          </div>
 
         <div className="cliente-container">
           <div className="botonera2">
@@ -161,7 +224,6 @@ const indexCuentaCorriente = () => {
               styles={customStyle}
             />
           </div>
-
         </div>
 
 
@@ -209,7 +271,7 @@ const indexCuentaCorriente = () => {
                 </tr>
               </thead>
               <tbody>
-                {cajas.map(({ _id, fecha , persona , referencia , tipo , medioPago , total}) => {
+                {cajasFiltradas.map(({ _id, fecha , persona, personaNombre , referencia , tipo , medioPagoNombre , total}) => {
                   return (
                     <tr key={_id}
                         className={
@@ -222,7 +284,7 @@ const indexCuentaCorriente = () => {
                     >
                       <td>{_id}</td>
                       <td>{fecha.split("T")[0]}</td>
-                      <td>{persona}</td>
+                      <td>{`${persona} - ${personaNombre}`}</td>
                       <td>{referencia}</td>
                       <td> {
                           tipo === 'CUENTA_CORRIENTE'
@@ -232,7 +294,7 @@ const indexCuentaCorriente = () => {
                               : 'SALIDA'
                         }
                       </td>
-                      <td>{medioPago}</td>
+                      <td>{medioPagoNombre}</td>
                       <td>{total}</td>
                       <td>
                         <div className="acciones">
@@ -241,6 +303,23 @@ const indexCuentaCorriente = () => {
                           </button>
                         </div>
                       </td>
+                    </tr>
+                  );
+                })}
+
+                {deudasFiltradas.map(({ clienteId , clienteNombre , saldoAdeudado}) => {
+                  return (
+                    <tr key={clienteId}
+                        className={'mov-salida'}
+                    >
+                      <td>{}</td>
+                      <td>{}</td>
+                      <td>{`${clienteId} - ${clienteNombre}`}</td>
+                      <td>{'Deuda a saldar'}</td>
+                      <td>{'Deuda'}</td>
+                      <td>{}</td>
+                      <td>{saldoAdeudado}</td>
+                      <td>{}</td>
                     </tr>
                   );
                 })}

@@ -316,7 +316,7 @@ const deleteCliente = async (clienteID) => {
             <thead>
               <tr className="fila">
                   <th onClick={() => toggleOrden('codigo')}>Codigo ⬍</th>
-                  <th onClick={() => toggleOrden('name')}>Nombre ⬍</th>
+                  <th onClick={() => toggleOrden('name')}>Nombre y Apellido ⬍</th>
                   <th onClick={() => toggleOrden('cuentaCorriente')}>Cuenta Corriente ⬍</th>
                   <th onClick={() => toggleOrden('saldoActual')}>Saldo Actual ⬍</th>
                   <th onClick={() => toggleOrden('localidad')}>Localidad ⬍</th>
@@ -325,11 +325,11 @@ const deleteCliente = async (clienteID) => {
             </thead>
             <tbody>
               {
-                clientesFiltrados.map(({_id,name , cuentaCorriente, localidad, saldoActualCuentaCorriente}) => {
+                clientesFiltrados.map(({_id,name, lastname, cuentaCorriente, localidad, saldoActualCuentaCorriente}) => {
                   const localidadEncontrada = localidades.find((p)=>{return p._id === localidad })
                   return <tr key={_id}>
                       <td className="columna">{_id}</td>
-                      <td className="columna">{name}</td>
+                      <td className="columna">{`${name} ${lastname}`}</td>
                       <td className="columna">{cuentaCorriente ? "SI" : "NO"}</td>
                       <td className="columna">{saldoActualCuentaCorriente ? saldoActualCuentaCorriente : "-"}</td>
                       <td className="columna">{localidadEncontrada?.name}</td>

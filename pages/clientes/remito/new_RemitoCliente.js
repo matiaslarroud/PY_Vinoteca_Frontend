@@ -268,7 +268,7 @@ const newRemitoCliente = ({exito}) => {
         }));
 
     const opciones_clientes = clientes.map(v => ({
-        value: v._id, label: v.name
+        value: v._id, label: `${v.name} ${v.lastname}`
     }));
 
     const opciones_comprobantesVenta = comprobantesVenta && pedidos.length > 0
