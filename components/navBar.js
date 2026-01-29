@@ -184,6 +184,27 @@ export default function Navbar({ usuario }) {
                   )}
                 </div>
 
+                {/* Catalogo */}
+                <div className={styles.dropdown}>
+                  <button
+                    className={styles.dropdownToggle}
+                    onClick={() => toggleDropdown("catalogo")}
+                  >
+                    Catalogo {openDropdown === "catalogo" ? "▲" : "▼"}
+                  </button>
+                  {openDropdown === "catalogo" && (
+                    <div className={styles.submenu}>
+                      <Link
+                        href="/products/catalogo/indexListado"
+                        onClick={handleLinkClick}
+                        className={isActive("/products/catalogo/indexListado") ? styles.active : ""}
+                      >
+                        Listado de Productos
+                      </Link>
+                    </div>
+                  )}
+                </div>
+
                 
               
           </>
