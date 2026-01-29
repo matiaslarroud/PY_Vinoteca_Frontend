@@ -111,6 +111,7 @@ const formOrden = ({exito , tipo , param}) => {
                     fechaElaboracion: ordenProduccion.fechaElaboracion ,
                     fechaEntrega: ordenProduccion.fechaEntrega,
                     empleado: ordenProduccion.empleado,
+                    detalles: detalles
                 })
             }
         )
@@ -121,32 +122,7 @@ const formOrden = ({exito , tipo , param}) => {
             alert(ordenCreada.message)
             return
         }
-
-        const ordenID = ordenCreada.data._id;
-
-        if(!ordenID){
-            alert("❌ Error al generar detalles de orden .")
-            return
-        }
-
-        // GUARDAMOS DETALLES
-        for (const detalle of detalles) {
-            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/ordenProduccionDetalle`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    cantidad: detalle.cantidad,
-                    picada: detalle.picada,
-                    ordenProduccion: ordenID
-            })
-                });
-            
-            if (!resDetalle.ok) {
-                const errorData = await resDetalle.json();
-                alert(errorData.message); 
-                return;
-            }
-        }
+        
         setDetalles([initialStateDetalle]);
         setOrdenProducion(initialState);
         alert(ordenCreada.message)
@@ -501,7 +477,6 @@ const formOrden = ({exito , tipo , param}) => {
                         display: flex;
                         flex-direction: column;
                         gap: 1rem;
-                        height: 160px;
                         overflow-y: auto;
                         padding-right: 8px;
                     }

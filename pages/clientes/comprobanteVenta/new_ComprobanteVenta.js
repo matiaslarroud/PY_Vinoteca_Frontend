@@ -219,6 +219,7 @@ const createComprobanteVenta = ({exito}) => {
         const bodyData = {
             tipoComprobante: comprobanteVenta.tipoComprobante,
             total: comprobanteVenta.total,  
+            detalles: detalles
         };
 
         if (comprobanteVenta.notaPedido) {
@@ -232,34 +233,11 @@ const createComprobanteVenta = ({exito}) => {
         })
 
         const comprobanteVentaCreado = await resNotaComprobanteVenta.json();
-        if(!comprobanteVentaCreado.ok) {
-            alert(comprobanteVentaCreado.message)
+        if(!comprobanteVentaCreado.ok){
+            alert(comprobanteVentaCreado.message);
             return
-        }
-        const comprobanteVentaID = comprobanteVentaCreado.data._id;
+        }            
 
-        // GUARDAMOS DETALLES
-        for (const detalle of detalles) {
-            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/comprobanteVentaDetalle`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    producto: detalle.producto,
-                    precio: detalle.precio,
-                    cantidad: detalle.cantidad,
-                    importe: detalle.importe,
-                    comprobanteVenta: comprobanteVentaID
-            })
-            
-            
-            });
-            if (!resDetalle.ok) {
-                const errData = await resDetalle.json();
-                alert(errData.message)
-                return
-            }
-        
-        }
         setDetalles([initialDetalle]);
         setComprobanteVenta(initialStateComprobanteVenta);
         alert(comprobanteVentaCreado.message)

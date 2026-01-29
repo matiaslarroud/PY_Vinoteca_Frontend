@@ -441,7 +441,6 @@ const viewOrden = ({exito , ordenID}) => {
                         display: flex;
                         flex-direction: column;
                         gap: 1rem;
-                        height: 160px;
                         overflow-y: auto;
                         padding-right: 8px;
                     }

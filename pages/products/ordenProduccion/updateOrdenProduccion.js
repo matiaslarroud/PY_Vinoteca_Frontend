@@ -119,6 +119,7 @@ const updateOrden = ({exito , ordenID}) => {
                     fechaElaboracion: ordenProduccion.fechaElaboracion ,
                     fechaEntrega: ordenProduccion.fechaEntrega,
                     empleado: ordenProduccion.empleado,
+                    detalles: detalles
                 })
             }
         )
@@ -129,49 +130,7 @@ const updateOrden = ({exito , ordenID}) => {
             alert(ordenCreada.message)
             return
         }
-        const identificador = ordenCreada.data._id;
-
-        if(!identificador){
-            alert("❌ Error al generar detalles de orden .")
-            return
-        }
-
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/ordenProduccionDetalle/${identificador}`,
-            {
-                method:'DELETE',
-                headers: {
-                    'Content-Type':'application/json',
-                }
-            }
-        ).then((a)=>{return a.json()})
-            .then((res)=>{
-                if(!res.ok) {
-                    alert(res.message)
-                    return
-                }
-            })
-            .catch((err)=>{
-                console.log("❌ Error al enviar detalle para su eliminación. \n Error: ",err);
-            })
-
-        // GUARDAMOS DETALLES
-        for (const detalle of detalles) {
-            const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/ordenProduccionDetalle`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    cantidad: detalle.cantidad,
-                    picada: detalle.picada,
-                    ordenProduccion: identificador
-            })
-                });
-            
-            if (!resDetalle.ok) {
-                const errorData = await resDetalle.json();
-                alert(errorData.message); 
-                return;
-            }
-        }
+        
         setDetalles([initialStateDetalle]);
         setOrdenProducion(initialState);
         alert(ordenCreada.message)
@@ -524,7 +483,6 @@ const updateOrden = ({exito , ordenID}) => {
                         display: flex;
                         flex-direction: column;
                         gap: 1rem;
-                        height: 160px;
                         overflow-y: auto;
                         padding-right: 8px;
                     }

@@ -6,7 +6,7 @@ import FormularioCreateTransporte from "../../gestion/transporte/createTransport
 const { default: Link } = require("next/link")
 
 const initialState = {cliente:'',totalPrecio:0, totalBultos:0, fecha:'', comprobanteVenta:'', transporteID:'', entregado:false}
-const initialDetalle = { remitoID:'', tipoProducto:"", producto:'' ,  cantidad: 0 };
+const initialDetalle = { tipoProducto:"", producto:'' ,  cantidad: 0 };
 
 const createRemitoCliente = ({exito , comprobanteVentaID}) => {
     const [remito , setRemito] = useState(initialState);
@@ -146,54 +146,28 @@ const createRemitoCliente = ({exito , comprobanteVentaID}) => {
 
     const clickChange = async (e) => {
         e.preventDefault();
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/remito`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    totalPrecio: remito.totalPrecio,
-                    totalBultos: remito.totalBultos,
-                    comprobanteVentaID: remito.comprobanteVenta.value,
-                    transporteID: remito.transporteID,
-                    entregado: remito.entregado
-                })
-            });
-            
-            const remitoCreado = await res.json();
-            if(!remitoCreado.ok) {
-                alert(remitoCreado.message)
-                return
-            }
-            const remitoID = remitoCreado.data._id;
-
-            // GUARDAMOS DETALLES
-            for (const detalle of detalles) {
-                const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/remitoDetalle`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        producto: detalle.producto,
-                        cantidad: detalle.cantidad,
-                        remitoID: remitoID
-                })
-                
-                
-                });
-                if (!resDetalle.ok) {
-                    const errData = await resDetalle.json();
-                    alert(errData.message)
-                    return
-                }
-            
-                setDetalles(initialDetalle);
-                setRemito(initialState);
-                alert(remitoCreado.message)
-                exito();
-            }
-        } 
-        catch (err) {
-            console.log('Error al enviar datos. \n Error: ', err);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/remito`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                totalPrecio: remito.totalPrecio,
+                totalBultos: remito.totalBultos,
+                comprobanteVenta: remito.comprobanteVenta.value,
+                transporteID: remito.transporteID,
+                entregado: remito.entregado,
+                detalles: detalles
+            })
+        });
+        
+        const remitoCreado = await res.json();
+        if(!remitoCreado.ok) {
+            alert(remitoCreado.message)
+            return
         }
+        setDetalles(initialDetalle);
+        setRemito(initialState);
+        alert(remitoCreado.message)
+        exito();
     };
 
     const selectChange = (selectedOption, actionMeta) => {
@@ -583,7 +557,7 @@ const createRemitoCliente = ({exito , comprobanteVentaID}) => {
                                     className="submit-btn"
                                     onClick={(e) => {
                                         if (!puedeGuardar) {
-                                        alert("❌ No se puede guardar un remito sin un comprobante de venta asociado.");
+                                        alert("❌ Falta completar datos del remito.");
                                         e.preventDefault();
                                         return;
                                         }

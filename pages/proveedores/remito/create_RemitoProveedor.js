@@ -144,7 +144,8 @@ const createRemito = ({exito , param , tipo}) => {
                     totalPrecio: remito.totalPrecio,
                     totalBultos: remito.totalBultos,
                     comprobanteCompra: remito.comprobanteCompra,
-                    transporte: remito.transporte
+                    transporte: remito.transporte,
+                    detalles: detalles
                 })
             });
             
@@ -152,33 +153,12 @@ const createRemito = ({exito , param , tipo}) => {
             if(!remitoCreado.ok){
                 alert(remitoCreado.message)
                 return
-            }       
-            const remitoID = remitoCreado.data._id;
-
-            // GUARDAMOS DETALLES
-            for (const detalle of detalles) {
-                const resDetalle = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proveedor/remitoDetalle`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        producto: detalle.producto,
-                        cantidad: detalle.cantidad,
-                        remito: remitoID
-                })
-                
-                
-                });
-                if (!resDetalle.ok)  {
-                    const errorData = await resDetalle.json();
-                    alert(errorData.message); 
-                    return;
-                }
-            }
+            }  
             
-                setDetalles(initialDetalle);
-                setRemito(initialState);
-                alert(remitoCreado.message)
-                exito();
+            setDetalles(initialDetalle);
+            setRemito(initialState);
+            alert(remitoCreado.message)
+            exito();
         } 
         catch (err) {
             console.log('❌ Error al enviar datos. \n Error: ', err);
