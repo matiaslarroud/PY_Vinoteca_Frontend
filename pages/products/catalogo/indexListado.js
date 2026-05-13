@@ -68,7 +68,7 @@ export default function Catalogo() {
 
   return (
     <div className="catalogo">
-      <h1 className="titulo-pagina">Catálogo de Productos</h1>
+      <h1 className="titulo-index">Catálogo de Productos</h1>
 
       {/* 🔧 FILTROS */}
       <div className="panel-filtros">

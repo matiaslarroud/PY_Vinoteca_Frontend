@@ -4,7 +4,7 @@ import { FaHome } from "react-icons/fa";
 export default function indexGestion() {
   return (
   <>
-  <h1 className="titulo-index">Productos</h1>
+  <h1 className="titulo-index">Listados</h1>
   <div className="botonera">
     <button className="btn-icon"title="Volver al menú">
       <Link href="/" >
@@ -15,28 +15,13 @@ export default function indexGestion() {
 
   <div className="menu-grid">
       <div className="boton-acceso">
-        <Link href="./vinos/indexVino">
-          <span>Vinos</span>
+        <Link href="./indexListado">
+          <span>Listado de Productos</span>
         </Link>
       </div>
       <div className="boton-acceso">
-        <Link href="./picadas/indexPicada">
-          <span>Picadas</span>
-        </Link>
-      </div>
-      <div className="boton-acceso">
-        <Link href="./insumos/indexInsumo">
-          <span>Insumos</span>
-        </Link>
-      </div>
-      <div className="boton-acceso">
-        <Link href="./ordenProduccion/indexOrdenProduccion">
-          <span>Ordenes de Produccion</span>
-        </Link>
-      </div>
-      <div className="boton-acceso">
-        <Link href="./catalogo/indexCatalogo">
-          <span>Listados</span>
+        <Link href="./promociones/indexPromocion">
+          <span>Listado de Promociones</span>
         </Link>
       </div>
   </div>

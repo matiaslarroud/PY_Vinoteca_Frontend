@@ -4,10 +4,12 @@ import { useRouter } from "next/router";
 export default function Login() {
   const [usuario, setUsuario] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/usuario/login`, {
@@ -18,16 +20,14 @@ export default function Login() {
 
       const data = await res.json();
       if (data.ok) {
-        // ✅ Guarda sesión temporal con rol
+        localStorage.setItem("authToken", data.token);
         sessionStorage.setItem("usuario", JSON.stringify(data.usuario));
-        
-        router.push("/"); // Redirige al inicio
+        router.push("/");
       } else {
-        alert("Usuario o contraseña incorrectos");
+        setError("Usuario o contraseña incorrectos");
       }
-    } catch (error) {
-      console.error(error);
-      alert("Error al iniciar sesión");
+    } catch {
+      setError("Error al conectar con el servidor");
     }
   };
 
@@ -49,6 +49,7 @@ export default function Login() {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
+        {error && <p className="login-error">{error}</p>}
         <button type="submit">Ingresar</button>
       </form>
 
@@ -73,6 +74,11 @@ export default function Login() {
           border-radius: 8px;
           border: none;
           font-size: 1rem;
+        }
+        .login-error {
+          color: #ff6b6b;
+          font-size: 0.9rem;
+          margin: 0;
         }
         button {
           padding: 10px;

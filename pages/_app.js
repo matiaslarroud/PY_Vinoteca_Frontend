@@ -5,14 +5,39 @@ import BackendLoader from "../components/backendLoader";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
+// Inyecta el token JWT en todas las peticiones al backend sin tocar cada página
+function patchFetch(backendUrl) {
+  if (typeof window === "undefined") return;
+  const originalFetch = window._originalFetch || window.fetch;
+  window._originalFetch = originalFetch;
+
+  window.fetch = function (url, options = {}) {
+    const token = localStorage.getItem("authToken");
+    if (token && typeof url === "string" && url.startsWith(backendUrl)) {
+      options = {
+        ...options,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          ...options.headers,
+        },
+      };
+    }
+    return originalFetch(url, options);
+  };
+}
+
 export default function App({ Component, pageProps }) {
   const router = useRouter();
   const [isAuthChecked, setIsAuthChecked] = useState(false);
   const [usuario, setUsuario] = useState(null);
 
   useEffect(() => {
+    patchFetch(process.env.NEXT_PUBLIC_BACKEND_URL);
+
     const usuarioGuardado = sessionStorage.getItem("usuario");
-    if (!usuarioGuardado && router.pathname !== "/login") {
+    const token = localStorage.getItem("authToken");
+
+    if ((!usuarioGuardado || !token) && router.pathname !== "/login") {
       router.replace("/login");
     } else {
       setUsuario(usuarioGuardado ? JSON.parse(usuarioGuardado) : null);
@@ -20,14 +45,12 @@ export default function App({ Component, pageProps }) {
     }
   }, [router.pathname]);
 
-  if (!isAuthChecked) return null; // evita parpadeo inicial
+  if (!isAuthChecked) return null;
 
-  // Si está en login, no mostrar el layout ni el loader
   if (router.pathname === "/login") {
     return <Component {...pageProps} />;
   }
 
-  // En todas las demás páginas, muestra loader mientras el backend despierta
   return (
     <BackendLoader>
       <Layout usuario={usuario}>

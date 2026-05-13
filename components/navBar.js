@@ -13,6 +13,7 @@ export default function Navbar({ usuario }) {
 
   const handleLogout = () => {
     sessionStorage.removeItem("usuario");
+    localStorage.removeItem("authToken");
     window.location.href = "/login";
   };
 
@@ -195,11 +196,25 @@ export default function Navbar({ usuario }) {
                   {openDropdown === "catalogo" && (
                     <div className={styles.submenu}>
                       <Link
+                        href="/products/catalogo/indexCatalogo"
+                        onClick={handleLinkClick}
+                        className={isActive("/products/catalogo/indexCatalogo") ? styles.active : ""}
+                      >
+                        Listado
+                      </Link>
+                      <Link
                         href="/products/catalogo/indexListado"
                         onClick={handleLinkClick}
                         className={isActive("/products/catalogo/indexListado") ? styles.active : ""}
                       >
                         Listado de Productos
+                      </Link>
+                      <Link
+                        href="/products/catalogo/promociones/indexPromocion"
+                        onClick={handleLinkClick}
+                        className={isActive("/products/catalogo/promociones/indexPromocion") ? styles.active : ""}
+                      >
+                        Listado de Promociones
                       </Link>
                     </div>
                   )}

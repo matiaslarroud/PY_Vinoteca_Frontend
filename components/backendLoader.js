@@ -14,8 +14,7 @@ export default function BackendLoader({ children }) {
       } else {
         throw new Error("Error en backend");
       }
-    } catch (err) {
-      console.log("Backend no disponible aún...");
+    } catch {
       setIsConnected(false);
     } finally {
       setIsLoading(false);
@@ -24,34 +23,53 @@ export default function BackendLoader({ children }) {
 
   useEffect(() => {
     checkBackend();
-
-    // reintenta cada 5 segundos si no está conectado
     const interval = setInterval(() => {
       if (!isConnected) checkBackend();
     }, 5000);
-
     return () => clearInterval(interval);
   }, [isConnected]);
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen text-gray-300 bg-neutral-900">
-        <ImSpinner8 className="animate-spin text-5xl mb-4 text-emerald-400" />
-        <p className="text-lg">Conectando con el servidor...</p>
+      <div style={styles.container}>
+        <ImSpinner8 style={{ ...styles.icon, color: "#20c997", animation: "spin 1s linear infinite" }} />
+        <p style={styles.text}>Conectando con el servidor...</p>
+        <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
 
   if (!isConnected) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-neutral-900 text-red-400">
-        <FaServer className="text-4xl mb-2" />
-        <p>No se pudo establecer conexión con el backend.</p>
-        <p className="text-sm text-gray-400 mt-1">El servidor puede estar iniciando, reintentá en unos segundos.</p>
+      <div style={styles.container}>
+        <FaServer style={{ ...styles.icon, color: "#dc3545" }} />
+        <p style={{ ...styles.text, color: "#dc3545" }}>No se pudo establecer conexión con el backend.</p>
+        <p style={{ color: "#6c757d", fontSize: "0.9rem", marginTop: "0.5rem" }}>
+          El servidor puede estar iniciando, reintentá en unos segundos.
+        </p>
       </div>
     );
   }
 
-  // Si ya está conectado, mostramos la app normalmente
   return <>{children}</>;
 }
+
+const styles = {
+  container: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    height: "100vh",
+    backgroundColor: "#1a1a1a",
+    color: "#dee2e6",
+  },
+  icon: {
+    fontSize: "3rem",
+    marginBottom: "1rem",
+  },
+  text: {
+    fontSize: "1.1rem",
+    color: "#dee2e6",
+  },
+};
