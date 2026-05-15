@@ -210,11 +210,18 @@ export default function Navbar({ usuario }) {
                         Listado de Productos
                       </Link>
                       <Link
-                        href="/products/catalogo/promociones/indexPromocion"
+                        href="/products/catalogo/gestionOfertas"
                         onClick={handleLinkClick}
-                        className={isActive("/products/catalogo/promociones/indexPromocion") ? styles.active : ""}
+                        className={isActive("/products/catalogo/gestionOfertas") ? styles.active : ""}
                       >
-                        Listado de Promociones
+                        Gestión de Ofertas
+                      </Link>
+                      <Link
+                        href="/products/catalogo/indexOfertas"
+                        onClick={handleLinkClick}
+                        className={isActive("/products/catalogo/indexOfertas") ? styles.active : ""}
+                      >
+                        Vitrina de Ofertas
                       </Link>
                     </div>
                   )}

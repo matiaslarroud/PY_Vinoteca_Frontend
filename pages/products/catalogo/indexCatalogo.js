@@ -20,8 +20,8 @@ export default function indexGestion() {
         </Link>
       </div>
       <div className="boton-acceso">
-        <Link href="./promociones/indexPromocion">
-          <span>Listado de Promociones</span>
+        <Link href="./indexOfertas">
+          <span>Vitrina de Ofertas</span>
         </Link>
       </div>
   </div>
