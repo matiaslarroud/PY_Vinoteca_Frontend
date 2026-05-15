@@ -6,12 +6,19 @@ const TIPO_LABEL = {
   ProductoInsumo: "Insumo",
 };
 
+const TIPO_COLOR_RGB = {
+  ProductoVino:   [139,   0,   0],
+  ProductoPicada: [ 21, 101, 192],
+  ProductoInsumo: [ 46, 125,  50],
+};
+
 export default function VitranaOfertas() {
   const [productos, setProductos] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [busqueda, setBusqueda] = useState("");
   const [tipoFiltro, setTipoFiltro] = useState("");
   const [orden, setOrden] = useState("");
+  const [exportando, setExportando] = useState(false);
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productFoto/ofertas`)
@@ -39,17 +46,239 @@ export default function VitranaOfertas() {
       return 0;
     });
 
+  const exportarPDF = async () => {
+    if (vista.length === 0) return;
+    setExportando(true);
+    try {
+      const { jsPDF } = await import("jspdf");
+      const doc = new jsPDF({ orientation: "p", unit: "mm", format: "a4" });
+
+      const W = 210, H = 297;
+      const ML = 14, MR = 14;
+      const CW = W - ML - MR;
+      const ROW_H = 22;
+      const HEADER_H = 40;
+      const FOOTER_H = 14;
+      const SUBHEADER_H = 14;
+      const today = new Date().toLocaleDateString("es-AR", { day: "2-digit", month: "long", year: "numeric" });
+
+      const rowsPerFirstPage = Math.floor((H - HEADER_H - FOOTER_H - 6) / ROW_H);
+      const rowsPerNextPage  = Math.floor((H - SUBHEADER_H - FOOTER_H - 6) / ROW_H);
+      const totalPages = Math.ceil(
+        Math.max(0, vista.length - rowsPerFirstPage) / rowsPerNextPage + 1
+      );
+
+      let page = 1;
+      let y = 0;
+
+      // ── Header principal ──────────────────────────────────────────
+      const drawHeader = () => {
+        doc.setFillColor(14, 14, 14);
+        doc.rect(0, 0, W, HEADER_H - 4, "F");
+        doc.setFillColor(139, 0, 0);
+        doc.rect(0, HEADER_H - 4, W, 4, "F");
+
+        doc.setFontSize(20);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(255, 255, 255);
+        doc.text("OFERTAS ESPECIALES", ML, 18);
+
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(150, 150, 150);
+        doc.text("Lista de precios en promoción", ML, 26);
+
+        doc.setFontSize(8);
+        doc.setTextColor(110, 110, 110);
+        doc.text(today, W - MR, 14, { align: "right" });
+
+        const pill = `${vista.length} producto${vista.length !== 1 ? "s" : ""} en oferta`;
+        const pillW = doc.getTextWidth(pill) + 8;
+        doc.setFillColor(30, 30, 30);
+        doc.roundedRect(W - MR - pillW, 19, pillW, 7, 2, 2, "F");
+        doc.setFontSize(7.5);
+        doc.setTextColor(160, 160, 160);
+        doc.text(pill, W - MR - pillW / 2, 24, { align: "center" });
+
+        y = HEADER_H + 4;
+      };
+
+      // ── Sub-header para páginas 2+ ─────────────────────────────
+      const drawSubHeader = () => {
+        doc.setFillColor(14, 14, 14);
+        doc.rect(0, 0, W, SUBHEADER_H - 2, "F");
+        doc.setFillColor(139, 0, 0);
+        doc.rect(0, SUBHEADER_H - 2, W, 2, "F");
+        doc.setFontSize(8);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(200, 200, 200);
+        doc.text("OFERTAS ESPECIALES", ML, 9);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(100, 100, 100);
+        doc.text(today, W - MR, 9, { align: "right" });
+        y = SUBHEADER_H + 4;
+      };
+
+      // ── Footer ────────────────────────────────────────────────────
+      const drawFooter = (pageNum) => {
+        doc.setFillColor(14, 14, 14);
+        doc.rect(0, H - FOOTER_H, W, FOOTER_H, "F");
+        doc.setFontSize(7.5);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(90, 90, 90);
+        doc.text("Precios sujetos a cambios sin previo aviso.", ML, H - 5);
+        doc.text(`Página ${pageNum} de ${totalPages}`, W - MR, H - 5, { align: "right" });
+      };
+
+      // ── Fila de producto ──────────────────────────────────────────
+      const drawRow = (prod, idx) => {
+        const tc = TIPO_COLOR_RGB[prod.tipoProducto] || [80, 80, 80];
+        const isEven = idx % 2 === 0;
+
+        // Fondo alternado
+        doc.setFillColor(isEven ? 250 : 255, isEven ? 250 : 255, isEven ? 250 : 255);
+        doc.rect(ML, y, CW, ROW_H, "F");
+
+        // Barra lateral de color de tipo
+        doc.setFillColor(...tc);
+        doc.rect(ML, y, 4.5, ROW_H, "F");
+
+        // Número de ítem
+        doc.setFontSize(6.5);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(190, 190, 190);
+        doc.text(String(idx + 1).padStart(2, "0"), ML + 7, y + 8);
+
+        // Nombre
+        doc.setFontSize(10.5);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(25, 25, 25);
+        const nameStr = doc.splitTextToSize(prod.name, 85)[0];
+        doc.text(nameStr, ML + 15, y + 9);
+
+        // Tipo + stock
+        const tipoLabel = (TIPO_LABEL[prod.tipoProducto] ?? prod.tipoProducto).toUpperCase();
+        doc.setFontSize(6.5);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(...tc);
+        doc.text(tipoLabel, ML + 15, y + 16);
+
+        doc.setFont("helvetica", "normal");
+        if (prod.stock === 0) {
+          doc.setTextColor(200, 50, 50);
+          doc.text("· SIN STOCK", ML + 15 + doc.getTextWidth(tipoLabel) + 1.5, y + 16);
+        } else {
+          doc.setTextColor(140, 140, 140);
+          doc.text(`· Stock: ${prod.stock}`, ML + 15 + doc.getTextWidth(tipoLabel) + 1.5, y + 16);
+        }
+
+        // ── Área de precios (derecha) ──
+        const priceAreaX = W - MR;
+
+        // Precio de oferta
+        doc.setFontSize(13);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(46, 125, 50);
+        doc.text(`$ ${prod.precioOferta.toFixed(2)}`, priceAreaX, y + 10, { align: "right" });
+
+        // Precio original tachado
+        doc.setFontSize(8.5);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(170, 170, 170);
+        const origStr = `$ ${prod.precioOriginal.toFixed(2)}`;
+        const origX = priceAreaX - 38;
+        doc.text(origStr, origX, y + 10, { align: "right" });
+        const origW = doc.getTextWidth(origStr);
+        doc.setDrawColor(160, 160, 160);
+        doc.setLineWidth(0.25);
+        doc.line(origX - origW, y + 9.2, origX, y + 9.2);
+
+        // Badge de descuento
+        if (prod.descuento > 0) {
+          const badgeTxt = `-${prod.descuento}%`;
+          const badgeW = doc.getTextWidth(badgeTxt) + 5;
+          const badgeX = priceAreaX - 50 - badgeW;
+          doc.setFillColor(139, 0, 0);
+          doc.roundedRect(badgeX, y + 3, badgeW, 7, 1.5, 1.5, "F");
+          doc.setFontSize(7.5);
+          doc.setFont("helvetica", "bold");
+          doc.setTextColor(255, 255, 255);
+          doc.text(badgeTxt, badgeX + badgeW / 2, y + 8, { align: "center" });
+        }
+
+        // Ahorro
+        if (prod.descuento > 0) {
+          const saving = (prod.precioOriginal - prod.precioOferta).toFixed(2);
+          doc.setFontSize(7);
+          doc.setFont("helvetica", "normal");
+          doc.setTextColor(76, 175, 80);
+          doc.text(`Ahorrás $${saving}`, priceAreaX, y + 17, { align: "right" });
+        }
+
+        // Separador
+        doc.setDrawColor(220, 220, 220);
+        doc.setLineWidth(0.1);
+        doc.line(ML + 4.5, y + ROW_H, ML + CW, y + ROW_H);
+
+        y += ROW_H;
+      };
+
+      // ── Renderizado ───────────────────────────────────────────────
+      drawHeader();
+
+      vista.forEach((prod, idx) => {
+        const isFirstPage = page === 1;
+        const rowsInThisPage = isFirstPage ? rowsPerFirstPage : rowsPerNextPage;
+        const rowsUsedBefore = isFirstPage ? 0 : rowsPerFirstPage + (page - 2) * rowsPerNextPage;
+        const posInPage = idx - rowsUsedBefore;
+
+        if (idx > 0 && posInPage === 0) {
+          drawFooter(page);
+          doc.addPage();
+          page++;
+          drawSubHeader();
+        }
+
+        drawRow(prod, idx);
+      });
+
+      drawFooter(page);
+
+      const filename = `ofertas-${new Date().toISOString().slice(0, 10)}.pdf`;
+      doc.save(filename);
+    } finally {
+      setExportando(false);
+    }
+  };
+
   return (
     <div className="vitrina">
       <div className="vitrina-header">
         <div className="header-inner">
-          <h1 className="titulo-index">🏷️ Vitrina de Ofertas</h1>
-          <div className="header-accent" />
-          {!cargando && (
-            <span className="pill-contador">
-              {productos.length} producto{productos.length !== 1 ? "s" : ""} en promoción
-            </span>
-          )}
+          <h1 className="titulo-index">Vitrina de Ofertas</h1>
+          <div className="header-actions">
+            {!cargando && (
+              <span className="pill-contador">
+                {vista.length} producto{vista.length !== 1 ? "s" : ""} en pantalla
+              </span>
+            )}
+            <button
+              className="btn-exportar"
+              onClick={exportarPDF}
+              disabled={exportando || vista.length === 0}
+              title="Exportar productos visibles a PDF"
+            >
+              {exportando ? (
+                <span className="export-spinner" />
+              ) : (
+                <svg viewBox="0 0 20 20" fill="none" width="15" height="15">
+                  <path d="M10 3v9M6 8l4 4 4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M3 14v1a2 2 0 002 2h10a2 2 0 002-2v-1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+                </svg>
+              )}
+              {exportando ? "Generando..." : "Exportar PDF"}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -201,6 +430,13 @@ export default function VitranaOfertas() {
           border-radius: 2px;
           margin-top: -6px;
         }
+        .header-actions {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
         .pill-contador {
           display: inline-block;
           background: #1e1e1e;
@@ -210,6 +446,40 @@ export default function VitranaOfertas() {
           padding: 4px 14px;
           border-radius: 20px;
         }
+        .btn-exportar {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          padding: 7px 16px;
+          border-radius: 8px;
+          border: 1px solid #2a2a2a;
+          background: #1a1a1a;
+          color: #ccc;
+          font-size: 13px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .btn-exportar:hover:not(:disabled) {
+          background: #8b0000;
+          border-color: #a30000;
+          color: #fff;
+          box-shadow: 0 2px 12px #8b000044;
+        }
+        .btn-exportar:disabled {
+          opacity: 0.4;
+          cursor: not-allowed;
+        }
+        .export-spinner {
+          display: inline-block;
+          width: 13px;
+          height: 13px;
+          border: 2px solid #ffffff33;
+          border-top-color: #ccc;
+          border-radius: 50%;
+          animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         /* ── Filtros ── */
         .panel-filtros {
