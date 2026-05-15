@@ -18,7 +18,14 @@ export default function Login() {
         body: JSON.stringify({ usuario, password }),
       });
 
-      const data = await res.json();
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        setError("Error al conectar con el servidor (respuesta inválida)");
+        return;
+      }
+
       if (data.ok) {
         localStorage.setItem("authToken", data.token);
         sessionStorage.setItem("usuario", JSON.stringify(data.usuario));
