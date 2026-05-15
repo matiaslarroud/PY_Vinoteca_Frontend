@@ -656,11 +656,9 @@ export default function GestionOfertas() {
           gap: 10px;
           flex-wrap: wrap;
           align-items: center;
+          justify-content: center;
           margin-bottom: 16px;
-          padding: 14px 16px;
-          background: #0d0d0d;
-          border: 1px solid #1e1e1e;
-          border-radius: 10px;
+          padding: 10px 0;
           animation: slideDown 0.18s ease;
         }
         @keyframes slideDown {
