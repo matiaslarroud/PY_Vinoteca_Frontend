@@ -133,7 +133,7 @@ export default function GestionOfertas() {
     <div className="gestion-ofertas">
       <h1 className="titulo-index">Gestión de Ofertas</h1>
 
-      <div className="barra-filtros">
+      <div className="botonera">
         <div className="search-wrapper">
           <svg className="search-icon" viewBox="0 0 20 20" fill="none">
             <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="1.5"/>
@@ -168,63 +168,6 @@ export default function GestionOfertas() {
           ))}
         </div>
 
-        {tipoFiltro === "ProductoVino" && (
-          <>
-            <div className="filtro-sep" />
-            <select
-              className="filtro-select"
-              value={filtroVino.bodega}
-              onChange={(e) => setFiltroVino((p) => ({ ...p, bodega: e.target.value }))}
-            >
-              <option value="">Todas las bodegas</option>
-              {bodegas.map((b) => <option key={b._id} value={b._id}>{b.name}</option>)}
-            </select>
-            <select
-              className="filtro-select"
-              value={filtroVino.tipo}
-              onChange={(e) => setFiltroVino((p) => ({ ...p, tipo: e.target.value }))}
-            >
-              <option value="">Todos los tipos</option>
-              {tiposVino.map((t) => <option key={t._id} value={t._id}>{t.name}</option>)}
-            </select>
-            <input
-              className="filtro-input"
-              type="text"
-              placeholder="Varietal..."
-              value={filtroVino.varietal}
-              onChange={(e) => setFiltroVino((p) => ({ ...p, varietal: e.target.value }))}
-            />
-            <input
-              className="filtro-input"
-              type="text"
-              placeholder="Proveedor..."
-              value={filtroVino.proveedor}
-              onChange={(e) => setFiltroVino((p) => ({ ...p, proveedor: e.target.value }))}
-            />
-          </>
-        )}
-
-        {tipoFiltro === "ProductoInsumo" && (
-          <>
-            <div className="filtro-sep" />
-            <select
-              className="filtro-select"
-              value={filtroInsumo.deposito}
-              onChange={(e) => setFiltroInsumo((p) => ({ ...p, deposito: e.target.value }))}
-            >
-              <option value="">Todos los depósitos</option>
-              {depositos.map((d) => <option key={d._id} value={d._id}>{d.name}</option>)}
-            </select>
-            <input
-              className="filtro-input"
-              type="text"
-              placeholder="Proveedor..."
-              value={filtroInsumo.proveedor}
-              onChange={(e) => setFiltroInsumo((p) => ({ ...p, proveedor: e.target.value }))}
-            />
-          </>
-        )}
-
         <label className="chip-toggle">
           <input
             type="checkbox"
@@ -237,6 +180,55 @@ export default function GestionOfertas() {
           </span>
         </label>
       </div>
+
+      {tipoFiltro === "ProductoVino" && (
+        <div className="filtros-especificos">
+          <select
+            value={filtroVino.bodega}
+            onChange={(e) => setFiltroVino((p) => ({ ...p, bodega: e.target.value }))}
+          >
+            <option value="">Todas las bodegas</option>
+            {bodegas.map((b) => <option key={b._id} value={b._id}>{b.name}</option>)}
+          </select>
+          <select
+            value={filtroVino.tipo}
+            onChange={(e) => setFiltroVino((p) => ({ ...p, tipo: e.target.value }))}
+          >
+            <option value="">Todos los tipos</option>
+            {tiposVino.map((t) => <option key={t._id} value={t._id}>{t.name}</option>)}
+          </select>
+          <input
+            type="text"
+            placeholder="Varietal..."
+            value={filtroVino.varietal}
+            onChange={(e) => setFiltroVino((p) => ({ ...p, varietal: e.target.value }))}
+          />
+          <input
+            type="text"
+            placeholder="Proveedor..."
+            value={filtroVino.proveedor}
+            onChange={(e) => setFiltroVino((p) => ({ ...p, proveedor: e.target.value }))}
+          />
+        </div>
+      )}
+
+      {tipoFiltro === "ProductoInsumo" && (
+        <div className="filtros-especificos">
+          <select
+            value={filtroInsumo.deposito}
+            onChange={(e) => setFiltroInsumo((p) => ({ ...p, deposito: e.target.value }))}
+          >
+            <option value="">Todos los depósitos</option>
+            {depositos.map((d) => <option key={d._id} value={d._id}>{d.name}</option>)}
+          </select>
+          <input
+            type="text"
+            placeholder="Proveedor..."
+            value={filtroInsumo.proveedor}
+            onChange={(e) => setFiltroInsumo((p) => ({ ...p, proveedor: e.target.value }))}
+          />
+        </div>
+      )}
       <div className="contenedor-tabla">
           <div className="tabla-scroll">
               <table id="tablaVinos">
@@ -412,9 +404,6 @@ export default function GestionOfertas() {
           align-items: center;
           margin-bottom: 20px;
           flex-wrap: wrap;
-          width: calc(100% - 100px);
-          margin-left: auto;
-          margin-right: auto;
         }
         .search-wrapper {
           position: relative;
@@ -661,15 +650,25 @@ export default function GestionOfertas() {
         .tipo-tab:hover { color: #aaa; background: #1a1a1a; }
         .tipo-tab.activo { background: #1e1e1e; color: #e0e0e0; border: 1px solid #2a2a2a; }
         .tipo-tab.activo[data-key="ProductoVino"] { color: #e08080; border-color: #8b000055; background: #1a0808; }
-        /* Filtros específicos inline */
-        .filtro-sep {
-          width: 1px;
-          height: 22px;
-          background: #2a2a2a;
-          flex-shrink: 0;
+        /* Filtros específicos por tipo */
+        .filtros-especificos {
+          display: flex;
+          gap: 10px;
+          flex-wrap: wrap;
+          align-items: center;
+          margin-bottom: 16px;
+          padding: 14px 16px;
+          background: #0d0d0d;
+          border: 1px solid #1e1e1e;
+          border-radius: 10px;
+          animation: slideDown 0.18s ease;
         }
-        .filtro-select,
-        .filtro-input {
+        @keyframes slideDown {
+          from { opacity: 0; transform: translateY(-6px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .filtros-especificos select,
+        .filtros-especificos input[type="text"] {
           background: #141414;
           border: 1px solid #2a2a2a;
           border-radius: 8px;
@@ -678,15 +677,13 @@ export default function GestionOfertas() {
           font-size: 13px;
           height: 34px;
           transition: border-color 0.2s;
-          min-width: 150px;
-          animation: fadeInFiltro 0.15s ease;
+          min-width: 160px;
         }
-        @keyframes fadeInFiltro { from { opacity: 0; } to { opacity: 1; } }
-        .filtro-select { cursor: pointer; }
-        .filtro-select option { background: #1a1a1a; }
-        .filtro-input::placeholder { color: #444; }
-        .filtro-select:focus,
-        .filtro-input:focus { outline: none; border-color: #8b0000; }
+        .filtros-especificos select { cursor: pointer; }
+        .filtros-especificos select option { background: #1a1a1a; }
+        .filtros-especificos input[type="text"]::placeholder { color: #444; }
+        .filtros-especificos select:focus,
+        .filtros-especificos input[type="text"]:focus { outline: none; border-color: #8b0000; }
         /* Empty state */
         .empty-state {
           text-align: center;
