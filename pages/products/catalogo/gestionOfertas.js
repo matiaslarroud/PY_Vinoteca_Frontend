@@ -231,7 +231,7 @@ export default function GestionOfertas() {
       )}
       <div className="contenedor-tabla">
           <div className="tabla-scroll">
-              <table id="tablaVinos">
+              <table id="tablaVinos" className="tabla-ofertas">
                 <thead>
                   <tr>
                     <th>Producto</th>
@@ -352,7 +352,7 @@ export default function GestionOfertas() {
       <style jsx>{`
         .gestion-ofertas {
           padding: 28px 24px;
-          max-width: 80%;
+          max-width: 1200px;
           margin: 0 auto;
         }
         /* Header */
@@ -397,6 +397,14 @@ export default function GestionOfertas() {
         }
         .alerta.ok .alerta-icon   { background: #1e4d1e; }
         .alerta.error .alerta-icon { background: #4d1e1e; }
+        /* Botonera principal */
+        .botonera {
+          display: flex;
+          gap: 12px;
+          align-items: center;
+          margin-bottom: 16px;
+          flex-wrap: wrap;
+        }
         /* Filtros */
         .barra-filtros {
           display: flex;
@@ -426,6 +434,7 @@ export default function GestionOfertas() {
           color: #e0e0e0;
           font-size: 13.5px;
           width: 280px;
+          max-width: 100%;
           transition: border-color 0.2s;
         }
         .search-wrapper input::placeholder { color: #444; }
@@ -461,6 +470,13 @@ export default function GestionOfertas() {
         }
         .chip-toggle input:checked ~ .chip-inner .chip-dot { opacity: 1; }
         /* Tabla */
+        .contenedor-tabla {
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          border-radius: 14px;
+          border: 1px solid #1e1e1e;
+          background: #0f0f0f;
+        }
         .tabla-wrapper {
           overflow-x: auto;
           border-radius: 14px;
@@ -699,6 +715,29 @@ export default function GestionOfertas() {
           display: block;
           font-size: 14px;
           color: #444;
+        }
+
+        /* ── Mobile ── */
+        @media (max-width: 640px) {
+          .gestion-ofertas { padding: 16px 12px; }
+          .botonera { gap: 8px; }
+          .search-wrapper { width: 100%; }
+          .search-wrapper input { width: 100%; }
+          .tipo-tabs {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            width: 100%;
+          }
+          .tipo-tabs::-webkit-scrollbar { display: none; }
+          .filtros-especificos { gap: 8px; }
+          .filtros-especificos select,
+          .filtros-especificos input[type="text"] { min-width: 130px; font-size: 12px; }
+          .tabla-ofertas th,
+          .tabla-ofertas td { padding: 10px 12px; font-size: 12px; }
+          .col-nombre { max-width: 140px; }
+          .input-precio-wrapper { width: 100px; }
+          .btn-guardar { padding: 6px 12px; font-size: 12px; min-width: 64px; }
         }
       `}</style>
     </div>

@@ -423,6 +423,9 @@ export default function VitranaOfertas() {
           align-items: center;
           gap: 10px;
         }
+        @media (max-width: 480px) {
+          .header-inner { gap: 8px; }
+        }
         .header-accent {
           width: 60px;
           height: 3px;
@@ -590,6 +593,9 @@ export default function VitranaOfertas() {
           grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
           gap: 20px;
         }
+        @media (max-width: 480px) {
+          .grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        }
         .card {
           background: #1e1e1e;
           border-radius: 12px;
@@ -718,6 +724,23 @@ export default function VitranaOfertas() {
           font-size: 11px;
           color: #4caf50;
           margin: 6px 0 0;
+        }
+
+        /* ── Mobile ── */
+        @media (max-width: 640px) {
+          .vitrina { padding: 14px 12px; }
+          .vitrina-header { margin-bottom: 18px; }
+          .panel-filtros { padding: 12px; gap: 10px; margin-bottom: 20px; }
+          .skeleton-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+          .skeleton-img { height: 120px; }
+          .img-wrapper { height: 130px; }
+          h3 { font-size: 13px; }
+          .precio-oferta { font-size: 17px; }
+          .card-body { padding: 10px; }
+          .badge-tipo { font-size: 10px; padding: 2px 8px; }
+          .badge-descuento { font-size: 11px; padding: 3px 8px; }
+          .btn-exportar { padding: 7px 12px; font-size: 12px; }
+          .sin-resultados { padding: 2rem; }
         }
       `}</style>
     </div>
