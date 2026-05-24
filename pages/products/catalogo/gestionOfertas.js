@@ -28,26 +28,23 @@ export default function GestionOfertas() {
   const [guardando, setGuardando] = useState({});
   const [filtro, setFiltro] = useState("");
   const [soloEnOferta, setSoloEnOferta] = useState(false);
-  const [tipoFiltro, setTipoFiltro] = useState("");
+  const [tipoFiltro, setTipoFiltro] = useState("ProductoVino");
   const [bodegas, setBodegas] = useState([]);
   const [tiposVino, setTiposVino] = useState([]);
   const [depositos, setDepositos] = useState([]);
+  const [varietales, setVarietales] = useState([]);
+  const [proveedores, setProveedores] = useState([]);
   const [filtroVino, setFiltroVino] = useState({ bodega: "", tipo: "", proveedor: "", varietal: "" });
   const [filtroInsumo, setFiltroInsumo] = useState({ deposito: "", proveedor: "" });
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products`)
-      .then((r) => r.json())
-      .then((d) => { if (d.ok) setProductos(d.data); });
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/bodega`)
-      .then((r) => r.json())
-      .then((d) => { if (d.data) setBodegas(d.data); });
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/tipoVino`)
-      .then((r) => r.json())
-      .then((d) => { if (d.data) setTiposVino(d.data); });
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/deposito`)
-      .then((r) => r.json())
-      .then((d) => { if (d.data) setDepositos(d.data); });
+    const BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
+    fetch(`${BASE}/gestion/products`).then((r) => r.json()).then((d) => { if (d.ok) setProductos(d.data); });
+    fetch(`${BASE}/gestion/bodega`).then((r) => r.json()).then((d) => { if (d.data) setBodegas(d.data); });
+    fetch(`${BASE}/gestion/tipoVino`).then((r) => r.json()).then((d) => { if (d.data) setTiposVino(d.data); });
+    fetch(`${BASE}/gestion/deposito`).then((r) => r.json()).then((d) => { if (d.data) setDepositos(d.data); });
+    fetch(`${BASE}/gestion/varietal`).then((r) => r.json()).then((d) => { if (d.data) setVarietales(d.data); });
+    fetch(`${BASE}/gestion/proveedor`).then((r) => r.json()).then((d) => { if (d.data) setProveedores(d.data); });
   }, []);
 
   const cambiarCampo = (id, campo, valor) => {
@@ -116,14 +113,14 @@ export default function GestionOfertas() {
 
     let coincideFiltrosEspecificos = true;
     if (p.tipoProducto === "ProductoVino") {
-      if (filtroVino.bodega && p.bodega !== filtroVino.bodega) coincideFiltrosEspecificos = false;
-      if (filtroVino.tipo && p.tipo !== filtroVino.tipo) coincideFiltrosEspecificos = false;
-      if (filtroVino.proveedor && !p.proveedor?.toLowerCase().includes(filtroVino.proveedor.toLowerCase())) coincideFiltrosEspecificos = false;
-      if (filtroVino.varietal && !p.varietal?.toLowerCase().includes(filtroVino.varietal.toLowerCase())) coincideFiltrosEspecificos = false;
+      if (filtroVino.bodega    && String(p.bodega)    !== filtroVino.bodega)    coincideFiltrosEspecificos = false;
+      if (filtroVino.tipo      && String(p.tipo)      !== filtroVino.tipo)      coincideFiltrosEspecificos = false;
+      if (filtroVino.varietal  && String(p.varietal)  !== filtroVino.varietal)  coincideFiltrosEspecificos = false;
+      if (filtroVino.proveedor && String(p.proveedor) !== filtroVino.proveedor) coincideFiltrosEspecificos = false;
     }
     if (p.tipoProducto === "ProductoInsumo") {
-      if (filtroInsumo.deposito && p.deposito !== filtroInsumo.deposito) coincideFiltrosEspecificos = false;
-      if (filtroInsumo.proveedor && !p.proveedor?.toLowerCase().includes(filtroInsumo.proveedor.toLowerCase())) coincideFiltrosEspecificos = false;
+      if (filtroInsumo.deposito && String(p.deposito) !== filtroInsumo.deposito) coincideFiltrosEspecificos = false;
+      if (filtroInsumo.proveedor && String(p.proveedor) !== filtroInsumo.proveedor) coincideFiltrosEspecificos = false;
     }
 
     return coincideNombre && coincideOferta && coincideTipo && coincideFiltrosEspecificos;
@@ -147,27 +144,6 @@ export default function GestionOfertas() {
           />
         </div>
 
-        <div className="tipo-tabs">
-          {[
-            { key: "", label: "Todos" },
-            { key: "ProductoVino", label: "Vino" },
-            { key: "ProductoInsumo", label: "Insumo" },
-            { key: "ProductoPicada", label: "Picada" },
-          ].map(({ key, label }) => (
-            <button
-              key={key}
-              className={`tipo-tab ${tipoFiltro === key ? "activo" : ""}`}
-              onClick={() => {
-                setTipoFiltro(key);
-                setFiltroVino({ bodega: "", tipo: "", proveedor: "", varietal: "" });
-                setFiltroInsumo({ deposito: "", proveedor: "" });
-              }}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
         <label className="chip-toggle">
           <input
             type="checkbox"
@@ -188,27 +164,29 @@ export default function GestionOfertas() {
             onChange={(e) => setFiltroVino((p) => ({ ...p, bodega: e.target.value }))}
           >
             <option value="">Todas las bodegas</option>
-            {bodegas.map((b) => <option key={b._id} value={b._id}>{b.name}</option>)}
+            {bodegas.map((b) => <option key={b._id} value={String(b._id)}>{b.name}</option>)}
           </select>
           <select
             value={filtroVino.tipo}
             onChange={(e) => setFiltroVino((p) => ({ ...p, tipo: e.target.value }))}
           >
             <option value="">Todos los tipos</option>
-            {tiposVino.map((t) => <option key={t._id} value={t._id}>{t.name}</option>)}
+            {tiposVino.map((t) => <option key={t._id} value={String(t._id)}>{t.name}</option>)}
           </select>
-          <input
-            type="text"
-            placeholder="Varietal..."
+          <select
             value={filtroVino.varietal}
             onChange={(e) => setFiltroVino((p) => ({ ...p, varietal: e.target.value }))}
-          />
-          <input
-            type="text"
-            placeholder="Proveedor..."
+          >
+            <option value="">Todos los varietales</option>
+            {varietales.map((v) => <option key={v._id} value={String(v._id)}>{v.name}</option>)}
+          </select>
+          <select
             value={filtroVino.proveedor}
             onChange={(e) => setFiltroVino((p) => ({ ...p, proveedor: e.target.value }))}
-          />
+          >
+            <option value="">Todos los proveedores</option>
+            {proveedores.map((pv) => <option key={pv._id} value={String(pv._id)}>{pv.name}</option>)}
+          </select>
         </div>
       )}
 
@@ -219,14 +197,15 @@ export default function GestionOfertas() {
             onChange={(e) => setFiltroInsumo((p) => ({ ...p, deposito: e.target.value }))}
           >
             <option value="">Todos los depósitos</option>
-            {depositos.map((d) => <option key={d._id} value={d._id}>{d.name}</option>)}
+            {depositos.map((d) => <option key={d._id} value={String(d._id)}>{d.name}</option>)}
           </select>
-          <input
-            type="text"
-            placeholder="Proveedor..."
+          <select
             value={filtroInsumo.proveedor}
             onChange={(e) => setFiltroInsumo((p) => ({ ...p, proveedor: e.target.value }))}
-          />
+          >
+            <option value="">Todos los proveedores</option>
+            {proveedores.map((pv) => <option key={pv._id} value={String(pv._id)}>{pv.name}</option>)}
+          </select>
         </div>
       )}
       <div className="contenedor-tabla">

@@ -16,17 +16,39 @@ export default function VitranaOfertas() {
   const [productos, setProductos] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [busqueda, setBusqueda] = useState("");
-  const [tipoFiltro, setTipoFiltro] = useState("");
+  const [tipoFiltro, setTipoFiltro] = useState("ProductoVino");
+  const [filtroVino, setFiltroVino] = useState({ bodega: "", tipo: "", proveedor: "", varietal: "" });
   const [orden, setOrden] = useState("");
   const [exportando, setExportando] = useState(false);
+  const [bodegas, setBodegas] = useState([]);
+  const [tiposVino, setTiposVino] = useState([]);
+  const [varietales, setVarietales] = useState([]);
+  const [proveedores, setProveedores] = useState([]);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/productFoto/ofertas`)
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.ok) setProductos(d.productos);
-      })
-      .finally(() => setCargando(false));
+    const BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
+    Promise.all([
+      fetch(`${BASE}/products/productFoto/ofertas`).then((r) => r.json()),
+      fetch(`${BASE}/gestion/products`).then((r) => r.json()),
+    ]).then(([ofertasData, todosData]) => {
+      if (ofertasData.ok && todosData.ok) {
+        const mapaCompleto = {};
+        for (const p of todosData.data) mapaCompleto[p._id] = p;
+        const merged = ofertasData.productos.map((p) => ({
+          ...p,
+          bodega:    mapaCompleto[p._id]?.bodega    ?? null,
+          tipo:      mapaCompleto[p._id]?.tipo      ?? null,
+          varietal:  mapaCompleto[p._id]?.varietal  ?? null,
+          proveedor: mapaCompleto[p._id]?.proveedor ?? null,
+        }));
+        setProductos(merged);
+      }
+    }).finally(() => setCargando(false));
+
+    fetch(`${BASE}/gestion/bodega`).then((r) => r.json()).then((d) => { if (d.data) setBodegas(d.data); });
+    fetch(`${BASE}/gestion/tipoVino`).then((r) => r.json()).then((d) => { if (d.data) setTiposVino(d.data); });
+    fetch(`${BASE}/gestion/varietal`).then((r) => r.json()).then((d) => { if (d.data) setVarietales(d.data); });
+    fetch(`${BASE}/gestion/proveedor`).then((r) => r.json()).then((d) => { if (d.data) setProveedores(d.data); });
   }, []);
 
   const vista = productos
@@ -35,7 +57,16 @@ export default function VitranaOfertas() {
         ? p.name.toLowerCase().includes(busqueda.toLowerCase())
         : true;
       const coincideTipo = tipoFiltro ? p.tipoProducto === tipoFiltro : true;
-      return coincideNombre && coincideTipo;
+
+    let coincideFiltrosEspecificos = true;
+    if (p.tipoProducto === "ProductoVino") {
+      if (filtroVino.bodega    && String(p.bodega)    !== filtroVino.bodega)    coincideFiltrosEspecificos = false;
+      if (filtroVino.tipo      && String(p.tipo)      !== filtroVino.tipo)      coincideFiltrosEspecificos = false;
+      if (filtroVino.varietal  && String(p.varietal)  !== filtroVino.varietal)  coincideFiltrosEspecificos = false;
+      if (filtroVino.proveedor && String(p.proveedor) !== filtroVino.proveedor) coincideFiltrosEspecificos = false;
+    }
+
+      return coincideNombre && coincideTipo && coincideFiltrosEspecificos;
     })
     .sort((a, b) => {
       if (orden === "desc-asc") return a.descuento - b.descuento;
@@ -293,15 +324,6 @@ export default function VitranaOfertas() {
           />
         </div>
         <div className="filtro">
-          <span className="filtro-icon">📦</span>
-          <select value={tipoFiltro} onChange={(e) => setTipoFiltro(e.target.value)}>
-            <option value="">Todos los tipos</option>
-            <option value="ProductoVino">Vinos</option>
-            <option value="ProductoInsumo">Insumos</option>
-            <option value="ProductoPicada">Picadas</option>
-          </select>
-        </div>
-        <div className="filtro">
           <span className="filtro-icon">↕️</span>
           <select value={orden} onChange={(e) => setOrden(e.target.value)}>
             <option value="">Ordenar por...</option>
@@ -312,6 +334,46 @@ export default function VitranaOfertas() {
             <option value="alfa">A - Z</option>
           </select>
         </div>
+        {tipoFiltro === "ProductoVino" && (
+          <>
+            <div className="filtro">
+              <select
+                value={filtroVino.bodega}
+                onChange={(e) => setFiltroVino((p) => ({ ...p, bodega: e.target.value }))}
+              >
+                <option value="">Todas las bodegas</option>
+                {bodegas.map((b) => <option key={b._id} value={String(b._id)}>{b.name}</option>)}
+              </select>
+            </div>
+            <div className="filtro">
+              <select
+                value={filtroVino.tipo}
+                onChange={(e) => setFiltroVino((p) => ({ ...p, tipo: e.target.value }))}
+              >
+                <option value="">Todos los tipos</option>
+                {tiposVino.map((t) => <option key={t._id} value={String(t._id)}>{t.name}</option>)}
+              </select>
+            </div>
+            <div className="filtro">
+              <select
+                value={filtroVino.varietal}
+                onChange={(e) => setFiltroVino((p) => ({ ...p, varietal: e.target.value }))}
+              >
+                <option value="">Todos los varietales</option>
+                {varietales.map((v) => <option key={v._id} value={String(v._id)}>{v.name}</option>)}
+              </select>
+            </div>
+            <div className="filtro">
+              <select
+                value={filtroVino.proveedor}
+                onChange={(e) => setFiltroVino((p) => ({ ...p, proveedor: e.target.value }))}
+              >
+                <option value="">Todos los proveedores</option>
+                {proveedores.map((pv) => <option key={pv._id} value={String(pv._id)}>{pv.name}</option>)}
+              </select>
+            </div>
+          </>
+        )}
       </div>
 
       {cargando && (
