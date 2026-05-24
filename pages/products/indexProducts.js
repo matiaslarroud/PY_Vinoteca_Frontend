@@ -20,21 +20,6 @@ export default function indexGestion() {
         </Link>
       </div>
       <div className="boton-acceso">
-        <Link href="./picadas/indexPicada">
-          <span>Picadas</span>
-        </Link>
-      </div>
-      <div className="boton-acceso">
-        <Link href="./insumos/indexInsumo">
-          <span>Insumos</span>
-        </Link>
-      </div>
-      <div className="boton-acceso">
-        <Link href="./ordenProduccion/indexOrdenProduccion">
-          <span>Ordenes de Produccion</span>
-        </Link>
-      </div>
-      <div className="boton-acceso">
         <Link href="./catalogo/indexCatalogo">
           <span>Listados</span>
         </Link>

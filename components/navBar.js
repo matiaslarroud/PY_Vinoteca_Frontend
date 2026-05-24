@@ -130,15 +130,6 @@ export default function Navbar({ usuario }) {
                       <Link href="/products/vinos/indexVino" onClick={handleLinkClick} className={isActive("/products/vinos/indexVino") ? styles.active : ""}>
                         Vino
                       </Link>
-                      <Link href="/products/picadas/indexPicada" onClick={handleLinkClick} className={isActive("/products/picadas/indexPicada") ? styles.active : ""}>
-                        Picada
-                      </Link>
-                      <Link href="/products/insumos/indexInsumo" onClick={handleLinkClick} className={isActive("/products/insumos/indexInsumo") ? styles.active : ""}>
-                        Insumo
-                      </Link>
-                      <Link href="/products/ordenProduccion/indexOrdenProduccion" onClick={handleLinkClick} className={isActive("/products/ordenProduccion/indexOrdenProduccion") ? styles.active : ""}>
-                        Órdenes de Producción
-                      </Link>
                     </div>
                   )}
                 </div>
