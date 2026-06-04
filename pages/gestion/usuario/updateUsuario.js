@@ -31,7 +31,7 @@ const updateUsuario = ({ exito , usuarioID }) => {
         })
             .then((s)=>{
                 if(s.ok){
-                    setUsuario(s.data)
+                    setUsuario({ ...initialState, name: s.data.name, rol: s.data.rol });
                 }
             })
         .catch((err)=>{console.log("No se encontro usuario con este id.\nError: ",err)})
