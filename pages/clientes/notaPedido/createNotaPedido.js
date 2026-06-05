@@ -1031,7 +1031,7 @@ const createNotaPedido = ({exito , param , tipo}) => {
                                     className="input-secondary"
                                     value={notaPedido.total}
                                     name="total"
-                                    disabled
+                                    onChange={inputChange}
                                     />
                                     
 
