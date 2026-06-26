@@ -195,9 +195,9 @@ const indexTransporte = () => {
                           <button onClick={() => setMostrarModalView(_id)} className="btn-icon" title="Visualizar">
                             <FaEye />
                           </button>
-                          <button onClick={() => setMostrarModalUpdate(_id)} className="btn-icon" title="Modificar">
+                          {/* <button onClick={() => setMostrarModalUpdate(_id)} className="btn-icon" title="Modificar">
                             <FaEdit />
-                          </button>
+                          </button> */}
                         </div>
                       </td>
                     </tr>

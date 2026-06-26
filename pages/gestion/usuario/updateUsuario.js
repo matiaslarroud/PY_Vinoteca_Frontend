@@ -6,10 +6,24 @@ const initialState = {
   password: "",
   password2: "",
   rol: "",
+  cliente: "",
 };
 
 const updateUsuario = ({ exito , usuarioID }) => {
   const [usuario, setUsuario] = useState(initialState);
+  const [clientes, setClientes] = useState([]);
+
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente`)
+      .then((res) => res.json())
+      .then(({ data }) => setClientes(data || []))
+      .catch(console.error);
+  }, []);
+
+  const clienteOptions = clientes.map((c) => ({
+    value: c._id,
+    label: `${c.name} ${c.lastname || ""} (#${c._id})`,
+  }));
 
   const roles = [
     { value: "vendedor", label: "Vendedor" },
@@ -31,20 +45,38 @@ const updateUsuario = ({ exito , usuarioID }) => {
         })
             .then((s)=>{
                 if(s.ok){
-                    setUsuario({ ...initialState, name: s.data.name, rol: s.data.rol });
+                    setUsuario({ ...initialState, name: s.data.name, rol: s.data.rol, cliente: s.data.cliente || "" });
                 }
             })
         .catch((err)=>{console.log("No se encontro usuario con este id.\nError: ",err)})
     }
 
   const selectChange = (selected) => {
+    const nuevoRol = selected ? selected.value : "";
     setUsuario({
       ...usuario,
-      rol: selected ? selected.value : "",
+      rol: nuevoRol,
+      cliente: nuevoRol === "cliente" ? usuario.cliente : "",
     });
   };
 
-  
+  const clienteChange = (selected) => {
+    setUsuario({
+      ...usuario,
+      cliente: selected ? selected.value : "",
+    });
+  };
+
+  const selectStyles = {
+    container: (base) => ({ ...base, width: 220 }),
+    control: (base) => ({ ...base, backgroundColor: "#2c2c2c", color: "white", border: "1px solid #444", borderRadius: 8 }),
+    singleValue: (base) => ({ ...base, color: "white" }),
+    menu: (base) => ({ ...base, backgroundColor: "#2c2c2c", color: "white" }),
+    option: (base, { isFocused }) => ({ ...base, backgroundColor: isFocused ? "#444" : "#2c2c2c", color: "white" }),
+    input: (base) => ({ ...base, color: "white" }),
+  };
+
+
     useEffect(()=>{
         if(!usuarioID){return}
         fetchData(usuarioID)
@@ -59,6 +91,11 @@ const updateUsuario = ({ exito , usuarioID }) => {
       return;
     }
 
+    if (usuario.rol === "cliente" && !usuario.cliente) {
+      alert("❌ Debe seleccionar el cliente asociado al usuario.");
+      return;
+    }
+
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/usuario/${usuarioID}`, {
         method: "PUT",
@@ -67,6 +104,7 @@ const updateUsuario = ({ exito , usuarioID }) => {
           name: usuario.name,
           password: usuario.password,
           rol: usuario.rol,
+          cliente: usuario.rol === "cliente" ? usuario.cliente : undefined,
         }),
       });
 
@@ -135,39 +173,25 @@ const updateUsuario = ({ exito , usuarioID }) => {
               onChange={selectChange}
               placeholder="Rol de usuario..."
               isClearable
-              styles={{
-                container: (base) => ({
-                  ...base,
-                  width: 220,
-                }),
-                control: (base) => ({
-                  ...base,
-                  backgroundColor: "#2c2c2c",
-                  color: "white",
-                  border: "1px solid #444",
-                  borderRadius: 8,
-                }),
-                singleValue: (base) => ({
-                  ...base,
-                  color: "white",
-                }),
-                menu: (base) => ({
-                  ...base,
-                  backgroundColor: "#2c2c2c",
-                  color: "white",
-                }),
-                option: (base, { isFocused }) => ({
-                  ...base,
-                  backgroundColor: isFocused ? "#444" : "#2c2c2c",
-                  color: "white",
-                }),
-                input: (base) => ({
-                  ...base,
-                  color: "white",
-                }),
-              }}
+              styles={selectStyles}
             />
           </div>
+
+          {usuario.rol === "cliente" && (
+            <div className="form-col">
+              <label>Cliente asociado:</label>
+              <Select
+                className="form-select-react"
+                classNamePrefix="rs"
+                options={clienteOptions}
+                value={clienteOptions.find((op) => op.value === usuario.cliente) || null}
+                onChange={clienteChange}
+                placeholder="Seleccione el cliente..."
+                isClearable
+                styles={selectStyles}
+              />
+            </div>
+          )}
 
           <div className="button-area">
             <button type="submit" className="submit-btn">

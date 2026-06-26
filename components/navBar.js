@@ -218,6 +218,18 @@ export default function Navbar({ usuario }) {
                   )}
                 </div>
 
+                {/* Tienda */}
+                <div className={styles.dropdown}>
+                  <Link
+                    href="/tienda"
+                    onClick={handleLinkClick}
+                    className={isActive("/tienda") ? styles.active : ""}
+                  >
+                    Tienda
+                  </Link>
+                </div>
+
+
                 
               
           </>
@@ -266,8 +278,20 @@ export default function Navbar({ usuario }) {
                 </div>
           </>
         )}
+
+        {usuario.rol === "cliente" && (
+          <>
+            <Link
+              href="/tienda"
+              onClick={handleLinkClick}
+              className={isActive("/tienda") ? styles.active : ""}
+            >
+              Tienda
+            </Link>
+          </>
+        )}
       </nav>
-      
+
       {usuario.rol === "vendedor" && (
         <>
           <div className={styles.userArea}>
@@ -286,6 +310,15 @@ export default function Navbar({ usuario }) {
                 <span>{usuario.nombre}</span>
                 <FaSignOutAlt  className={styles.icon} onClick={handleLogout} title="Cerrar sesión" />
 
+          </div>
+        </>
+      )}
+
+      {usuario.rol === "cliente" && (
+        <>
+          <div className={styles.userArea}>
+            <span>{usuario.nombre}</span>
+            <FaSignOutAlt className={styles.icon} onClick={handleLogout} title="Cerrar sesión" />
           </div>
         </>
       )}

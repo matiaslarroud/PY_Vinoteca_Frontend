@@ -37,6 +37,11 @@ export default function Home() {
       return;
     }
 
+    if (usuario.rol === "cliente") {
+      router.push("/tienda");
+      return;
+    }
+
     // Si es administrador, cargar stock bajo
     if (usuario.rol === "administrador") {
       fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/lowStock`)
