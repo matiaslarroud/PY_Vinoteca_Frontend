@@ -22,6 +22,12 @@ export default function indexGestion() {
       <Link href="./registroCuentaCorriente/indexCuentaCorriente" className="boton-acceso">
           <span>Registro de cuentas corriente</span>
       </Link>
+      <Link href="./clientesInactivos/indexClientesInactivos" className="boton-acceso">
+          <span>Clientes inactivos</span>
+      </Link>
+      <Link href="./vinosMasVendidos/indexVinosMasVendidos" className="boton-acceso">
+          <span>Vinos más vendidos</span>
+      </Link>
   </div>
 
   <style jsx>{`

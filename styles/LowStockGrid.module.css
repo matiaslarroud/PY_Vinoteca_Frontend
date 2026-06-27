@@ -1,55 +1,102 @@
 .container {
-  margin-top: 60px;
   width: 100%;
-  /* min-width: 400px; */
-  /* max-width: 800px; */
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(15px);
-  padding: 30px;
-  border-radius: 20px;
-  box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+  background: #111827;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow:
+    0 10px 40px rgba(0,0,0,0.55),
+    0 0 0 1px rgba(255,255,255,0.04) inset;
+  overflow: hidden;
   color: #fff;
 }
 
-.container h2 {
-  color: #fff;
-  margin-bottom: 20px;
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 13px 16px;
+  background: #0f172a;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
 }
 
-/* .table {
-  width: 100%;
-  border-collapse: collapse;
-} */
+.panelTitulo {
+  color: #e5e7eb;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
 
 .tableWrapper {
   width: 100%;
-  overflow-x: auto;       /* 🔥 permite scroll horizontal */
-  overflow-y: hidden;     /* opcional */
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 246px; /* 5 filas de ~41px cada una */
 }
 
 .table {
-  width: max-content;     /* 🔥 permite que la tabla crezca todo lo que necesite */
-  min-width: 100%;        /* 🔥 evita que sea más chica que el container */
+  width: max-content;
+  min-width: 100%;
   border-collapse: collapse;
 }
 
-
-.table th,
-.table td {
-  padding: 12px 15px;
-  text-align: center;
-}
-
 .table th {
-  color: #ff9f1c;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+  padding: 11px 14px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  background: #0f172a;
+  z-index: 1;
 }
 
 .table td {
-  color: #fff;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 10px 14px;
+  text-align: center;
+  color: #d1d5db;
+  font-size: 0.875rem;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .table tr:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255,255,255,0.04);
+}
+
+.stockBadge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.stockCero {
+  background: rgba(220,38,38,0.2);
+  color: #f87171;
+  border: 1px solid rgba(248,113,113,0.35);
+}
+
+.stockBajo {
+  background: rgba(217,119,6,0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(251,191,36,0.35);
+}
+
+.sinDatos {
+  color: #6b7280;
+  font-style: italic;
+  padding: 32px;
+  text-align: center;
+  font-size: 14px;
 }

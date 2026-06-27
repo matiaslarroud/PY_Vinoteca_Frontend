@@ -129,88 +129,106 @@ export default function LowStockGrid({ products = [], title = "Productos con Sto
       </div>
     )}
     <div className={styles.container}>
-      <h2>{title}</h2>
+      <div className={styles.panelHeader}>
+        <span className={styles.panelTitulo}>{title}</span>
+        <span style={{ color: '#6b7280', fontSize: '0.72rem' }}>{products.length} producto{products.length !== 1 ? 's' : ''}</span>
+      </div>
 
       {products.length === 0 ? (
-        <p>No hay productos con stock bajo.</p>
+        <p className={styles.sinDatos}>No hay productos con stock bajo.</p>
       ) : (
-       <div className={styles.tableWrapper}> 
-        <table className={styles.table}>
-          <thead>
-            <tr className="fila">
-              <th>Proveedor</th>
-              <th>Nombre</th>
-              <th>Stock Actual</th>
-              <th>Stock Mínimo</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((product) => (
-              <tr key={product._id}>
-                <td className="columna">{product.proveedor}</td>
-                <td className="columna">{product.name}</td>
-                <td className="columna">{product.stock}</td>
-                <td className="columna">{product.stockMinimo}</td>
-                <td className="acciones">
-                  <button onClick={() => {
-                          if(product.tipoProducto === 'ProductoInsumo' || product.tipoProducto === 'ProductoVino' ){
-                            setMostrarSolicitudPresupuesto(product._id)
-                          } else if (product.tipoProducto === 'ProductoPicada'){
-                            setMostrarOrdenProduccion(product._id)
-                          } 
-                        }} 
-                        className="btn-icon2" 
-                        title="Pedir"
-                      >
-                      <FaShoppingCart />
-                  </button>
-                  <button onClick={() => {
-                        if(product.tipoProducto === 'ProductoInsumo'){
-                          setMostrarProductoInsumoUpdate(product._id)
-                        } else if (product.tipoProducto === 'ProductoVino'){
-                          setMostrarProductoVinoUpdate(product._id)
-                        } else if (product.tipoProducto === 'ProductoPicada'){
-                          setMostrarProductoPicadaUpdate(product._id)
-                        }
-                      }
-                    } 
-                    className="btn-icon2" 
-                    title="Modificar producto"
-                  >
-                      <FaEdit />
-                  </button>
-                </td>
+        <div className={styles.tableWrapper}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Proveedor</th>
+                <th>Nombre</th>
+                <th>Stock actual</th>
+                <th>Stock mínimo</th>
+                <th>Acciones</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-       </div>
+            </thead>
+            <tbody>
+              {products.map((product) => {
+                const stockClass = product.stock === 0
+                  ? styles.stockCero
+                  : styles.stockBajo;
+                return (
+                  <tr key={product._id}>
+                    <td>{product.proveedor}</td>
+                    <td style={{ textAlign: 'left', fontWeight: 600, color: '#f3f4f6' }}>{product.name}</td>
+                    <td>
+                      <span className={`${styles.stockBadge} ${stockClass}`}>{product.stock}</span>
+                    </td>
+                    <td>{product.stockMinimo}</td>
+                    <td>
+                      <div className="acciones-wrap">
+                        <button
+                          onClick={() => {
+                            if (product.tipoProducto === 'ProductoInsumo' || product.tipoProducto === 'ProductoVino') {
+                              setMostrarSolicitudPresupuesto(product._id);
+                            } else if (product.tipoProducto === 'ProductoPicada') {
+                              setMostrarOrdenProduccion(product._id);
+                            }
+                          }}
+                          className="btn-accion"
+                          title="Pedir"
+                        >
+                          <FaShoppingCart />
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (product.tipoProducto === 'ProductoInsumo') {
+                              setMostrarProductoInsumoUpdate(product._id);
+                            } else if (product.tipoProducto === 'ProductoVino') {
+                              setMostrarProductoVinoUpdate(product._id);
+                            } else if (product.tipoProducto === 'ProductoPicada') {
+                              setMostrarProductoPicadaUpdate(product._id);
+                            }
+                          }}
+                          className="btn-accion"
+                          title="Modificar producto"
+                        >
+                          <FaEdit />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
 
       <style jsx>{`
-        
-
-        .btn-icon2 {
-            background-color: #575757ff;
-            color: white;
-            padding: 0.8rem;
-            font-size: 1.2rem;
-            border-radius: 50%;
-            border: none;
-            cursor: pointer;
-            width: 3rem;
-            height: 3rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.3s, transform 0.2s;
+        .acciones-wrap {
+          display: flex;
+          gap: 8px;
+          justify-content: center;
+          align-items: center;
         }
-          
-        .btn-icon2:hover {
-          background-color: #424141ff;
-          transform: translateY(-3px);
+
+        .btn-accion {
+          background: rgba(255,255,255,0.07);
+          color: #d1d5db;
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 8px;
+          width: 32px;
+          height: 32px;
+          font-size: 0.85rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: background 0.15s, color 0.15s, transform 0.1s;
+        }
+
+        .btn-accion:hover {
+          background: rgba(255,255,255,0.14);
+          color: #fff;
+          transform: translateY(-1px);
         }
       `}</style>
   </>

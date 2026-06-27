@@ -172,6 +172,20 @@ export default function Navbar({ usuario }) {
                       >
                         Registro de cuenta corriente
                       </Link>
+                      <Link
+                        href="/gestion/informes/clientesInactivos/indexClientesInactivos"
+                        onClick={handleLinkClick}
+                        className={isActive("/gestion/informes/clientesInactivos/indexClientesInactivos") ? styles.active : ""}
+                      >
+                        Registro de clientes inactivos
+                      </Link>
+                      <Link
+                        href="/gestion/informes/vinosMasVendidos/indexVinosMasVendidos"
+                        onClick={handleLinkClick}
+                        className={isActive("/gestion/informes/vinosMasVendidos/indexVinosMasVendidos") ? styles.active : ""}
+                      >
+                        Registro de vinos mas vendidos
+                      </Link>
                     </div>
                   )}
                 </div>

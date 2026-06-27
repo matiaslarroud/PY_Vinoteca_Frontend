@@ -9,6 +9,8 @@ export default function Home() {
   const router = useRouter();
   const [usuario, setUsuario] = useState(null);
   const [lowStockProducts, setLowStockProducts] = useState([]);
+  const [vinosMasVendidos, setVinosMasVendidos] = useState([]);
+  const [clientesInactivos, setClientesInactivos] = useState([]);
   const [mostrarModalNotaPedido, setMostrarModalNotaPedido] = useState(false);
 
   const cargarProductos = () => {
@@ -42,12 +44,23 @@ export default function Home() {
       return;
     }
 
-    // Si es administrador, cargar stock bajo
+    // Si es administrador, cargar stock bajo + mini-dashboard
     if (usuario.rol === "administrador") {
       fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/products/lowStock`)
         .then((res) => res.json())
         .then((data) => setLowStockProducts(data.data))
         .catch(console.error);
+
+      const hace30 = new Date();
+      hace30.setDate(hace30.getDate() - 30);
+      const fechaInicio = hace30.toISOString().split('T')[0];
+      const fechaFin    = new Date().toISOString().split('T')[0];
+
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/comprobanteVentaDetalle/mas-vendidos?top=5&fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`)
+        .then(r => r.json()).then(d => setVinosMasVendidos(d.data || [])).catch(console.error);
+
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente/inactivos?dias=30`)
+        .then(r => r.json()).then(d => setClientesInactivos((d.data || []).slice(0, 5))).catch(console.error);
     }
   }, [usuario]);
 
@@ -118,24 +131,83 @@ export default function Home() {
       </div>
       
       <div className="lowstock-container">
-        {/* 🔒 Solo administrador puede ver proveedores */}
         {usuario.rol === "administrador" && (
           <div className="lowstock-wrapper">
             <LowStockGrid
               products={lowStockProducts}
               title="Productos con Stock Bajo"
-              recargar={cargarProductos} 
+              recargar={cargarProductos}
             />
           </div>
         )}
       </div>
 
+      {usuario.rol === "administrador" && (
+        <div className="dashboard-container">
+
+          <div className="dash-panel">
+            <div className="dash-header">
+              <span className="dash-titulo">Top 5 Vinos (últimos 30 días)</span>
+              <Link href="/gestion/informes/vinosMasVendidos/indexVinosMasVendidos" className="dash-link">Ver completo →</Link>
+            </div>
+            <table className="dash-table">
+              <thead>
+                <tr><th>#</th><th>Vino</th><th>Bodega</th><th>Unidades</th></tr>
+              </thead>
+              <tbody>
+                {vinosMasVendidos.map(v => (
+                  <tr key={v.productoID}>
+                    <td>
+                      <span className={`rank-dot rank-${v.ranking <= 3 ? ['oro','plata','bronce'][v.ranking-1] : 'normal'}`}>{v.ranking}</span>
+                    </td>
+                    <td className="td-nombre">{v.nombre}</td>
+                    <td>{v.bodega}</td>
+                    <td><span className="cant">{v.cantidadVendida}</span></td>
+                  </tr>
+                ))}
+                {vinosMasVendidos.length === 0 && (
+                  <tr><td colSpan={4} className="td-empty">Sin datos en los últimos 30 días</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="dash-panel">
+            <div className="dash-header">
+              <span className="dash-titulo">Top 5 Clientes Inactivos (+30 días)</span>
+              <Link href="/gestion/informes/clientesInactivos/indexClientesInactivos" className="dash-link">Ver completo →</Link>
+            </div>
+            <table className="dash-table">
+              <thead>
+                <tr><th>Nombre</th><th>Días sin comprar</th></tr>
+              </thead>
+              <tbody>
+                {clientesInactivos.map(c => (
+                  <tr key={c.clienteID}>
+                    <td className="td-nombre">{c.nombre}</td>
+                    <td>
+                      <span className={`dias-badge ${c.diasSinComprar > 180 ? 'critico' : c.diasSinComprar > 90 ? 'alto' : c.diasSinComprar === null ? 'nunca' : 'medio'}`}>
+                        {c.diasSinComprar !== null ? `${c.diasSinComprar}d` : '—'}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+                {clientesInactivos.length === 0 && (
+                  <tr><td colSpan={2} className="td-empty">Sin clientes inactivos</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      )}
+
       <style jsx>{`
         .lowstock-container {
           width: 100%;
-          max-width: 900px; /* controla el ancho máximo */
-          margin: 20px auto;
-          padding: 10px;
+          max-width: 900px;
+          margin: 24px auto 16px;
+          padding: 0 10px;
           display: flex;
           justify-content: center;
         }
@@ -193,6 +265,106 @@ export default function Home() {
           text-align: center;
           margin-top: 20px;
         }
+
+        /* ── MINI DASHBOARD ──────────────────────── */
+        .dashboard-container {
+          display: flex;
+          gap: 16px;
+          max-width: 900px;
+          margin: 0 auto 32px;
+          padding: 0 10px;
+          flex-wrap: wrap;
+        }
+
+        .dash-panel {
+          flex: 1;
+          min-width: 280px;
+          background: #111827;
+          border-radius: 16px;
+          border: 1px solid rgba(255,255,255,0.08);
+          box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+          overflow: hidden;
+        }
+
+        .dash-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 12px 16px;
+          background: #0f172a;
+          border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+
+        .dash-titulo { color: #e5e7eb; font-size: 0.8rem; font-weight: 700; }
+
+        .dash-link { color: #60a5fa; font-size: 0.72rem; text-decoration: none; }
+        .dash-link:hover { text-decoration: underline; }
+
+        .dash-table { width: 100%; border-collapse: collapse; }
+
+        .dash-table thead th {
+          padding: 8px 12px;
+          text-align: center;
+          color: #6b7280;
+          font-size: 0.68rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+
+        .dash-table tbody tr {
+          border-top: 1px solid rgba(255,255,255,0.05);
+          transition: background 0.1s;
+        }
+        .dash-table tbody tr:hover { background: rgba(255,255,255,0.04); }
+
+        .dash-table tbody td {
+          padding: 8px 12px;
+          font-size: 0.8rem;
+          color: #d1d5db;
+          text-align: center;
+        }
+
+        .td-nombre {
+          text-align: left;
+          font-weight: 600;
+          color: #f3f4f6;
+          max-width: 160px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .td-empty { color: #4b5563; font-style: italic; padding: 16px; }
+
+        .rank-dot {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          font-size: 0.75rem;
+          font-weight: 700;
+        }
+        .rank-oro    { background: rgba(234,179,8,0.2);   color: #fde047; }
+        .rank-plata  { background: rgba(148,163,184,0.2); color: #cbd5e1; }
+        .rank-bronce { background: rgba(180,83,9,0.2);    color: #fb923c; }
+        .rank-normal { background: rgba(75,85,99,0.2);    color: #9ca3af; }
+
+        .cant { font-weight: 700; color: #34d399; }
+
+        .dias-badge {
+          display: inline-block;
+          padding: 2px 8px;
+          border-radius: 999px;
+          font-size: 0.72rem;
+          font-weight: 700;
+        }
+        .critico { background: rgba(220,38,38,0.2);   color: #f87171; border: 1px solid rgba(248,113,113,0.3); }
+        .alto    { background: rgba(217,119,6,0.2);   color: #fbbf24; border: 1px solid rgba(251,191,36,0.3);  }
+        .medio   { background: rgba(79,70,229,0.2);   color: #a5b4fc; border: 1px solid rgba(165,180,252,0.3); }
+        .nunca   { background: rgba(107,114,128,0.2); color: #9ca3af; border: 1px solid rgba(156,163,175,0.2); }
       `}</style>
     </>
   );
