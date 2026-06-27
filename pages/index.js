@@ -51,12 +51,7 @@ export default function Home() {
         .then((data) => setLowStockProducts(data.data))
         .catch(console.error);
 
-      const hace30 = new Date();
-      hace30.setDate(hace30.getDate() - 30);
-      const fechaInicio = hace30.toISOString().split('T')[0];
-      const fechaFin    = new Date().toISOString().split('T')[0];
-
-      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/comprobanteVentaDetalle/mas-vendidos?top=5&fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`)
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cliente/comprobanteVentaDetalle/mas-vendidos?top=5`)
         .then(r => r.json()).then(d => setVinosMasVendidos(d.data || [])).catch(console.error);
 
       fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gestion/cliente/inactivos?dias=30`)
@@ -147,7 +142,7 @@ export default function Home() {
 
           <div className="dash-panel">
             <div className="dash-header">
-              <span className="dash-titulo">Top 5 Vinos (últimos 30 días)</span>
+              <span className="dash-titulo">Top 5 Vinos más vendidos</span>
               <Link href="/gestion/informes/vinosMasVendidos/indexVinosMasVendidos" className="dash-link">Ver completo →</Link>
             </div>
             <table className="dash-table">
@@ -315,14 +310,16 @@ export default function Home() {
         .dash-table tbody tr {
           border-top: 1px solid rgba(255,255,255,0.05);
           transition: background 0.1s;
+          height: 41px;
         }
         .dash-table tbody tr:hover { background: rgba(255,255,255,0.04); }
 
         .dash-table tbody td {
-          padding: 8px 12px;
+          padding: 0 12px;
           font-size: 0.8rem;
           color: #d1d5db;
           text-align: center;
+          height: 41px;
         }
 
         .td-nombre {
