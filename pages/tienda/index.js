@@ -104,7 +104,7 @@ export default function Tienda() {
         importe: i.importe,
       }));
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/tienda/notaPedido`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/tienda/presupuesto`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ total, detalles }),
@@ -112,22 +112,22 @@ export default function Tienda() {
       const data = await res.json();
 
       if (!data.ok) {
-        alert(data.message || "No se pudo generar el pedido.");
+        alert(data.message || "No se pudo generar el presupuesto.");
         setEnviando(false);
         return;
       }
 
-      const notaId = data.data?._id;
+      const presupuestoId = data.data?._id;
 
-      // Armar el mensaje de WhatsApp al dueño con el resumen del pedido
+      // Armar el mensaje de WhatsApp al dueño con el resumen del presupuesto
       const resumen = carrito
         .map((i) => `• ${i.name} x${i.cantidad} = $${i.importe}`)
         .join("%0A");
-      const texto = `Hola!%0A%0aLe envío mi pedido para procesar:%0A%0a🛒 Pedido: ${notaId}%0A${resumen}%0A%0a💵 Monto Total: $${total}%0A%0aQuedo a la espera de la confirmación.`;
+      const texto = `Hola!%0A%0aLe envío mi presupuesto para procesar:%0A%0a🛒 Presupuesto: ${presupuestoId}%0A${resumen}%0A%0a💵 Monto Total: $${total}%0A%0aQuedo a la espera de la confirmación.`;
       const telefono = process.env.NEXT_PUBLIC_WHATSAPP_DUENO;
       window.open(`https://wa.me/${telefono}?text=${texto}`, "_blank");
 
-      alert(`✔️ Pedido N°${notaId} creado. Coordiná el pago por WhatsApp con el dueño.`);
+      alert(`✔️ Presupuesto N°${presupuestoId} creado. Coordiná el pago por WhatsApp con el dueño.`);
       setCarrito([]);
       cargarProductos(); // refrescar stock real
     } catch (err) {
